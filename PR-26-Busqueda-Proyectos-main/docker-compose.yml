@@ -28,7 +28,7 @@ services:
       - JWT_SECRET=super_secret_key_123
       - PORT=3000
     ports:
-      - "3000:3000"
+      - "3010:3000"
     depends_on:
       - postgres
     networks:
