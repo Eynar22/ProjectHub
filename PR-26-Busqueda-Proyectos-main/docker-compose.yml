@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: buscador_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: buscador
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./data:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: buscador_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345@postgres:5432/buscador
+      - JWT_SECRET=super_secret_key_123
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: buscador_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
