@@ -24,7 +24,7 @@ services:
     container_name: buscador_backend
     restart: always
     environment:
-      - CORS_ORIGINS=https://projecthub.umauniville.com,http://localhost:5173
+      - CORS_ORIGINS=https://projecthub.umaunivalle.com,http://localhost:5173
       - DATABASE_URL=postgresql://postgres:12345@postgres:5432/buscador
       - JWT_SECRET=super_secret_key_123
       - PORT=3000
