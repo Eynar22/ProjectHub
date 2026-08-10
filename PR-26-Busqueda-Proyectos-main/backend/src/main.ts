@@ -17,8 +17,8 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Enable huge payload limits for base64 files
-  app.use(json({ limit: '50mb' }));
+  // Payload limit for JSON bodies that embed base64 files (imágenes comprimidas + 1 PDF de hasta 10MB)
+  app.use(json({ limit: '20mb' }));
 
   // Global validation pipe
   app.useGlobalPipes(

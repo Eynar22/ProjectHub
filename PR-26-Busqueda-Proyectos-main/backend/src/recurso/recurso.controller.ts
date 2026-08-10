@@ -1,11 +1,20 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException, PayloadTooLargeException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import sharp from 'sharp';
 import { RecursoService } from './recurso.service';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { Proyecto } from '../entities/proyecto.entity';
+
+// Límites de subida: el techo de Multer cubre imagen o PDF; el PDF además
+// tiene su propio tope más estricto porque no se recomprime.
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024; // 20MB
+const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10MB
+const IMAGE_MAX_DIMENSION = 1600; // px, lado más largo
+const IMAGE_JPEG_QUALITY = 80;
+const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
 @Controller('recursos')
 @UseGuards(AuthGuard('jwt'))
@@ -54,21 +63,50 @@ export class RecursoController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: MAX_UPLOAD_BYTES },
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_MIMETYPES.includes(file.mimetype)) {
+          cb(new UnsupportedMediaTypeException('Solo se permiten imágenes (JPG, PNG, WEBP, GIF) o archivos PDF'), false);
+          return;
+        }
+        cb(null, true);
+      },
+    }),
+  )
   async uploadFile(@UploadedFile() file: any) {
     if (!file) {
       throw new Error('No file uploaded');
     }
-    
-    // Convert file to base64
-    const base64 = file.buffer.toString('base64');
-    const base64String = `data:${file.mimetype};base64,${base64}`;
-    
+
+    let outputBuffer: Buffer = file.buffer;
+    let outputMimetype: string = file.mimetype;
+
+    if (file.mimetype === 'application/pdf') {
+      if (file.size > MAX_PDF_BYTES) {
+        throw new PayloadTooLargeException(
+          `El PDF supera el máximo permitido de ${MAX_PDF_BYTES / (1024 * 1024)}MB`,
+        );
+      }
+    } else {
+      // Imagen: redimensionar y comprimir para reducir el peso guardado/transmitido
+      outputBuffer = await sharp(file.buffer)
+        .rotate() // respeta la orientación EXIF antes de descartarla
+        .resize({ width: IMAGE_MAX_DIMENSION, height: IMAGE_MAX_DIMENSION, fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: IMAGE_JPEG_QUALITY, mozjpeg: true })
+        .toBuffer();
+      outputMimetype = 'image/jpeg';
+    }
+
+    const base64 = outputBuffer.toString('base64');
+    const base64String = `data:${outputMimetype};base64,${base64}`;
+
     return {
       base64: base64String,
       filename: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
+      mimetype: outputMimetype,
+      size: outputBuffer.length,
     };
   }
 
