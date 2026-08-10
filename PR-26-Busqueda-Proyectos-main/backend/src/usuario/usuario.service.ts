@@ -15,13 +15,41 @@ export class UsuarioService {
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
   ) {}
 
+  // select explícito: excluye documento_url (base64) de la lista para no cargar
+  // el documento de cada usuario en pantallas que no lo muestran. El detalle
+  // completo (findOne) sigue trayéndolo para cuando sí se necesita.
+  private static readonly LISTADO_SELECT = {
+    id: true,
+    nombre_completo: true,
+    cargo: true,
+    correo: true,
+    rol: true,
+    empresa_id: true,
+    fecha_registro: true,
+    estado: true,
+    empresa: {
+      id: true,
+      nombre: true,
+      descripcion: true,
+      num_empleados: true,
+      portafolio: true,
+      fecha_registro: true,
+      fecha_aprobacion: true,
+      estado: true,
+    },
+  } as const;
+
   async findAll() {
-    return this.usuarioRepo.find({ relations: ['empresa'] });
+    return this.usuarioRepo.find({
+      select: UsuarioService.LISTADO_SELECT,
+      relations: ['empresa'],
+    });
   }
 
   async findByEmpresa(empresaId: number) {
     return this.usuarioRepo.find({
       where: { empresa_id: empresaId },
+      select: UsuarioService.LISTADO_SELECT,
       relations: ['empresa'],
     });
   }

@@ -12,8 +12,32 @@ export class EmpresaService {
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
   ) {}
 
+  // select explícito: excluye documento_url (base64) de la empresa y de cada
+  // usuario relacionado en el listado, que se carga en cada arranque de la app.
   async findAll() {
-    return this.empresaRepo.find({ relations: ['usuarios'] });
+    return this.empresaRepo.find({
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        num_empleados: true,
+        portafolio: true,
+        fecha_registro: true,
+        fecha_aprobacion: true,
+        estado: true,
+        usuarios: {
+          id: true,
+          nombre_completo: true,
+          cargo: true,
+          correo: true,
+          rol: true,
+          empresa_id: true,
+          fecha_registro: true,
+          estado: true,
+        },
+      },
+      relations: ['usuarios'],
+    });
   }
 
   async findApproved() {

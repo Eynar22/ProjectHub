@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { json } from 'express';
+import compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',')
   : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173'];
@@ -16,6 +17,9 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
+  // Comprime las respuestas (los listados con base64 embebido pesan bastante en texto plano)
+  app.use(compression());
 
   // Payload limit for JSON bodies that embed base64 files (imágenes comprimidas + 1 PDF de hasta 10MB)
   app.use(json({ limit: '20mb' }));

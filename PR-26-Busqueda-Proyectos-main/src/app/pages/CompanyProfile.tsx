@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -30,6 +32,17 @@ export default function CompanyProfile() {
   const { currentUser, companies, openBase64 } = useApp();
 
   const userCompany = companies.find(c => c.id === currentUser?.empresa_id);
+
+  // El listado ya no trae documento_url (para no cargar todos los documentos al abrir la app);
+  // se pide puntual aquí, solo al mostrar el perfil de la empresa.
+  const [companyDocUrl, setCompanyDocUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!userCompany) return;
+    api.get<{ documento_url?: string }>(`/empresas/${userCompany.id}`)
+      .then(data => setCompanyDocUrl(data.documento_url))
+      .catch(() => {});
+  }, [userCompany?.id]);
 
   const rolConfig = {
     superadmin: { label: 'Administrador del Sistema', icon: Shield, color: 'text-purple-600', bg: 'bg-purple-100' },
@@ -189,7 +202,7 @@ export default function CompanyProfile() {
                   )}
 
                   {/* Company document */}
-                  {userCompany.documento_url && (
+                  {companyDocUrl && (
                     <div className="px-6 pb-5 border-t border-border pt-4">
                       <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Documento de Empresa</p>
                       <div className="flex items-center gap-3 p-3 bg-secondary/5 border border-secondary/20 rounded-xl">
@@ -202,13 +215,13 @@ export default function CompanyProfile() {
                         </div>
                         <div className="flex gap-1">
                           <button
-                            onClick={() => openBase64(userCompany.documento_url!)}
+                            onClick={() => openBase64(companyDocUrl)}
                             className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
                             title="Ver"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <a href={userCompany.documento_url} download="documento-empresa.pdf"
+                          <a href={companyDocUrl} download="documento-empresa.pdf"
                             className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
                             title="Descargar">
                             <Download className="w-4 h-4" />

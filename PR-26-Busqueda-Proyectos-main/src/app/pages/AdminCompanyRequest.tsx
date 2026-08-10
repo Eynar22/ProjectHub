@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { api } from '../services/api';
 import { toast } from 'sonner';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
@@ -29,8 +31,27 @@ export default function AdminCompanyRequest() {
   const { companies, users, approveCompany, blockCompany, unblockCompany, deleteCompany, openBase64 } = useApp();
 
   const company = companies.find(c => c.id === Number(id));
-  const registrant = users.find(u => u.empresa_id === Number(id) && u.rol === 'admin') 
+  const registrant = users.find(u => u.empresa_id === Number(id) && u.rol === 'admin')
     || company?.usuarios?.find(u => u.rol === 'admin');
+
+  // El listado ya no trae documento_url (para no cargar todos los documentos al abrir la app);
+  // se pide puntual aquí, solo cuando se revisa esta solicitud.
+  const [companyDoc, setCompanyDoc] = useState<string | undefined>();
+  const [registrantDoc, setRegistrantDoc] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!company) return;
+    api.get<{ documento_url?: string }>(`/empresas/${company.id}`)
+      .then(data => setCompanyDoc(data.documento_url))
+      .catch(() => {});
+  }, [company?.id]);
+
+  useEffect(() => {
+    if (!registrant) return;
+    api.get<{ documento_url?: string }>(`/usuarios/${registrant.id}`)
+      .then(data => setRegistrantDoc(data.documento_url))
+      .catch(() => {});
+  }, [registrant?.id]);
 
   if (!company) {
     return (
@@ -166,8 +187,8 @@ export default function AdminCompanyRequest() {
                     
                     <div className="grid md:grid-cols-2 gap-4">
                       {[
-                        { title: 'Acreditación de Empresa', hint: 'NIT, Matrícula de Comercio', file: company.documento_url || '#' },
-                        { title: 'Pertenencia Personal', hint: 'Verificación del responsable', file: registrant?.documento_url || '#' },
+                        { title: 'Acreditación de Empresa', hint: 'NIT, Matrícula de Comercio', file: companyDoc || '#' },
+                        { title: 'Pertenencia Personal', hint: 'Verificación del responsable', file: registrantDoc || '#' },
                       ].map((doc, i) => (
                         <div 
                           key={i} 
