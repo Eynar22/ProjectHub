@@ -456,7 +456,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toast.success('Proyecto creado exitosamente');
     } catch (err) {
       console.error('Error al crear proyecto:', err);
-      toast.error('Error al crear el proyecto');
+      toast.error(err instanceof Error ? err.message : 'Error al crear el proyecto');
       throw err;
     }
   };

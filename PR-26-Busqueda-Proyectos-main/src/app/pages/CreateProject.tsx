@@ -141,7 +141,7 @@ export default function CreateProject() {
 
       setStep('success');
     } catch (err) {
-      toast.error('Error al crear el proyecto');
+      // AppContext.createProject ya muestra el toast con el motivo específico del error
       console.error(err);
     } finally {
       setIsSubmitting(false);

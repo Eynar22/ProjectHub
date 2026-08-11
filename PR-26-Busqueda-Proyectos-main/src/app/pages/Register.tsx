@@ -5,63 +5,16 @@ import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Navbar } from '../components/Navbar';
-import { Building2, CheckCircle2, FileText, X, Search, UserPlus } from 'lucide-react';
+import { DocumentUpload } from '../components/DocumentUpload';
+import { Building2, CheckCircle2, Search, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 
 type RegisterMode = 'choose' | 'join_company' | 'new_company' | 'success';
 
-// ── Helper: Document upload field ──────────────────────────────────────────────────
-function DocumentUpload({
-  label,
-  hint,
-  value,
-  onChange,
-  onRemove,
-  error,
-}: {
-  label: string;
-  hint: string;
-  value: File | null;
-  onChange: (file: File) => void;
-  onRemove: () => void;
-  error?: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium">{label}</label>
-      <p className="text-xs text-muted-foreground">{hint}</p>
-      {value ? (
-        <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg">
-          <div className="flex items-center gap-3">
-            <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-            <span className="text-sm font-medium truncate max-w-[220px]">{value.name}</span>
-          </div>
-          <button type="button" onClick={onRemove} className="p-1 hover:bg-muted rounded-full transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-      ) : (
-        <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors ${error ? 'border-destructive bg-destructive/5' : 'border-border'}`}>
-          <div className="flex flex-col items-center">
-            <FileText className={`w-7 h-7 mb-1 ${error ? 'text-destructive' : 'text-muted-foreground'}`} />
-            <p className="text-xs text-muted-foreground"><span className="font-semibold">Haz clic para subir</span> • PDF, JPG, PNG</p>
-          </div>
-          <input
-            type="file"
-            className="hidden"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onChange={e => {
-              const file = e.target.files?.[0];
-              if (file) onChange(file);
-            }}
-          />
-        </label>
-      )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  );
-}
+// El backend acepta hasta 20MB por request en base64 (~20/1.37 ≈ 14.6MB en binario).
+// Flujo B sube 2 documentos en la misma petición, así que se deja margen por archivo.
+const MAX_DOCUMENT_MB = 6;
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function Register() {
@@ -128,7 +81,7 @@ export default function Register() {
       setMode('success');
     } catch (err) {
       console.error(err);
-      toast.error('Error en el registro');
+      toast.error(err instanceof Error ? err.message : 'Error en el registro');
     } finally {
       setIsSubmitting(false);
     }
@@ -185,7 +138,7 @@ export default function Register() {
       setMode('success');
     } catch (err) {
       console.error(err);
-      toast.error('Error registrando empresa: Por favor, revisa todos los datos ingresados.');
+      toast.error(err instanceof Error ? err.message : 'Error registrando empresa: Por favor, revisa todos los datos ingresados.');
     } finally {
       setIsSubmitting(false);
     }
@@ -327,6 +280,7 @@ export default function Register() {
                     onChange={file => { setJoinData(prev => ({ ...prev, memberDocument: file })); setJoinErrors(prev => ({ ...prev, memberDocument: '' })); }}
                     onRemove={() => setJoinData(prev => ({ ...prev, memberDocument: null }))}
                     error={joinErrors.memberDocument}
+                    maxSizeMB={MAX_DOCUMENT_MB}
                   />
 
                   <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
@@ -397,6 +351,7 @@ export default function Register() {
                       onChange={file => { setNewCompanyData(prev => ({ ...prev, companyDocument: file })); setNewCompanyErrors(prev => ({ ...prev, companyDocument: '' })); }}
                       onRemove={() => setNewCompanyData(prev => ({ ...prev, companyDocument: null }))}
                       error={newCompanyErrors.companyDocument}
+                      maxSizeMB={MAX_DOCUMENT_MB}
                     />
                     <DocumentUpload
                       label="Documento 2 — Prueba de pertenencia personal *"
@@ -405,6 +360,7 @@ export default function Register() {
                       onChange={file => { setNewCompanyData(prev => ({ ...prev, personalDocument: file })); setNewCompanyErrors(prev => ({ ...prev, personalDocument: '' })); }}
                       onRemove={() => setNewCompanyData(prev => ({ ...prev, personalDocument: null }))}
                       error={newCompanyErrors.personalDocument}
+                      maxSizeMB={MAX_DOCUMENT_MB}
                     />
                   </div>
                 </div>

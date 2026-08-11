@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException, PayloadTooLargeException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, UseFilters, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException, PayloadTooLargeException, UnsupportedMediaTypeException, ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Response } from 'express';
+import { MulterError } from 'multer';
 import sharp from 'sharp';
 import { RecursoService } from './recurso.service';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
@@ -15,6 +17,23 @@ const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10MB
 const IMAGE_MAX_DIMENSION = 1600; // px, lado más largo
 const IMAGE_JPEG_QUALITY = 80;
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+
+// Cuando Multer corta la subida por el límite de MAX_UPLOAD_BYTES, lanza un MulterError
+// crudo antes de que el controller pueda validarlo, así que Nest lo devolvería como un
+// 500 genérico sin mensaje. Lo interceptamos para responder igual que el resto de errores de tamaño.
+@Catch(MulterError)
+class MulterExceptionFilter implements ExceptionFilter {
+  catch(exception: MulterError, host: ArgumentsHost) {
+    const response = host.switchToHttp().getResponse<Response>();
+    const message = exception.code === 'LIMIT_FILE_SIZE'
+      ? `El archivo supera el máximo permitido de ${MAX_UPLOAD_BYTES / (1024 * 1024)}MB`
+      : exception.message;
+    response.status(HttpStatus.PAYLOAD_TOO_LARGE).json({
+      statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
+      message,
+    });
+  }
+}
 
 @Controller('recursos')
 @UseGuards(AuthGuard('jwt'))
@@ -63,6 +82,7 @@ export class RecursoController {
   }
 
   @Post('upload')
+  @UseFilters(MulterExceptionFilter)
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: MAX_UPLOAD_BYTES },

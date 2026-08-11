@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router';
+import { toast } from 'sonner';
 import { useApp } from '../context/AppContext';
 import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
@@ -714,7 +715,7 @@ export default function Workspace() {
       });
     } catch (err) {
       console.error('Error uploading file:', err);
-      alert('Error al subir el archivo. Por favor intenta de nuevo.');
+      toast.error(err instanceof Error ? err.message : 'Error al subir el archivo. Por favor intenta de nuevo.');
     } finally {
       setUploadingFile(false);
     }

@@ -30,10 +30,20 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
-  const data = await response.json();
+
+  let data: any = null;
+  try {
+    data = await response.json();
+  } catch {
+    // La respuesta no vino en JSON (por ejemplo, un error 413 del propio servidor/proxy)
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || 'Ocurrió un error en la petición');
+    const message = data?.message
+      ?? (response.status === 413
+        ? 'El archivo es demasiado grande para subirlo. Reduce su tamaño e intenta nuevamente.'
+        : 'Ocurrió un error en la petición');
+    throw new Error(Array.isArray(message) ? message.join(', ') : message);
   }
 
   return data as T;
