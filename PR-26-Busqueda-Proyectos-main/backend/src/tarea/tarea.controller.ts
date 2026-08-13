@@ -40,8 +40,8 @@ export class TareaController {
   }
 
   @Post()
-  create(@Body() data: any) {
-    return this.tareaService.create(data);
+  create(@Body() data: any, @Request() req: any) {
+    return this.tareaService.create(data, req.user.id);
   }
 
   // Asignados — must be before generic /:id PATCH

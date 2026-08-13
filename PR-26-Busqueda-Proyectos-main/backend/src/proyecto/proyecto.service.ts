@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Proyecto } from '../entities/proyecto.entity';
@@ -270,6 +270,35 @@ export class ProyectoService {
   async removeParticipant(proyectoId: number, usuarioId: number) {
     await this.upRepo.delete({ proyecto_id: proyectoId, usuario_id: usuarioId });
     return { message: 'Participante eliminado' };
+  }
+
+  /**
+   * Da/quita a un colaborador el acceso para crear tareas ('miembro') dentro de este
+   * proyecto. Solo el creador puede usarlo, y nunca puede asignar 'admin' por acá
+   * (ese nivel queda reservado para transferirPropiedad).
+   */
+  async updateParticipantRol(proyectoId: number, usuarioId: number, rol: string, user: any) {
+    if (rol !== 'colaborador' && rol !== 'miembro') {
+      throw new BadRequestException("Rol inválido: solo se puede asignar 'colaborador' o 'miembro'");
+    }
+
+    const proyecto = await this.proyectoRepo.findOne({ where: { id: proyectoId } });
+    if (!proyecto) throw new NotFoundException('Proyecto no encontrado');
+
+    if (user.rol !== 'superadmin' && proyecto.creador_id !== user.id) {
+      throw new ForbiddenException('Solo el creador del proyecto puede cambiar el acceso de los participantes');
+    }
+
+    const participante = await this.upRepo.findOne({
+      where: { proyecto_id: proyectoId, usuario_id: usuarioId },
+    });
+    if (!participante) throw new NotFoundException('Participante no encontrado');
+    if (participante.rol === 'admin') {
+      throw new ForbiddenException('No se puede cambiar el rol del creador del proyecto');
+    }
+
+    participante.rol = rol;
+    return this.upRepo.save(participante);
   }
 
   // Project join requests

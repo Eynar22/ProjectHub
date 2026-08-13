@@ -523,6 +523,10 @@ export default function Workspace() {
 
   const isOwner = currentUser?.id === project?.creador_id;
   const isParticipant = project?.participantes?.some(p => p.usuario_id === currentUser?.id) || isOwner;
+  // 'miembro' es un colaborador al que el creador le dio acceso para crear tareas
+  // (sin darle el rol completo de 'admin', reservado para el dueño del proyecto).
+  const miParticipacion = project?.participantes?.find(p => p.usuario_id === currentUser?.id);
+  const puedeCrearTareas = isOwner || miParticipacion?.rol === 'miembro';
 
   if (!project) {
     return (
@@ -590,6 +594,31 @@ export default function Workspace() {
     throw new Error(`Unsupported method ${method}`);
   };
 
+  // ── Dar/quitar acceso a un colaborador para crear tareas ('miembro' ⇄ 'colaborador') ──
+  const [updatingAccesoId, setUpdatingAccesoId] = useState<number | null>(null);
+  const handleToggleAccesoTareas = async (usuarioId: number, rolActual: string) => {
+    if (!project) return;
+    const nuevoRol = rolActual === 'miembro' ? 'colaborador' : 'miembro';
+    setUpdatingAccesoId(usuarioId);
+    try {
+      await api.patch(`/proyectos/${project.id}/participantes/${usuarioId}`, { rol: nuevoRol });
+      setProjectCompleto(prev => {
+        const base = prev ?? project;
+        return {
+          ...base,
+          participantes: base.participantes?.map(p =>
+            p.usuario_id === usuarioId ? { ...p, rol: nuevoRol } : p
+          ),
+        };
+      });
+      toast.success(nuevoRol === 'miembro' ? 'Ahora puede crear tareas en el proyecto' : 'Se quitó el acceso para crear tareas');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo actualizar el acceso');
+    } finally {
+      setUpdatingAccesoId(null);
+    }
+  };
+
   const ensureColumns = async (pId: number): Promise<typeof kanbanColumns> => {
     if (kanbanColumns.length > 0) return kanbanColumns;
     // Create the default 3 columns if none exist
@@ -605,23 +634,27 @@ export default function Workspace() {
 
   const handleCreateTask = async () => {
     if (!newTaskTitle.trim()) return;
-    const cols = await ensureColumns(project!.id);
-    const firstCol = cols[0];
-    const newTask = await apiCall('/tareas', 'POST', {
-      proyecto_id: project!.id,
-      titulo: newTaskTitle,
-      descripcion: newTaskDesc,
-      usuario_ids: newTaskAssignees,
-      prioridad: newTaskPriority,
-      fecha_limite: newTaskDeadline || null,
-      columna_id: firstCol.id,
-      orden: localTasks.filter(t => t.columna_id === firstCol.id).length,
-    });
-    setLocalTasks(prev => [...prev, newTask]);
-    setNewTaskTitle('');
-    setNewTaskDesc('');
-    setNewTaskDeadline('');
-    setNewTaskAssignees([]);
+    try {
+      const cols = await ensureColumns(project!.id);
+      const firstCol = cols[0];
+      const newTask = await apiCall('/tareas', 'POST', {
+        proyecto_id: project!.id,
+        titulo: newTaskTitle,
+        descripcion: newTaskDesc,
+        usuario_ids: newTaskAssignees,
+        prioridad: newTaskPriority,
+        fecha_limite: newTaskDeadline || null,
+        columna_id: firstCol.id,
+        orden: localTasks.filter(t => t.columna_id === firstCol.id).length,
+      });
+      setLocalTasks(prev => [...prev, newTask]);
+      setNewTaskTitle('');
+      setNewTaskDesc('');
+      setNewTaskDeadline('');
+      setNewTaskAssignees([]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo crear la tarea');
+    }
   };
 
   const handleMoveTask = async (taskId: number, newColId: number) => {
@@ -936,10 +969,13 @@ export default function Workspace() {
                   <div className="grid md:grid-cols-2 gap-4">
                     {participatingUsers.map(user => {
                       const userComp = companies.find(c => c.id === user.empresa_id);
+                      const esCreador = user.id === project.creador_id;
+                      const rolEnProyecto = project.participantes?.find(p => p.usuario_id === user.id)?.rol;
+                      const tieneAccesoTareas = rolEnProyecto === 'miembro';
                       return (
                         <Card key={user.id} className="p-4 bg-muted">
                           <div className="flex items-center gap-4">
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl ${user.id === project.creador_id ? 'bg-gradient-to-br from-primary to-purple-500' : 'bg-gradient-to-br from-accent to-success'
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl ${esCreador ? 'bg-gradient-to-br from-primary to-purple-500' : 'bg-gradient-to-br from-accent to-success'
                               }`}>
                               {user.nombre_completo.charAt(0).toUpperCase()}
                             </div>
@@ -947,10 +983,24 @@ export default function Workspace() {
                               <h4 className="font-semibold">{user.nombre_completo}</h4>
                               {user.cargo && <p className="text-sm text-muted-foreground">{user.cargo}</p>}
                               {userComp && <p className="text-sm text-muted-foreground">{userComp.nombre}</p>}
-                              {user.id === project.creador_id && (
+                              {esCreador ? (
                                 <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded mt-1 inline-block">Creador</span>
+                              ) : tieneAccesoTareas && (
+                                <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded mt-1 inline-block">Puede crear tareas</span>
                               )}
                             </div>
+                            {isOwner && !esCreador && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={updatingAccesoId === user.id}
+                                onClick={() => handleToggleAccesoTareas(user.id, rolEnProyecto || 'colaborador')}
+                              >
+                                {updatingAccesoId === user.id
+                                  ? '...'
+                                  : tieneAccesoTareas ? 'Quitar acceso' : 'Dar acceso a tareas'}
+                              </Button>
+                            )}
                           </div>
                         </Card>
                       );
@@ -1072,8 +1122,8 @@ export default function Workspace() {
             {activeTab === 'tasks' && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
 
-                {/* Create Task (Owner Only) */}
-                {isOwner && !isReadOnly && (
+                {/* Create Task (Owner or granted 'miembro' only) */}
+                {puedeCrearTareas && !isReadOnly && (
                   <Card className="p-6 mb-6 border-none shadow-sm">
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                       <Plus className="w-4 h-4 text-primary" /> Nueva Tarea
@@ -1136,11 +1186,11 @@ export default function Workspace() {
                     <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                     <p className="text-muted-foreground text-sm">Cargando tablero...</p>
                   </Card>
-                ) : kanbanColumns.length === 0 && !isOwner ? (
+                ) : kanbanColumns.length === 0 && !puedeCrearTareas ? (
                   <Card className="p-16 text-center border-none shadow-sm">
                     <ListTodo className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="font-semibold text-muted-foreground">No hay tareas aún</p>
-                    <p className="text-sm text-muted-foreground/70">El propietario del proyecto puede crear tareas desde este tablero</p>
+                    <p className="text-sm text-muted-foreground/70">El propietario del proyecto o un miembro con acceso puede crear tareas desde este tablero</p>
                   </Card>
                 ) : (
                   /* Kanban Board — Dynamic columns from DB */
@@ -1155,8 +1205,8 @@ export default function Workspace() {
                         onEditTask={handleOpenEditModal}
                       />
                     ))}
-                    {/* If no columns yet and owner, show placeholder */}
-                    {kanbanColumns.length === 0 && isOwner && (
+                    {/* If no columns yet and can create tasks, show placeholder */}
+                    {kanbanColumns.length === 0 && puedeCrearTareas && (
                       <div className="flex-1 text-center py-16 text-muted-foreground">
                         <ListTodo className="w-10 h-10 mx-auto mb-3" />
                         <p className="text-sm">Crea tu primera tarea y se inicializará el tablero automáticamente</p>

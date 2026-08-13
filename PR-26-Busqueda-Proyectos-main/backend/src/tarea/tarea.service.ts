@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Tarea } from '../entities/tarea.entity';
 import { TareaComentario } from '../entities/tarea-comentario.entity';
 import { KanbanColumna } from '../entities/kanban-columna.entity';
 import { Usuario } from '../entities/usuario.entity';
+import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 
 @Injectable()
 export class TareaService {
@@ -13,7 +14,20 @@ export class TareaService {
     @InjectRepository(TareaComentario) private comentarioRepo: Repository<TareaComentario>,
     @InjectRepository(KanbanColumna) private columnaRepo: Repository<KanbanColumna>,
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
+    @InjectRepository(UsuarioProyecto) private upRepo: Repository<UsuarioProyecto>,
   ) {}
+
+  // Solo el creador ('admin') o un colaborador al que se le dio acceso ('miembro')
+  // pueden crear tareas. El resto de las acciones del tablero (mover/editar/comentar)
+  // siguen abiertas a cualquier participante, como ya funcionaba.
+  private async verificarPuedeCrearTareas(proyectoId: number, usuarioId: number) {
+    const participante = await this.upRepo.findOne({
+      where: { proyecto_id: proyectoId, usuario_id: usuarioId },
+    });
+    if (!participante || (participante.rol !== 'admin' && participante.rol !== 'miembro')) {
+      throw new ForbiddenException('No tienes permiso para crear tareas en este proyecto');
+    }
+  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   private tareaRelations = ['usuarios', 'columna', 'comentarios', 'comentarios.usuario'];
@@ -65,7 +79,8 @@ export class TareaService {
     return tarea;
   }
 
-  async create(data: any) {
+  async create(data: any, usuarioId: number) {
+    await this.verificarPuedeCrearTareas(data.proyecto_id, usuarioId);
     const { usuario_ids, ...rest } = data;
     const tarea = this.tareaRepo.create(rest as Tarea);
     tarea.usuarios = await this.loadUsuarios(usuario_ids ?? []);

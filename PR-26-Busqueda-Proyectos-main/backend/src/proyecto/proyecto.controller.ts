@@ -135,6 +135,17 @@ export class ProyectoController {
     return this.proyectoService.removeParticipant(id, usuarioId);
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':id/participantes/:usuarioId')
+  updateParticipantRol(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('usuarioId', ParseIntPipe) usuarioId: number,
+    @Body() body: { rol: string },
+    @Request() req: any,
+  ) {
+    return this.proyectoService.updateParticipantRol(id, usuarioId, body.rol, req.user);
+  }
+
   // Join requests
   @UseGuards(AuthGuard('jwt'))
   @Get(':id/solicitudes')
