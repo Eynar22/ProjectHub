@@ -11,6 +11,34 @@ import { Recurso } from '../entities/recurso.entity';
 
 @Injectable()
 export class ProyectoService {
+  // Columnas livianas del proyecto: excluye documento_url (el PDF de acreditación en
+  // base64). No se usa: el frontend nunca renderiza project.documento_url, porque ese
+  // mismo PDF ya queda accesible como Recurso dentro de la carpeta "Principal".
+  private static readonly PROYECTO_SELECT = {
+    id: true,
+    nombre: true,
+    descripcion_corta: true,
+    descripcion_completa: true,
+    fecha_inicio: true,
+    fecha_fin: true,
+    financiamiento: true,
+    categoria: true,
+    estado: true,
+    suspendido: true,
+    creador_id: true,
+  } as const;
+
+  // Campos del usuario participante/creador que realmente se muestran (nombre, cargo,
+  // correo, empresa) — nunca documento_url, el documento personal de acreditación en
+  // base64 que se cargaba de más por cada participante de cada proyecto.
+  private static readonly USUARIO_LIGERO_SELECT = {
+    id: true,
+    nombre_completo: true,
+    correo: true,
+    cargo: true,
+    empresa_id: true,
+  } as const;
+
   constructor(
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
     @InjectRepository(ProyectoImagen) private imagenRepo: Repository<ProyectoImagen>,
@@ -21,17 +49,40 @@ export class ProyectoService {
     @InjectRepository(Recurso) private recursoRepo: Repository<Recurso>,
   ) { }
 
+  // 'recursos' queda afuera de los listados a propósito: solo se usa en la vista de
+  // un único proyecto (Workspace/ProjectDetail), y además duplicaba el mismo base64
+  // de imágenes/PDF que ya viaja en 'imagenes' (se guardan también como Recurso).
   async findAll() {
     return this.proyectoRepo.find({
       where: [{ estado: 'en_curso' }, { estado: 'terminado' }],
-      relations: ['imagenes', 'participantes', 'participantes.usuario', 'recursos'],
+      relations: ['imagenes', 'participantes', 'participantes.usuario'],
+      select: {
+        ...ProyectoService.PROYECTO_SELECT,
+        imagenes: { id: true, url: true },
+        participantes: {
+          usuario_id: true,
+          proyecto_id: true,
+          rol: true,
+          usuario: ProyectoService.USUARIO_LIGERO_SELECT,
+        },
+      },
     });
   }
 
   /** For superadmin: returns ALL projects regardless of estado */
   async findAllAdmin() {
     return this.proyectoRepo.find({
-      relations: ['imagenes', 'participantes', 'participantes.usuario', 'recursos'],
+      relations: ['imagenes', 'participantes', 'participantes.usuario'],
+      select: {
+        ...ProyectoService.PROYECTO_SELECT,
+        imagenes: { id: true, url: true },
+        participantes: {
+          usuario_id: true,
+          proyecto_id: true,
+          rol: true,
+          usuario: ProyectoService.USUARIO_LIGERO_SELECT,
+        },
+      },
     });
   }
 
@@ -43,14 +94,39 @@ export class ProyectoService {
     }
     return this.proyectoRepo.find({
       where,
-      relations: ['imagenes', 'participantes', 'participantes.usuario', 'recursos'],
+      relations: ['imagenes', 'participantes', 'participantes.usuario'],
+      select: {
+        ...ProyectoService.PROYECTO_SELECT,
+        imagenes: { id: true, url: true },
+        participantes: {
+          usuario_id: true,
+          proyecto_id: true,
+          rol: true,
+          usuario: ProyectoService.USUARIO_LIGERO_SELECT,
+        },
+      },
     });
   }
 
+  // Vista de un único proyecto (Workspace/ProjectDetail): sí necesita 'recursos'
+  // (pestaña de recursos) e 'imagenes' completas, pero documento_url del proyecto y
+  // el documento personal de cada participante/creador siguen sin usarse ahí.
   async findOne(id: number) {
     const proyecto = await this.proyectoRepo.findOne({
       where: { id },
       relations: ['imagenes', 'participantes', 'participantes.usuario', 'recursos', 'creador'],
+      select: {
+        ...ProyectoService.PROYECTO_SELECT,
+        imagenes: { id: true, url: true },
+        participantes: {
+          usuario_id: true,
+          proyecto_id: true,
+          rol: true,
+          usuario: ProyectoService.USUARIO_LIGERO_SELECT,
+        },
+        recursos: { id: true, proyecto_id: true, nombre: true, tipo: true, url: true, padre_id: true, fecha_creacion: true },
+        creador: ProyectoService.USUARIO_LIGERO_SELECT,
+      },
     });
     if (!proyecto) throw new NotFoundException('Proyecto no encontrado');
     return proyecto;
@@ -59,7 +135,16 @@ export class ProyectoService {
   async findByUser(usuarioId: number) {
     const participaciones = await this.upRepo.find({
       where: { usuario_id: usuarioId },
-      relations: ['proyecto', 'proyecto.imagenes', 'proyecto.recursos'],
+      relations: ['proyecto', 'proyecto.imagenes'],
+      select: {
+        usuario_id: true,
+        proyecto_id: true,
+        rol: true,
+        proyecto: {
+          ...ProyectoService.PROYECTO_SELECT,
+          imagenes: { id: true, url: true },
+        },
+      },
     });
     return participaciones.map((p) => ({ ...p.proyecto, rol_en_proyecto: p.rol }));
   }

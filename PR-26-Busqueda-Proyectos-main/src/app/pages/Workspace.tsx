@@ -47,7 +47,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import type { Task } from '../context/AppContext';
+import type { Task, Project } from '../context/AppContext';
 
 type TabType = 'info' | 'team' | 'chat' | 'tasks' | 'resources' | 'solicitudes';
 
@@ -381,7 +381,13 @@ export default function Workspace() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const project = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
+  const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
+
+  // Los recursos (documentos/PDFs del proyecto) pesan mucho en base64 y no vienen en el
+  // listado general — se piden solo acá, al entrar al workspace de este proyecto.
+  const [projectCompleto, setProjectCompleto] = useState<Project | null>(null);
+  const project = projectCompleto ?? projectLigero;
+
   const isReadOnly = project ? (project.suspendido || project.estado === 'archivado' || project.estado === 'terminado') : false;
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
@@ -463,11 +469,14 @@ export default function Workspace() {
     fetchProjectTasks(project.id).finally(() => setLoadingTasks(false));
   }, [project?.id]);
 
-  // ── PROJECT MEMBERS: load from API to get all members incl. cross-company ──
+  // ── PROJECT DETAIL: trae recursos + members completos (incl. cross-company) ──
   useEffect(() => {
-    if (!project?.id) return;
-    api.get<any>(`/proyectos/${project.id}`)
+    setProjectCompleto(null);
+    if (!id) return;
+    api.get<Project>(`/proyectos/${id}`)
       .then(data => {
+        setProjectCompleto(data);
+
         const members: any[] = [];
         // Add creator
         if (data.creador) {
@@ -487,7 +496,7 @@ export default function Workspace() {
         setProjectMembers(members);
       })
       .catch(() => { /* silently use context fallback */ });
-  }, [project?.id]);
+  }, [id]);
   useEffect(() => {
     if (!project || !currentUser) return;
     if (currentUser.id !== project.creador_id) return;

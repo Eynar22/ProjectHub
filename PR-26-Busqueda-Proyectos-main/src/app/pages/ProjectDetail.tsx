@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useApp, type Project } from '../context/AppContext';
+import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -39,7 +40,18 @@ export default function ProjectDetail() {
   const [message, setMessage] = useState('');
   const [applying, setApplying] = useState(false);
 
-  const project = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
+  const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
+
+  // Los recursos (documentos/PDFs del proyecto) pesan mucho en base64 y no vienen en el
+  // listado general — se piden solo acá, al entrar al detalle de este proyecto.
+  const [projectCompleto, setProjectCompleto] = useState<Project | null>(null);
+  useEffect(() => {
+    setProjectCompleto(null);
+    if (!id) return;
+    api.get<Project>(`/proyectos/${id}`).then(setProjectCompleto).catch(() => {});
+  }, [id]);
+
+  const project = projectCompleto ?? projectLigero;
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
   const participatingUsers = project?.participantes?.map(p => p.usuario) || [];

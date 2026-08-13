@@ -61,6 +61,7 @@ export interface Project {
   financiamiento?: number;
   documento_url?: string;
   creador_id: number;
+  creador?: User;
   estado: 'en_curso' | 'terminado' | 'archivado';
   suspendido?: boolean;
   participantes?: { usuario_id: number, rol: string, usuario: User }[];
@@ -274,9 +275,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser]);
 
-  // Polling silencioso para actualizaciones en "tiempo real" (cada 15 segundos)
+  // Polling silencioso para actualizaciones en "tiempo real" (cada 15 segundos).
+  // Se salta el ciclo si la pestaña está en segundo plano: no tiene sentido re-descargar
+  // proyectos/empresas/usuarios cada 15s si nadie está mirando la pantalla.
   React.useEffect(() => {
     const interval = setInterval(async () => {
+      if (document.hidden) return;
       try {
         const [companiesData, projectsData] = await Promise.all([
           api.get<Company[]>('/empresas').catch(() => null),
