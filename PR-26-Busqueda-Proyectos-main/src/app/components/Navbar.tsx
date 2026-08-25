@@ -3,16 +3,15 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Building2, LogOut, LayoutDashboard, Compass, Bell,
-  ChevronDown, User as UserIcon, Settings, Menu, X,
-  Shield, Crown, Users,
+  Building2, LogOut, LayoutDashboard, Compass,
+  ChevronDown, User as UserIcon, Menu, X,
 } from 'lucide-react';
 
-function UserAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' }) {
+// Avatar encajado perfectamente
+function UserAvatar({ name }: { name: string }) {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <div className={`rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white flex-shrink-0
-      ${size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'}`}>
+    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white text-[11px] shadow-sm flex-shrink-0">
       {initials}
     </div>
   );
@@ -28,7 +27,7 @@ export function Navbar() {
 
   const myCompany = companies.find(c => c.id === currentUser?.empresa_id);
 
-  // Close user menu on outside click
+  // Cerrar menú al hacer clic afuera
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -39,7 +38,6 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => setMobileMenuOpen(false), [location.pathname]);
 
   const handleLogout = () => {
@@ -54,156 +52,197 @@ export function Navbar() {
   const dashboardPath = currentUser?.rol === 'superadmin' ? '/admin' : '/dashboard';
 
   return (
-    <>
-      <nav className="bg-card/95 border-b border-border sticky top-0 z-50 backdrop-blur-md shadow-sm">
-        <div className="px-4 sm:px-6">
-          <div className="flex justify-between items-center h-16">
+    // Navbar delgado (h-14 en móvil, h-16 en PC)
+    <div className="sticky top-0 z-50 w-full h-14 md:h-16 flex pointer-events-none">
+      
+      {/* ======================================= */}
+      {/* 1. ISLA IZQUIERDA (Plomo + Curva S)     */}
+      {/* ======================================= */}
+      
+      {/* Zona sólida Ploma (Más transparente) */}
+      <div className="bg-slate-400/15 backdrop-blur-md flex items-center pl-4 md:pl-6 pr-1 h-full pointer-events-auto">
+        <Link to="/" className="bg-card px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-2 shadow-sm border border-border/40 hover:shadow-md transition-all group">
+          <div className="w-6 h-6 md:w-7 md:h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+            <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
+          </div>
+          <span className="text-sm md:text-base font-bold text-foreground hidden sm:block tracking-tight">
+            ProjectHub
+          </span>
+        </Link>
+      </div>
+      
+      {/* Curva de transición Izquierda */}
+      <div className="relative w-8 md:w-12 h-full flex-shrink-0 pointer-events-auto">
+        {/* Capa Blanca (Ligeramente transparente) */}
+        <div 
+          className="absolute inset-0 bg-card/85 backdrop-blur-md"
+          style={{ 
+            maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100V0Z' fill='black'/%3E%3C/svg%3E")`,
+            WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100V0Z' fill='black'/%3E%3C/svg%3E")`,
+            maskSize: '100% 100%', WebkitMaskSize: '100% 100%'
+          }} 
+        />
+        {/* Capa Ploma (Muy transparente) */}
+        <div 
+          className="absolute inset-0 bg-slate-400/15 backdrop-blur-md"
+          style={{ 
+            maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100H0Z' fill='black'/%3E%3C/svg%3E")`,
+            WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100H0Z' fill='black'/%3E%3C/svg%3E")`,
+            maskSize: '100% 100%', WebkitMaskSize: '100% 100%'
+          }} 
+        />
+      </div>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
-                <Building2 className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hidden sm:block">
-                ProjectHub
-              </span>
-            </Link>
+      {/* ======================================= */}
+      {/* 2. ZONA CENTRAL (Blanca semi-transparente) */}
+      {/* ======================================= */}
+      <div className="flex-1 bg-card/85 backdrop-blur-md flex items-center justify-center h-full px-2 z-10 pointer-events-auto">
+        <div className="hidden md:flex items-center gap-8">
+          <NavLink to="/explore" icon={<Compass className="w-4 h-4" />} label="Explorar Proyectos" current={location.pathname} />
+          
+          {currentUser && (
+            <NavLink to={dashboardPath} icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" current={location.pathname} />
+          )}
+        </div>
+      </div>
 
-            {/* Desktop center nav */}
-            <div className="hidden md:flex items-center gap-1">
-              <NavLink to="/explore" icon={<Compass className="w-4 h-4" />} label="Explorar" current={location.pathname} />
-              {currentUser && (
-                <NavLink to={dashboardPath} icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" current={location.pathname} />
-              )}
-            </div>
+      {/* ======================================= */}
+      {/* 3. ISLA DERECHA (Curva S + Plomo)       */}
+      {/* ======================================= */}
+      
+      {/* Curva de transición Derecha */}
+      <div className="relative w-8 md:w-12 h-full flex-shrink-0 pointer-events-auto">
+        {/* Capa Blanca (Ligeramente transparente) */}
+        <div 
+          className="absolute inset-0 bg-card/85 backdrop-blur-md"
+          style={{ 
+            maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100V0Z' fill='black'/%3E%3C/svg%3E")`,
+            WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100V0Z' fill='black'/%3E%3C/svg%3E")`,
+            maskSize: '100% 100%', WebkitMaskSize: '100% 100%'
+          }} 
+        />
+        {/* Capa Ploma (Muy transparente) */}
+        <div 
+          className="absolute inset-0 bg-slate-400/15 backdrop-blur-md"
+          style={{ 
+            maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100H100Z' fill='black'/%3E%3C/svg%3E")`,
+            WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100H100Z' fill='black'/%3E%3C/svg%3E")`,
+            maskSize: '100% 100%', WebkitMaskSize: '100% 100%'
+          }} 
+        />
+      </div>
 
-            {/* Right side */}
-            <div className="flex items-center gap-2">
-              {currentUser ? (
-                <>
-                  {/* User menu */}
-                  <div className="relative" ref={userMenuRef}>
-                    <button
-                      onClick={() => setUserMenuOpen(v => !v)}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted transition-colors group"
-                    >
-                      <UserAvatar name={currentUser.nombre_completo} />
-                      <div className="hidden sm:block text-left">
-                        <div className="text-sm font-semibold leading-tight max-w-[120px] truncate">
-                          {currentUser.nombre_completo.split(' ')[0]}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground font-medium leading-tight">
-                          {rolLabel}
+      {/* Zona sólida Ploma (Más transparente) */}
+      <div className="bg-slate-400/15 backdrop-blur-md flex items-center pr-4 md:pr-6 pl-1 h-full pointer-events-auto">
+        <div className="bg-card rounded-full p-1 md:p-1.5 flex items-center shadow-sm border border-border/40">
+          
+          {currentUser ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(v => !v)}
+                className="flex items-center gap-2 pr-2 md:pr-3 pl-0.5 md:pl-1 py-0.5 rounded-full hover:bg-muted/50 transition-colors group"
+              >
+                <UserAvatar name={currentUser.nombre_completo} />
+                <div className="hidden sm:block text-left">
+                  <div className="text-[11px] md:text-xs font-semibold leading-tight max-w-[80px] md:max-w-[90px] truncate text-foreground">
+                    {currentUser.nombre_completo.split(' ')[0]}
+                  </div>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform hidden sm:block ${userMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-3 w-64 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden p-2 z-50"
+                  >
+                    <div className="p-3 bg-muted/30 rounded-[1.25rem] mb-2 border-b border-border/30">
+                      <div className="flex items-center gap-3">
+                        <UserAvatar name={currentUser.nombre_completo} />
+                        <div className="min-w-0">
+                          <div className="font-bold text-sm truncate text-foreground">{currentUser.nombre_completo}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">{currentUser.correo}</div>
+                          {myCompany && (
+                            <div className="text-[10px] text-primary font-bold mt-1 truncate uppercase">{myCompany.nombre}</div>
+                          )}
                         </div>
                       </div>
-                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform hidden sm:block ${userMenuOpen ? 'rotate-180' : ''}`} />
-                    </button>
+                    </div>
+                    <div className="p-1 space-y-1">
+                      <DropdownItem icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" to={dashboardPath} onClick={() => setUserMenuOpen(false)} />
+                      <DropdownItem icon={<UserIcon className="w-4 h-4" />} label="Mi Perfil" to="/dashboard/profile" onClick={() => setUserMenuOpen(false)} />
+                      <div className="my-1 mx-2 border-t border-border/40" />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs text-destructive hover:bg-destructive/10 transition-colors font-semibold"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Cerrar Sesión
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center px-1">
+              <Link to="/login" className="px-3 py-1.5 md:px-4 md:py-1.5 text-[11px] md:text-xs font-semibold text-foreground hover:bg-muted rounded-full transition-colors">
+                Ingresar
+              </Link>
+              <Link to="/register"
+                className="px-4 py-1.5 md:px-5 md:py-1.5 text-[11px] md:text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors shadow-sm">
+                Registro
+              </Link>
+            </div>
+          )}
 
-                    <AnimatePresence>
-                      {userMenuOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
-                        >
-                          {/* User header */}
-                          <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-b border-border">
-                            <div className="flex items-center gap-3">
-                              <UserAvatar name={currentUser.nombre_completo} size="md" />
-                              <div className="min-w-0">
-                                <div className="font-bold text-sm truncate">{currentUser.nombre_completo}</div>
-                                <div className="text-xs text-muted-foreground truncate">{currentUser.correo}</div>
-                                {myCompany && (
-                                  <div className="text-xs text-primary font-medium mt-0.5 truncate">{myCompany.nombre}</div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="mt-3 flex items-center gap-1.5">
-                              {currentUser.rol === 'superadmin' && <Shield className="w-3 h-3 text-purple-500" />}
-                              {currentUser.rol === 'admin' && <Crown className="w-3 h-3 text-blue-500" />}
-                              {currentUser.rol === 'empleado' && <Users className="w-3 h-3 text-slate-500" />}
-                              <span className="text-[11px] font-semibold text-muted-foreground">{rolLabel}</span>
-                            </div>
-                          </div>
+          <button
+            onClick={() => setMobileMenuOpen(v => !v)}
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4 text-foreground" /> : <Menu className="w-4 h-4 text-foreground" />}
+          </button>
+        </div>
+      </div>
 
-                          {/* Menu items */}
-                          <div className="p-2">
-                            <DropdownItem icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" to={dashboardPath} onClick={() => setUserMenuOpen(false)} />
-                            <DropdownItem icon={<UserIcon className="w-4 h-4" />} label="Mi Perfil" to="/dashboard/profile" onClick={() => setUserMenuOpen(false)} />
-                            <DropdownItem icon={<Compass className="w-4 h-4" />} label="Explorar Proyectos" to="/explore" onClick={() => setUserMenuOpen(false)} />
-                            <div className="my-1 border-t border-border" />
-                            <button
-                              onClick={handleLogout}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-destructive hover:bg-destructive/10 transition-colors font-medium"
-                            >
-                              <LogOut className="w-4 h-4" />
-                              Cerrar Sesión
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+      {/* Menú Móvil */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="md:hidden absolute top-full left-4 right-4 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden z-40 p-2 mt-2 pointer-events-auto"
+          >
+            <div className="space-y-1">
+              <MobileNavLink to="/explore" label="Explorar Proyectos" />
+              {currentUser ? (
+                <>
+                  <MobileNavLink to={dashboardPath} label="Dashboard" />
+                  <MobileNavLink to="/dashboard/profile" label="Mi Perfil" />
+                  <div className="h-px bg-border/50 my-1 mx-2" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2.5 rounded-2xl text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    Cerrar Sesión
+                  </button>
                 </>
               ) : (
-                <div className="hidden md:flex items-center gap-2">
-                  <Link to="/login" className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                    Iniciar Sesión
-                  </Link>
-                  <Link to="/register"
-                    className="px-4 py-2 text-sm font-bold bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:opacity-90 transition-opacity shadow-md shadow-primary/20">
-                    Registrarse
-                  </Link>
-                </div>
+                <>
+                  <MobileNavLink to="/login" label="Iniciar Sesión" />
+                  <MobileNavLink to="/register" label="Registrarse" />
+                </>
               )}
-
-              {/* Mobile hamburger */}
-              <button
-                onClick={() => setMobileMenuOpen(v => !v)}
-                className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted transition-colors"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
             </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden border-t border-border overflow-hidden"
-            >
-              <div className="p-4 space-y-1">
-                <MobileNavLink to="/explore" label="Explorar Proyectos" />
-                {currentUser ? (
-                  <>
-                    <MobileNavLink to={dashboardPath} label="Dashboard" />
-                    <MobileNavLink to="/dashboard/profile" label="Mi Perfil" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
-                    >
-                      Cerrar Sesión
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <MobileNavLink to="/login" label="Iniciar Sesión" />
-                    <MobileNavLink to="/register" label="Registrarse" />
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-    </>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -211,11 +250,12 @@ function NavLink({ to, icon, label, current }: { to: string; icon: React.ReactNo
   const isActive = current === to || current.startsWith(to + '/');
   return (
     <Link to={to}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-semibold transition-all border ${isActive
-          ? 'bg-primary/10 text-primary border-primary/20'
-          : 'text-foreground hover:text-primary hover:bg-primary/5 border-transparent hover:border-primary/10'
-        }`}>
-      {icon}
+      className={`flex items-center gap-2 px-1 py-1 text-[13px] font-semibold transition-all ${
+        isActive
+          ? 'text-primary'
+          : 'text-muted-foreground hover:text-foreground'
+      }`}>
+      <span className={isActive ? 'text-primary' : 'text-muted-foreground/70'}>{icon}</span>
       {label}
     </Link>
   );
@@ -224,8 +264,8 @@ function NavLink({ to, icon, label, current }: { to: string; icon: React.ReactNo
 function DropdownItem({ icon, label, to, onClick }: { icon: React.ReactNode; label: string; to: string; onClick: () => void }) {
   return (
     <Link to={to} onClick={onClick}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground hover:bg-muted transition-colors">
-      <span className="text-muted-foreground">{icon}</span>
+      className="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-medium text-foreground hover:bg-muted/50 transition-colors">
+      <span className="text-muted-foreground/70">{icon}</span>
       {label}
     </Link>
   );
@@ -233,7 +273,7 @@ function DropdownItem({ icon, label, to, onClick }: { icon: React.ReactNode; lab
 
 function MobileNavLink({ to, label }: { to: string; label: string }) {
   return (
-    <Link to={to} className="block px-4 py-3 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
+    <Link to={to} className="block px-4 py-2.5 rounded-2xl text-xs font-semibold text-foreground hover:bg-muted/50 transition-colors">
       {label}
     </Link>
   );
