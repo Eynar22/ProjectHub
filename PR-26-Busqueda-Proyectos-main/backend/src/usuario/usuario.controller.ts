@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Query, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsuarioService } from './usuario.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -28,6 +28,16 @@ export class UsuarioController {
     return this.usuarioService.findOne(id);
   }
 
+  // Perfil propio — cualquier usuario autenticado puede editar su propia
+  // foto/cargo/nombre. Declarado antes de ':id' para que 'me' no sea
+  // interpretado como un id.
+  @Patch('me')
+  updateSelf(@Request() req: any, @Body() data: any) {
+    return this.usuarioService.updateSelf(req.user.id, data);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles('admin', 'superadmin')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
     return this.usuarioService.update(id, data);

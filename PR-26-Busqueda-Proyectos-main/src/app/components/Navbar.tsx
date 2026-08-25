@@ -8,11 +8,14 @@ import {
   Shield, Crown, Users,
 } from 'lucide-react';
 
-function UserAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' }) {
+function UserAvatar({ name, photoUrl, size = 'sm' }: { name: string; photoUrl?: string; size?: 'sm' | 'md' }) {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const sizeClasses = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm';
+  if (photoUrl) {
+    return <img src={photoUrl} alt={name} className={`rounded-full object-cover flex-shrink-0 ${sizeClasses}`} />;
+  }
   return (
-    <div className={`rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white flex-shrink-0
-      ${size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'}`}>
+    <div className={`rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white flex-shrink-0 ${sizeClasses}`}>
       {initials}
     </div>
   );
@@ -87,7 +90,7 @@ export function Navbar() {
                       onClick={() => setUserMenuOpen(v => !v)}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted transition-colors group"
                     >
-                      <UserAvatar name={currentUser.nombre_completo} />
+                      <UserAvatar name={currentUser.nombre_completo} photoUrl={currentUser.foto_url} />
                       <div className="hidden sm:block text-left">
                         <div className="text-sm font-semibold leading-tight max-w-[120px] truncate">
                           {currentUser.nombre_completo.split(' ')[0]}
@@ -111,7 +114,7 @@ export function Navbar() {
                           {/* User header */}
                           <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-b border-border">
                             <div className="flex items-center gap-3">
-                              <UserAvatar name={currentUser.nombre_completo} size="md" />
+                              <UserAvatar name={currentUser.nombre_completo} photoUrl={currentUser.foto_url} size="md" />
                               <div className="min-w-0">
                                 <div className="font-bold text-sm truncate">{currentUser.nombre_completo}</div>
                                 <div className="text-xs text-muted-foreground truncate">{currentUser.correo}</div>

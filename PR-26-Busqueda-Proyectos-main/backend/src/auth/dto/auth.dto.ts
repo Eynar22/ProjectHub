@@ -29,6 +29,10 @@ export class RegisterEmpresaDto {
   @IsString()
   documento_empresa_url?: string;
 
+  @IsOptional()
+  @IsString()
+  logo_url?: string;
+
   // Datos del admin
   @IsString()
   @IsNotEmpty()

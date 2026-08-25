@@ -23,6 +23,7 @@ export class UsuarioService {
     nombre_completo: true,
     cargo: true,
     correo: true,
+    foto_url: true,
     rol: true,
     empresa_id: true,
     fecha_registro: true,
@@ -69,6 +70,22 @@ export class UsuarioService {
     }
     await this.usuarioRepo.update(id, data);
     return this.findOne(id);
+  }
+
+  // Whitelist explícito: cualquier usuario autenticado puede editar su propio
+  // perfil, pero solo estos campos — nunca rol/estado/empresa_id/password por
+  // esta vía (esos tienen sus propios endpoints con permisos de admin).
+  async updateSelf(
+    userId: number,
+    data: { nombre_completo?: string; cargo?: string; foto_url?: string },
+  ) {
+    const payload: Partial<Usuario> = {};
+    if (data.nombre_completo !== undefined) payload.nombre_completo = data.nombre_completo;
+    if (data.cargo !== undefined) payload.cargo = data.cargo;
+    if (data.foto_url !== undefined) payload.foto_url = data.foto_url;
+
+    await this.usuarioRepo.update(userId, payload);
+    return this.findOne(userId);
   }
 
   async promoteToAdmin(id: number) {

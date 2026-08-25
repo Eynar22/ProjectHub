@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Usuario } from './usuario.entity';
+import { EmpresaImagen } from './empresa-imagen.entity';
+import { EmpresaEnlace } from './empresa-enlace.entity';
 
 @Entity('empresa')
 export class Empresa {
@@ -21,6 +23,9 @@ export class Empresa {
   @Column({ type: 'text', nullable: true })
   documento_url: string;
 
+  @Column({ type: 'text', nullable: true })
+  logo_url: string;
+
   @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   fecha_registro: string;
 
@@ -32,4 +37,10 @@ export class Empresa {
 
   @OneToMany(() => Usuario, (usuario) => usuario.empresa)
   usuarios: Usuario[];
+
+  @OneToMany(() => EmpresaImagen, (imagen) => imagen.empresa, { cascade: true })
+  imagenes: EmpresaImagen[];
+
+  @OneToMany(() => EmpresaEnlace, (enlace) => enlace.empresa, { cascade: true })
+  enlaces: EmpresaEnlace[];
 }

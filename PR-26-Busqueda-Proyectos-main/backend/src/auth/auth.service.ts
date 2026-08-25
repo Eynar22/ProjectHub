@@ -93,6 +93,7 @@ export class AuthService {
       num_empleados: dto.num_empleados,
       portafolio: dto.portafolio,
       documento_url: dto.documento_empresa_url,
+      logo_url: dto.logo_url,
       estado: 'pendiente',
     });
     const savedEmpresa = await this.empresaRepo.save(empresa);

@@ -87,7 +87,7 @@ PORT=3000
 ```bash
 cd backend
 npm install
-npm run start:dev
+   npm run start:dev
 ```
 
 #### 4. Ejecutar el Frontend (React + Vite)
@@ -121,3 +121,9 @@ La aplicación estará disponible de forma local en `http://localhost:5173`.
 - `docker-compose.yml`: Definición del servicio PostgreSQL dockerizado.
 - `public/`: Assets estáticos del frontend.
 - `dist/`: Carpeta generada tras el proceso de build (excluida por git).
+
+
+ migraciones 
+docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/001_empresa_logo_imagenes_enlaces.sql"
+
+docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/002_usuario_foto_perfil.sql"

@@ -88,8 +88,8 @@ export default function AdminCompanies() {
                 >
                   <Card className="p-6 transition-all border-none bg-white shadow-sm hover:shadow-md">
                     <div className="flex items-center gap-6">
-                      {comp.logo ? (
-                        <img src={comp.logo} alt={comp.nombre} className="w-20 h-20 rounded-xl object-cover shadow-sm" />
+                      {comp.logo_url ? (
+                        <img src={comp.logo_url} alt={comp.nombre} className="w-20 h-20 rounded-xl object-cover shadow-sm" />
                       ) : (
                         <div className="w-20 h-20 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl flex items-center justify-center border border-slate-100">
                           <Building2 className="w-10 h-10 text-primary/40" />

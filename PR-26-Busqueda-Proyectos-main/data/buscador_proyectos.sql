@@ -65,6 +65,7 @@ CREATE TABLE public.empresa (
     num_empleados integer,
     portafolio character varying(250),
     documento_url text,
+    logo_url text,
     fecha_registro date DEFAULT ('now'::text)::date NOT NULL,
     estado character varying(20) DEFAULT 'pendiente'::character varying NOT NULL,
     fecha_aprobacion date
@@ -80,6 +81,61 @@ ALTER TABLE public.empresa OWNER TO postgres;
 
 ALTER TABLE public.empresa ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.empresa_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: empresa_imagen; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.empresa_imagen (
+    id integer NOT NULL,
+    empresa_id integer NOT NULL,
+    url text NOT NULL
+);
+
+
+ALTER TABLE public.empresa_imagen OWNER TO postgres;
+
+--
+-- Name: empresa_imagen_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.empresa_imagen ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.empresa_imagen_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: empresa_enlace; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.empresa_enlace (
+    id integer NOT NULL,
+    empresa_id integer NOT NULL,
+    url text NOT NULL,
+    nombre character varying(100)
+);
+
+
+ALTER TABLE public.empresa_enlace OWNER TO postgres;
+
+--
+-- Name: empresa_enlace_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.empresa_enlace ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.empresa_enlace_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -404,6 +460,7 @@ CREATE TABLE public.usuario (
     correo character varying(150) NOT NULL,
     password text NOT NULL,
     documento_url text,
+    foto_url text,
     rol character varying(20) NOT NULL,
     empresa_id smallint,
     fecha_registro date DEFAULT ('now'::text)::date NOT NULL,
@@ -690,6 +747,22 @@ ALTER TABLE ONLY public.empresa
 
 
 --
+-- Name: empresa_imagen empresa_imagen_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.empresa_imagen
+    ADD CONSTRAINT empresa_imagen_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: empresa_enlace empresa_enlace_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.empresa_enlace
+    ADD CONSTRAINT empresa_enlace_pkey PRIMARY KEY (id);
+
+
+--
 -- TOC entry 4940 (class 2606 OID 16499)
 -- Name: kanban_columna kanban_columna_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -847,6 +920,22 @@ ALTER TABLE ONLY public.tarea
 
 ALTER TABLE ONLY public.proyecto_imagen
     ADD CONSTRAINT "FK_28735ab707fdf5a41e2f1000d84" FOREIGN KEY (proyecto_id) REFERENCES public.proyecto(id) ON DELETE CASCADE;
+
+
+--
+-- Name: empresa_imagen empresa_imagen_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.empresa_imagen
+    ADD CONSTRAINT empresa_imagen_empresa_id_fkey FOREIGN KEY (empresa_id) REFERENCES public.empresa(id) ON DELETE CASCADE;
+
+
+--
+-- Name: empresa_enlace empresa_enlace_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.empresa_enlace
+    ADD CONSTRAINT empresa_enlace_empresa_id_fkey FOREIGN KEY (empresa_id) REFERENCES public.empresa(id) ON DELETE CASCADE;
 
 
 --
