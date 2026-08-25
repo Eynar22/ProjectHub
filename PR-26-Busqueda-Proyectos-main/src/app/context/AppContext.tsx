@@ -14,7 +14,19 @@ export interface User {
   empresa_id?: number | null;
   estado?: string;
   documento_url?: string;
+  foto_url?: string;
   empresa?: { id: number; nombre: string };
+}
+
+export interface CompanyImagen {
+  id: number;
+  url: string;
+}
+
+export interface CompanyEnlace {
+  id: number;
+  url: string;
+  nombre?: string;
 }
 
 export interface Company {
@@ -26,11 +38,13 @@ export interface Company {
   contacto: string;
   estado: 'pendiente' | 'aprobado' | 'bloqueado' | 'rechazado';
   fecha_creacion: string;
-  logo?: string;
+  logo_url?: string;
   documento_url?: string;
   fecha_registro?: string;
   fecha_aprobacion?: string;
   usuarios?: User[];
+  imagenes?: CompanyImagen[];
+  enlaces?: CompanyEnlace[];
 }
 
 export interface MemberRequest {
@@ -147,7 +161,12 @@ interface AppContextType {
     userData: { name: string; email: string; password: string; jobTitle: string; memberDocument: File },
     companyId: number
   ) => Promise<void>;
-  updateCompany: (id: number, data: Partial<Company>) => Promise<void>;
+  updateCompany: (
+    id: number,
+    data: Partial<Company> & { imagenes_urls?: string[]; enlaces?: { url: string; nombre?: string }[] },
+  ) => Promise<void>;
+  updateProfile: (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => Promise<void>;
+  uploadFile: (file: File) => Promise<string>;
   createProject: (project: any) => Promise<void>;
   updateProject: (id: number, data: Partial<Project>) => Promise<void>;
   updateProjectEstado: (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => Promise<void>;
@@ -409,9 +428,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updateCompany = async (id: number, data: Partial<Company>) => {
+  const updateCompany = async (
+    id: number,
+    data: Partial<Company> & { imagenes_urls?: string[]; enlaces?: { url: string; nombre?: string }[] },
+  ) => {
     const updated = await api.patch<Company>(`/empresas/${id}`, data);
     setCompanies(prev => prev.map(c => c.id === id ? updated : c));
+    toast.success('Empresa actualizada');
+  };
+
+  // Sube un archivo al backend, que lo redimensiona/comprime (imágenes) y lo
+  // devuelve como base64 listo para guardar (foto de perfil, logo, galería).
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const result = await api.post<{ base64: string }>('/recursos/upload', formData);
+    return result.base64;
+  };
+
+  const updateProfile = async (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => {
+    const updated = await api.patch<User>('/usuarios/me', data);
+    setCurrentUser(updated);
+    toast.success('Perfil actualizado');
   };
 
   const createProject = async (project: any) => {
@@ -677,6 +715,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         register,
         registerToCompany,
         updateCompany,
+        updateProfile,
+        uploadFile,
         createProject,
         updateProject,
         updateProjectEstado,

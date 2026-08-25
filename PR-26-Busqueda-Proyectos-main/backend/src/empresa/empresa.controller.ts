@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Delete, Param, Body, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { EmpresaService } from './empresa.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -23,11 +23,13 @@ export class EmpresaController {
     return this.empresaService.findOne(id);
   }
 
+  // Un admin solo puede editar su propia empresa (verificado en el service
+  // contra su empresa_id real en BD); superadmin puede editar cualquiera.
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('admin', 'superadmin')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
-    return this.empresaService.update(id, data);
+  update(@Request() req: any, @Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.empresaService.update(id, data, req.user);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)

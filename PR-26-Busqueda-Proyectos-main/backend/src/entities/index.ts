@@ -1,4 +1,6 @@
 export { Empresa } from './empresa.entity';
+export { EmpresaImagen } from './empresa-imagen.entity';
+export { EmpresaEnlace } from './empresa-enlace.entity';
 export { Usuario } from './usuario.entity';
 export { Proyecto } from './proyecto.entity';
 export { ProyectoImagen } from './proyecto-imagen.entity';

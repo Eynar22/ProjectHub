@@ -116,8 +116,8 @@ export default function AdminCompanyRequest() {
                   <Card className="p-8 border-none shadow-sm overflow-hidden relative">
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                     <div className="flex items-start gap-6 mb-8">
-                      {company.logo ? (
-                        <img src={company.logo} alt={company.nombre} className="w-24 h-24 rounded-2xl object-cover shadow-md" />
+                      {company.logo_url ? (
+                        <img src={company.logo_url} alt={company.nombre} className="w-24 h-24 rounded-2xl object-cover shadow-md" />
                       ) : (
                         <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center border border-primary/20">
                           <Building2 className="w-10 h-10 text-primary" />

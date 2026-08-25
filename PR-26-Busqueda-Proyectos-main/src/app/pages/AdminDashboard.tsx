@@ -194,9 +194,9 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/70 transition-colors group"
                 >
                   <div className="flex items-center gap-3">
-                    {company.logo ? (
-                      <img 
-                        src={company.logo} 
+                    {company.logo_url ? (
+                      <img
+                        src={company.logo_url}
                         alt={company.nombre}
                         className="w-10 h-10 rounded-lg object-cover"
                       />

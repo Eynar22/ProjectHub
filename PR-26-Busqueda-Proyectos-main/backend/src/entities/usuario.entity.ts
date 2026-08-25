@@ -25,6 +25,9 @@ export class Usuario {
   @Column({ type: 'text', nullable: true })
   documento_url: string;
 
+  @Column({ type: 'text', nullable: true })
+  foto_url: string;
+
   @Column({ type: 'varchar', length: 20 })
   rol: string;
 

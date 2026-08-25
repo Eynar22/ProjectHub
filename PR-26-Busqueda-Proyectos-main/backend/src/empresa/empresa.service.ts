@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Empresa } from '../entities/empresa.entity';
+import { EmpresaImagen } from '../entities/empresa-imagen.entity';
+import { EmpresaEnlace } from '../entities/empresa-enlace.entity';
 import { Usuario } from '../entities/usuario.entity';
 
 
@@ -9,6 +11,8 @@ import { Usuario } from '../entities/usuario.entity';
 export class EmpresaService {
   constructor(
     @InjectRepository(Empresa) private empresaRepo: Repository<Empresa>,
+    @InjectRepository(EmpresaImagen) private imagenRepo: Repository<EmpresaImagen>,
+    @InjectRepository(EmpresaEnlace) private enlaceRepo: Repository<EmpresaEnlace>,
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
   ) {}
 
@@ -22,6 +26,7 @@ export class EmpresaService {
         descripcion: true,
         num_empleados: true,
         portafolio: true,
+        logo_url: true,
         fecha_registro: true,
         fecha_aprobacion: true,
         estado: true,
@@ -47,14 +52,76 @@ export class EmpresaService {
   async findOne(id: number) {
     const empresa = await this.empresaRepo.findOne({
       where: { id },
-      relations: ['usuarios'],
+      relations: ['usuarios', 'imagenes', 'enlaces'],
     });
     if (!empresa) throw new NotFoundException('Empresa no encontrada');
     return empresa;
   }
 
-  async update(id: number, data: Partial<Empresa>) {
-    await this.empresaRepo.update(id, data);
+  // Campos del perfil de empresa que un admin (no superadmin) puede tocar por
+  // esta vía. Deja fuera nombre/estado/fechas: esos van por endpoints propios
+  // (aprobar/bloquear/desbloquear) o no son editables por un admin de empresa.
+  private static readonly ADMIN_EDITABLE_FIELDS = [
+    'descripcion',
+    'num_empleados',
+    'portafolio',
+    'documento_url',
+    'logo_url',
+  ] as const;
+
+  async update(
+    id: number,
+    data: Partial<Empresa> & {
+      imagenes_urls?: string[];
+      enlaces?: { url: string; nombre?: string }[];
+    },
+    actingUser?: { id: number; rol: string },
+  ) {
+    let { imagenes_urls, enlaces, ...empresaData } = data;
+
+    // Cuando la llamada viene de un usuario real (vs. flujos internos como
+    // approve/block/unblock), un admin (no superadmin) solo puede editar su
+    // propia empresa, y solo los campos permitidos.
+    if (actingUser && actingUser.rol !== 'superadmin') {
+      const admin = await this.usuarioRepo.findOne({ where: { id: actingUser.id } });
+      if (!admin || admin.empresa_id !== id) {
+        throw new ForbiddenException('Solo puedes editar el perfil de tu propia empresa');
+      }
+      empresaData = Object.fromEntries(
+        Object.entries(empresaData).filter(([key]) =>
+          (EmpresaService.ADMIN_EDITABLE_FIELDS as readonly string[]).includes(key),
+        ),
+      ) as Partial<Empresa>;
+    }
+
+    if (Object.keys(empresaData).length > 0) {
+      await this.empresaRepo.update(id, empresaData);
+    }
+
+    if (imagenes_urls) {
+      await this.imagenRepo.delete({ empresa_id: id });
+      if (imagenes_urls.length > 0) {
+        const imagenes = imagenes_urls.map((url) =>
+          this.imagenRepo.create({ empresa_id: id, url }),
+        );
+        await this.imagenRepo.save(imagenes);
+      }
+    }
+
+    if (enlaces) {
+      await this.enlaceRepo.delete({ empresa_id: id });
+      if (enlaces.length > 0) {
+        const enlacesEntities = enlaces.map((enlace) =>
+          this.enlaceRepo.create({
+            empresa_id: id,
+            url: enlace.url,
+            nombre: enlace.nombre,
+          }),
+        );
+        await this.enlaceRepo.save(enlacesEntities);
+      }
+    }
+
     return this.findOne(id);
   }
 

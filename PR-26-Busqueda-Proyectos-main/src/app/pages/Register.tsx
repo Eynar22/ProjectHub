@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { api } from '../services/api';
 import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Navbar } from '../components/Navbar';
 import { DocumentUpload } from '../components/DocumentUpload';
-import { Building2, CheckCircle2, Search, UserPlus } from 'lucide-react';
+import { Building2, CheckCircle2, Search, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -47,6 +48,21 @@ export default function Register() {
   const filteredCompanies = approvedCompanies.filter(c =>
     c.nombre.toLowerCase().includes(companySearch.toLowerCase())
   );
+
+  // El listado general de empresas no trae la galería de fotos (para no cargar
+  // eso en cada arranque de la app); se pide puntual acá, solo para las
+  // empresas que aparecen en los resultados de búsqueda. `null` = ya se
+  // consultó y no tiene fotos; `undefined` = todavía no se consultó.
+  const [companyPhotos, setCompanyPhotos] = useState<Record<number, string | null>>({});
+
+  useEffect(() => {
+    filteredCompanies.slice(0, 12).forEach(company => {
+      if (companyPhotos[company.id] !== undefined) return;
+      api.get<{ imagenes?: { url: string }[] }>(`/empresas/${company.id}`)
+        .then(data => setCompanyPhotos(prev => ({ ...prev, [company.id]: data.imagenes?.[0]?.url || null })))
+        .catch(() => setCompanyPhotos(prev => ({ ...prev, [company.id]: null })));
+    });
+  }, [companySearch, companies]);
 
   // ── Flujo A handlers ──
   const handleJoinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,22 +222,50 @@ export default function Register() {
 
               <AnimatePresence>
                 {companySearch.length > 0 && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-6 border border-border rounded-xl overflow-hidden">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-6 overflow-hidden">
                     {filteredCompanies.length > 0 ? (
-                      filteredCompanies.map(company => (
-                        <button key={company.id} onClick={() => { setSelectedCompanyId(company.id.toString()); setMode('join_company'); }} className="w-full flex items-center gap-3 p-4 hover:bg-muted transition-colors text-left border-b border-border last:border-0">
-                          {company.logo
-                            ? <img src={company.logo} alt={company.nombre} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-                            : <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5 text-white" /></div>
-                          }
-                          <div>
-                            <p className="font-semibold text-sm">{company.nombre}</p>
-                            <p className="text-xs text-muted-foreground">{company.num_empleados} empleados</p>
-                          </div>
-                        </button>
-                      ))
+                      <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        {filteredCompanies.map(company => {
+                          const photo = companyPhotos[company.id];
+                          return (
+                            <button
+                              key={company.id}
+                              onClick={() => { setSelectedCompanyId(company.id.toString()); setMode('join_company'); }}
+                              className="w-full bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-md transition-all text-left"
+                            >
+                              {/* Foto de portada de la empresa */}
+                              <div className="h-20 w-full bg-gradient-to-br from-primary/10 to-secondary/10">
+                                {photo ? (
+                                  <img src={photo} alt={company.nombre} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Building2 className="w-7 h-7 text-primary/25" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-start gap-3 p-4 pt-0">
+                                {company.logo_url
+                                  ? <img src={company.logo_url} alt={company.nombre} className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border-2 border-card shadow-md -mt-6 bg-card" />
+                                  : <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-card shadow-md -mt-6"><Building2 className="w-5 h-5 text-white" /></div>
+                                }
+                                <div className="min-w-0 flex-1 pt-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="font-bold text-sm">{company.nombre}</p>
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full flex-shrink-0">
+                                      <Users className="w-3 h-3" /> {company.num_empleados ?? '—'} empleados
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {company.descripcion || 'Sin descripción disponible.'}
+                                  </p>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
                     ) : (
-                      <div className="p-6 text-center">
+                      <div className="p-6 text-center border border-border rounded-xl">
                         <p className="text-sm text-muted-foreground mb-3">No encontramos tu empresa</p>
                         <Button variant="primary" size="sm" onClick={() => setMode('new_company')}>Registrar nueva empresa</Button>
                       </div>
@@ -251,14 +295,17 @@ export default function Register() {
             return (
               <Card className="p-8">
                 <button onClick={() => setMode('choose')} className="text-sm text-muted-foreground hover:text-foreground mb-6 flex items-center gap-1">← Volver</button>
-                <div className="flex items-center gap-4 mb-6">
-                  {company?.logo
-                    ? <img src={company.logo} alt={company.nombre} className="w-14 h-14 rounded-xl object-cover" />
-                    : <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"><Building2 className="w-7 h-7 text-white" /></div>
+                <div className="flex items-start gap-4 mb-6">
+                  {company?.logo_url
+                    ? <img src={company.logo_url} alt={company.nombre} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                    : <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0"><Building2 className="w-7 h-7 text-white" /></div>
                   }
-                  <div>
+                  <div className="min-w-0">
                     <h1 className="text-2xl font-bold">{company?.nombre}</h1>
                     <p className="text-muted-foreground text-sm">Solicitar acceso a esta empresa</p>
+                    {company?.descripcion && (
+                      <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{company.descripcion}</p>
+                    )}
                   </div>
                 </div>
 
