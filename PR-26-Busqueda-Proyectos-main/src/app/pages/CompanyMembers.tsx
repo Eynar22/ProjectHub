@@ -65,7 +65,7 @@ export default function CompanyMembers() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="flex">
         <Sidebar />

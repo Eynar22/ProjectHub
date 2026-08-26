@@ -163,7 +163,7 @@ export default function Register() {
   // ── Success ──
   if (mode === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <div className="min-h-screen">
         <Navbar />
         <div className="flex items-center justify-center py-16 px-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md">
@@ -190,7 +190,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+    <div className="min-h-screen">
       <Navbar />
       <div className="py-16 px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">

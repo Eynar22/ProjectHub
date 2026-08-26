@@ -15,7 +15,7 @@ export default function ProjectRequests() {
 
   if (!project || project.creador_id !== currentUser?.id) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <div className="min-h-screen">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">No autorizado</h1>
@@ -39,7 +39,7 @@ export default function ProjectRequests() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+    <div className="min-h-screen">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

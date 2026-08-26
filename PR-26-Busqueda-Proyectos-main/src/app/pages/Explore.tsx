@@ -70,7 +70,7 @@ export default function Explore() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden">
+    <div className="min-h-screen text-foreground font-sans relative overflow-hidden">
       
       {/* Luces de fondo estilo Home */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/5 via-secondary/5 to-transparent pointer-events-none -z-10" />

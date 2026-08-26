@@ -111,7 +111,7 @@ export default function ProjectDetail() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="min-h-screen text-foreground flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Proyecto no encontrado</h1>
           <Link to="/explore"><Button variant="primary">Volver a Explorar</Button></Link>
@@ -159,7 +159,7 @@ export default function ProjectDetail() {
   const dateFin = parseDate(project.fecha_fin);
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans relative overflow-x-hidden selection:bg-primary/30">
+    <div className="min-h-screen text-foreground font-sans relative overflow-x-hidden selection:bg-primary/30">
       
       {/* Estilos para el Carrusel con efecto Desvanecimiento y Desenfoque */}
       <style>{`

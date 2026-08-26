@@ -55,7 +55,7 @@ export default function AdminCompanyRequest() {
 
   if (!company) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <Building2 className="w-16 h-16 text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-4">Empresa no encontrada</h1>
         <Link to="/admin/companies">
@@ -66,7 +66,7 @@ export default function AdminCompanyRequest() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen">
       <Navbar />
       
       <div className="flex">

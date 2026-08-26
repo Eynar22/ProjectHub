@@ -120,11 +120,7 @@ export default function Login() {
 
   if (statusMessage) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex flex-col bg-slate-50">
-        <div className="absolute inset-0 z-0 pointer-events-none flex-grow">
-          <div className="absolute top-[35%] -right-[20%] w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-300 via-purple-300 to-white opacity-80 filter blur-3xl"></div>
-          <div className="absolute top-[10%] -left-[15%] w-[80%] h-[80%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-pink-200 via-transparent to-transparent opacity-90 filter blur-3xl"></div>
-        </div>
+      <div className="min-h-screen relative overflow-hidden flex flex-col">
         <Navbar />
         <div className="flex-grow flex items-center justify-center py-16 px-4 z-10 relative">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg mt-16">
@@ -149,7 +145,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col bg-slate-50 overflow-hidden">
+    <div className="min-h-screen relative flex flex-col overflow-hidden">
       <style>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear,
@@ -162,44 +158,6 @@ export default function Login() {
       {/* NAVBAR */}
       <div className="absolute top-0 w-full z-50">
         <Navbar />
-      </div>
-
-      {/* ========================================================= */}
-      {/* FONDO ANIMADO Y BORROSO MEJORADO (Movimiento más amplio)  */}
-      {/* ========================================================= */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {/* Esfera 1: Morada (Superior izquierda) */}
-        <motion.div
-          animate={{ 
-            x: [0, 150, -50, 0], 
-            y: [0, -100, 120, 0],
-            scale: [1, 1.1, 0.9, 1]
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-[10%] -left-[10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-purple-400/30 rounded-full blur-[120px] opacity-80"
-        />
-        
-        {/* Esfera 2: Azul (Inferior derecha) */}
-        <motion.div
-          animate={{ 
-            x: [0, -120, 80, 0], 
-            y: [0, 100, -150, 0],
-            scale: [0.9, 1.2, 1, 0.9]
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-[10%] -right-[10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-blue-400/30 rounded-full blur-[120px] opacity-70"
-        />
-
-        {/* Esfera 3: Fucsia suave (Central, cruza toda la pantalla) */}
-        <motion.div
-          animate={{ 
-            x: [0, 100, -150, 0], 
-            y: [0, -50, 100, 0],
-            scale: [0.8, 1.2, 0.9, 0.8]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[20%] left-[20%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-fuchsia-400/20 rounded-full blur-[100px] opacity-60"
-        />
       </div>
 
       {/* CONTENEDOR CENTRAL */}

@@ -125,7 +125,7 @@ export default function CompanyDashboard() {
   const isCompanyAdmin = currentUser?.rol === 'admin' && !!userCompany;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+    <div className="min-h-screen">
       {isCompanyAdmin && currentUser && !currentUser.onboarding_completado && <OnboardingWizard />}
       <Navbar />
       <div className="flex">
