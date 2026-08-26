@@ -127,3 +127,8 @@ La aplicación estará disponible de forma local en `http://localhost:5173`.
 docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/001_empresa_logo_imagenes_enlaces.sql"
 
 docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/002_usuario_foto_perfil.sql"
+
+por porwersell
+Get-Content "C:\Users\user\Documents\UMA\ProjectHub\PR-26-Busqueda-Proyectos-main\data\migrations\001_empresa_logo_imagenes_enlaces.sql" | docker exec -i buscador_postgres psql -U postgres -d buscador
+
+Get-Content "C:\Users\user\Documents\UMA\ProjectHub\PR-26-Busqueda-Proyectos-main\data\migrations\002_usuario_foto_perfil.sql" | docker exec -i buscador_postgres psql -U postgres -d buscador
