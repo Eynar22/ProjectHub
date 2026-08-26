@@ -134,7 +134,7 @@ export default function Login() {
                <p className="text-lg text-slate-800 dark:text-slate-300 mb-10 leading-relaxed font-medium">
                  {statusMessage.message}
                </p>
-               <Button onClick={() => setStatusMessage(null)} variant="primary" className="w-full py-6 text-base font-extrabold rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 border-none shadow-lg shadow-blue-500/10 text-white transition-all duration-300">
+               <Button onClick={() => setStatusMessage(null)} variant="primary" className="w-full py-6 text-base font-extrabold rounded-2xl bg-gradient-to-r from-primary to-secondary hover:brightness-110 border-none shadow-lg shadow-primary/10 text-white transition-all duration-300">
                  Volver al inicio de sesión
                </Button>
             </Card>
@@ -175,15 +175,15 @@ export default function Login() {
             <svg viewBox="0 0 100 100" className="w-72 h-72 xl:w-80 xl:h-80 relative z-10 overflow-visible mt-10">
               <defs>
                 <linearGradient id="bearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" /> 
-                  <stop offset="100%" stopColor="#a855f7" /> 
+                  <stop offset="0%" style={{ stopColor: 'var(--primary)' }} />
+                  <stop offset="100%" style={{ stopColor: 'var(--secondary)' }} />
                 </linearGradient>
-                
+
                 {/* DEGRADADO PARA EL MARCO EXTERIOR */}
                 <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fa6560" />
-                  <stop offset="50%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#4c1d95" />
+                  <stop offset="0%" style={{ stopColor: 'var(--destructive)' }} />
+                  <stop offset="50%" style={{ stopColor: 'var(--secondary)' }} />
+                  <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--secondary) 55%, black)' }} />
                 </linearGradient>
 
                 {/* NUEVO: DEGRADADO RADIAL PARA EL FONDO (Efecto profundidad/cápsula) */}
@@ -197,7 +197,7 @@ export default function Login() {
 
                 {/* SOMBRA DEL MARCO PARA DARLE PROFUNDIDAD */}
                 <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#4c1d95" floodOpacity="0.25" />
+                  <feDropShadow dx="0" dy="6" stdDeviation="6" style={{ floodColor: 'var(--secondary)' }} floodOpacity="0.25" />
                 </filter>
 
                 {/* CLIP-PATH: La máscara circular ajustada al interior del marco (r=42) */}
@@ -369,7 +369,7 @@ export default function Login() {
                 </Link>
               </div>
 
-              <Button type="submit" variant="primary" className="w-full py-4 text-base font-bold rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-none shadow-lg shadow-purple-500/25 text-white transition-all duration-300 mt-6 disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
+              <Button type="submit" variant="primary" className="w-full py-4 text-base font-bold rounded-2xl bg-gradient-to-r from-primary to-secondary hover:brightness-110 border-none shadow-lg shadow-secondary/25 text-white transition-all duration-300 mt-6 disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
                 {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
               </Button>
             </form>
