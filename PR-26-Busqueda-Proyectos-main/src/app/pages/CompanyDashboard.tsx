@@ -5,6 +5,7 @@ import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { OnboardingWizard } from '../components/OnboardingWizard';
 import {
   FolderKanban,
   Plus,
@@ -121,8 +122,11 @@ export default function CompanyDashboard() {
       : []),
   ];
 
+  const isCompanyAdmin = currentUser?.rol === 'admin' && !!userCompany;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      {isCompanyAdmin && currentUser && !currentUser.onboarding_completado && <OnboardingWizard />}
       <Navbar />
       <div className="flex">
         <Sidebar />

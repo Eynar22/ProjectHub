@@ -16,6 +16,8 @@ export interface User {
   documento_url?: string;
   foto_url?: string;
   empresa?: { id: number; nombre: string };
+  onboarding_completado?: boolean;
+  debe_cambiar_password?: boolean;
 }
 
 export interface CompanyImagen {
@@ -167,7 +169,8 @@ interface AppContextType {
   ) => Promise<void>;
   updateProfile: (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => Promise<void>;
   uploadFile: (file: File) => Promise<string>;
-  createProject: (project: any) => Promise<void>;
+  refreshCurrentUser: () => Promise<void>;
+  createProject: (project: any) => Promise<Project>;
   updateProject: (id: number, data: Partial<Project>) => Promise<void>;
   updateProjectEstado: (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => Promise<void>;
   createRequest: (request: { proyecto_id: number; mensaje: string }) => Promise<void>;
@@ -452,6 +455,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast.success('Perfil actualizado');
   };
 
+  // Vuelve a pedir el usuario autenticado (ej. tras cambiar la contraseña o
+  // marcar el onboarding como completado) sin pasar por login de nuevo.
+  const refreshCurrentUser = async () => {
+    const user = await api.get<User>('/auth/profile');
+    setCurrentUser(user);
+  };
+
   const createProject = async (project: any) => {
     try {
       // Upload images if provided and convert to base64
@@ -496,6 +506,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setProjects(prev => [...prev, newProject]);
       toast.success('Proyecto creado exitosamente');
+      return newProject;
     } catch (err) {
       console.error('Error al crear proyecto:', err);
       toast.error(err instanceof Error ? err.message : 'Error al crear el proyecto');
@@ -717,6 +728,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateCompany,
         updateProfile,
         uploadFile,
+        refreshCurrentUser,
         createProject,
         updateProject,
         updateProjectEstado,

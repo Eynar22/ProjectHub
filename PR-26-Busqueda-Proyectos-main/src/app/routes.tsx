@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { ForceChangePassword } from './pages/ForceChangePassword';
 import Explore from './pages/Explore';
 import ProjectDetail from './pages/ProjectDetail';
 import CompanyDashboard from './pages/CompanyDashboard';
@@ -36,6 +37,13 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (!currentUser) {
     return <Navigate to="/" replace />;
+  }
+
+  // Empleados creados por el admin desde el wizard de bienvenida reciben una
+  // contraseña temporal por correo — se bloquea el resto de la app hasta que
+  // la cambien, sin importar a qué ruta protegida hayan entrado.
+  if (currentUser.debe_cambiar_password) {
+    return <ForceChangePassword />;
   }
 
   return <>{children}</>;

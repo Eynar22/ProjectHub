@@ -34,7 +34,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const usuario = await this.usuarioRepo.findOne({
       where: { correo: dto.correo },
-      select: ['id', 'nombre_completo', 'correo', 'password', 'rol', 'empresa_id', 'cargo', 'estado'],
+      select: ['id', 'nombre_completo', 'correo', 'password', 'rol', 'empresa_id', 'cargo', 'estado', 'onboarding_completado', 'debe_cambiar_password'],
       relations: ['empresa'],
     });
 
@@ -89,6 +89,8 @@ export class AuthService {
         cargo: usuario.cargo,
         empresa_id: usuario.empresa_id,
         empresa: usuario.empresa ? { id: usuario.empresa.id, nombre: usuario.empresa.nombre } : null,
+        onboarding_completado: usuario.onboarding_completado,
+        debe_cambiar_password: usuario.debe_cambiar_password,
       },
     };
   }
@@ -237,7 +239,7 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.nueva_password, 10);
-    await this.usuarioRepo.update(usuario.id, { password: hashedPassword });
+    await this.usuarioRepo.update(usuario.id, { password: hashedPassword, debe_cambiar_password: false });
     await this.codigoRepo.update(registro.id, { usado: true });
 
     return { message: 'Contraseña actualizada correctamente' };
@@ -264,7 +266,7 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password_nueva, 10);
-    await this.usuarioRepo.update(userId, { password: hashedPassword });
+    await this.usuarioRepo.update(userId, { password: hashedPassword, debe_cambiar_password: false });
 
     return { message: 'Contraseña actualizada correctamente' };
   }

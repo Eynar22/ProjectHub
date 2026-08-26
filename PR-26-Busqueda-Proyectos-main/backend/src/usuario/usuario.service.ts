@@ -1,11 +1,26 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { randomBytes } from 'crypto';
 import { Usuario } from '../entities/usuario.entity';
 import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
 import { Proyecto } from '../entities/proyecto.entity';
+import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
+import { MailService } from '../mail/mail.service';
+import { QuickCreateEmpleadoDto } from './dto/usuario.dto';
 import * as bcrypt from 'bcrypt';
 
+// Caracteres sin ambigüedad visual (sin 0/O, 1/l/I) para la contraseña temporal.
+const TEMP_PASSWORD_CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+
+function generateTempPassword(length = 10): string {
+  const bytes = randomBytes(length);
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += TEMP_PASSWORD_CHARSET[bytes[i] % TEMP_PASSWORD_CHARSET.length];
+  }
+  return password;
+}
 
 @Injectable()
 export class UsuarioService {
@@ -13,6 +28,8 @@ export class UsuarioService {
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
     @InjectRepository(SolicitudMembresia) private solicitudRepo: Repository<SolicitudMembresia>,
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
+    @InjectRepository(UsuarioProyecto) private usuarioProyectoRepo: Repository<UsuarioProyecto>,
+    private mailService: MailService,
   ) {}
 
   // select explícito: excluye documento_url (base64) de la lista para no cargar
@@ -77,15 +94,78 @@ export class UsuarioService {
   // esta vía (esos tienen sus propios endpoints con permisos de admin).
   async updateSelf(
     userId: number,
-    data: { nombre_completo?: string; cargo?: string; foto_url?: string },
+    data: { nombre_completo?: string; cargo?: string; foto_url?: string; onboarding_completado?: boolean },
   ) {
     const payload: Partial<Usuario> = {};
     if (data.nombre_completo !== undefined) payload.nombre_completo = data.nombre_completo;
     if (data.cargo !== undefined) payload.cargo = data.cargo;
     if (data.foto_url !== undefined) payload.foto_url = data.foto_url;
+    if (data.onboarding_completado !== undefined) payload.onboarding_completado = data.onboarding_completado;
 
     await this.usuarioRepo.update(userId, payload);
     return this.findOne(userId);
+  }
+
+  // ── Alta rápida de empleado desde el wizard de bienvenida del admin ──────
+  async quickCreateEmpleado(adminUserId: number, dto: QuickCreateEmpleadoDto) {
+    const admin = await this.usuarioRepo.findOne({
+      where: { id: adminUserId },
+      relations: ['empresa'],
+    });
+    if (!admin || !admin.empresa_id) {
+      throw new BadRequestException('No se pudo determinar la empresa del administrador');
+    }
+
+    const existing = await this.usuarioRepo.findOne({ where: { correo: dto.correo } });
+    if (existing) {
+      throw new ConflictException('El correo ya está registrado');
+    }
+
+    let proyecto: Proyecto | null = null;
+    if (dto.proyecto_id) {
+      proyecto = await this.proyectoRepo.findOne({ where: { id: dto.proyecto_id } });
+      if (!proyecto || proyecto.creador_id !== adminUserId) {
+        throw new ForbiddenException('Solo puedes agregar empleados a un proyecto que tú creaste');
+      }
+    }
+
+    const passwordTemporal = generateTempPassword();
+    const hashedPassword = await bcrypt.hash(passwordTemporal, 10);
+
+    const usuario = this.usuarioRepo.create({
+      nombre_completo: dto.nombre_completo,
+      correo: dto.correo,
+      cargo: dto.cargo,
+      password: hashedPassword,
+      rol: 'empleado',
+      empresa_id: admin.empresa_id,
+      estado: 'activo',
+      debe_cambiar_password: true,
+    });
+    const savedUsuario = await this.usuarioRepo.save(usuario);
+
+    if (proyecto) {
+      const participante = this.usuarioProyectoRepo.create({
+        usuario_id: savedUsuario.id,
+        proyecto_id: proyecto.id,
+        rol: 'colaborador',
+      });
+      await this.usuarioProyectoRepo.save(participante);
+    }
+
+    await this.mailService.sendWelcomeEmployee(
+      savedUsuario.correo,
+      savedUsuario.nombre_completo,
+      passwordTemporal,
+      admin.empresa?.nombre,
+    );
+
+    return {
+      id: savedUsuario.id,
+      nombre_completo: savedUsuario.nombre_completo,
+      correo: savedUsuario.correo,
+      cargo: savedUsuario.cargo,
+    };
   }
 
   async promoteToAdmin(id: number) {

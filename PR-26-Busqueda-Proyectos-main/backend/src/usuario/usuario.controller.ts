@@ -1,8 +1,9 @@
-import { Controller, Get, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Query, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsuarioService } from './usuario.service';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { QuickCreateEmpleadoDto } from './dto/usuario.dto';
 
 @Controller('usuarios')
 @UseGuards(AuthGuard('jwt'))
@@ -21,6 +22,14 @@ export class UsuarioController {
   @Get('solicitudes/empresa/:empresaId')
   findMembershipRequests(@Param('empresaId', ParseIntPipe) empresaId: number) {
     return this.usuarioService.findMembershipRequests(empresaId);
+  }
+
+  // Alta rápida de empleado desde el wizard de bienvenida (admin de empresa)
+  @UseGuards(RolesGuard)
+  @Roles('admin', 'superadmin')
+  @Post('quick-create')
+  quickCreate(@Request() req: any, @Body() dto: QuickCreateEmpleadoDto) {
+    return this.usuarioService.quickCreateEmpleado(req.user.id, dto);
   }
 
   @Get(':id')

@@ -494,7 +494,9 @@ CREATE TABLE public.usuario (
     rol character varying(20) NOT NULL,
     empresa_id smallint,
     fecha_registro date DEFAULT ('now'::text)::date NOT NULL,
-    estado character varying(20) DEFAULT 'pendiente'::character varying NOT NULL
+    estado character varying(20) DEFAULT 'pendiente'::character varying NOT NULL,
+    onboarding_completado boolean DEFAULT false NOT NULL,
+    debe_cambiar_password boolean DEFAULT false NOT NULL
 );
 
 

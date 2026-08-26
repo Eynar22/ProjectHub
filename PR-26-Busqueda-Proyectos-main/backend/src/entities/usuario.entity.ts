@@ -40,6 +40,18 @@ export class Usuario {
   @Column({ type: 'varchar', length: 20, default: 'pendiente' })
   estado: string;
 
+  // Controla si al Administrador de Empresa ya se le mostró el wizard de
+  // bienvenida (crear su primer proyecto + equipo rápido). Se marca en true
+  // al omitirlo o al terminarlo — nunca se vuelve a mostrar después.
+  @Column({ type: 'boolean', default: false })
+  onboarding_completado: boolean;
+
+  // true para empleados creados por el admin desde el wizard de bienvenida
+  // (reciben una contraseña temporal por correo). Bloquea el resto de la app
+  // hasta que la cambien vía /auth/change-password.
+  @Column({ type: 'boolean', default: false })
+  debe_cambiar_password: boolean;
+
   @ManyToOne(() => Empresa, (empresa) => empresa.usuarios)
   @JoinColumn({ name: 'empresa_id' })
   empresa: Empresa;
