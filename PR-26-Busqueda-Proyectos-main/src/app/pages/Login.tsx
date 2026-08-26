@@ -124,14 +124,14 @@ export default function Login() {
         <Navbar />
         <div className="flex-grow flex items-center justify-center py-16 px-4 z-10 relative">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg mt-16">
-            <Card className="p-10 pt-16 text-center border-none shadow-[0_8px_32px_0_rgba(100,100,100,0.1)] bg-white/60 backdrop-blur-3xl rounded-3xl relative">
-               <div className="mx-auto w-24 h-24 mb-6 flex items-center justify-center rounded-full bg-slate-100/50 border border-slate-200 backdrop-blur-md">
+            <Card className="p-10 pt-16 text-center border-none shadow-[0_8px_32px_0_rgba(100,100,100,0.1)] bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl rounded-3xl relative">
+               <div className="mx-auto w-24 h-24 mb-6 flex items-center justify-center rounded-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 backdrop-blur-md">
                  {statusMessage.type === 'rejected' && <AlertCircle className="w-12 h-12 text-destructive" />}
                  {statusMessage.type === 'pending' && <Clock className="w-12 h-12 text-warning" />}
                  {statusMessage.type === 'suspended' && <Info className="w-12 h-12 text-orange-500" />}
                </div>
-               <h2 className="text-4xl font-extrabold mb-5 text-slate-950 tracking-tight">{statusMessage.title}</h2>
-               <p className="text-lg text-slate-800 mb-10 leading-relaxed font-medium">
+               <h2 className="text-4xl font-extrabold mb-5 text-slate-950 dark:text-slate-50 tracking-tight">{statusMessage.title}</h2>
+               <p className="text-lg text-slate-800 dark:text-slate-300 mb-10 leading-relaxed font-medium">
                  {statusMessage.message}
                </p>
                <Button onClick={() => setStatusMessage(null)} variant="primary" className="w-full py-6 text-base font-extrabold rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 border-none shadow-lg shadow-blue-500/10 text-white transition-all duration-300">
@@ -166,11 +166,11 @@ export default function Login() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-5xl bg-white rounded-[40px] shadow-2xl flex flex-col lg:flex-row overflow-hidden border border-white/50 min-h-[550px]"
+          className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[40px] shadow-2xl flex flex-col lg:flex-row overflow-hidden border border-white/50 dark:border-slate-800/50 min-h-[550px]"
         >
-          
+
           {/* LADO IZQUIERDO: EL OSITO Y SU NUEVO MARCO PROFESIONAL */}
-          <div className="lg:w-1/2 bg-slate-50/50 flex items-center justify-center relative p-8 border-b lg:border-b-0 lg:border-r border-slate-100">
+          <div className="lg:w-1/2 bg-slate-50/50 dark:bg-slate-950/50 flex items-center justify-center relative p-8 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800">
             
             <svg viewBox="0 0 100 100" className="w-72 h-72 xl:w-80 xl:h-80 relative z-10 overflow-visible mt-10">
               <defs>
@@ -187,10 +187,12 @@ export default function Login() {
                 </linearGradient>
 
                 {/* NUEVO: DEGRADADO RADIAL PARA EL FONDO (Efecto profundidad/cápsula) */}
+                {/* Usa las variables de theme.css directamente, así sigue cualquier
+                    cambio de paleta (o de modo claro/oscuro) sin tocar este archivo. */}
                 <radialGradient id="innerWindow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="70%" stopColor="#f8fafc" />
-                  <stop offset="100%" stopColor="#c8c9ca" />
+                  <stop offset="0%" style={{ stopColor: 'var(--card)' }} />
+                  <stop offset="70%" style={{ stopColor: 'var(--muted)' }} />
+                  <stop offset="100%" style={{ stopColor: 'var(--border)' }} />
                 </radialGradient>
 
                 {/* SOMBRA DEL MARCO PARA DARLE PROFUNDIDAD */}
@@ -217,7 +219,7 @@ export default function Login() {
               {/* ========================================================= */}
               {/* 3. SOMBRA INTERIOR SUTIL                                  */}
               {/* ========================================================= */}
-              <circle cx="50" cy="55" r="45" fill="none" stroke="#0f172a" strokeOpacity="0.15" strokeWidth="1" />
+              <circle cx="50" cy="55" r="45" fill="none" style={{ stroke: 'var(--foreground)' }} strokeOpacity="0.15" strokeWidth="1" />
 
 
               {/* Orejas y cabeza dibujadas DESPUÉS del círculo (Efecto 3D asomándose) */}
@@ -290,10 +292,10 @@ export default function Login() {
           </div>
 
           {/* LADO DERECHO: FORMULARIO */}
-          <div className="lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-16 xl:p-20 bg-white relative z-10">
+          <div className="lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-16 xl:p-20 bg-white dark:bg-slate-900 relative z-10">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-extrabold mb-2 text-slate-950 tracking-wide">¡Hola de nuevo!</h1>
-              <p className="text-slate-500 font-medium text-sm">
+              <h1 className="text-3xl font-extrabold mb-2 text-slate-950 dark:text-slate-50 tracking-wide">¡Hola de nuevo!</h1>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                 Por favor, ingresa tus datos para continuar
               </p>
             </div>
@@ -312,13 +314,13 @@ export default function Login() {
                 onFocusCapture={() => { setIsEmailFocused(true); setIsPasswordFocused(false); }}
                 onBlurCapture={() => setIsEmailFocused(false)}
               >
-                <label className="text-sm font-semibold text-slate-900 ml-1">Email</label>
+                <label className="text-sm font-semibold text-slate-900 dark:text-slate-200 ml-1">Email</label>
                 <input
                   type="email"
                   placeholder="tu@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-900 px-5 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 outline-none transition-all font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 text-slate-900 dark:text-slate-100 px-5 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 outline-none transition-all font-medium"
                 />
               </div>
 
@@ -331,7 +333,7 @@ export default function Login() {
                   }
                 }}
               >
-                <label className="text-sm font-semibold text-slate-900 ml-1">
+                <label className="text-sm font-semibold text-slate-900 dark:text-slate-200 ml-1">
                   Contraseña
                 </label>
                 <div className="relative">
@@ -340,7 +342,7 @@ export default function Login() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-900 placeholder:text-slate-400 px-5 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 outline-none transition-all pr-14 font-medium tracking-wide"
+                    className="w-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 px-5 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 outline-none transition-all pr-14 font-medium tracking-wide"
                   />
 
                   <button
@@ -349,7 +351,7 @@ export default function Login() {
                       e.preventDefault();
                       setShowPassword(!showPassword);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-purple-600 transition-colors focus:outline-none bg-white rounded-full shadow-sm border border-slate-100"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-purple-600 transition-colors focus:outline-none bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700"
                     title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -359,10 +361,10 @@ export default function Login() {
 
               <div className="flex items-center justify-between mt-2 px-1">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
-                  <span className="text-xs font-medium text-slate-500">Recordarme 30 días</span>
+                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-purple-600 focus:ring-purple-500" />
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Recordarme 30 días</span>
                 </label>
-                <Link to="/forgot-password" className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors">
+                <Link to="/forgot-password" className="text-xs text-purple-600 dark:text-purple-400 font-semibold hover:text-purple-700 dark:hover:text-purple-300 transition-colors">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
@@ -373,9 +375,9 @@ export default function Login() {
             </form>
 
             <div className="mt-8 text-center">
-              <p className="text-sm text-slate-600 font-medium">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                 ¿No tienes cuenta?{' '}
-                <Link to="/register" className="text-purple-600 font-bold hover:text-purple-700 transition-colors">
+                <Link to="/register" className="text-purple-600 dark:text-purple-400 font-bold hover:text-purple-700 dark:hover:text-purple-300 transition-colors">
                   Regístrate aquí
                 </Link>
               </p>

@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Building2, LogOut, LayoutDashboard, Compass,
-  ChevronDown, User as UserIcon, Menu, X,
+  ChevronDown, User as UserIcon, Menu, X, Sun, Moon,
 } from 'lucide-react';
 
 // Avatar encajado perfectamente
@@ -19,6 +20,7 @@ function UserAvatar({ name }: { name: string }) {
 
 export function Navbar() {
   const { currentUser, logout, companies } = useApp();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -135,7 +137,15 @@ export function Navbar() {
       {/* Zona sólida Ploma (Más transparente) */}
       <div className="bg-slate-400/15 backdrop-blur-md flex items-center pr-4 md:pr-6 pl-1 h-full pointer-events-auto">
         <div className="bg-card rounded-full p-1 md:p-1.5 flex items-center shadow-sm border border-border/40">
-          
+
+          <button
+            onClick={toggleTheme}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors flex-shrink-0"
+            title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
+          </button>
+
           {currentUser ? (
             <div className="relative" ref={userMenuRef}>
               <button
