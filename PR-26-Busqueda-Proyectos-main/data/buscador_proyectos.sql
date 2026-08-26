@@ -54,6 +54,36 @@ ALTER TABLE public.chat ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
+-- Name: codigo_recuperacion; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.codigo_recuperacion (
+    id integer NOT NULL,
+    usuario_id integer NOT NULL,
+    codigo character varying(6) NOT NULL,
+    fecha_expiracion timestamp without time zone NOT NULL,
+    usado boolean DEFAULT false NOT NULL,
+    fecha_creacion timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.codigo_recuperacion OWNER TO postgres;
+
+--
+-- Name: codigo_recuperacion_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.codigo_recuperacion ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.codigo_recuperacion_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- TOC entry 221 (class 1259 OID 16396)
 -- Name: empresa; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -763,6 +793,14 @@ ALTER TABLE ONLY public.empresa_enlace
 
 
 --
+-- Name: codigo_recuperacion codigo_recuperacion_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.codigo_recuperacion
+    ADD CONSTRAINT codigo_recuperacion_pkey PRIMARY KEY (id);
+
+
+--
 -- TOC entry 4940 (class 2606 OID 16499)
 -- Name: kanban_columna kanban_columna_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -896,6 +934,13 @@ CREATE INDEX "IDX_43da450f4230d23b655a2704e5" ON public.tarea_usuario USING btre
 
 
 --
+-- Name: idx_codigo_recuperacion_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_codigo_recuperacion_usuario ON public.codigo_recuperacion USING btree (usuario_id);
+
+
+--
 -- TOC entry 4969 (class 2606 OID 16781)
 -- Name: mensaje FK_07a3dfdc233017738e897c0f46e; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -936,6 +981,14 @@ ALTER TABLE ONLY public.empresa_imagen
 
 ALTER TABLE ONLY public.empresa_enlace
     ADD CONSTRAINT empresa_enlace_empresa_id_fkey FOREIGN KEY (empresa_id) REFERENCES public.empresa(id) ON DELETE CASCADE;
+
+
+--
+-- Name: codigo_recuperacion codigo_recuperacion_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.codigo_recuperacion
+    ADD CONSTRAINT codigo_recuperacion_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuario(id) ON DELETE CASCADE;
 
 
 --

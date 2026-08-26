@@ -39,7 +39,8 @@ import {
   Image,
   Upload,
   Loader2,
-  AlertOctagon
+  AlertOctagon,
+  Pencil
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import Slider from 'react-slick';
@@ -318,7 +319,8 @@ export default function Workspace() {
     resources,
     addResource,
     deleteResource,
-    openBase64
+    openBase64,
+    uploadFile
   } = useApp();
 
   // ── LOCAL CHAT STATE (loaded per project) ──────────────────────────
@@ -380,6 +382,15 @@ export default function Workspace() {
   const [newFolderName, setNewFolderName] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Project Info Editing State (Administrador de Empresa: foto, descripción, fecha fin)
+  const [editingProjectInfo, setEditingProjectInfo] = useState(false);
+  const [editDescripcion, setEditDescripcion] = useState('');
+  const [editFechaFin, setEditFechaFin] = useState('');
+  const [editImagenes, setEditImagenes] = useState<string[]>([]);
+  const [uploadingProjectImage, setUploadingProjectImage] = useState(false);
+  const [savingProjectInfo, setSavingProjectInfo] = useState(false);
+  const projectImageInputRef = useRef<HTMLInputElement>(null);
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
 
@@ -527,6 +538,9 @@ export default function Workspace() {
   // (sin darle el rol completo de 'admin', reservado para el dueño del proyecto).
   const miParticipacion = project?.participantes?.find(p => p.usuario_id === currentUser?.id);
   const puedeCrearTareas = isOwner || miParticipacion?.rol === 'miembro';
+  // El Administrador de Empresa puede editar foto/descripción/fecha fin, pero solo en
+  // proyectos donde ya tiene acceso al workspace (es creador o participante).
+  const puedeEditarInfo = isParticipant && currentUser?.rol === 'admin';
 
   if (!project) {
     return (
@@ -616,6 +630,53 @@ export default function Workspace() {
       toast.error(err instanceof Error ? err.message : 'No se pudo actualizar el acceso');
     } finally {
       setUpdatingAccesoId(null);
+    }
+  };
+
+  // ── Edición de info del proyecto (Administrador de Empresa): foto, descripción, fecha fin ──
+  const startEditingProjectInfo = () => {
+    if (!project) return;
+    setEditDescripcion(project.descripcion_completa || '');
+    setEditFechaFin(project.fecha_fin ? project.fecha_fin.slice(0, 10) : '');
+    setEditImagenes((project.imagenes || []).map(img => img.url));
+    setEditingProjectInfo(true);
+  };
+
+  const handleProjectImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) { toast.error('Selecciona archivos de imagen válidos'); return; }
+    setUploadingProjectImage(true);
+    try {
+      const uploaded = await Promise.all(imageFiles.map(f => uploadFile(f)));
+      setEditImagenes(prev => [...prev, ...uploaded]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al subir la imagen');
+    } finally {
+      setUploadingProjectImage(false);
+      if (projectImageInputRef.current) projectImageInputRef.current.value = '';
+    }
+  };
+
+  const removeEditImage = (index: number) => setEditImagenes(prev => prev.filter((_, i) => i !== index));
+
+  const handleSaveProjectInfo = async () => {
+    if (!project) return;
+    setSavingProjectInfo(true);
+    try {
+      const updated = await api.patch<Project>(`/proyectos/${project.id}`, {
+        descripcion_completa: editDescripcion.trim(),
+        fecha_fin: editFechaFin || null,
+        imagenes_urls: editImagenes,
+      });
+      setProjectCompleto(updated);
+      setEditingProjectInfo(false);
+      toast.success('Información del proyecto actualizada');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo actualizar el proyecto');
+    } finally {
+      setSavingProjectInfo(false);
     }
   };
 
@@ -894,29 +955,109 @@ export default function Workspace() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
+                {/* Edit toggle (Administrador de Empresa) */}
+                {puedeEditarInfo && (
+                  <div className="flex justify-end -mb-2">
+                    {!editingProjectInfo ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={startEditingProjectInfo}
+                        className="flex items-center gap-2"
+                      >
+                        <Pencil className="w-3.5 h-3.5" /> Editar Información
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setEditingProjectInfo(false)} disabled={savingProjectInfo}>
+                          Cancelar
+                        </Button>
+                        <Button variant="primary" size="sm" onClick={handleSaveProjectInfo} disabled={savingProjectInfo} className="flex items-center gap-2">
+                          {savingProjectInfo && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          Guardar Cambios
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Images */}
                 <Card className="overflow-hidden">
-                  <div className="h-96">
-                    <Slider {...sliderSettings}>
-                      {project.imagenes.map((img, idx) => (
-                        <div key={idx}>
-                          <img
-                            src={img.url}
-                            alt={`${project.nombre} ${idx + 1}`}
-                            className="w-full h-96 object-cover"
-                          />
-                        </div>
-                      ))}
-                    </Slider>
-                  </div>
+                  {editingProjectInfo ? (
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm flex items-center gap-2">
+                          <Image className="w-4 h-4 text-primary" /> Imágenes del Proyecto
+                        </h4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => projectImageInputRef.current?.click()}
+                          disabled={uploadingProjectImage}
+                          className="flex items-center gap-2"
+                        >
+                          {uploadingProjectImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                          Agregar
+                        </Button>
+                        <input
+                          ref={projectImageInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={handleProjectImageSelect}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {editImagenes.map((url, idx) => (
+                          <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-border">
+                            <img src={url} alt={`Imagen ${idx + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeEditImage(idx)}
+                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                        {editImagenes.length === 0 && (
+                          <p className="text-sm text-muted-foreground col-span-full">Sin imágenes. Agrega al menos una.</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-96">
+                      <Slider {...sliderSettings}>
+                        {project.imagenes.map((img, idx) => (
+                          <div key={idx}>
+                            <img
+                              src={img.url}
+                              alt={`${project.nombre} ${idx + 1}`}
+                              className="w-full h-96 object-cover"
+                            />
+                          </div>
+                        ))}
+                      </Slider>
+                    </div>
+                  )}
                 </Card>
 
                 {/* Description */}
                 <Card className="p-6">
                   <h3 className="text-xl font-semibold mb-4">Descripción</h3>
-                  <p className="text-muted-foreground whitespace-pre-line">
-                    {project.descripcion_completa}
-                  </p>
+                  {editingProjectInfo ? (
+                    <TextArea
+                      value={editDescripcion}
+                      onChange={(e) => setEditDescripcion(e.target.value)}
+                      placeholder="Descripción completa del proyecto..."
+                      rows={6}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground whitespace-pre-line">
+                      {project.descripcion_completa}
+                    </p>
+                  )}
                 </Card>
 
                 {/* Info Grid */}
@@ -926,9 +1067,21 @@ export default function Workspace() {
                       <Calendar className="w-5 h-5 text-primary" />
                       <h4 className="font-semibold">Fechas</h4>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground space-y-1.5">
                       <div>Inicio: {project.fecha_inicio}</div>
-                      <div>Fin: {project.fecha_fin}</div>
+                      {editingProjectInfo ? (
+                        <div className="flex items-center gap-2">
+                          <span>Fin:</span>
+                          <Input
+                            type="date"
+                            value={editFechaFin}
+                            onChange={(e) => setEditFechaFin(e.target.value)}
+                            className="h-8 text-sm w-40"
+                          />
+                        </div>
+                      ) : (
+                        <div>Fin: {project.fecha_fin}</div>
+                      )}
                     </div>
                   </Card>
 

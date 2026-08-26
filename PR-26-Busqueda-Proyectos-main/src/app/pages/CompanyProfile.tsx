@@ -11,7 +11,7 @@ import {
   Building2, User, FileText, Eye, Download,
   Mail, Briefcase, Shield, Crown, Users,
   CheckCircle2, Clock, AlertCircle, Calendar,
-  Pencil, X, Camera, Plus, Trash2, Link2, Loader2, Upload,
+  Pencil, X, Camera, Plus, Trash2, Link2, Loader2, Upload, Lock,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -118,6 +118,36 @@ export default function CompanyProfile() {
       toast.error(err instanceof Error ? err.message : 'Error al actualizar el perfil');
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  // ───────────────────────── Cambio de contraseña (cualquier usuario) ─────────────────────────
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ actual: '', nueva: '', confirmar: '' });
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const startEditingPassword = () => {
+    setPasswordForm({ actual: '', nueva: '', confirmar: '' });
+    setEditingPassword(true);
+  };
+
+  const handleSavePassword = async () => {
+    if (!passwordForm.actual || !passwordForm.nueva) { toast.error('Completa todos los campos'); return; }
+    if (passwordForm.nueva.length < 4) { toast.error('La nueva contraseña debe tener al menos 4 caracteres'); return; }
+    if (passwordForm.nueva !== passwordForm.confirmar) { toast.error('Las contraseñas no coinciden'); return; }
+
+    setSavingPassword(true);
+    try {
+      await api.post('/auth/change-password', {
+        password_actual: passwordForm.actual,
+        password_nueva: passwordForm.nueva,
+      });
+      toast.success('Contraseña actualizada correctamente');
+      setEditingPassword(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo actualizar la contraseña');
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -400,6 +430,68 @@ export default function CompanyProfile() {
                     <InfoRow icon={Mail}     label="Correo Electrónico" value={currentUser?.correo || ''} />
                     <InfoRow icon={Briefcase} label="Cargo"          value={currentUser?.cargo || 'No especificado'} />
                     <InfoRow icon={RolIcon}  label="Rol en Plataforma" value={rol.label} color={rol.color} />
+                  </div>
+                )}
+              </Card>
+
+              {/* Security / Change Password */}
+              <Card className="border-none shadow-md overflow-hidden">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Lock className="w-4 h-4 text-primary" />
+                  </div>
+                  <h2 className="font-bold">Seguridad</h2>
+                  {!editingPassword ? (
+                    <button
+                      type="button"
+                      onClick={startEditingPassword}
+                      className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                    >
+                      <Pencil className="w-3.5 h-3.5" /> Cambiar Contraseña
+                    </button>
+                  ) : (
+                    <div className="ml-auto flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingPassword(false)}
+                        disabled={savingPassword}
+                        className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                      >
+                        Cancelar
+                      </button>
+                      <Button type="button" size="sm" onClick={handleSavePassword} disabled={savingPassword}>
+                        {savingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Guardar'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {editingPassword ? (
+                  <div className="p-4 grid sm:grid-cols-3 gap-4">
+                    <Input
+                      label="Contraseña actual"
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.actual}
+                      onChange={(e) => setPasswordForm(f => ({ ...f, actual: e.target.value }))}
+                    />
+                    <Input
+                      label="Nueva contraseña"
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.nueva}
+                      onChange={(e) => setPasswordForm(f => ({ ...f, nueva: e.target.value }))}
+                    />
+                    <Input
+                      label="Confirmar nueva contraseña"
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.confirmar}
+                      onChange={(e) => setPasswordForm(f => ({ ...f, confirmar: e.target.value }))}
+                    />
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <p className="text-sm text-muted-foreground">Actualiza periódicamente tu contraseña para mantener tu cuenta segura.</p>
                   </div>
                 )}
               </Card>

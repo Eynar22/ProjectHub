@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -6,7 +6,19 @@ import * as bcrypt from 'bcrypt';
 import { Usuario } from '../entities/usuario.entity';
 import { Empresa } from '../entities/empresa.entity';
 import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
-import { LoginDto, RegisterEmpresaDto, RegisterEmpleadoDto } from './dto/auth.dto';
+import { CodigoRecuperacion } from '../entities/codigo-recuperacion.entity';
+import { MailService } from '../mail/mail.service';
+import {
+  LoginDto,
+  RegisterEmpresaDto,
+  RegisterEmpleadoDto,
+  ForgotPasswordDto,
+  VerifyResetCodeDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+} from './dto/auth.dto';
+
+const CODIGO_EXPIRACION_MINUTOS = 15;
 
 @Injectable()
 export class AuthService {
@@ -14,7 +26,9 @@ export class AuthService {
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
     @InjectRepository(Empresa) private empresaRepo: Repository<Empresa>,
     @InjectRepository(SolicitudMembresia) private solicitudRepo: Repository<SolicitudMembresia>,
+    @InjectRepository(CodigoRecuperacion) private codigoRepo: Repository<CodigoRecuperacion>,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -158,5 +172,100 @@ export class AuthService {
       relations: ['empresa'],
     });
     return usuario;
+  }
+
+  // ── Recuperación de contraseña por código enviado al correo ──────────────
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const usuario = await this.usuarioRepo.findOne({ where: { correo: dto.correo } });
+
+    // Respuesta genérica siempre, para no revelar si el correo existe o no.
+    if (!usuario) {
+      return { message: 'Si el correo está registrado, recibirás un código de verificación.' };
+    }
+
+    // Invalida cualquier código previo sin usar de este usuario.
+    await this.codigoRepo.update({ usuario_id: usuario.id, usado: false }, { usado: true });
+
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+    const fechaExpiracion = new Date(Date.now() + CODIGO_EXPIRACION_MINUTOS * 60 * 1000);
+
+    const registro = this.codigoRepo.create({
+      usuario_id: usuario.id,
+      codigo,
+      fecha_expiracion: fechaExpiracion,
+      usado: false,
+    });
+    await this.codigoRepo.save(registro);
+
+    await this.mailService.sendRecoveryCode(usuario.correo, codigo);
+
+    return { message: 'Si el correo está registrado, recibirás un código de verificación.' };
+  }
+
+  private async findValidCode(correo: string, codigo: string): Promise<{ usuario: Usuario; registro: CodigoRecuperacion }> {
+    const usuario = await this.usuarioRepo.findOne({
+      where: { correo },
+      select: ['id', 'correo', 'password'],
+    });
+    if (!usuario) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    const registro = await this.codigoRepo.findOne({
+      where: { usuario_id: usuario.id, codigo, usado: false },
+      order: { fecha_creacion: 'DESC' },
+    });
+
+    if (!registro || registro.fecha_expiracion.getTime() < Date.now()) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    return { usuario, registro };
+  }
+
+  async verifyResetCode(dto: VerifyResetCodeDto) {
+    await this.findValidCode(dto.correo, dto.codigo);
+    return { message: 'Código válido' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { usuario, registro } = await this.findValidCode(dto.correo, dto.codigo);
+
+    const esMismaPassword = await bcrypt.compare(dto.nueva_password, usuario.password);
+    if (esMismaPassword) {
+      throw new BadRequestException('La nueva contraseña debe ser diferente a la actual');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.nueva_password, 10);
+    await this.usuarioRepo.update(usuario.id, { password: hashedPassword });
+    await this.codigoRepo.update(registro.id, { usado: true });
+
+    return { message: 'Contraseña actualizada correctamente' };
+  }
+
+  // ── Cambio de contraseña estando autenticado ──────────────────────────────
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    const usuario = await this.usuarioRepo.findOne({
+      where: { id: userId },
+      select: ['id', 'password'],
+    });
+    if (!usuario) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    const passwordValid = await bcrypt.compare(dto.password_actual, usuario.password);
+    if (!passwordValid) {
+      throw new UnauthorizedException('La contraseña actual es incorrecta');
+    }
+
+    const esMismaPassword = await bcrypt.compare(dto.password_nueva, usuario.password);
+    if (esMismaPassword) {
+      throw new BadRequestException('La nueva contraseña debe ser diferente a la actual');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password_nueva, 10);
+    await this.usuarioRepo.update(userId, { password: hashedPassword });
+
+    return { message: 'Contraseña actualizada correctamente' };
   }
 }

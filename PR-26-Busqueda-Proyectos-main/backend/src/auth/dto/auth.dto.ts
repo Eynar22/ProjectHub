@@ -75,3 +75,40 @@ export class RegisterEmpleadoDto {
   @Type(() => Number)
   empresa_id: number;
 }
+
+export class ForgotPasswordDto {
+  @IsEmail()
+  correo: string;
+}
+
+export class VerifyResetCodeDto {
+  @IsEmail()
+  correo: string;
+
+  @IsString()
+  @IsNotEmpty()
+  codigo: string;
+}
+
+export class ResetPasswordDto {
+  @IsEmail()
+  correo: string;
+
+  @IsString()
+  @IsNotEmpty()
+  codigo: string;
+
+  @IsString()
+  @MinLength(4)
+  nueva_password: string;
+}
+
+export class ChangePasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  password_actual: string;
+
+  @IsString()
+  @MinLength(4)
+  password_nueva: string;
+}

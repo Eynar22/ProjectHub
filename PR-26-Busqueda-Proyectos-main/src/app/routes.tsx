@@ -4,6 +4,8 @@ import { useApp } from './context/AppContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Explore from './pages/Explore';
 import ProjectDetail from './pages/ProjectDetail';
 import CompanyDashboard from './pages/CompanyDashboard';
@@ -70,6 +72,14 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     Component: Register,
+  },
+  {
+    path: '/forgot-password',
+    Component: ForgotPassword,
+  },
+  {
+    path: '/reset-password',
+    Component: ResetPassword,
   },
   {
     path: '/explore',

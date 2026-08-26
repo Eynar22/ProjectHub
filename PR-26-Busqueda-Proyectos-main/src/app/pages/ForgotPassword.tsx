@@ -1,0 +1,82 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router';
+import { toast } from 'sonner';
+import { api } from '../services/api';
+import { Input } from '../components/Input';
+import { Button } from '../components/Button';
+import { Card } from '../components/Card';
+import { Navbar } from '../components/Navbar';
+import { KeyRound, ArrowLeft } from 'lucide-react';
+import { motion } from 'motion/react';
+
+export default function ForgotPassword() {
+  const [correo, setCorreo] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!correo.trim()) {
+      toast.error('Ingresa tu correo electrónico');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await api.post<{ message: string }>('/auth/forgot-password', { correo: correo.trim() });
+      toast.success('Si el correo está registrado, recibirás un código de verificación.');
+      navigate(`/reset-password?correo=${encodeURIComponent(correo.trim())}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo enviar el código');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <Navbar />
+
+      <div className="flex items-center justify-center py-16 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <Card className="p-8">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
+                <KeyRound className="w-8 h-8 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-3xl font-bold text-center mb-2">Recuperar Contraseña</h1>
+            <p className="text-center text-muted-foreground mb-8">
+              Ingresa tu correo y te enviaremos un código de verificación
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="tu@empresa.com"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+              />
+
+              <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Enviando...' : 'Enviar Código'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5">
+                <ArrowLeft className="w-3.5 h-3.5" /> Volver a iniciar sesión
+              </Link>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
