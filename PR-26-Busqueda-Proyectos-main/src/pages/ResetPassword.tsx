@@ -73,6 +73,7 @@ export default function ResetPassword() {
               <Input
                 label="Email"
                 type="email"
+                autoComplete="email"
                 placeholder="tu@empresa.com"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
@@ -81,6 +82,7 @@ export default function ResetPassword() {
               <Input
                 label="Código de verificación"
                 type="text"
+                autoComplete="one-time-code"
                 inputMode="numeric"
                 maxLength={6}
                 placeholder="123456"
@@ -92,6 +94,7 @@ export default function ResetPassword() {
               <Input
                 label="Nueva contraseña"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={nuevaPassword}
                 onChange={(e) => setNuevaPassword(e.target.value)}
@@ -100,6 +103,7 @@ export default function ResetPassword() {
               <Input
                 label="Confirmar nueva contraseña"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={confirmarPassword}
                 onChange={(e) => setConfirmarPassword(e.target.value)}

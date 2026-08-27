@@ -70,6 +70,7 @@ export function ForceChangePassword() {
               <Input
                 label="Contraseña temporal (la que recibiste por correo)"
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 value={passwordTemporal}
                 onChange={(e) => setPasswordTemporal(e.target.value)}
@@ -78,6 +79,7 @@ export function ForceChangePassword() {
               <Input
                 label="Nueva contraseña"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={nuevaPassword}
                 onChange={(e) => setNuevaPassword(e.target.value)}
@@ -86,6 +88,7 @@ export function ForceChangePassword() {
               <Input
                 label="Confirmar nueva contraseña"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={confirmarPassword}
                 onChange={(e) => setConfirmarPassword(e.target.value)}

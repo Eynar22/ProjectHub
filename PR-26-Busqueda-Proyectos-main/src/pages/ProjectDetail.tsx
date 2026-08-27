@@ -10,6 +10,7 @@ import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
 import { TextArea } from '@/shared/components/ui/Input';
 import {
   Building2,
@@ -481,68 +482,68 @@ export default function ProjectDetail() {
       </div>
 
       {/* MODALES DE ACCIÓN */}
-      {showRequestModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-modal p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
-            <Card className="p-8 rounded-[2rem] shadow-2xl border-border/50 bg-card">
-              <h2 className="text-2xl font-bold mb-6 text-foreground">Solicitar Participación</h2>
-              <div className="mb-6 space-y-3 bg-muted p-5 rounded-2xl border border-border/50">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase font-bold mb-1">Solicitante</p>
-                  <p className="font-semibold text-foreground">{currentUser?.nombre_completo}</p>
-                </div>
-              </div>
-              <TextArea
-                label="Mensaje (opcional)"
-                placeholder="Explica por qué tu perfil sumaría valor a este proyecto..."
-                rows={4}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <div className="flex gap-3 mt-8">
-                <Button variant="outline" className="flex-1 rounded-2xl" onClick={() => setShowRequestModal(false)}>Cancelar</Button>
-                <Button variant="primary" className="flex-1 rounded-2xl flex items-center justify-center gap-2" onClick={handleRequestParticipation} disabled={crearSolicitud.isPending}>
-                  <Send className="w-4 h-4" /> {crearSolicitud.isPending ? 'Enviando...' : 'Enviar'}
-                </Button>
-              </div>
-            </Card>
-          </motion.div>
+      <Modal
+        open={showRequestModal}
+        onClose={() => setShowRequestModal(false)}
+        titulo="Solicitar participación"
+        acciones={
+          <>
+            <Button variant="ghost" onClick={() => setShowRequestModal(false)}>Cancelar</Button>
+            <Button
+              variant="primary"
+              onClick={handleRequestParticipation}
+              disabled={crearSolicitud.isPending}
+            >
+              <Send className="w-4 h-4" aria-hidden="true" />
+              {crearSolicitud.isPending ? 'Enviando…' : 'Enviar'}
+            </Button>
+          </>
+        }
+      >
+        <div className="mb-4 rounded-xl border border-border bg-muted p-4">
+          <p className="mb-1 text-xs font-bold uppercase text-muted-foreground">Solicitante</p>
+          <p className="font-semibold">{currentUser?.nombre_completo}</p>
         </div>
-      )}
+        <TextArea
+          label="Mensaje (opcional)"
+          placeholder="Explica por qué tu perfil sumaría valor a este proyecto..."
+          rows={4}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+      </Modal>
 
-      {showTransferModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-modal p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
-            <Card className="p-8 rounded-[2rem] shadow-2xl border-border/50 bg-card">
-              <h2 className="text-2xl font-bold mb-4 text-foreground">Transferir Proyecto</h2>
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Selecciona a un usuario activo de la empresa para que sea el nuevo propietario.
-              </p>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-foreground">Nuevo Propietario</label>
-                  <select
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:border-primary focus-visible:ring-2 focus-visible:ring-ring outline-none transition-all cursor-pointer font-medium"
-                    value={selectedNewOwner}
-                    onChange={(e) => setSelectedNewOwner(Number(e.target.value))}
-                  >
-                    <option value="" disabled>Seleccione un usuario...</option>
-                    {companyUsers.map(u => (
-                      <option key={u.id} value={u.id}>{u.nombre_completo}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-8">
-                <Button variant="outline" className="flex-1 rounded-2xl" onClick={() => setShowTransferModal(false)}>Cancelar</Button>
-                <Button variant="primary" className="flex-1 rounded-2xl" onClick={handleTransfer} disabled={!selectedNewOwner}>
-                  Transferir
-                </Button>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-      )}
+      <Modal
+        open={showTransferModal}
+        onClose={() => setShowTransferModal(false)}
+        titulo="Transferir proyecto"
+        acciones={
+          <>
+            <Button variant="ghost" onClick={() => setShowTransferModal(false)}>Cancelar</Button>
+            <Button variant="primary" onClick={handleTransfer} disabled={!selectedNewOwner}>
+              Transferir
+            </Button>
+          </>
+        }
+      >
+        <p className="mb-4 text-sm text-muted-foreground">
+          Selecciona a un usuario activo de la empresa para que sea el nuevo propietario.
+        </p>
+        <label htmlFor="nuevo-propietario" className="mb-2 block text-sm font-medium text-foreground">
+          Nuevo propietario
+        </label>
+        <select
+          id="nuevo-propietario"
+          className="w-full min-h-11 rounded-md border border-input bg-input-background px-4 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          value={selectedNewOwner}
+          onChange={(e) => setSelectedNewOwner(Number(e.target.value))}
+        >
+          <option value="" disabled>Selecciona un usuario…</option>
+          {companyUsers.map((u) => (
+            <option key={u.id} value={u.id}>{u.nombre_completo}</option>
+          ))}
+        </select>
+      </Modal>
     </div>
   );
 }

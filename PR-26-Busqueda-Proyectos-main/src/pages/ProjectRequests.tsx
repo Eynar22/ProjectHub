@@ -4,6 +4,7 @@ import { Navbar } from '@/shared/components/layout/Navbar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Building2, Check, X, ArrowLeft, Mail } from 'lucide-react';
+import { EstadoVacio } from '@/shared/components/feedback';
 import { motion } from 'motion/react';
 
 export default function ProjectRequests() {
@@ -114,13 +115,11 @@ export default function ProjectRequests() {
               })}
             </div>
           ) : (
-            <Card className="p-12 text-center">
-              <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No hay solicitudes pendientes</h3>
-              <p className="text-muted-foreground">
-                Las nuevas solicitudes aparecerán aquí
-              </p>
-            </Card>
+            <EstadoVacio
+              icono={Building2}
+              titulo="No hay solicitudes pendientes"
+              descripcion="Las nuevas solicitudes de participación aparecerán aquí."
+            />
           )}
         </div>
 

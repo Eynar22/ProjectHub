@@ -8,8 +8,9 @@ import {
   useSolicitudesEnviadas,
   useCambiarEstadoProyecto,
 } from '@/features/proyectos';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
+import { EstadoVacio } from '@/shared/components/feedback';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import {
@@ -58,7 +59,7 @@ function EstadoDropdown({ projectId, currentEstado, anchorRef, onSelect, onClose
   ];
 
   return createPortal(
-    <div style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 9999 }}
+    <div style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 'var(--z-index-popover)' }}
       className="bg-card border border-border rounded-xl shadow-2xl min-w-[185px] overflow-hidden">
       {opts.map(o => {
         const Icon = o.icon;
@@ -332,11 +333,8 @@ export default function MyProjects() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/dashboard" }, { label: "Mis proyectos" }]} />
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between">
@@ -467,34 +465,32 @@ export default function MyProjects() {
 
           {/* Empty states */}
           {displayProjects.length === 0 && (
-            <Card className="p-12 text-center">
-              {tab === 'activos'    && <PlayCircle  className="w-12 h-12 text-info mx-auto mb-4" />}
-              {tab === 'terminados' && <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-4" />}
-              {tab === 'archivados' && <Archive      className="w-12 h-12 text-muted-foreground mx-auto mb-4" />}
-              <h3 className="text-lg font-semibold mb-2">
-                {tab === 'activos'    ? 'No tienes proyectos activos' :
-                 tab === 'terminados' ? 'No hay proyectos terminados' :
-                 'No tienes proyectos archivados'}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {tab === 'activos'    ? 'Crea un proyecto o únete a uno existente' :
-                 tab === 'terminados' ? 'Cuando un proyecto finalice aparecerá aquí' :
-                 'Los proyectos que archives aparecerán aquí y solo tú podrás verlos'}
-              </p>
-              {tab === 'activos' && (
-                <div className="flex gap-3 justify-center">
-                  <Link to="/dashboard/create-project">
-                    <Button variant="primary">Crear Proyecto</Button>
-                  </Link>
-                  <Link to="/explore">
-                    <Button variant="outline">Explorar</Button>
-                  </Link>
-                </div>
-              )}
-            </Card>
+            <EstadoVacio
+              icono={tab === 'activos' ? PlayCircle : tab === 'terminados' ? CheckCircle2 : Archive}
+              titulo={
+                tab === 'activos'    ? 'No tienes proyectos activos' :
+                tab === 'terminados' ? 'No hay proyectos terminados' :
+                'No tienes proyectos archivados'
+              }
+              descripcion={
+                tab === 'activos'    ? 'Crea un proyecto o únete a uno existente para empezar.' :
+                tab === 'terminados' ? 'Cuando un proyecto finalice aparecerá aquí.' :
+                'Los proyectos que archives aparecerán aquí y solo tú podrás verlos.'
+              }
+              accion={
+                tab === 'activos' ? (
+                  <div className="flex gap-3">
+                    <Link to="/dashboard/create-project">
+                      <Button variant="primary">Crear Proyecto</Button>
+                    </Link>
+                    <Link to="/explore">
+                      <Button variant="outline">Explorar</Button>
+                    </Link>
+                  </div>
+                ) : undefined
+              }
+            />
           )}
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

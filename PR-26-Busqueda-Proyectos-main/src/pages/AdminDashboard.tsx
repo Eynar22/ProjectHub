@@ -1,6 +1,5 @@
 import { useApp } from '@/app/context/AppContext';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Card } from '@/shared/components/ui/Card';
 import { Link } from 'react-router';
 import { Building2, FolderKanban, Users, TrendingUp } from 'lucide-react';
@@ -78,13 +77,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      <div className="flex">
-        <Sidebar isAdmin />
-        
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -268,8 +261,6 @@ export default function AdminDashboard() {
               })}
             </div>
           </Card>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

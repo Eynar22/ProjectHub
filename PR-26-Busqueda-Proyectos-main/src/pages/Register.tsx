@@ -215,7 +215,7 @@ export default function Register() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Nombre de la empresa..."
+                    aria-label="Buscar tu empresa" placeholder="Nombre de la empresa..."
                     value={companySearch}
                     onChange={e => setCompanySearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -314,13 +314,13 @@ export default function Register() {
 
                 <form onSubmit={handleJoinSubmit} className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
-                    <Input label="Nombre completo *" type="text" name="name" placeholder="Juan Pérez" value={joinData.name} onChange={handleJoinChange} error={joinErrors.name} />
-                    <Input label="Cargo en la empresa *" type="text" name="jobTitle" placeholder="Ej: Gerente de Proyectos" value={joinData.jobTitle} onChange={handleJoinChange} error={joinErrors.jobTitle} />
+                    <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Juan Pérez" value={joinData.name} onChange={handleJoinChange} error={joinErrors.name} />
+                    <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: Gerente de Proyectos" value={joinData.jobTitle} onChange={handleJoinChange} error={joinErrors.jobTitle} />
                   </div>
-                  <Input label="Email *" type="email" name="email" placeholder="juan@empresa.com" value={joinData.email} onChange={handleJoinChange} error={joinErrors.email} />
+                  <Input label="Email *" type="email" name="email" autoComplete="email" placeholder="juan@empresa.com" value={joinData.email} onChange={handleJoinChange} error={joinErrors.email} />
                   <div className="grid md:grid-cols-2 gap-4">
-                    <Input label="Contraseña *" type="password" name="password" placeholder="••••••••" value={joinData.password} onChange={handleJoinChange} error={joinErrors.password} />
-                    <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" placeholder="••••••••" value={joinData.confirmPassword} onChange={handleJoinChange} error={joinErrors.confirmPassword} />
+                    <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={joinData.password} onChange={handleJoinChange} error={joinErrors.password} />
+                    <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={joinData.confirmPassword} onChange={handleJoinChange} error={joinErrors.confirmPassword} />
                   </div>
 
                   <DocumentUpload
@@ -361,23 +361,23 @@ export default function Register() {
                 <div>
                   <h2 className="text-base font-semibold mb-3 text-primary border-b border-border pb-2">📋 Datos del Responsable</h2>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <Input label="Nombre completo *" type="text" name="name" placeholder="Ana García" value={newCompanyData.name} onChange={handleNewChange} error={newCompanyErrors.name} />
-                    <Input label="Cargo en la empresa *" type="text" name="jobTitle" placeholder="Ej: CEO, Director Técnico" value={newCompanyData.jobTitle} onChange={handleNewChange} error={newCompanyErrors.jobTitle} />
+                    <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Ana García" value={newCompanyData.name} onChange={handleNewChange} error={newCompanyErrors.name} />
+                    <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: CEO, Director Técnico" value={newCompanyData.jobTitle} onChange={handleNewChange} error={newCompanyErrors.jobTitle} />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4 mt-4">
-                    <Input label="Email de contacto *" type="email" name="email" placeholder="ana@empresa.com" value={newCompanyData.email} onChange={handleNewChange} error={newCompanyErrors.email} />
+                    <Input label="Email de contacto *" type="email" name="email" autoComplete="email" placeholder="ana@empresa.com" value={newCompanyData.email} onChange={handleNewChange} error={newCompanyErrors.email} />
                     <div />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4 mt-4">
-                    <Input label="Contraseña *" type="password" name="password" placeholder="••••••••" value={newCompanyData.password} onChange={handleNewChange} error={newCompanyErrors.password} />
-                    <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" placeholder="••••••••" value={newCompanyData.confirmPassword} onChange={handleNewChange} error={newCompanyErrors.confirmPassword} />
+                    <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={newCompanyData.password} onChange={handleNewChange} error={newCompanyErrors.password} />
+                    <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={newCompanyData.confirmPassword} onChange={handleNewChange} error={newCompanyErrors.confirmPassword} />
                   </div>
                 </div>
 
                 {/* Datos de la empresa */}
                 <div>
                   <h2 className="text-base font-semibold mb-3 text-primary border-b border-border pb-2">🏢 Datos de la Empresa</h2>
-                  <Input label="Nombre de la empresa *" type="text" name="companyName" placeholder="Mi Empresa S.A." value={newCompanyData.companyName} onChange={handleNewChange} error={newCompanyErrors.companyName} />
+                  <Input label="Nombre de la empresa *" type="text" name="companyName" autoComplete="organization" placeholder="Mi Empresa S.A." value={newCompanyData.companyName} onChange={handleNewChange} error={newCompanyErrors.companyName} />
                   <div className="mt-4">
                     <TextArea label="Descripción *" name="description" placeholder="Describe tu empresa, industria y servicios..." rows={3} value={newCompanyData.description} onChange={handleNewChange} error={newCompanyErrors.description} />
                   </div>

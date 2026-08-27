@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
 import { useEmpresas } from '@/features/empresas';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
+import { EstadoVacio } from '@/shared/components/feedback';
+import { Modal } from '@/shared/components/ui/Modal';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
@@ -62,11 +64,8 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar isAdmin />
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Usuarios" }]} />
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between">
               <div>
@@ -91,7 +90,7 @@ export default function AdminUsers() {
               <div className="relative min-w-[240px]">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <select
-                  className="w-full pl-9 pr-9 py-2 bg-input-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                  aria-label="Filtrar por empresa" className="w-full pl-9 pr-9 py-2 bg-input-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
                   value={selectedCompanyId ?? ''}
                   onChange={e => setSelectedCompanyId(e.target.value === '' ? null : Number(e.target.value))}
                 >
@@ -107,7 +106,7 @@ export default function AdminUsers() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nombre o correo..."
+                  aria-label="Buscar usuarios" placeholder="Buscar por nombre o correo..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -252,80 +251,52 @@ export default function AdminUsers() {
             </AnimatePresence>
 
             {filteredUsers.length === 0 && (
-              <Card className="p-12 text-center">
-                <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-1">No se encontraron usuarios</h3>
-                <p className="text-muted-foreground text-sm">
-                  {selectedCompanyId ? 'Esta empresa no tiene usuarios o no coincide la búsqueda.' : 'Selecciona una empresa para ver sus usuarios.'}
-                </p>
-              </Card>
+              <EstadoVacio
+                icono={Users}
+                titulo="No se encontraron usuarios"
+                descripcion={selectedCompanyId ? "Esta empresa no tiene usuarios o no coincide la búsqueda." : "Selecciona una empresa para ver sus usuarios."}
+              />
             )}
           </div>
 
-          {/* Premium Block User Modal */}
-          <AnimatePresence>
-            {userToBlock && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-foreground/60 backdrop-blur-sm flex items-center justify-center z-modal p-4"
-                onClick={() => setUserToBlock(null)}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                  transition={{ type: 'spring', duration: 0.4 }}
-                  className="max-w-md w-full"
-                  onClick={e => e.stopPropagation()}
+          {/* Confirmación de bloqueo */}
+          <Modal
+            open={!!userToBlock}
+            onClose={() => setUserToBlock(null)}
+            titulo="¿Bloquear a este usuario?"
+            size="sm"
+            acciones={
+              <>
+                <Button variant="ghost" onClick={() => setUserToBlock(null)}>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    const u = userToBlock;
+                    setUserToBlock(null);
+                    if (u) handle('bloquear', u.id);
+                  }}
                 >
-                  <Card className="border-none shadow-2xl overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-danger to-danger" />
-                    
-                    <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-danger-subtle rounded-full flex items-center justify-center mx-auto mb-6 text-danger-strong shadow-inner">
-                        <AlertTriangle className="w-8 h-8 animate-bounce-slow" />
-                      </div>
-                      
-                      <h2 className="text-2xl font-black text-foreground mb-3">¿Bloquear a este usuario?</h2>
-                      
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                        ¿Estás seguro de bloquear a <strong className="text-foreground">{userToBlock.nombre_completo}</strong>?
-                        <br /><br />
-                        <span className="text-left text-xs text-warning-strong bg-warning-subtle px-3 py-2.5 rounded-lg border border-warning/30 mt-2 block font-semibold leading-normal">
-                          ⚠️ Los proyectos creados por este usuario se suspenderán temporalmente hasta que se asigne un nuevo propietario. Además, su acceso a la plataforma quedará inhabilitado.
-                        </span>
-                      </p>
-
-                      <div className="flex gap-3">
-                        <Button
-                          variant="ghost"
-                          className="flex-1 py-3 text-muted-foreground hover:bg-muted font-bold"
-                          onClick={() => setUserToBlock(null)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="primary"
-                          className="flex-1 py-3 bg-gradient-to-r from-destructive to-destructive hover:brightness-95 text-primary-foreground font-bold shadow-lg"
-                          onClick={() => {
-                            const u = userToBlock;
-                            setUserToBlock(null);
-                            handle('bloquear', u.id);
-                          }}
-                        >
-                          Bloquear
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
-      </div>
-    </div>
+                  Bloquear
+                </Button>
+              </>
+            }
+          >
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-danger-subtle text-danger-strong">
+                <AlertTriangle className="h-7 w-7" aria-hidden="true" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                ¿Estás seguro de bloquear a{' '}
+                <strong className="text-foreground">{userToBlock?.nombre_completo}</strong>?
+              </p>
+              <p className="rounded-lg border border-warning/30 bg-warning-subtle px-3 py-2.5 text-xs font-semibold leading-normal text-warning-strong">
+                ⚠️ Los proyectos creados por este usuario se suspenderán temporalmente hasta que se
+                asigne un nuevo propietario. Su acceso a la plataforma quedará inhabilitado.
+              </p>
+            </div>
+          </Modal>
+    </AppLayout>
   );
 }

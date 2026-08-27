@@ -8,8 +8,9 @@ import {
   useCambiarEstadoProyecto,
   useAutoTerminarProyectos,
 } from '@/features/proyectos';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
+import { EstadoVacio } from '@/shared/components/feedback';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
@@ -200,11 +201,8 @@ export default function AdminProjects() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar isAdmin />
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Proyectos" }]} />
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-start justify-between">
               <div>
@@ -254,7 +252,7 @@ export default function AdminProjects() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nombre, empresa o creador..."
+                aria-label="Buscar proyectos" placeholder="Buscar por nombre, empresa o creador..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -381,20 +379,14 @@ export default function AdminProjects() {
               </table>
 
               {filtered.length === 0 && (
-                <div className="p-16 text-center">
-                  <FolderKanban className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-1">Sin resultados</h3>
-                  <p className="text-muted-foreground text-sm">
-                    {searchTerm
-                      ? 'Intenta con otro término de búsqueda'
-                      : `No hay proyectos en estado "${estadoFilter}"`}
-                  </p>
-                </div>
+                <EstadoVacio
+                  icono={FolderKanban}
+                  titulo="Sin resultados"
+                  descripcion={searchTerm ? "Intenta con otro término de búsqueda" : `No hay proyectos en estado ""`}
+                />
               )}
             </div>
           </Card>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

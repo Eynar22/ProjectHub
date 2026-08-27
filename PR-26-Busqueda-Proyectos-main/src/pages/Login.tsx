@@ -314,9 +314,11 @@ export default function Login() {
                 onFocusCapture={() => { setIsEmailFocused(true); setIsPasswordFocused(false); }}
                 onBlurCapture={() => setIsEmailFocused(false)}
               >
-                <label className="text-sm font-semibold text-foreground ml-1">Email</label>
+                <label htmlFor="login-email" className="text-sm font-semibold text-foreground ml-1">Email</label>
                 <input
+                  id="login-email"
                   type="email"
+                  autoComplete="email"
                   placeholder="tu@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -333,12 +335,14 @@ export default function Login() {
                   }
                 }}
               >
-                <label className="text-sm font-semibold text-foreground ml-1">
+                <label htmlFor="login-password" className="text-sm font-semibold text-foreground ml-1">
                   Contraseña
                 </label>
                 <div className="relative">
                   <input
+                    id="login-password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

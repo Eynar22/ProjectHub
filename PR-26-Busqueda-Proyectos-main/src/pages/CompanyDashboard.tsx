@@ -3,10 +3,10 @@ import { useApp } from '@/app/context/AppContext';
 import { useEmpresas } from '@/features/empresas';
 import { solicitudesService } from '@/features/proyectos';
 import { useSolicitudesMembresia, useResponderSolicitudMembresia } from '@/features/usuarios';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
 import { OnboardingWizard } from '@/shared/components/OnboardingWizard';
 import {
   FolderKanban,
@@ -23,12 +23,10 @@ import {
   Briefcase,
   Mail,
   ExternalLink,
-  X,
   ShieldCheck,
   UserPlus,
-  AlertCircle,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { MemberRequest } from '@/app/context/AppContext';
@@ -124,12 +122,9 @@ export default function CompanyDashboard() {
   const isCompanyAdmin = currentUser?.rol === 'admin' && !!userCompany;
 
   return (
-    <div className="min-h-screen">
+    <>
       {isCompanyAdmin && currentUser && !currentUser.onboarding_completado && <OnboardingWizard />}
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main id="contenido" tabIndex={-1} className="flex-1 py-8 px-6">
+      <AppLayout mainClassName="flex-1 py-8 px-6">
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -535,47 +530,33 @@ export default function CompanyDashboard() {
               </div>
             </motion.div>
           )}
-        </main>
-      </div>
 
       {/* ── Detail Modal ── */}
-      <AnimatePresence>
-        {detailRequest && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-modal p-4"
-            onClick={() => setDetailRequest(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.93, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.93, y: 10 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="max-w-2xl w-full"
-              onClick={e => e.stopPropagation()}
+      <Modal
+        open={!!detailRequest}
+        onClose={() => setDetailRequest(null)}
+        titulo="Solicitud de membresía"
+        size="lg"
+        acciones={detailRequest ? (
+          <>
+            <Button
+              variant="outline"
+              className="text-destructive border-destructive hover:bg-destructive/10"
+              onClick={() => { rejectMemberRequest(detailRequest.id); setDetailRequest(null); }}
             >
-              <Card className="border-none shadow-2xl overflow-hidden">
-                {/* Modal header */}
-                <div className="relative p-6 bg-gradient-to-r from-primary/10 via-background to-secondary/10 border-b border-border">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold">Solicitud de Membresía</h2>
-                      <p className="text-muted-foreground text-sm mt-0.5">Revisión completa del solicitante</p>
-                    </div>
-                    <button
-                      onClick={() => setDetailRequest(null)}
-                      className="p-2 rounded-xl hover:bg-muted transition-colors"
-                    >
-                      <X className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <UserX className="w-4 h-4" aria-hidden="true" /> Rechazar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => { approveMemberRequest(detailRequest.id); setDetailRequest(null); }}
+            >
+              <UserCheck className="w-4 h-4" aria-hidden="true" /> Aprobar solicitud
+            </Button>
+          </>
+        ) : undefined}
+      >
+        {detailRequest && (
+                  <div className="grid md:grid-cols-2 gap-6">
                     {/* Datos personales */}
                     <div>
                       <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Datos Personales</h3>
@@ -654,33 +635,9 @@ export default function CompanyDashboard() {
                       )}
                     </div>
                   </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-4 border-t border-border">
-                    <Button
-                      variant="primary"
-                      className="flex-1 flex items-center justify-center gap-2 py-5 font-bold shadow-lg shadow-primary/20 hover:scale-[1.01] transition-all"
-                      onClick={() => { approveMemberRequest(detailRequest.id); setDetailRequest(null); }}
-                    >
-                      <UserCheck className="w-5 h-5" /> Aprobar Solicitud
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 flex items-center justify-center gap-2 py-5 text-destructive border-destructive hover:bg-destructive/10"
-                      onClick={() => { rejectMemberRequest(detailRequest.id); setDetailRequest(null); }}
-                    >
-                      <UserX className="w-5 h-5" /> Rechazar
-                    </Button>
-                    <Button variant="ghost" className="px-4" onClick={() => setDetailRequest(null)}>
-                      <X className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          </motion.div>
         )}
-      </AnimatePresence>
-    </div>
+      </Modal>
+      </AppLayout>
+    </>
   );
 }

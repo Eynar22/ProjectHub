@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { useEmpresas } from '@/features/empresas';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
 import { Building2, Search, Users, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
+import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 
 export default function AdminCompanies() {
-  const { data: companies = [] } = useEmpresas();
+  const { data: companies = [], isError, refetch } = useEmpresas();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'blocked' | 'rejected'>((searchParams.get('filter') as any) || 'all');
@@ -30,13 +31,8 @@ export default function AdminCompanies() {
   });
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      <div className="flex">
-        <Sidebar isAdmin />
-        
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Empresas" }]} />
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -54,7 +50,7 @@ export default function AdminCompanies() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar empresas..."
+                    aria-label="Buscar empresas" placeholder="Buscar empresas..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -141,19 +137,20 @@ export default function AdminCompanies() {
                 </motion.div>
               ))}
 
-              {filteredCompanies.length === 0 && (
-                <div className="py-20 text-center">
-                  <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 text-muted-foreground">
-                    <Building2 className="w-10 h-10" />
-                  </div>
-                  <h3 className="text-xl font-bold text-muted-foreground mb-2">No se encontraron empresas</h3>
-                  <p className="text-muted-foreground max-w-xs mx-auto">Intenta ajustar los filtros o el término de búsqueda para ver otras empresas registradas.</p>
-                </div>
+              {isError ? (
+                <EstadoError
+                  titulo="No pudimos cargar las empresas"
+                  onReintentar={() => refetch()}
+                />
+              ) : filteredCompanies.length === 0 && (
+                <EstadoVacio
+                  icono={Building2}
+                  titulo="No se encontraron empresas"
+                  descripcion="Ajusta los filtros o el término de búsqueda para ver otras empresas registradas."
+                />
               )}
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

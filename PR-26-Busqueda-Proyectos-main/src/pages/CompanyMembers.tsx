@@ -8,8 +8,9 @@ import {
   useEliminarSolicitudMembresia,
 } from '@/features/usuarios';
 import { useState, useEffect } from 'react';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
+import { Modal } from '@/shared/components/ui/Modal';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import {
@@ -25,7 +26,6 @@ import {
   ExternalLink,
   Mail,
   Briefcase,
-  X,
   ChevronRight,
   Lock,
   AlertTriangle
@@ -73,11 +73,8 @@ export default function CompanyMembers() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/dashboard" }, { label: "Gestión de miembros" }]} />
           <div className="max-w-5xl mx-auto">
 
             {/* Header */}
@@ -385,40 +382,31 @@ export default function CompanyMembers() {
           </div>
 
           {/* ── DETAIL MODAL ── */}
-          <AnimatePresence>
-            {selectedRequest && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                onClick={() => setSelectedRequest(null)}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.93, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.93, y: 10 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  className="max-w-2xl w-full"
-                  onClick={e => e.stopPropagation()}
+          <Modal
+            open={!!selectedRequest}
+            onClose={() => setSelectedRequest(null)}
+            titulo="Solicitud de membresía"
+            size="lg"
+            acciones={selectedRequest ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="text-destructive border-destructive hover:bg-destructive/10"
+                  onClick={() => { rejectMemberRequest(selectedRequest.id); setSelectedRequest(null); }}
                 >
-                  <Card className="border-none shadow-2xl overflow-hidden">
-                    {/* Modal header stripe */}
-                    <div className="relative p-6 bg-gradient-to-r from-primary/10 via-background to-secondary/10 border-b border-border">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h2 className="text-2xl font-black">Solicitud de Membresía</h2>
-                          <p className="text-muted-foreground text-sm mt-0.5">Revisión completa del solicitante</p>
-                        </div>
-                        <button onClick={() => setSelectedRequest(null)} className="p-2 rounded-xl hover:bg-muted transition-colors">
-                          <X className="w-5 h-5 text-muted-foreground" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="p-6">
-                      <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <UserX className="w-4 h-4" aria-hidden="true" /> Rechazar
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => { approveMemberRequest(selectedRequest.id); setSelectedRequest(null); }}
+                >
+                  <UserCheck className="w-4 h-4" aria-hidden="true" /> Aprobar solicitud
+                </Button>
+              </>
+            ) : undefined}
+          >
+            {selectedRequest && (
+                      <div className="grid md:grid-cols-2 gap-6">
                         {/* Left: personal info */}
                         <div>
                           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Datos Personales</h3>
@@ -488,99 +476,46 @@ export default function CompanyMembers() {
                           )}
                         </div>
                       </div>
-
-                      {/* Action buttons */}
-                      <div className="flex gap-3 pt-4 border-t border-border">
-                        <Button
-                          variant="primary"
-                          className="flex-1 flex items-center justify-center gap-2 py-5 font-bold shadow-lg shadow-primary/20 hover:scale-[1.01] transition-all"
-                          onClick={() => { approveMemberRequest(selectedRequest.id); setSelectedRequest(null); }}
-                        >
-                          <UserCheck className="w-5 h-5" /> Aprobar Solicitud
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="flex-1 flex items-center justify-center gap-2 py-5 text-destructive border-destructive hover:bg-destructive/10"
-                          onClick={() => { rejectMemberRequest(selectedRequest.id); setSelectedRequest(null); }}
-                        >
-                          <UserX className="w-5 h-5" /> Rechazar
-                        </Button>
-                        <Button variant="ghost" className="px-4" onClick={() => setSelectedRequest(null)}>
-                          <X className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              </motion.div>
             )}
-          </AnimatePresence>
+          </Modal>
 
-          {/* ── GORGEOUS PREMIUM DELETE CONFIRMATION MODAL ── */}
-          <AnimatePresence>
-            {requestToDelete && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                onClick={() => setRequestToDelete(null)}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                  transition={{ type: 'spring', duration: 0.4 }}
-                  className="max-w-md w-full"
-                  onClick={e => e.stopPropagation()}
+          {/* ── Confirmación de eliminación ── */}
+          <Modal
+            open={!!requestToDelete}
+            onClose={() => setRequestToDelete(null)}
+            titulo="¿Eliminar registro de rechazo?"
+            size="sm"
+            acciones={
+              <>
+                <Button variant="ghost" onClick={() => setRequestToDelete(null)}>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (requestToDelete) deleteMemberRequest(requestToDelete.id);
+                    setRequestToDelete(null);
+                  }}
                 >
-                  <Card className="border-none shadow-2xl overflow-hidden relative">
-                    {/* Upper decorative warning bar */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-danger to-danger" />
-                    
-                    <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-danger-subtle rounded-full flex items-center justify-center mx-auto mb-6 text-danger-strong shadow-inner">
-                        <AlertTriangle className="w-8 h-8 animate-bounce-slow" />
-                      </div>
-                      
-                      <h2 className="text-2xl font-black text-foreground mb-3">¿Eliminar Registro de Rechazo?</h2>
-                      
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                        Si eliminas el rechazo de <strong className="text-foreground">{requestToDelete.usuario?.nombre_completo}</strong>, 
-                        su cuenta y datos se borrarán por completo de la base de datos.
-                        <br />
-                        <span className="text-xs text-warning-strong bg-warning-subtle px-2 py-1.5 rounded-lg border border-warning/30 mt-3 inline-block font-semibold">
-                          ⚠️ Esto permitirá que el usuario pueda registrarse y volver a solicitar unirse a tu empresa.
-                        </span>
-                      </p>
-
-                      <div className="flex gap-3">
-                        <Button
-                          variant="ghost"
-                          className="flex-1 py-3 text-muted-foreground hover:bg-muted font-bold"
-                          onClick={() => setRequestToDelete(null)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="primary"
-                          className="flex-1 py-3 bg-gradient-to-r from-destructive to-destructive hover:brightness-95 text-primary-foreground font-bold shadow-lg"
-                          onClick={() => {
-                            deleteMemberRequest(requestToDelete.id);
-                            setRequestToDelete(null);
-                          }}
-                        >
-                          Eliminar
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
-      </div>
-    </div>
+                  Eliminar
+                </Button>
+              </>
+            }
+          >
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-danger-subtle text-danger-strong">
+                <AlertTriangle className="h-7 w-7" aria-hidden="true" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Si eliminas el rechazo de{' '}
+                <strong className="text-foreground">{requestToDelete?.usuario?.nombre_completo}</strong>,
+                su cuenta y datos se borrarán por completo de la base de datos.
+              </p>
+              <p className="rounded-lg border border-warning/30 bg-warning-subtle px-3 py-2 text-xs font-semibold text-warning-strong">
+                ⚠️ Esto permitirá que el usuario pueda registrarse y volver a solicitar unirse a tu empresa.
+              </p>
+            </div>
+          </Modal>
+    </AppLayout>
   );
 }

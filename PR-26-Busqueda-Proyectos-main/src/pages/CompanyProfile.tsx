@@ -3,8 +3,8 @@ import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
 import { useCambiarPassword } from '@/features/auth';
 import { useSubirArchivo } from '@/features/workspace';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
@@ -256,11 +256,8 @@ export default function CompanyProfile() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="flex">
-        <Sidebar />
-        <main id="contenido" tabIndex={-1} className="flex-1 py-10 px-6">
+    <AppLayout mainClassName="flex-1 py-10 px-6">
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/dashboard" }, { label: "Mi perfil" }]} />
 
           {/* Page header */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
@@ -768,8 +765,6 @@ export default function CompanyProfile() {
               )}
             </motion.div>
           </div>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

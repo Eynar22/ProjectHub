@@ -116,7 +116,7 @@ export default function Explore() {
                   <Search className="w-5 h-5 text-muted-foreground mr-3 flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Buscar por nombre de proyecto o empresa..."
+                    aria-label="Buscar proyectos" placeholder="Buscar por nombre de proyecto o empresa..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-transparent border-none outline-none rounded focus-visible:ring-2 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70 text-sm md:text-base font-medium"

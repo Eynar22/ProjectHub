@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { useEmpresa } from '@/features/empresas';
 import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
@@ -41,26 +41,20 @@ export default function AdminCompanyUsers() {
 
   if (!company) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
+      <AppLayout isAdmin>
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Empresa no encontrada</h1>
           <Link to="/admin/companies">
             <Button variant="primary">Volver a Empresas</Button>
           </Link>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      <div className="flex">
-        <Sidebar isAdmin />
-        
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Empresas", to: "/admin/companies" }, { label: company.nombre + " · Usuarios" }]} />
           <div className="max-w-5xl mx-auto">
             <Link to="/admin/companies">
               <Button variant="ghost" className="mb-6 flex items-center gap-2">
@@ -103,7 +97,7 @@ export default function AdminCompanyUsers() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nombre o email..."
+                  aria-label="Buscar usuarios" placeholder="Buscar por nombre o email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -256,8 +250,6 @@ export default function AdminCompanyUsers() {
               )}
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }

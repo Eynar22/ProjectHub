@@ -2,8 +2,8 @@ import { useParams, useNavigate, Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useModerarEmpresa } from '@/features/empresas';
 import { useUsuario } from '@/features/usuarios';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
+import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { 
@@ -52,13 +52,8 @@ export default function AdminCompanyRequest() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      <div className="flex">
-        <Sidebar isAdmin />
-        
-        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
+    <AppLayout isAdmin mainClassName="flex-1 p-8">
+      <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Empresas", to: "/admin/companies" }, { label: "Revisar solicitud" }]} />
           <div className="max-w-5xl mx-auto">
             {/* Header / Navigation */}
             <div className="flex items-center justify-between mb-8">
@@ -352,8 +347,6 @@ export default function AdminCompanyRequest() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </AppLayout>
   );
 }
