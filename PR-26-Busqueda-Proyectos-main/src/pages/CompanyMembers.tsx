@@ -88,9 +88,9 @@ export default function CompanyMembers() {
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-4 mb-8">
               {[
-                { label: 'Miembros Activos', value: companyMembers.length, color: 'from-primary to-secondary', icon: Users },
-                { label: 'Solicitudes Pendientes', value: pendingRequests.length, color: pendingRequests.length > 0 ? 'from-warning to-warning' : 'from-muted to-muted', icon: Clock },
-                { label: 'Aprobadas', value: approvedRequests.length, color: 'from-success to-success', icon: CheckCircle2 },
+                { label: 'Miembros Activos', value: companyMembers.length, color: 'bg-primary', icon: Users },
+                { label: 'Solicitudes Pendientes', value: pendingRequests.length, color: pendingRequests.length > 0 ? 'bg-warning' : 'bg-muted', icon: Clock },
+                { label: 'Aprobadas', value: approvedRequests.length, color: 'bg-success', icon: CheckCircle2 },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -101,7 +101,7 @@ export default function CompanyMembers() {
                           <p className="text-xs text-muted-foreground font-medium mb-0.5">{stat.label}</p>
                           <p className="text-3xl font-black">{stat.value}</p>
                         </div>
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md relative`}>
+                        <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center shadow-md relative`}>
                           <Icon className="w-6 h-6 text-primary-foreground" />
                           {stat.label === 'Solicitudes Pendientes' && stat.value > 0 && (
                             <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
@@ -157,7 +157,7 @@ export default function CompanyMembers() {
                               <div className="flex items-start gap-5 justify-between">
                                 {/* Left: avatar + info */}
                                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                                  <div className="w-14 h-14 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
+                                  <div className="w-14 h-14 bg-warning rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
                                     {mr.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -263,7 +263,7 @@ export default function CompanyMembers() {
                               <div className="p-6 pl-7">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0 ${isAdmin ? 'bg-gradient-to-br from-primary to-primary' : 'bg-gradient-to-br from-success to-success'}`}>
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0 ${isAdmin ? 'bg-primary' : 'bg-success'}`}>
                                       {member.nombre_completo.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -411,7 +411,7 @@ export default function CompanyMembers() {
                         <div>
                           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Datos Personales</h3>
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
+                            <div className="w-16 h-16 bg-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
                               {selectedRequest.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                             </div>
                             <div>

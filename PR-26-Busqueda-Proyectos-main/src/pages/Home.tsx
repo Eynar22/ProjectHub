@@ -2,8 +2,7 @@ import { Link } from 'react-router';
 import { motion } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { useApp } from '@/app/context/AppContext';
 import {
   Briefcase,
@@ -79,13 +78,12 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen text-foreground font-sans">
-      <Navbar />
-      
-      <div className="flex">
-        {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
-        
-        <main id="contenido" tabIndex={-1} className="flex-1 w-full overflow-hidden">
+    <AppLayout
+      sinSidebar={!currentUser}
+      isAdmin={currentUser?.rol === 'superadmin'}
+      sinFooter
+      mainClassName="flex-1 w-full overflow-hidden"
+    >
 
           {/* ======================================= */}
           {/* HERO SECTION 3D (100% PANTALLA)         */}
@@ -93,7 +91,7 @@ export default function Home() {
           <section className="relative w-full min-h-[100dvh] -mt-14 md:-mt-16 flex items-center justify-center z-10 pb-10">
             
             <div className="absolute inset-0 rounded-b-[3rem] md:rounded-b-[5rem] bg-background border-b border-border/50 overflow-hidden -z-10">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+              <div className="absolute inset-0 bg-primary/5" />
               <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
               <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
             </div>
@@ -114,7 +112,7 @@ export default function Home() {
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 lg:mb-6 leading-[1.1] tracking-tight text-foreground">
                     <span className="block mb-1 lg:mb-2">Conecta.</span>
                     <span className="block mb-1 lg:mb-2">Colabora.</span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                    <span className="text-primary">
                       Escala.
                     </span>
                   </h1>
@@ -292,7 +290,7 @@ export default function Home() {
               </motion.div>
 
               <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative">
-                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-transparent via-border to-transparent" />
+                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-border" />
 
                 {[
                   {
@@ -320,8 +318,8 @@ export default function Home() {
                     className="relative text-center"
                   >
                     <div className="w-24 h-24 mx-auto bg-card border-[6px] border-background shadow-xl rounded-full flex items-center justify-center relative z-10 mb-8 group hover:scale-105 transition-transform duration-300">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-10 transition-opacity" />
-                      <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-primary to-secondary">
+                      <div className="absolute inset-0 rounded-full bg-primary opacity-0 group-hover:opacity-10 transition-opacity" />
+                      <span className="text-2xl font-extrabold text-primary">
                         {step.step}
                       </span>
                     </div>
@@ -344,7 +342,7 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <div className="relative overflow-hidden rounded-[3rem] p-12 md:p-20 text-center shadow-2xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary/80" />
+                  <div className="absolute inset-0 bg-primary" />
                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                   
                   <div className="relative z-10">
@@ -372,7 +370,7 @@ export default function Home() {
           <footer className="bg-card border-t border-border py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <div className="flex justify-center items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-xl font-bold">ProjectHub</span>
@@ -380,9 +378,7 @@ export default function Home() {
               <p className="text-muted-foreground font-medium">&copy; 2026 ProjectHub. Todos los derechos reservados.</p>
             </div>
           </footer>
-          
-        </main>
-      </div>
-    </div>
+
+    </AppLayout>
   );
 }

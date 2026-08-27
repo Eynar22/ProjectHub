@@ -87,7 +87,7 @@ export default function AdminCompanies() {
                       {comp.logo_url ? (
                         <img src={comp.logo_url} alt={comp.nombre} className="w-20 h-20 rounded-xl object-cover shadow-sm" />
                       ) : (
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl flex items-center justify-center border border-border">
+                        <div className="w-20 h-20 bg-primary/5 rounded-xl flex items-center justify-center border border-border">
                           <Building2 className="w-10 h-10 text-primary/40" />
                         </div>
                       )}

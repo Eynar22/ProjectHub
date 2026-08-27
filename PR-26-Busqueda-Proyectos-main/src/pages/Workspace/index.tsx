@@ -13,6 +13,7 @@ import {
 } from '@/features/workspace';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Button } from '@/shared/components/ui/Button';
+import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import {
   ArrowLeft,
   Info,
@@ -120,6 +121,7 @@ export default function Workspace() {
   // listado general — se piden solo acá, al entrar al workspace de este proyecto.
   const [projectCompleto, setProjectCompleto] = useState<Project | null>(null);
   const project = projectCompleto ?? projectLigero;
+  useDocumentTitle(project?.nombre);
 
   const isReadOnly = project ? (project.suspendido || project.estado === 'archivado' || project.estado === 'terminado') : false;
   const creator = project ? users.find(u => u.id === project.creador_id) : null;

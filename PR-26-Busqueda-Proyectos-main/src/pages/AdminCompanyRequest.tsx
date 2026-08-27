@@ -100,7 +100,7 @@ export default function AdminCompanyRequest() {
                       {company.logo_url ? (
                         <img src={company.logo_url} alt={company.nombre} className="w-24 h-24 rounded-2xl object-cover shadow-md" />
                       ) : (
-                        <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center border border-primary/20">
+                        <div className="w-24 h-24 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20">
                           <Building2 className="w-10 h-10 text-primary" />
                         </div>
                       )}
@@ -209,7 +209,7 @@ export default function AdminCompanyRequest() {
                       <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 px-2">Responsable de Solicitud</h3>
                       
                       <div className="flex flex-col items-center text-center px-2">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center mb-4 border-2 border-white shadow-lg overflow-hidden">
+                        <div className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-4 border-2 border-white shadow-lg overflow-hidden">
                           <span className="text-3xl font-black text-success">{registrant.nombre_completo.charAt(0).toUpperCase()}</span>
                         </div>
                         <h4 className="text-xl font-bold text-foreground mb-1">{registrant.nombre_completo}</h4>

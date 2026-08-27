@@ -3,7 +3,7 @@ import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/u
 import { useEmpresas } from '@/features/empresas';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
-import { EstadoVacio } from '@/shared/components/feedback';
+import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
@@ -28,7 +28,7 @@ const ESTADO_CFG: Record<string, { label: string; dot: string }> = {
 };
 
 export default function AdminUsers() {
-  const { data: users = [] } = useUsuarios();
+  const { data: users = [], isError, refetch } = useUsuarios();
   const { data: companies = [] } = useEmpresas();
   const moderar = useModerarUsuario();
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
@@ -152,7 +152,7 @@ export default function AdminUsers() {
                       {/* Left: user info */}
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative
-                          ${isBlocked ? 'bg-danger-subtle text-danger' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'}`}>
+                          ${isBlocked ? 'bg-danger-subtle text-danger' : 'bg-primary/15 text-primary'}`}>
                           {user.nombre_completo.charAt(0).toUpperCase()}
                           {isBlocked && (
                             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center">
@@ -250,7 +250,12 @@ export default function AdminUsers() {
               })}
             </AnimatePresence>
 
-            {filteredUsers.length === 0 && (
+            {isError ? (
+              <EstadoError
+                titulo="No pudimos cargar los usuarios"
+                onReintentar={() => refetch()}
+              />
+            ) : filteredUsers.length === 0 && (
               <EstadoVacio
                 icono={Users}
                 titulo="No se encontraron usuarios"

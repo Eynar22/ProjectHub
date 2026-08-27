@@ -7,6 +7,7 @@
 import { createBrowserRouter } from 'react-router';
 import { RutaPrivada } from './guards/RutaPrivada';
 import { RutaPorRol } from './guards/RutaPorRol';
+import { TitleSync } from './TitleSync';
 
 import Home from '@/pages/Home';
 import Login from '@/pages/Login';
@@ -30,29 +31,34 @@ import AdminCompanyUsers from '@/pages/AdminCompanyUsers';
 import AdminCompanyRequest from '@/pages/AdminCompanyRequest';
 
 export const router = createBrowserRouter([
-  // ── Rutas públicas ──
-  { path: '/', Component: Home },
-  { path: '/login', Component: Login },
-  { path: '/register', Component: Register },
-  { path: '/forgot-password', Component: ForgotPassword },
-  { path: '/reset-password', Component: ResetPassword },
-  { path: '/explore', Component: Explore },
-  { path: '/project/:id', Component: ProjectDetail },
+  {
+    element: <TitleSync />,
+    children: [
+      // ── Rutas públicas ──
+      { path: '/', Component: Home, handle: { titulo: 'Conecta empresas y proyectos' } },
+      { path: '/login', Component: Login, handle: { titulo: 'Iniciar sesión' } },
+      { path: '/register', Component: Register, handle: { titulo: 'Crear cuenta' } },
+      { path: '/forgot-password', Component: ForgotPassword, handle: { titulo: 'Recuperar contraseña' } },
+      { path: '/reset-password', Component: ResetPassword, handle: { titulo: 'Restablecer contraseña' } },
+      { path: '/explore', Component: Explore, handle: { titulo: 'Explorar proyectos' } },
+      { path: '/project/:id', Component: ProjectDetail, handle: { titulo: 'Detalle del proyecto' } },
 
-  // ── Rutas de usuario autenticado ──
-  { path: '/dashboard', element: <RutaPrivada><CompanyDashboard /></RutaPrivada> },
-  { path: '/dashboard/projects', element: <RutaPrivada><MyProjects /></RutaPrivada> },
-  { path: '/dashboard/create-project', element: <RutaPrivada><CreateProject /></RutaPrivada> },
-  { path: '/dashboard/profile', element: <RutaPrivada><CompanyProfile /></RutaPrivada> },
-  { path: '/dashboard/members', element: <RutaPrivada><CompanyMembers /></RutaPrivada> },
-  { path: '/grupo-trabajo/:id', element: <RutaPrivada><Workspace /></RutaPrivada> },
-  { path: '/project/:id/requests', element: <RutaPrivada><ProjectRequests /></RutaPrivada> },
+      // ── Rutas de usuario autenticado ──
+      { path: '/dashboard', element: <RutaPrivada><CompanyDashboard /></RutaPrivada>, handle: { titulo: 'Panel de empresa' } },
+      { path: '/dashboard/projects', element: <RutaPrivada><MyProjects /></RutaPrivada>, handle: { titulo: 'Mis proyectos' } },
+      { path: '/dashboard/create-project', element: <RutaPrivada><CreateProject /></RutaPrivada>, handle: { titulo: 'Crear proyecto' } },
+      { path: '/dashboard/profile', element: <RutaPrivada><CompanyProfile /></RutaPrivada>, handle: { titulo: 'Perfil' } },
+      { path: '/dashboard/members', element: <RutaPrivada><CompanyMembers /></RutaPrivada>, handle: { titulo: 'Miembros de la empresa' } },
+      { path: '/grupo-trabajo/:id', element: <RutaPrivada><Workspace /></RutaPrivada>, handle: { titulo: 'Grupo de trabajo' } },
+      { path: '/project/:id/requests', element: <RutaPrivada><ProjectRequests /></RutaPrivada>, handle: { titulo: 'Solicitudes del proyecto' } },
 
-  // ── Rutas de superadmin ──
-  { path: '/admin', element: <RutaPorRol><AdminDashboard /></RutaPorRol> },
-  { path: '/admin/companies', element: <RutaPorRol><AdminCompanies /></RutaPorRol> },
-  { path: '/admin/projects', element: <RutaPorRol><AdminProjects /></RutaPorRol> },
-  { path: '/admin/users', element: <RutaPorRol><AdminUsers /></RutaPorRol> },
-  { path: '/admin/companies/:id/users', element: <RutaPorRol><AdminCompanyUsers /></RutaPorRol> },
-  { path: '/admin/companies/:id/review', element: <RutaPorRol><AdminCompanyRequest /></RutaPorRol> },
+      // ── Rutas de superadmin ──
+      { path: '/admin', element: <RutaPorRol><AdminDashboard /></RutaPorRol>, handle: { titulo: 'Administración' } },
+      { path: '/admin/companies', element: <RutaPorRol><AdminCompanies /></RutaPorRol>, handle: { titulo: 'Gestión de empresas' } },
+      { path: '/admin/projects', element: <RutaPorRol><AdminProjects /></RutaPorRol>, handle: { titulo: 'Gestión de proyectos' } },
+      { path: '/admin/users', element: <RutaPorRol><AdminUsers /></RutaPorRol>, handle: { titulo: 'Gestión de usuarios' } },
+      { path: '/admin/companies/:id/users', element: <RutaPorRol><AdminCompanyUsers /></RutaPorRol>, handle: { titulo: 'Equipo de la empresa' } },
+      { path: '/admin/companies/:id/review', element: <RutaPorRol><AdminCompanyRequest /></RutaPorRol>, handle: { titulo: 'Revisión de empresa' } },
+    ],
+  },
 ]);

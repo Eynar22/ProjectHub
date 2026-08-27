@@ -134,7 +134,7 @@ export default function Login() {
                <p className="text-lg text-muted-foreground mb-10 leading-relaxed font-medium">
                  {statusMessage.message}
                </p>
-               <Button onClick={() => setStatusMessage(null)} variant="primary" className="w-full py-6 text-base font-extrabold rounded-2xl bg-gradient-to-r from-primary to-secondary hover:brightness-110 border-none shadow-lg shadow-primary/10 text-white transition-all duration-300">
+               <Button onClick={() => setStatusMessage(null)} variant="primary" className="w-full py-6 text-base font-extrabold rounded-2xl bg-primary hover:brightness-110 border-none shadow-lg shadow-primary/10 text-white transition-all duration-300">
                  Volver al inicio de sesión
                </Button>
             </Card>
@@ -373,7 +373,7 @@ export default function Login() {
                 </Link>
               </div>
 
-              <Button type="submit" variant="primary" className="w-full py-4 text-base font-bold rounded-2xl bg-gradient-to-r from-primary to-secondary hover:brightness-110 border-none shadow-lg shadow-secondary/25 text-white transition-all duration-300 mt-6 disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
+              <Button type="submit" variant="primary" className="w-full py-4 text-base font-bold rounded-2xl bg-primary hover:brightness-110 border-none shadow-lg shadow-secondary/25 text-white transition-all duration-300 mt-6 disabled:opacity-70 disabled:cursor-not-allowed" disabled={isLoading}>
                 {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
               </Button>
             </form>

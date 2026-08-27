@@ -37,7 +37,7 @@ export function ChatTab({
         {/* Chat Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-md">
               <MessageSquare className="w-4 h-4 text-primary-foreground" />
             </div>
             <div>
@@ -79,7 +79,7 @@ export function ChatTab({
                   {/* Avatar */}
                   <div className="flex flex-col justify-end flex-shrink-0">
                     {showHeader ? (
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-primary-foreground text-xs font-black shadow-sm ${isOwn ? 'bg-gradient-to-br from-primary to-primary' : 'bg-gradient-to-br from-muted to-muted'
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-primary-foreground text-xs font-black shadow-sm ${isOwn ? 'bg-primary' : 'bg-muted'
                         }`}>
                         {senderInitial}
                       </div>
@@ -94,7 +94,7 @@ export function ChatTab({
                       </p>
                     )}
                     <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${isOwn
-                      ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-sm'
+                      ? 'bg-primary text-primary-foreground rounded-tr-sm'
                       : 'bg-muted text-foreground rounded-tl-sm border border-border/50'
                       }`}>
                       {message.contenido}

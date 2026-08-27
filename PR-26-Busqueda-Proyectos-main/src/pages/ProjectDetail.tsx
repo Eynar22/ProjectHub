@@ -12,6 +12,7 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import { TextArea } from '@/shared/components/ui/Input';
+import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import {
   Building2,
   FileText,
@@ -70,6 +71,7 @@ export default function ProjectDetail() {
   const { data: projectCompleto } = useProyecto(id);
 
   const project = projectCompleto ?? projectLigero;
+  useDocumentTitle(project?.nombre);
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
   const participatingUsers = project?.participantes?.map(p => p.usuario) || [];
@@ -370,7 +372,7 @@ export default function ProjectDetail() {
                       ))}
                     </Slider>
                   ) : (
-                    <div className="w-full aspect-[4/5] md:aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-border/50 flex flex-col items-center justify-center shadow-lg">
+                    <div className="w-full aspect-[4/5] md:aspect-[3/4] rounded-2xl bg-primary/5 border border-border/50 flex flex-col items-center justify-center shadow-lg">
                       <Building2 className="w-20 h-20 text-muted-foreground/30 mb-4" />
                       <p className="text-sm font-semibold text-muted-foreground">Sin imágenes</p>
                     </div>

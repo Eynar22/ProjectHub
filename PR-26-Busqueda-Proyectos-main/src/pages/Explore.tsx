@@ -73,7 +73,7 @@ export default function Explore() {
     <div className="min-h-screen text-foreground font-sans relative overflow-hidden">
       
       {/* Luces de fondo estilo Home */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/5 via-secondary/5 to-transparent pointer-events-none -z-10" />
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-primary/5 pointer-events-none -z-10" />
       <div className="absolute top-[-10%] right-[-5%] w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10" />
       
       <Navbar />
@@ -93,7 +93,7 @@ export default function Explore() {
               className="mb-12 text-center max-w-3xl mx-auto"
             >
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight text-foreground">
-                Explorar <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Proyectos</span>
+                Explorar <span className="text-primary">Proyectos</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
                 Descubre oportunidades de colaboración, encuentra aliados estratégicos y sé parte de las iniciativas más innovadoras del país.
@@ -190,7 +190,7 @@ export default function Explore() {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="mb-12 p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-[2rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm"
+                className="mb-12 p-6 bg-primary/5 border border-primary/20 rounded-[2rem] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -231,7 +231,7 @@ export default function Explore() {
                     <div className="relative h-full group/card cursor-pointer">
                       
                       {/* --- Efecto Resplandor 3D Posterior (Se activa en Hover) --- */}
-                      <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-[2.5rem] blur-xl opacity-0 group-hover/card:opacity-40 transition-opacity duration-500 -z-10" />
+                      <div className="absolute -inset-1 bg-primary rounded-[2.5rem] blur-xl opacity-0 group-hover/card:opacity-40 transition-opacity duration-500 -z-10" />
 
                       {/* Tarjeta Principal */}
                       <Card className="relative overflow-hidden h-[480px] flex flex-col border border-white/10 bg-surface-inverse shadow-[0_10px_30px_rgba(0,0,0,0.3)] group-hover/card:-translate-y-2 transition-transform duration-500 rounded-[2rem]">
@@ -251,14 +251,14 @@ export default function Explore() {
                               ))}
                             </Slider>
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-surface-inverse to-surface-inverse flex items-center justify-center transition-transform duration-1000 group-hover/card:scale-110">
+                            <div className="w-full h-full bg-surface-inverse flex items-center justify-center transition-transform duration-1000 group-hover/card:scale-110">
                               <Building2 className="w-20 h-20 text-white/10" />
                             </div>
                           )}
                         </div>
 
                         {/* 2. DEGRADADO DUAL (Oscuro Arriba y Abajo, centro libre) */}
-                        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/80 via-black/10 to-black/90 pointer-events-none" />
+                        <div className="absolute inset-0 z-10 bg-black/50 pointer-events-none" />
 
                         {/* 3. CONTENIDO PRINCIPAL DE LA TARJETA */}
                         <div className="relative z-20 flex flex-col h-full p-6 text-white">

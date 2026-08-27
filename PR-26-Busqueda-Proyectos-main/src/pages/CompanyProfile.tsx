@@ -262,7 +262,7 @@ export default function CompanyProfile() {
           {/* Page header */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto mb-8 flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
               <User className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
@@ -279,7 +279,7 @@ export default function CompanyProfile() {
 
               {/* Avatar + Name */}
               <Card className="p-6 border-none shadow-md text-center overflow-hidden relative">
-                <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-br from-primary/20 to-secondary/20" />
+                <div className="absolute top-0 left-0 right-0 h-20 bg-primary/15" />
                 <div className="relative pt-4">
                   <div className="relative w-20 h-20 mx-auto mb-4">
                     {(editingProfile ? photoPreview : currentUser?.foto_url) ? (
@@ -289,7 +289,7 @@ export default function CompanyProfile() {
                         className="w-20 h-20 rounded-2xl object-cover shadow-xl"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl">
+                      <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl">
                         {initials}
                       </div>
                     )}
@@ -371,7 +371,7 @@ export default function CompanyProfile() {
 
               {/* Personal Info */}
               <Card className="border-none shadow-md overflow-hidden">
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-primary/5">
                   <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
                     <User className="w-4 h-4 text-primary" />
                   </div>
@@ -425,7 +425,7 @@ export default function CompanyProfile() {
 
               {/* Security / Change Password */}
               <Card className="border-none shadow-md overflow-hidden">
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-gradient-to-r from-primary/5 to-transparent">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-primary/5">
                   <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Lock className="w-4 h-4 text-primary" />
                   </div>
@@ -488,7 +488,7 @@ export default function CompanyProfile() {
               {/* Company Info */}
               {userCompany && (
                 <Card className="border-none shadow-md overflow-hidden">
-                  <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/5 to-transparent">
+                  <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-muted/50">
                     {userCompany.logo_url ? (
                       <img src={userCompany.logo_url} alt={userCompany.nombre} className="w-7 h-7 rounded-lg object-cover" />
                     ) : (
@@ -640,7 +640,7 @@ export default function CompanyProfile() {
                                   <p className="text-sm font-medium truncate">{link.nombre || link.url}</p>
                                   {link.nombre && <p className="text-xs text-muted-foreground truncate">{link.url}</p>}
                                 </div>
-                                <button type="button" onClick={() => removeLink(i)} className="p-1 hover:bg-muted rounded-full flex-shrink-0">
+                                <button type="button" onClick={() => removeLink(i)} aria-label="Quitar enlace" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:bg-muted rounded-full flex-shrink-0">
                                   <Trash2 className="w-3.5 h-3.5 text-destructive" />
                                 </button>
                               </div>

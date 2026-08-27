@@ -137,7 +137,7 @@ export function Navbar() {
 
           <button
             onClick={toggleTheme}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors flex-shrink-0"
+            className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors flex-shrink-0"
             title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
@@ -150,7 +150,7 @@ export function Navbar() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(v => !v)}
-                className="flex items-center gap-2 pr-2 md:pr-3 pl-0.5 md:pl-1 py-0.5 rounded-full hover:bg-muted/50 transition-colors group"
+                className="flex items-center gap-2 pr-2 md:pr-3 pl-0.5 md:pl-1 py-0.5 min-h-11 rounded-full hover:bg-muted/50 transition-colors group"
                 aria-label="Menú de cuenta"
                 aria-haspopup="menu"
                 aria-expanded={userMenuOpen}
@@ -215,7 +215,7 @@ export function Navbar() {
 
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors"
             aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={mobileMenuOpen}
           >

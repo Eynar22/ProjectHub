@@ -43,7 +43,7 @@ export function DocumentUpload({
             <FileText className="w-5 h-5 text-primary flex-shrink-0" />
             <span className="text-sm font-medium truncate max-w-[220px]">{value.name}</span>
           </div>
-          <button type="button" onClick={onRemove} className="p-1 hover:bg-muted rounded-full transition-colors">
+          <button type="button" onClick={onRemove} aria-label="Quitar documento" className="inline-flex min-h-11 min-w-11 items-center justify-center hover:bg-muted rounded-full transition-colors">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>

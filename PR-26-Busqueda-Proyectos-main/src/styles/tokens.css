@@ -18,36 +18,36 @@
 
 :root {
   /* --------------------------------------------------------------------------
-   * PRIMARIO — Indigo (hue 277). Rol: marca lo accionable. ~10% de pantalla.
+   * PRIMARIO — Indigo (hue 262). Rol: marca lo accionable. ~10% de pantalla.
    * -------------------------------------------------------------------------- */
-  --indigo-50:  oklch(0.970 0.014 277);
-  --indigo-100: oklch(0.936 0.032 277);
-  --indigo-200: oklch(0.882 0.059 277);
-  --indigo-300: oklch(0.811 0.097 277);
-  --indigo-400: oklch(0.714 0.150 277);
-  --indigo-500: oklch(0.585 0.196 277); /* base de marca */
-  --indigo-600: oklch(0.511 0.219 277); /* fondo del botón primario (AA con blanco) */
-  --indigo-700: oklch(0.451 0.204 277); /* hover / activo */
-  --indigo-800: oklch(0.394 0.166 277);
-  --indigo-900: oklch(0.343 0.123 277);
-  --indigo-950: oklch(0.257 0.090 277);
+  --indigo-50:  oklch(0.970 0.014 262);
+  --indigo-100: oklch(0.936 0.032 262);
+  --indigo-200: oklch(0.882 0.059 262);
+  --indigo-300: oklch(0.811 0.097 262);
+  --indigo-400: oklch(0.714 0.150 262);
+  --indigo-500: oklch(0.585 0.196 262); /* base de marca */
+  --indigo-600: oklch(0.511 0.219 262); /* fondo del botón primario (AA con blanco) */
+  --indigo-700: oklch(0.451 0.204 262); /* hover / activo */
+  --indigo-800: oklch(0.394 0.166 262);
+  --indigo-900: oklch(0.343 0.123 262);
+  --indigo-950: oklch(0.257 0.090 262);
 
   /* --------------------------------------------------------------------------
    * NEUTRALES — grises tintados con el tono del primario (croma 0.002–0.017).
    * El croma es imperceptible como color pero cohesiona toda la interfaz.
    * Aquí vive el ~85-90% del diseño.
    * -------------------------------------------------------------------------- */
-  --gray-50:  oklch(0.985 0.002 277);
-  --gray-100: oklch(0.968 0.004 277);
-  --gray-200: oklch(0.925 0.006 277);
-  --gray-300: oklch(0.872 0.009 277);
-  --gray-400: oklch(0.712 0.014 277);
-  --gray-500: oklch(0.556 0.017 277); /* mínimo legible sobre blanco (~4.6:1) */
-  --gray-600: oklch(0.446 0.017 277);
-  --gray-700: oklch(0.372 0.016 277);
-  --gray-800: oklch(0.269 0.013 277);
-  --gray-900: oklch(0.208 0.012 277); /* texto principal */
-  --gray-950: oklch(0.145 0.011 277);
+  --gray-50:  oklch(0.985 0.002 262);
+  --gray-100: oklch(0.968 0.004 262);
+  --gray-200: oklch(0.925 0.006 262);
+  --gray-300: oklch(0.872 0.009 262);
+  --gray-400: oklch(0.712 0.014 262);
+  --gray-500: oklch(0.556 0.017 262); /* mínimo legible sobre blanco (~4.6:1) */
+  --gray-600: oklch(0.446 0.017 262);
+  --gray-700: oklch(0.372 0.016 262);
+  --gray-800: oklch(0.269 0.013 262);
+  --gray-900: oklch(0.208 0.012 262); /* texto principal */
+  --gray-950: oklch(0.145 0.011 262);
 
   /* --------------------------------------------------------------------------
    * SEMÁNTICOS — convención universal, NO se eligen por gusto (Anexo A9).

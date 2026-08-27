@@ -10,7 +10,7 @@ import {
 } from '@/features/proyectos';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
-import { EstadoVacio } from '@/shared/components/feedback';
+import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
@@ -146,7 +146,7 @@ function EstadoTableCell({
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AdminProjects() {
   const { companies, users } = useApp();
-  const { data: projects = [] } = useProyectos();
+  const { data: projects = [], isError, refetch } = useProyectos();
   const { data: archivedProjects = [] } = useProyectosArchivados();
   const cambiarEstado = useCambiarEstadoProyecto();
   const autoTerminar = useAutoTerminarProyectos();
@@ -295,7 +295,7 @@ export default function AdminProjects() {
                         >
                           <td className="p-4">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${estado === 'archivado' ? 'bg-muted' : 'bg-gradient-to-br from-primary to-secondary'
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${estado === 'archivado' ? 'bg-muted' : 'bg-primary'
                                 }`}>
                                 <FolderKanban className={`w-5 h-5 ${estado === 'archivado' ? 'text-muted-foreground' : 'text-primary-foreground'}`} />
                               </div>
@@ -315,7 +315,7 @@ export default function AdminProjects() {
 
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
+                              <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
                                 {creator?.nombre_completo?.charAt(0).toUpperCase() || '?'}
                               </div>
                               <div>
@@ -378,7 +378,12 @@ export default function AdminProjects() {
                 </tbody>
               </table>
 
-              {filtered.length === 0 && (
+              {isError ? (
+                <EstadoError
+                  titulo="No pudimos cargar los proyectos"
+                  onReintentar={() => refetch()}
+                />
+              ) : filtered.length === 0 && (
                 <EstadoVacio
                   icono={FolderKanban}
                   titulo="Sin resultados"

@@ -10,7 +10,7 @@ import {
 } from '@/features/proyectos';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
-import { EstadoVacio } from '@/shared/components/feedback';
+import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import {
@@ -155,7 +155,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
       {/* Title Area */}
       <div className="flex gap-4 mb-5">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-110 ${
-          tab === 'archivados' ? 'bg-muted' : 'bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20'
+          tab === 'archivados' ? 'bg-muted' : 'bg-primary/10 border border-primary/20'
         }`}>
           <FolderKanban className={`w-7 h-7 ${tab === 'archivados' ? 'text-muted-foreground' : 'text-primary'}`} />
         </div>
@@ -296,7 +296,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function MyProjects() {
   const { currentUser } = useApp();
-  const { data: projects = [] } = useProyectos();
+  const { data: projects = [], isError, refetch } = useProyectos();
   const { data: archivedProjects = [] } = useProyectosArchivados(!!currentUser);
   const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
   const cambiarEstado = useCambiarEstadoProyecto();
@@ -464,7 +464,12 @@ export default function MyProjects() {
           </div>
 
           {/* Empty states */}
-          {displayProjects.length === 0 && (
+          {isError ? (
+            <EstadoError
+              titulo="No pudimos cargar tus proyectos"
+              onReintentar={() => refetch()}
+            />
+          ) : displayProjects.length === 0 && (
             <EstadoVacio
               icono={tab === 'activos' ? PlayCircle : tab === 'terminados' ? CheckCircle2 : Archive}
               titulo={

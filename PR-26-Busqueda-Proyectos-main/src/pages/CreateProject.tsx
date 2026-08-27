@@ -159,7 +159,7 @@ export default function CreateProject() {
             >
               <Card className="p-8 text-center">
                 <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-success to-accent rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-success rounded-full flex items-center justify-center">
                     <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export default function CreateProject() {
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl mx-auto mb-10">
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <Plus className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
@@ -214,7 +214,7 @@ export default function CreateProject() {
             {/* Section 1: Basic Info */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
               <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-primary/8 to-transparent border-b border-border">
+                <div className="flex items-center gap-3 px-6 py-4 bg-primary/5 border-b border-border">
                   <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
                     <FileText className="w-4 h-4 text-primary" />
                   </div>
@@ -251,7 +251,7 @@ export default function CreateProject() {
             {/* Section 2: Dates & Funding */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-secondary/8 to-transparent border-b border-border">
+                <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border">
                   <div className="w-7 h-7 rounded-lg bg-secondary/15 flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4 text-secondary" />
                   </div>
@@ -281,7 +281,7 @@ export default function CreateProject() {
             {/* Section 3: Images */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent/8 to-transparent border-b border-border">
+                <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border">
                   <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
                     <Upload className="w-4 h-4 text-accent" />
                   </div>
@@ -319,7 +319,7 @@ export default function CreateProject() {
             {/* Section 4: PDFs */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-warning/10 to-transparent border-b border-border">
+                <div className="flex items-center gap-3 px-6 py-4 bg-warning-subtle border-b border-border">
                   <div className="w-7 h-7 rounded-lg bg-warning-subtle flex items-center justify-center">
                     <FileText className="w-4 h-4 text-warning-strong" />
                   </div>

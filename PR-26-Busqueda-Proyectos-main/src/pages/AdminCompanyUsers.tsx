@@ -12,10 +12,11 @@ import {
   Building2, Crown, AlertTriangle, User as UserIcon
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 
 export default function AdminCompanyUsers() {
   const { id } = useParams();
-  const { data: users = [] } = useUsuarios();
+  const { data: users = [], isError, refetch } = useUsuarios();
   const { data: company } = useEmpresa(id);
   const moderar = useModerarUsuario();
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,7 +126,7 @@ export default function AdminCompanyUsers() {
                     }`}>
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative ${
-                          isBlocked ? 'bg-danger-subtle text-danger' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'
+                          isBlocked ? 'bg-danger-subtle text-danger' : 'bg-primary/15 text-primary'
                         }`}>
                           {member.nombre_completo.charAt(0).toUpperCase()}
                           {isBlocked && (
@@ -243,10 +244,17 @@ export default function AdminCompanyUsers() {
                 );
               })}
 
-              {filteredUsers.length === 0 && (
-                <Card className="p-12 text-center text-muted-foreground italic">
-                  No se encontraron usuarios que coincidan con la búsqueda.
-                </Card>
+              {isError ? (
+                <EstadoError
+                  titulo="No pudimos cargar los usuarios"
+                  onReintentar={() => refetch()}
+                />
+              ) : filteredUsers.length === 0 && (
+                <EstadoVacio
+                  icono={Users}
+                  titulo="No se encontraron usuarios"
+                  descripcion="Ningún usuario de esta empresa coincide con la búsqueda."
+                />
               )}
             </div>
           </div>

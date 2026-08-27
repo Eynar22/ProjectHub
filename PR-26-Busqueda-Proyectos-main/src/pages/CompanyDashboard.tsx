@@ -86,7 +86,7 @@ export default function CompanyDashboard() {
       value: myProjects.length,
       subtext: 'Proyectos creados por ti',
       icon: FolderKanban,
-      color: 'from-primary to-secondary',
+      color: 'bg-primary',
       link: '/dashboard/projects#owned',
     },
     {
@@ -94,7 +94,7 @@ export default function CompanyDashboard() {
       value: collaboratingProjects.length,
       subtext: 'Proyectos en los que participas',
       icon: Users,
-      color: 'from-success to-success',
+      color: 'bg-success',
       link: '/dashboard/projects#colab',
     },
     {
@@ -102,7 +102,7 @@ export default function CompanyDashboard() {
       value: totalProjectPending,
       subtext: totalProjectPending > 0 ? 'Nuevas solicitudes pendientes' : 'Sin solicitudes pendientes',
       icon: UserPlus,
-      color: totalProjectPending > 0 ? 'from-primary to-primary' : 'from-muted to-muted',
+      color: totalProjectPending > 0 ? 'bg-primary' : 'bg-muted',
       link: '#project-requests-section',
       pulse: totalProjectPending > 0,
     },
@@ -112,7 +112,7 @@ export default function CompanyDashboard() {
         value: pendingMembers.length,
         subtext: pendingMembers.length > 0 ? 'Nuevos miembros esperando' : 'No hay solicitudes nuevas',
         icon: Clock,
-        color: pendingMembers.length > 0 ? 'from-warning to-warning' : 'from-muted to-muted',
+        color: pendingMembers.length > 0 ? 'bg-warning' : 'bg-muted',
         link: '/dashboard/members',
         pulse: pendingMembers.length > 0,
       }]
@@ -130,7 +130,7 @@ export default function CompanyDashboard() {
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 text-primary-foreground text-xl font-black flex-shrink-0">
+                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 text-primary-foreground text-xl font-black flex-shrink-0">
                   {currentUser?.nombre_completo?.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -168,7 +168,7 @@ export default function CompanyDashboard() {
               const cardContent = (
                 <Card hover className="p-6 transition-all border-none shadow-sm h-full flex flex-col justify-between">
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md relative`}>
+                    <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center shadow-md relative`}>
                       <Icon className="w-6 h-6 text-primary-foreground" />
                       {hasPulse && stat.value > 0 && (
                         <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background animate-bounce shadow-lg">
@@ -216,8 +216,8 @@ export default function CompanyDashboard() {
           {/* Quick Actions — mobile only (desktop buttons in header) */}
           <div className="md:hidden grid grid-cols-2 gap-4 mb-8">
             <Link to="/dashboard/create-project">
-              <Card className="p-5 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-md transition-all cursor-pointer">
-                <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-3 shadow-md shadow-primary/20">
+              <Card className="p-5 bg-primary/10 border-primary/20 hover:shadow-md transition-all cursor-pointer">
+                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center mb-3 shadow-md shadow-primary/20">
                   <Plus className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <p className="font-bold text-sm">Nuevo Proyecto</p>
@@ -225,8 +225,8 @@ export default function CompanyDashboard() {
               </Card>
             </Link>
             <Link to="/explore">
-              <Card className="p-5 bg-gradient-to-br from-accent/10 to-success/5 border-accent/20 hover:shadow-md transition-all cursor-pointer">
-                <div className="w-9 h-9 bg-gradient-to-br from-muted to-muted rounded-xl flex items-center justify-center mb-3 shadow-md">
+              <Card className="p-5 bg-muted border-border hover:shadow-md transition-all cursor-pointer">
+                <div className="w-9 h-9 bg-muted rounded-xl flex items-center justify-center mb-3 shadow-md">
                   <Search className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <p className="font-bold text-sm">Explorar</p>
@@ -259,7 +259,7 @@ export default function CompanyDashboard() {
                   return (
                     <Card key={project.id} hover className="p-5 border-none shadow-sm hover:shadow-md transition-all">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-primary/20">
+                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-primary/20">
                           <FolderKanban className="w-5 h-5 text-primary-foreground" />
                         </div>
                         <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function CompanyDashboard() {
                         {creatorCompany?.logo_url ? (
                           <img src={creatorCompany.logo_url} alt={creatorCompany.nombre} className="w-10 h-10 rounded-lg object-cover" />
                         ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-muted to-muted rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
                             <Building2 className="w-5 h-5 text-primary-foreground" />
                           </div>
                         )}
@@ -363,7 +363,7 @@ export default function CompanyDashboard() {
                       <div className="flex items-start justify-between gap-4">
                         {/* Avatar + Info */}
                         <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-warning to-warning rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg flex-shrink-0 shadow-md">
+                          <div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg flex-shrink-0 shadow-md">
                             {mr.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -488,7 +488,7 @@ export default function CompanyDashboard() {
                       <div className="divide-y divide-border/40">
                         {group.solicitudes.slice(0, 3).map((sol) => (
                           <div key={sol.id} className="px-6 py-4 flex items-center gap-4 hover:bg-muted/20 transition-colors">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
                               {sol.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -563,7 +563,7 @@ export default function CompanyDashboard() {
                       <div className="space-y-4">
                         {/* Avatar */}
                         <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
+                          <div className="w-16 h-16 bg-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
                             {detailRequest.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                           </div>
                           <div>

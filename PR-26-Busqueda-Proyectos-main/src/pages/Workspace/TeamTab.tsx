@@ -35,7 +35,7 @@ export function TeamTab({
             return (
               <Card key={user.id} className="p-4 bg-muted">
                 <div className="flex items-center gap-4">
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center text-primary-foreground font-bold text-xl ${esCreador ? 'bg-gradient-to-br from-primary to-primary' : 'bg-gradient-to-br from-muted to-muted'
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center text-primary-foreground font-bold text-xl ${esCreador ? 'bg-primary' : 'bg-muted'
                     }`}>
                     {user.nombre_completo.charAt(0).toUpperCase()}
                   </div>

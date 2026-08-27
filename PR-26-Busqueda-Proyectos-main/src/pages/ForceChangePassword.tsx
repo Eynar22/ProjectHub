@@ -56,7 +56,7 @@ export function ForceChangePassword() {
         >
           <Card className="p-8">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-warning rounded-2xl flex items-center justify-center">
                 <ShieldAlert className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>

@@ -80,7 +80,7 @@ export default function ProjectRequests() {
                   >
                     <Card className="p-6">
                       <div className="flex items-start gap-6">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xl flex-shrink-0">
+                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xl flex-shrink-0">
                           {requester.nombre_completo.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -140,7 +140,7 @@ export default function ProjectRequests() {
                   <Card key={request.id} className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
                           {requester.nombre_completo.charAt(0).toUpperCase()}
                         </div>
                         <div>
