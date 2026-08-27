@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
-import { useProyectos, useSolicitudesEnviadas, useResponderSolicitud } from '@/features/proyectos';
+import { useProyectos, useSolicitudesDeProyecto, useResponderSolicitud } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
 import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
@@ -16,11 +16,10 @@ export default function ProjectRequests() {
   const { data: projects = [] } = useProyectos();
   const { data: companies = [] } = useEmpresas();
   const { data: users = [] } = useUsuarios(!!currentUser);
-  const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
+  const { data: projectRequests = [] } = useSolicitudesDeProyecto(id);
   const responder = useResponderSolicitud();
 
   const project = projects.find(p => p.id === Number(id));
-  const projectRequests = requests.filter(r => r.proyecto_id === Number(id));
 
   if (!project || project.creador_id !== currentUser?.id) {
     return (

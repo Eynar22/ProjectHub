@@ -4,15 +4,18 @@ ESTADO DE CUMPLIMIENTO DE LA CARPETA reglas/  —  ProjectHub (frontend)
 Última actualización: 2026-08-27
 Rama de trabajo:       test   (todos los avances están commiteados aquí)
 Último commit:         49b1caf  "etado"
-Cambios sin commitear:  sí — sesión 2026-08-27 (continuación, 3 rondas). tsc/lint/
-  build verdes (0 errores; 90 -> 33 warnings, ver B7 en FASE 2). El usuario
-  commitea él mismo. Además de los archivos de las rondas 1-2 (ver historial),
-  esta ronda: movió src/pages/Workspace/*.tsx (salvo index.tsx) a
-  features/workspace/components/ con `git mv`, y tipificó los `any` que quedaban
-  en AppContext.tsx, AdminCompanies.tsx, AdminUsers.tsx, AdminProjects.tsx,
-  CompanyDashboard.tsx, CompanyProfile.tsx, MyProjects.tsx, ProjectDetail.tsx,
-  Workspace/index.tsx y los componentes recién movidos — más eslint.config.mjs
-  (`no-explicit-any`: warn -> error).
+Cambios sin commitear:  sí — sesión 2026-08-27 (continuación, 5 rondas). tsc/lint/
+  build verdes (0 errores; 90 -> 32 warnings, ver B7 en FASE 2). El usuario
+  commitea él mismo. Resumen de las rondas 3-5 (ver historial arriba para 1-2):
+  movió src/pages/Workspace/*.tsx (salvo index.tsx) a features/workspace/components/
+  con `git mv`; tipificó los `any` que quedaban en AppContext.tsx,
+  AdminCompanies.tsx, AdminUsers.tsx, AdminProjects.tsx, CompanyDashboard.tsx,
+  CompanyProfile.tsx, MyProjects.tsx, ProjectDetail.tsx, Workspace/index.tsx y
+  los componentes recién movidos, más eslint.config.mjs (`no-explicit-any`:
+  warn -> error); corrigió el bug de fuente de datos en ProjectRequests.tsx;
+  dividió Register.tsx en 3 componentes nuevos bajo features/auth/components/
+  (RegisterChooseStep, JoinCompanyForm, NewCompanyForm); movió Login.tsx entero
+  (sin partirlo) a features/auth/components/LoginForm.tsx.
 
 Objetivo global: aplicar los 3 documentos de reglas/ a todo el frontend
   - Manual-Reglas-UI-UX-Web-2026.txt
@@ -182,18 +185,18 @@ FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
     En ProjectRequests.tsx además se cambió `updateRequest` (función del puente)
     por el hook `useResponderSolicitud` — mismo resultado pero ahora sí muestra
     un toast de confirmación al aceptar/rechazar (antes no mostraba ninguno).
-    OJO — bug preexistente encontrado de paso, NO corregido (fuera de alcance de
-    esta migración mecánica, requiere decidir el fix y probarlo en navegador):
-    ProjectRequests.tsx (ruta /project/:id/requests) usa `useSolicitudesEnviadas`
-    ("solicitudes que YO envié a proyectos ajenos") para listar las solicitudes
-    de un proyecto que el usuario actual es dueño — pero eso trae las
-    solicitudes que el usuario envió, no las que recibió. Lo semánticamente
-    correcto sería `useSolicitudesDeProyecto(project.id)` ("recibidas en un
-    proyecto propio"), que ya existe en features/proyectos y es lo que sí usa
-    correctamente Workspace/SolicitudesTab. No se tocó porque cambiar la fuente
-    de datos es un cambio de comportamiento, no un import — y no se pudo probar
-    en navegador si esta página siquiera se usa (no tiene ningún link visible
-    en la UI, solo es alcanzable por URL directa).
+  - [HECHO 2026-08-27] Bug corregido en ProjectRequests.tsx (ruta
+    /project/:id/requests): usaba `useSolicitudesEnviadas` ("solicitudes que YO
+    envié a proyectos ajenos") para listar las solicitudes de un proyecto del
+    que el usuario actual es dueño. Como esta página solo se muestra cuando
+    `project.creador_id === currentUser?.id`, esa fuente de datos prácticamente
+    nunca podía traer nada (uno no se envía solicitudes a sí mismo) — la página
+    mostraba "0 pendientes" siempre, sin importar cuánta gente pidiera unirse de
+    verdad. Cambiado a `useSolicitudesDeProyecto(id)` ("recibidas en un proyecto
+    propio"), que ya existía en features/proyectos y es lo que usa correctamente
+    Workspace/SolicitudesTab. Se eliminó también el filtro manual
+    `.filter(r => r.proyecto_id === Number(id))` que ya no hace falta porque el
+    hook nuevo escopa por proyecto en el propio query. tsc/lint/build verdes.
   - Mover UI de features fuera de pages/:
       [HECHO 2026-08-27] Workspace/*.tsx (los 6 *Tab.tsx + AssigneeSelector,
         NewFolderModal, TaskCard, TaskColumn, TaskEditModal, types.ts) movidos
@@ -201,15 +204,26 @@ FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
         ahora solo tiene index.tsx (la página/ruta). Los imports relativos entre
         ellos (`./TaskColumn`, `./types`, etc.) no cambiaron -> cero riesgo, solo
         se actualizaron los imports de index.tsx a la ruta nueva.
-      PENDIENTE: formularios de Login/Register -> features/auth/components/.
-        Evaluado y NO hecho: en Login.tsx el "formulario" no es una pieza
-        separable del resto de la página — el osito SVG animado reacciona a qué
-        campo tiene foco (mira al cursor, se tapa los ojos con la contraseña),
-        así que extraerlo implicaría pasar ~10 props de estado de ida y vuelta
-        sin reducir nada de complejidad real, solo mover el riesgo de transcribir
-        mal algo que no puedo verificar en navegador. Register.tsx sí tiene
-        bloques más separables (choose/join_company/new_company) y sería buen
-        candidato si se retoma esto.
+      [HECHO 2026-08-27] Register.tsx dividido en 3 componentes propios en
+        features/auth/components/: RegisterChooseStep (buscador de empresa,
+        incluye el useEffect de fotos que antes vivía en Register), JoinCompanyForm
+        (Flujo A) y NewCompanyForm (Flujo B). Cada uno pasó a dueño de su propio
+        estado/validación/mutación (useRegistrarEmpleado / useRegistrarEmpresa) —
+        antes vivían todos juntos en el padre. Register.tsx quedó como
+        orquestador fino: solo `mode` + `selectedCompanyId` (para el mensaje de
+        éxito) y la pantalla de éxito. JSX copiado literal, sin tocar clases ni
+        textos, para minimizar riesgo de transcripción. tsc/lint/build verdes
+        (el warning de exhaustive-deps del useEffect de fotos simplemente se
+        movió con el código a RegisterChooseStep.tsx, ya estaba antes).
+      [HECHO 2026-08-27] Login.tsx. En vez de partirlo en "formulario" vs
+        "osito" (estaban demasiado entrelazados — el oso reacciona a qué campo
+        tiene foco, partirlo hubiera significado pasar ~10 props de estado de
+        ida y vuelta sin ganar nada), se movió el componente COMPLETO tal cual
+        a features/auth/components/LoginForm.tsx (mismo patrón que los
+        Workspace/*.tsx: relocación literal, no una descomposición). pages/Login.tsx
+        quedó en 4 líneas: solo renderiza <LoginForm/>. De paso se sacó el
+        import muerto de `Input` (ya no se usaba, los campos son <input> nativos)
+        -> warnings 33 -> 32. tsc/lint/build verdes.
   - [HECHO 2026-08-27] B7: los ~56 `any` explícitos que quedaban (AppContext,
     AdminCompanies, AdminUsers, AdminProjects, CompanyDashboard, CompanyProfile,
     MyProjects, ProjectDetail, Workspace/index.tsx y los componentes movidos a
@@ -403,22 +417,19 @@ CÓMO CONTINUAR EN LA PC NUEVA
 1. git clone / pull  y  `git checkout test`.
 2. cd PR-26-Busqueda-Proyectos-main  &&  npm install.
 3. Confirmar base verde:  npx tsc --noEmit  &&  npm run lint  &&  npx vite build.
-   (debe dar 0 errores de tsc, 0 errores de lint + 33 warnings preexistentes
+   (debe dar 0 errores de tsc, 0 errores de lint + 32 warnings preexistentes
    -unused-vars/exhaustive-deps/etc., no `any`-, y build compila.)
-4. Retomar por prioridad:
+4. Retomar por prioridad (todo lo que queda requiere navegador, nada más es
+   auditable/corregible desde la terminal):
    a) CONTRASTE con Lighthouse/axe (punto 1 de "FALTA EN FASE 3") — es lo único
       que bloquea cerrar Fase 3.
    b) Lo que queda del checklist Manual 11.1-11.4 (punto 4: zoom 200%, espaciado
       de texto, y confirmar visualmente las excepciones de 44px táctil).
-   c) Único follow-up grande de Anexo B que queda: Workspace/index.tsx a
-      react-query (requiere navegador — ver nota en FASE 2). El resto de Anexo B
-      (puente del context en las 7 páginas, re-export de tipos, mover UI de
-      Workspace fuera de pages/, B7 `any` -> error) ya se resolvió el 2026-08-27.
-      Queda opcional: extraer formularios de Login/Register a
-      features/auth/components/ (evaluado y pospuesto, ver nota en esa sección).
-   d) Bug encontrado de paso, no corregido: ProjectRequests.tsx usa la fuente de
-      datos equivocada para listar solicitudes (ver detalle en FASE 2, sección
-      "Páginas que leían el PUENTE del context").
+   c) Único follow-up de Anexo B que queda: Workspace/index.tsx a react-query
+      (requiere navegador — ver nota en FASE 2). Todo lo demás de Anexo B ya se
+      resolvió el 2026-08-27: puente del context en las 7 páginas, re-export de
+      tipos, mover TODA la UI de Workspace/Register.tsx/Login.tsx fuera de
+      pages/, B7 `any` -> error, bug de ProjectRequests.tsx.
 5. Trabajar en slices pequeños y verificables; commitear cada slice.
 6. El detalle fino y el historial de decisiones está también en la memoria del
    agente (archivo reglas-carpeta-estandar-vinculante.md del proyecto).
