@@ -28,6 +28,9 @@ services:
       - DATABASE_URL=postgresql://postgres:12345@postgres:5432/buscador
       - JWT_SECRET=super_secret_key_123
       - PORT=3000
+      # Explícito por las mismas columnas timestamp-sin-zona (ver backend/.env);
+      # la imagen node:20-alpine ya usa UTC por defecto, esto lo deja documentado.
+      - TZ=UTC
     ports:
       - "3010:3000"
     depends_on:

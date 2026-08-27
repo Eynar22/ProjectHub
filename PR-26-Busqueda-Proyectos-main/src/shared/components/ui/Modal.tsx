@@ -32,6 +32,16 @@ export function Modal({
   const tituloId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const disparadorRef = useRef<HTMLElement | null>(null);
+  // El padre casi siempre pasa `onClose` como arrow function inline (nueva
+  // identidad en cada render suyo). Si el efecto dependiera de `onClose`
+  // directo, se re-ejecutaría en cada tecleo del contenido del modal y
+  // volvería a robar el foco hacia el primer elemento interactivo. Con el
+  // ref, el efecto corre solo una vez por apertura pero el handler de ESC
+  // sigue llamando siempre a la versión más reciente de `onClose`.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -48,7 +58,7 @@ export function Modal({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab' || !panel) return;
@@ -74,7 +84,7 @@ export function Modal({
       document.body.style.overflow = scrollBloqueado;
       disparadorRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   const anchoMax = size === 'sm' ? 'max-w-sm' : size === 'lg' ? 'max-w-2xl' : 'max-w-lg';
 

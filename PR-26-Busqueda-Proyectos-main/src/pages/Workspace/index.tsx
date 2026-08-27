@@ -1,16 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useApp } from '@/app/context/AppContext';
-import { proyectosService, solicitudesService, type Project } from '@/features/proyectos';
+import {
+  proyectosService,
+  type Project,
+  useProyecto,
+  PROYECTOS_KEYS,
+  useSolicitudesDeProyecto,
+  useResponderSolicitud,
+} from '@/features/proyectos';
 import {
   tareasService,
-  chatService,
   recursosService,
   useCrearRecurso,
   useEliminarRecurso,
   useSubirArchivo,
+  useMensajesChat,
+  useEnviarMensaje,
+  useColumnasProyecto,
+  useTareasProyecto,
+  useCrearTarea,
+  useActualizarTarea,
+  useEliminarTarea,
+  useAgregarComentario,
+  TAREAS_KEYS,
 } from '@/features/workspace';
+import { useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Button } from '@/shared/components/ui/Button';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
@@ -27,7 +43,7 @@ import {
 } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import type { ProyectoSolicitud, TabType, WorkspaceMember, WorkspaceTask } from '@/features/workspace/components/types';
+import type { TabType, WorkspaceMember, WorkspaceTask } from '@/features/workspace/components/types';
 import { InfoTab } from '@/features/workspace/components/InfoTab';
 import { TeamTab } from '@/features/workspace/components/TeamTab';
 import { ChatTab } from '@/features/workspace/components/ChatTab';
@@ -40,46 +56,11 @@ import { NewFolderModal } from '@/features/workspace/components/NewFolderModal';
 export default function Workspace() {
   const { id } = useParams();
   const { projects, archivedProjects, companies, users, currentUser, openBase64 } = useApp();
+  const queryClient = useQueryClient();
   const crearRecurso = useCrearRecurso();
   const eliminarRecursoMut = useEliminarRecurso();
   const subir = useSubirArchivo();
   const uploadFile = async (file: File) => (await subir.mutateAsync(file)).base64;
-
-  // ── LOCAL CHAT STATE (loaded per project) ──────────────────────────
-  const [chatMessages, setChatMessages] = useState<Array<{
-    id: number;
-    chat_id: number;
-    usuario_id: number;
-    contenido: string;
-    archivo_url?: string;
-    fecha: string;
-    usuario?: { nombre_completo: string; cargo?: string };
-  }>>([]);
-  const [sendingMsg, setSendingMsg] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // ── LOCAL TASKS STATE (loaded per project) ──────────────────────────
-  const [kanbanColumns, setKanbanColumns] = useState<Array<{ id: number; nombre: string; orden: number }>>([]);
-  const [localTasks, setLocalTasks] = useState<Array<{
-    id: number;
-    proyecto_id: number;
-    columna_id: number;
-    usuario_id?: number;
-    titulo: string;
-    descripcion?: string;
-    prioridad: 'baja' | 'media' | 'alta';
-    fecha_limite?: string;
-    orden: number;
-    usuario?: { id: number; nombre_completo: string };
-    comentarios?: Array<{ id: number; usuario_id: number; texto: string; fecha_creacion: string; usuario?: { nombre_completo: string } }>;
-  }>>([]);
-  const [loadingTasks, setLoadingTasks] = useState(false);
-  // ─────────────────────────────────────────────────────────────────
-
-  // Project join requests — fetched locally per project
-  const [projectJoinRequests, setProjectJoinRequests] = useState<ProyectoSolicitud[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
 
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const [messageText, setMessageText] = useState('');
@@ -119,7 +100,7 @@ export default function Workspace() {
 
   // Los recursos (documentos/PDFs del proyecto) pesan mucho en base64 y no vienen en el
   // listado general — se piden solo acá, al entrar al workspace de este proyecto.
-  const [projectCompleto, setProjectCompleto] = useState<Project | null>(null);
+  const { data: projectCompleto } = useProyecto(id);
   const project = projectCompleto ?? projectLigero;
   useDocumentTitle(project?.nombre);
 
@@ -127,8 +108,28 @@ export default function Workspace() {
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
 
-  // ── PROJECT MEMBERS — loaded directly from API (includes cross-company members) ──
-  const [projectMembers, setProjectMembers] = useState<WorkspaceMember[]>([]);
+  // ── PROJECT MEMBERS — derivado del detalle del proyecto (incluye cross-company) ──
+  const projectMembers = useMemo<WorkspaceMember[]>(() => {
+    if (!project) return [];
+    const members: WorkspaceMember[] = [];
+    if (project.creador) {
+      members.push(project.creador);
+    } else if (creator) {
+      members.push(creator);
+    }
+    if (Array.isArray(project.participantes)) {
+      project.participantes.forEach((p) => {
+        // Defensivo: si el backend algún día devuelve el participante sin el
+        // sub-objeto `usuario`, se descarta (u.id quedará undefined) en vez
+        // de romper el render.
+        const u = (p.usuario ?? p) as WorkspaceMember;
+        if (u?.id && !members.some(m => m.id === u.id)) {
+          members.push(u);
+        }
+      });
+    }
+    return members;
+  }, [project, creator]);
 
   // Fallback: if API not yet loaded, derive from context
   const participatingUsers = projectMembers.length > 0
@@ -137,11 +138,7 @@ export default function Workspace() {
       ? users.filter(u => project.participantes!.some(p => p.usuario_id === u.id))
       : []);
 
-  const projectMessages = chatMessages;
-  const projectTasks = localTasks;
   const projectResources = project?.recursos || [];
-
-  const pendingJoinRequests = projectJoinRequests.filter(r => r.estado === 'pendiente');
 
   // Get Recursos folder
   const recursosFolder = projectResources.find(r => r.nombre === 'Recursos' && r.tipo === 'carpeta' && !r.padre_id);
@@ -156,102 +153,57 @@ export default function Workspace() {
     }
   }, [recursosFolder?.id]);
 
-  // ── CHAT: load messages from API + poll every 3s ────────────────────
-  const fetchChatMessages = async () => {
-    if (!project) return;
+  // ── CHAT: react-query, re-descarga cada 3s (se pausa con la pestaña oculta) ──
+  // El auto-scroll al final vive dentro de ChatTab (necesita saber si el
+  // usuario está scrolleado hacia arriba leyendo historial, para no sacarlo
+  // de ahí cuando llega un mensaje nuevo).
+  const { data: chatMessages = [] } = useMensajesChat(project?.id);
+  const enviarMensaje = useEnviarMensaje(project?.id ?? '');
+  // Se desestructura en vez de depender del objeto `enviarMensaje` entero:
+  // `mutateAsync` es estable entre renders (lo garantiza react-query), así
+  // `handleSendMessage` no cambia de identidad en renders ajenos al chat
+  // (p. ej. el poll de tareas) y ChatTab (memoizado) puede saltarse esos
+  // re-renders innecesarios.
+  const { mutateAsync: enviarMensajeAsync, isPending: enviandoMensaje } = enviarMensaje;
+  const handleSendMessage = useCallback(async () => {
+    if (!messageText.trim() || enviandoMensaje) return;
+    const text = messageText.trim();
+    setMessageText('');
     try {
-      const data = await chatService.listarMensajes(project.id);
-      setChatMessages(Array.isArray(data) ? data : []);
-    } catch { /* silently ignore polling errors */ }
-  };
-
-  useEffect(() => {
-    if (!project?.id) return;
-    fetchChatMessages();
-    pollingRef.current = setInterval(fetchChatMessages, 3000);
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
-  }, [project?.id]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages.length]);
+      await enviarMensajeAsync({ contenido: text });
+    } catch {
+      // On error restore the text
+      setMessageText(text);
+    }
+  }, [messageText, enviandoMensaje, enviarMensajeAsync]);
   // ─────────────────────────────────────────────────────────────────
 
 
-  const fetchProjectTasks = async (pId: number) => {
-    try {
-      const [colData, taskData] = await Promise.all([
-        tareasService.listarColumnas(pId),
-        tareasService.listarPorProyecto(pId),
-      ]);
-      setKanbanColumns(Array.isArray(colData) ? colData.map((c) => ({ id: c.id, nombre: c.nombre, orden: c.orden })) : []);
-      setLocalTasks(Array.isArray(taskData) ? taskData : []);
-    } catch (err) {
-      console.error('Error fetching tasks:', err);
-    }
-  };
+  // ── TAREAS: react-query. Columnas y lista de tareas del tablero kanban ──
+  const { data: kanbanColumns = [], isLoading: loadingColumnas } = useColumnasProyecto(project?.id);
+  const { data: projectTasks = [], isLoading: loadingListaTareas } = useTareasProyecto(project?.id);
+  const loadingTasks = loadingColumnas || loadingListaTareas;
+  const crearTarea = useCrearTarea(project?.id ?? '');
+  const actualizarTarea = useActualizarTarea(project?.id ?? '');
+  const eliminarTarea = useEliminarTarea(project?.id ?? '');
+  const agregarComentario = useAgregarComentario(project?.id ?? '');
+  // ─────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    if (!project?.id) return;
-    setLoadingTasks(true);
-    fetchProjectTasks(project.id).finally(() => setLoadingTasks(false));
-  }, [project?.id]);
-
-  // ── PROJECT DETAIL: trae recursos + members completos (incl. cross-company) ──
-  const cargarProyectoDetalle = async () => {
-    if (!id) return;
-    try {
-      const data = await proyectosService.obtenerPorId(id);
-      setProjectCompleto(data);
-
-      const members: WorkspaceMember[] = [];
-      if (data.creador) {
-        members.push(data.creador);
-      } else if (creator) {
-        members.push(creator);
-      }
-      if (Array.isArray(data.participantes)) {
-        data.participantes.forEach((p) => {
-          // Defensivo: si el backend algún día devuelve el participante sin el
-          // sub-objeto `usuario`, se descarta (u.id quedará undefined) en vez
-          // de romper el render.
-          const u = (p.usuario ?? p) as WorkspaceMember;
-          if (u?.id && !members.some(m => m.id === u.id)) {
-            members.push(u);
-          }
-        });
-      }
-      setProjectMembers(members);
-    } catch {
-      /* silently use context fallback */
-    }
-  };
-
-  useEffect(() => {
-    setProjectCompleto(null);
-    cargarProyectoDetalle();
-  }, [id]);
-
-  useEffect(() => {
-    if (!project || !currentUser) return;
-    if (currentUser.id !== project.creador_id) return;
-    setLoadingRequests(true);
-    solicitudesService.listarPorProyecto(project.id)
-      .then(data => setProjectJoinRequests(Array.isArray(data) ? data : []))
-      .catch(console.error)
-      .finally(() => setLoadingRequests(false));
-  }, [project?.id, currentUser?.id]);
+  // ── SOLICITUDES DE UNIÓN: solo se piden si el usuario actual es el dueño ──
+  const esDueno = !!currentUser && !!project && currentUser.id === project.creador_id;
+  const { data: projectJoinRequests = [], isLoading: loadingRequests } =
+    useSolicitudesDeProyecto(esDueno ? project?.id : undefined);
+  const responderSolicitud = useResponderSolicitud();
 
   const handleAcceptJoinRequest = async (solicitudId: number) => {
-    await solicitudesService.aceptar(solicitudId);
-    setProjectJoinRequests(prev => prev.map(r => r.id === solicitudId ? { ...r, estado: 'aceptado' } : r));
+    await responderSolicitud.mutateAsync({ solicitudId, accion: 'aceptar' });
   };
 
   const handleRejectJoinRequest = async (solicitudId: number) => {
-    await solicitudesService.rechazar(solicitudId);
-    setProjectJoinRequests(prev => prev.map(r => r.id === solicitudId ? { ...r, estado: 'rechazado' } : r));
+    await responderSolicitud.mutateAsync({ solicitudId, accion: 'rechazar' });
   };
+
+  const pendingJoinRequests = projectJoinRequests.filter(r => r.estado === 'pendiente');
 
   // Sync editingTask with projectsTasks to show new comments immediately
   const latestEditingTask = editingTask ? projectTasks.find(t => t.id === editingTask.id) : null;
@@ -295,36 +247,6 @@ export default function Workspace() {
     );
   }
 
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || sendingMsg) return;
-    const text = messageText.trim();
-    setMessageText('');
-    setSendingMsg(true);
-
-    // Optimistic UI: add message immediately
-    const optimistic = {
-      id: Date.now(),
-      chat_id: -1,
-      usuario_id: currentUser!.id,
-      contenido: text,
-      fecha: new Date().toISOString(),
-      usuario: { nombre_completo: currentUser!.nombre_completo },
-    };
-    setChatMessages(prev => [...prev, optimistic]);
-
-    try {
-      const saved = await chatService.enviarMensaje(project.id, text);
-      // Replace optimistic with real message
-      setChatMessages(prev => prev.map(m => m.id === optimistic.id ? saved : m));
-    } catch {
-      // On error restore the text
-      setMessageText(text);
-      setChatMessages(prev => prev.filter(m => m.id !== optimistic.id));
-    } finally {
-      setSendingMsg(false);
-    }
-  };
-
   // ── Dar/quitar acceso a un colaborador para crear tareas ('miembro' ⇄ 'colaborador') ──
   const handleToggleAccesoTareas = async (usuarioId: number, rolActual: string) => {
     if (!project) return;
@@ -332,8 +254,8 @@ export default function Workspace() {
     setUpdatingAccesoId(usuarioId);
     try {
       await proyectosService.cambiarRolParticipante(project.id, usuarioId, nuevoRol);
-      setProjectCompleto(prev => {
-        const base = prev ?? project;
+      queryClient.setQueryData(PROYECTOS_KEYS.detalle(project.id), (base: Project | undefined) => {
+        if (!base) return base;
         return {
           ...base,
           participantes: base.participantes?.map(p =>
@@ -386,7 +308,7 @@ export default function Workspace() {
         fecha_fin: editFechaFin || null,
         imagenes_urls: editImagenes,
       } as Partial<Project>);
-      setProjectCompleto(updated);
+      queryClient.setQueryData(PROYECTOS_KEYS.detalle(project.id), updated);
       setEditingProjectInfo(false);
       toast.success('Información del proyecto actualizada');
     } catch (err) {
@@ -405,7 +327,7 @@ export default function Workspace() {
       { nombre: 'Completado', orden: 3 },
     ];
     const created = await Promise.all(cols.map(c => tareasService.crearColumna({ proyecto_id: pId, ...c })));
-    setKanbanColumns(created);
+    queryClient.invalidateQueries({ queryKey: TAREAS_KEYS.columnas(pId) });
     return created;
   };
 
@@ -414,7 +336,7 @@ export default function Workspace() {
     try {
       const cols = await ensureColumns(project!.id);
       const firstCol = cols[0];
-      const newTask = await tareasService.crear({
+      await crearTarea.mutateAsync({
         proyecto_id: project!.id,
         titulo: newTaskTitle,
         descripcion: newTaskDesc,
@@ -422,9 +344,8 @@ export default function Workspace() {
         prioridad: newTaskPriority,
         fecha_limite: newTaskDeadline || null,
         columna_id: firstCol.id,
-        orden: localTasks.filter(t => t.columna_id === firstCol.id).length,
+        orden: projectTasks.filter(t => t.columna_id === firstCol.id).length,
       });
-      setLocalTasks(prev => [...prev, newTask]);
       setNewTaskTitle('');
       setNewTaskDesc('');
       setNewTaskDeadline('');
@@ -435,9 +356,14 @@ export default function Workspace() {
   };
 
   const handleMoveTask = async (taskId: number, newColId: number) => {
-    if (isReadOnly) return;
-    setLocalTasks(prev => prev.map(t => t.id === taskId ? { ...t, columna_id: newColId } : t));
-    await tareasService.actualizar(taskId, { columna_id: newColId });
+    if (isReadOnly || !project) return;
+    // Update optimista: la tarjeta se ve en la columna nueva de inmediato, sin
+    // esperar el round-trip (drag&drop se ve roto si no hay feedback instantáneo).
+    queryClient.setQueryData<WorkspaceTask[]>(
+      TAREAS_KEYS.lista(project.id),
+      (old) => (old ?? []).map(t => t.id === taskId ? { ...t, columna_id: newColId } : t),
+    );
+    await actualizarTarea.mutateAsync({ id: taskId, datos: { columna_id: newColId } });
   };
 
   const handleOpenEditModal = (task: WorkspaceTask) => {
@@ -452,32 +378,30 @@ export default function Workspace() {
 
   const handleSaveEditTask = async () => {
     if (!editingTask) return;
-    const updated = await tareasService.actualizar(editingTask.id, {
-      titulo: editTaskTitle,
-      descripcion: editTaskDesc,
-      prioridad: editTaskPriority,
-      fecha_limite: editTaskDeadline || null,
-      usuario_ids: editTaskAssignees,
+    await actualizarTarea.mutateAsync({
+      id: editingTask.id,
+      datos: {
+        titulo: editTaskTitle,
+        descripcion: editTaskDesc,
+        prioridad: editTaskPriority,
+        fecha_limite: editTaskDeadline || null,
+        usuario_ids: editTaskAssignees,
+      },
     });
-    setLocalTasks(prev => prev.map(t => t.id === editingTask.id ? updated : t));
     setEditingTask(null);
   };
 
   const handleAddTaskComment = async () => {
     if (!editingTask || !newTaskComment.trim()) return;
-    const newComment = await tareasService.agregarComentario(editingTask.id, newTaskComment);
-    setLocalTasks(prev => prev.map(t =>
-      t.id === editingTask.id
-        ? { ...t, comentarios: [...(t.comentarios || []), newComment] }
-        : t
-    ));
+    const newComment = await agregarComentario.mutateAsync({ tareaId: editingTask.id, texto: newTaskComment });
+    // Patch local del modal para que el comentario se vea al instante, sin
+    // esperar a que la invalidación de la query traiga la lista de nuevo.
     setEditingTask(prev => prev ? { ...prev, comentarios: [...(prev.comentarios || []), newComment] } : null);
     setNewTaskComment('');
   };
 
   const handleDeleteTask = async (taskId: number) => {
-    setLocalTasks(prev => prev.filter(t => t.id !== taskId));
-    await tareasService.eliminar(taskId);
+    await eliminarTarea.mutateAsync(taskId);
     if (editingTask?.id === taskId) setEditingTask(null);
   };
 
@@ -505,7 +429,6 @@ export default function Workspace() {
       tipo: 'carpeta',
       padre_id: activeFolderId,
     });
-    await cargarProyectoDetalle();
     setNewFolderName('');
     setShowNewFolderModal(false);
   };
@@ -530,7 +453,6 @@ export default function Workspace() {
         url: base64,
         padre_id: activeFolderId,
       });
-      await cargarProyectoDetalle();
     } catch (err) {
       console.error('Error uploading file:', err);
       toast.error(err instanceof Error ? err.message : 'Error al subir el archivo. Por favor intenta de nuevo.');
@@ -541,7 +463,6 @@ export default function Workspace() {
 
   const handleDeleteResource = async (resourceId: number) => {
     await eliminarRecursoMut.mutateAsync(resourceId);
-    await cargarProyectoDetalle();
   };
 
   const tabs = [
@@ -698,14 +619,13 @@ export default function Workspace() {
               <ChatTab
                 projectName={project.nombre}
                 participantsCount={participatingUsers.length}
-                messages={projectMessages}
+                messages={chatMessages}
                 currentUser={currentUser}
                 users={users}
-                messagesEndRef={messagesEndRef}
                 messageText={messageText}
                 setMessageText={setMessageText}
                 onSend={handleSendMessage}
-                sending={sendingMsg}
+                sending={enviandoMensaje}
                 isReadOnly={isReadOnly}
               />
             )}

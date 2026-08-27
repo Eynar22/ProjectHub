@@ -1,17 +1,26 @@
-import { RefObject } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { motion } from 'motion/react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Input } from '@/shared/components/ui/Input';
 import type { User } from '@/features/usuarios';
 import type { WorkspaceChatMessage } from './types';
 
-export function ChatTab({
+// Umbral en px: si el usuario está más lejos que esto del final, se asume que
+// scrolleó hacia arriba a propósito para leer el historial y NO se lo saca de
+// ahí cuando llega un mensaje nuevo (cada poll de 3s).
+const CERCA_DEL_FINAL_PX = 80;
+
+// Memoizado: Workspace/index.tsx re-renderiza seguido por el polling de
+// tareas (10s) y de chat (3s) aunque el usuario esté mirando otra pestaña.
+// Sin esto, ChatTab se vuelve a dibujar entero -y re-arma la lista de
+// mensajes- por cambios que no le importan, lo que se siente como
+// lentitud/traba si coincide con que el usuario está scrolleando.
+export const ChatTab = memo(function ChatTab({
   projectName,
   participantsCount,
   messages,
   currentUser,
   users,
-  messagesEndRef,
   messageText,
   setMessageText,
   onSend,
@@ -23,13 +32,47 @@ export function ChatTab({
   messages: WorkspaceChatMessage[];
   currentUser: User | null;
   users: User[];
-  messagesEndRef: RefObject<HTMLDivElement>;
   messageText: string;
   setMessageText: (v: string) => void;
   onSend: () => void;
   sending: boolean;
   isReadOnly: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  // Empieza en true: al entrar al chat se muestra el final (últimos mensajes).
+  const cercaDelFinalRef = useRef(true);
+  const rafPendienteRef = useRef<number | null>(null);
+
+  // El evento `scroll` puede disparar decenas de veces por segundo con
+  // trackpad/mouse de alta precisión. Leer scrollHeight/scrollTop/clientHeight
+  // en cada uno fuerza un recálculo de layout sincrónico en pleno gesto de
+  // scroll -> se siente trabado. Se agrupa a máximo una lectura por frame.
+  const handleScroll = () => {
+    if (rafPendienteRef.current != null) return;
+    rafPendienteRef.current = requestAnimationFrame(() => {
+      rafPendienteRef.current = null;
+      const el = containerRef.current;
+      if (!el) return;
+      cercaDelFinalRef.current =
+        el.scrollHeight - el.scrollTop - el.clientHeight < CERCA_DEL_FINAL_PX;
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafPendienteRef.current != null) cancelAnimationFrame(rafPendienteRef.current);
+    };
+  }, []);
+
+  // Auto-scroll solo si el usuario ya estaba cerca del final; si scrolleó
+  // hacia arriba a leer el historial, un mensaje nuevo no lo interrumpe.
+  useEffect(() => {
+    if (cercaDelFinalRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length]);
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="flex flex-col h-[600px] bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
@@ -54,7 +97,7 @@ export function ChatTab({
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
@@ -106,7 +149,7 @@ export function ChatTab({
             })
           )}
           {/* Auto-scroll anchor */}
-          <div ref={messagesEndRef} />
+          <div ref={bottomRef} />
         </div>
 
         {/* Input Area */}
@@ -118,7 +161,7 @@ export function ChatTab({
               onChange={(e) => setMessageText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }}
               className="flex-1 border-none bg-transparent shadow-none focus:ring-0 px-0 py-0 text-sm"
-              disabled={sending || isReadOnly}
+              disabled={isReadOnly}
             />
             <button
               onClick={onSend}
@@ -138,4 +181,4 @@ export function ChatTab({
       </div>
     </motion.div>
   );
-}
+});

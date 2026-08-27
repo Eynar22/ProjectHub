@@ -15,19 +15,26 @@ export const TAREAS_KEYS = {
     [...TAREAS_KEYS.todas, 'lista', String(proyectoId)] as const,
 };
 
+const REFETCH_MS = 10_000;
+
+/** Columnas del tablero; se re-descargan cada 10s para que los cambios de
+ * otros usuarios (o de otra pestaña) aparezcan sin recargar la página. */
 export function useColumnasProyecto(proyectoId: number | string | undefined) {
   return useQuery({
     queryKey: TAREAS_KEYS.columnas(proyectoId ?? ''),
     queryFn: () => tareasService.listarColumnas(proyectoId!),
     enabled: proyectoId != null && proyectoId !== '',
+    refetchInterval: () => (document.hidden ? false : REFETCH_MS),
   });
 }
 
+/** Tareas del tablero; mismo polling de 10s que las columnas, por la misma razón. */
 export function useTareasProyecto(proyectoId: number | string | undefined) {
   return useQuery({
     queryKey: TAREAS_KEYS.lista(proyectoId ?? ''),
     queryFn: () => tareasService.listarPorProyecto(proyectoId!),
     enabled: proyectoId != null && proyectoId !== '',
+    refetchInterval: () => (document.hidden ? false : REFETCH_MS),
   });
 }
 
@@ -43,7 +50,7 @@ export function useCrearTarea(proyectoId: number | string) {
 export function useActualizarTarea(proyectoId: number | string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, datos }: { id: number; datos: Partial<Task> }) =>
+    mutationFn: ({ id, datos }: { id: number; datos: Partial<Task> & Record<string, unknown> }) =>
       tareasService.actualizar(id, datos),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: TAREAS_KEYS.lista(proyectoId) }),

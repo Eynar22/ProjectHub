@@ -3,19 +3,22 @@ ESTADO DE CUMPLIMIENTO DE LA CARPETA reglas/  —  ProjectHub (frontend)
 ===============================================================================
 Última actualización: 2026-08-27
 Rama de trabajo:       test   (todos los avances están commiteados aquí)
-Último commit:         49b1caf  "etado"
-Cambios sin commitear:  sí — sesión 2026-08-27 (continuación, 5 rondas). tsc/lint/
-  build verdes (0 errores; 90 -> 32 warnings, ver B7 en FASE 2). El usuario
-  commitea él mismo. Resumen de las rondas 3-5 (ver historial arriba para 1-2):
-  movió src/pages/Workspace/*.tsx (salvo index.tsx) a features/workspace/components/
-  con `git mv`; tipificó los `any` que quedaban en AppContext.tsx,
-  AdminCompanies.tsx, AdminUsers.tsx, AdminProjects.tsx, CompanyDashboard.tsx,
-  CompanyProfile.tsx, MyProjects.tsx, ProjectDetail.tsx, Workspace/index.tsx y
-  los componentes recién movidos, más eslint.config.mjs (`no-explicit-any`:
-  warn -> error); corrigió el bug de fuente de datos en ProjectRequests.tsx;
-  dividió Register.tsx en 3 componentes nuevos bajo features/auth/components/
-  (RegisterChooseStep, JoinCompanyForm, NewCompanyForm); movió Login.tsx entero
-  (sin partirlo) a features/auth/components/LoginForm.tsx.
+Último commit:         567e218  "moviendo login"  (rondas 1-5 ya commiteadas
+  por el usuario, uno o varios commits por ronda — ver `git log` para el detalle).
+Cambios sin commitear:  sí — sesión 2026-08-27, ronda 6: los 4 slices de
+  Workspace/index.tsx -> react-query ya están HECHOS (chat, tareas,
+  recursos+detalle de proyecto, solicitudes de unión) -esto cierra el follow-up
+  de Anexo B que quedaba pendiente-. Slices 1 (CHAT) y 2 (TAREAS) ya fueron
+  probados y confirmados por el usuario en navegador; en el camino aparecieron
+  y se corrigieron 3 bugs reales (uno preexistente: el focus-trap de
+  shared/components/ui/Modal.tsx robaba el foco en cada re-render ajeno, no
+  solo al abrir) más dos rondas de trabajo en la fluidez del scroll del chat
+  (mejoró bastante, el usuario dice que "aún no está del todo solucionado" —
+  sigue abierto, ver FASE 2 sección CHAT punto 6). Slices 3 y 4 (RECURSOS+
+  DETALLE DE PROYECTO, SOLICITUDES) se hicieron juntos al final y están
+  PENDIENTES DE PROBAR en navegador — ver "PENDIENTE DE VERIFICAR EN
+  NAVEGADOR" más abajo, en FASE 2. tsc/lint verdes (0 errores; 90 -> 25
+  warnings acumulado en toda la sesión), build compila.
 
 Objetivo global: aplicar los 3 documentos de reglas/ a todo el frontend
   - Manual-Reglas-UI-UX-Web-2026.txt
@@ -169,12 +172,341 @@ HECHO:
   (app en la raíz + backend/ como subcarpeta) es estándar y no rompe ninguna regla.
 
 FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
-  - Workspace/index.tsx: todavía usa estado local + polling manual de chat/tareas.
-    Pasarlo a react-query (los hooks ya existen en features/workspace/).
-    NO tocado en la sesión 2026-08-27: es un componente de 800+ líneas con mucho
-    estado entrelazado (chat optimista, kanban drag&drop, carpetas de recursos);
-    migrarlo a ciegas sin poder verificar visualmente en navegador es demasiado
-    riesgo de regresión. Requiere `npm run dev` abierto en paralelo.
+  - [HECHO 2026-08-27 — LOS 4 SLICES] Workspace/index.tsx: pasado de estado
+    local + polling/fetch manual a react-query (hooks de features/workspace/
+    y features/proyectos/). Se hizo en slices chicos, cada uno verificado en
+    navegador por el usuario antes de seguir con el siguiente (acordado
+    2026-08-27). Slices 1 y 2 (CHAT, TAREAS) quedaron confirmados por el
+    usuario en navegador antes de seguir; slices 3 y 4 (RECURSOS+DETALLE DE
+    PROYECTO, SOLICITUDES DE UNIÓN) se hicieron juntos al final -están
+    entrelazados en el código- y quedan PENDIENTES DE PROBAR (ver la lista al
+    final de esta sección). Con esto, Workspace/index.tsx ya no tiene ningún
+    `useState` haciendo de caché de datos del servidor ni ningún fetch manual
+    en un useEffect -todo pasa por hooks de react-query-, cumpliendo el
+    objetivo original del follow-up. Warnings de lint acumulados en esta
+    migración: 90 -> 25 (bajaron con cada slice, sobre todo por sacar
+    useEffects con setState directo, que gatillaban un warning cada uno).
+    [HECHO Y CONFIRMADO 2026-08-27, slice 1/4 — CHAT] `chatMessages`/`sendingMsg`/
+      el polling manual con setInterval de 3s se reemplazaron por
+      `useMensajesChat(project?.id)` (mismo intervalo de 3s, pero ahora se PAUSA
+      si la pestaña está oculta — antes seguía pegándole al backend en segundo
+      plano) y `useEnviarMensaje(project?.id ?? '')`. Se perdió el update
+      optimista (el mensaje ya no aparece instantáneo, espera el round-trip).
+      Usuario probó en navegador el 2026-08-27: "se ve bien, está funcionando".
+      Confirmado, no se toca más.
+    [HECHO 2026-08-27, slice 2/4 — TAREAS (kanban)] `kanbanColumns`/`localTasks`/
+      `loadingTasks` (estado local + fetch manual en un useEffect) reemplazados
+      por `useColumnasProyecto(project?.id)` + `useTareasProyecto(project?.id)`
+      (loadingTasks = OR de ambos `isLoading`). Los handlers (crear/mover/editar/
+      comentar/eliminar tarea) pasaron a usar `useCrearTarea` / `useActualizarTarea`
+      / `useEliminarTarea` / `useAgregarComentario` (proyectoId fijado al crear
+      cada hook, mutationFn se recrea con el proyecto actual en cada render — no
+      hay problema de closure viejo porque el usuario no puede accionar antes de
+      que el componente re-renderice con el project.id real).
+      Se ensanchó el tipo de `useActualizarTarea` en
+      features/workspace/hooks/useTareas.ts (`datos: Partial<Task>` ->
+      `Partial<Task> & Record<string, unknown>`) porque la firma original no
+      dejaba pasar `usuario_ids` (campo de escritura de la relación ManyToMany,
+      no existe en el modelo de lectura `Task`) ni `fecha_limite: null` (para
+      borrar la fecha límite). Cambio seguro: este hook no lo usaba nadie más
+      todavía (era el primer consumidor real).
+      DECISIÓN DE DISEÑO — drag&drop SÍ lleva update optimista (a diferencia del
+      chat): `handleMoveTask` escribe directo en la caché de react-query con
+      `queryClient.setQueryData(TAREAS_KEYS.lista(project.id), ...)` ANTES de
+      llamar a la mutación, así la tarjeta se ve en la columna nueva al soltarla,
+      no después de que vuelva el request. Si no fuera así, soltar una tarjeta
+      se vería "roto" (vuelve a su lugar y salta a la posición correcta después),
+      mucho más notorio que el mensaje de chat con un poco de delay.
+      El comentario nuevo en el modal de tarea SÍ sigue siendo instantáneo (se
+      parchea `editingTask` local con la respuesta del POST, igual que antes —
+      no dependía del polling).
+      `ensureColumns` (crea las 3 columnas por defecto la primera vez que se usa
+      el tablero) se mantiene con `tareasService.crearColumna` directo (no hay
+      hook dedicado, es un bootstrap raro) + invalidar la query de columnas al
+      final. tsc/lint verdes (0 errores; 30 -> 29 warnings).
+      Quedan 2 slices: RECURSOS+DETALLE DE PROYECTO (projectCompleto/
+      projectMembers), SOLICITUDES DE UNIÓN.
+
+    [HECHO 2026-08-27, 3 BUGS reportados por el usuario al probar el slice
+      TAREAS — corregidos]
+      1. BUG PREEXISTENTE, NO introducido por esta migración, pero encontrado
+         de paso: shared/components/ui/Modal.tsx (el modal accesible con
+         focus-trap, usado por TODOS los modales de la app) tenía
+         `useEffect(..., [open, onClose])`. Como casi todos los que usan
+         <Modal> le pasan `onClose` como arrow function inline (identidad
+         nueva en cada render del padre), el efecto se re-ejecutaba en CADA
+         re-render del padre — no solo al abrir el modal — y esa re-ejecución
+         vuelve a robar el foco hacia el primer elemento interactivo del panel.
+         Síntoma exacto que reportó el usuario: escribir una sola letra en el
+         comentario de una tarea sacaba el foco del textarea y lo mandaba al
+         botón "Cerrar" (X) del modal — porque en el DOM ese botón aparece
+         antes que el textarea, así que es el "primer elemento interactivo".
+         Esto ya pasaba antes de tocar Workspace/index.tsx (el estado del
+         comentario siempre vivió arriba, cualquier tecleo ya re-renderizaba
+         todo el árbol) pero probablemente nunca se notó tan claro como ahora.
+         Arreglo: el efecto ahora depende solo de `[open]`; `onClose` se guarda
+         en un ref que se actualiza en un efecto aparte (sin condición de
+         carrera, patrón estándar "latest ref"), así el ESC sigue llamando a
+         la versión más reciente sin forzar que el efecto principal se
+         re-dispare en cada tecleo. Beneficia a TODOS los modales de la app,
+         no solo al de tareas.
+      2. features/workspace/components/ChatTab.tsx: el input de texto tenía
+         `disabled={sending || isReadOnly}`. Un <input> deshabilitado pierde el
+         foco automáticamente (comportamiento del navegador, no de React) —
+         por eso al mandar un mensaje el campo "se deseleccionaba" y había que
+         volver a clickearlo. Se sacó `sending` de esa condición: ahora solo el
+         botón de enviar se deshabilita mientras la mutación está en curso, el
+         campo de texto se puede seguir usando sin perder el foco.
+      3. Reportado: los cambios (mover tarjeta de columna, agregar comentario)
+         no se reflejaban en la vista de OTRO usuario sin recargar la pestaña.
+         Causa: `useColumnasProyecto`/`useTareasProyecto` no tenían
+         `refetchInterval` (a diferencia del chat, que sí polleaba cada 3s) —
+         esto YA pasaba antes de esta sesión (el código viejo tampoco tenía
+         ningún polling de tareas), no es una regresión de esta migración, pero
+         era la oportunidad obvia de arreglarlo ahora que ya está en
+         react-query. Se agregó el mismo patrón que usan el resto de los hooks
+         del proyecto (`refetchInterval: () => document.hidden ? false : 10_000`,
+         se pausa con la pestaña oculta). Con el fix del Modal ya hecho, este
+         polling no debería volver a robar el foco del modal de edición de
+         tarea (antes de ese fix, agregar polling acá habría empeorado el bug 1).
+      tsc/lint verdes (0 errores, 29 warnings, igual que el slice anterior),
+      build compila.
+      4. [HECHO 2026-08-27, con más detalle del usuario] "la barra de chat al
+         subir/bajar no está fluida... cuando scrolleo y me detengo, después
+         de un segundo salta directo al lugar" / "todo el chat se mueve junto
+         con lo que estoy scrolleando". Causa: el auto-scroll-al-final
+         (`scrollIntoView({behavior:'smooth'})`) se disparaba cada vez que
+         cambiaba la cantidad de mensajes SIN importar si el usuario estaba
+         scrolleado hacia arriba leyendo el historial — con el chat consultando
+         cada 3s, cualquier mensaje nuevo (o incluso una cuenta que fluctúe)
+         lo secuestraba de vuelta al final, interrumpiendo la lectura. Este
+         efecto YA estaba en el código original (no es una regresión de esta
+         sesión), pero antes vivía en Workspace/index.tsx sin forma de saber
+         si el usuario estaba lejos del final.
+         Arreglo: el auto-scroll se movió adentro de
+         features/workspace/components/ChatTab.tsx (que sí tiene acceso al
+         contenedor real con overflow-y-auto). Ahora escucha el scroll del
+         contenedor de mensajes y guarda en un ref si el usuario está a menos
+         de 80px del final. El efecto que dispara `scrollIntoView` solo actúa
+         si `cercaDelFinalRef.current` es true — si el usuario scrolleó arriba
+         a propósito, un mensaje nuevo ya no lo saca de ahí. Al entrar al chat
+         arranca en true (muestra los últimos mensajes, como siempre).
+         Efecto secundario de la refactorización: `messagesEndRef` ya no se
+         crea/pasa desde Workspace/index.tsx (era una prop que solo usaba
+         ChatTab) — se volvió estado interno de ChatTab.
+         tsc/lint/build verdes (0 errores, 29 warnings, sin cambio).
+      5. [HECHO 2026-08-27] El usuario aclaró que lo anterior no era todo:
+         además del salto al final, el scroll EN SÍ se sentía trabado mientras
+         lo hacía activamente ("como pausado, de golpe se mueve cuando te
+         detienes") — y confirmó que pasa SOLO en el chat, en el resto de la
+         app el scroll es fluido (dato clave: descarta que sea el fondo
+         animado global de esferas borrosas, que corre en todas las páginas).
+         Causa: el listener `onScroll` que se acababa de agregar (punto 4)
+         lee `scrollHeight`/`scrollTop`/`clientHeight` en cada evento de
+         scroll, y con mouse/trackpad de alta precisión ese evento puede
+         disparar decenas de veces por segundo — cada lectura de esas tres
+         propiedades fuerza al navegador a recalcular el layout de forma
+         sincrónica en pleno gesto de scroll (layout thrashing), lo cual se
+         siente exactamente como "trabado, salta cuando parás". Arreglo:
+         agrupar esa lectura a máximo una vez por frame con
+         `requestAnimationFrame` (con cleanup de `cancelAnimationFrame` al
+         desmontar) en vez de en cada evento nativo. Patrón estándar para
+         listeners de scroll, sin cambiar el comportamiento (mismo resultado,
+         como mucho un frame de latencia en detectar "cerca del final").
+         tsc/lint/build verdes (0 errores, 29 warnings, sin cambio).
+      6. [HECHO 2026-08-27, MEJORA PARCIAL — usuario: "aún no está del todo
+         solucionado"] Intento adicional tras el punto 5 (usuario: "el chat
+         aún sigue un poco lento"). Causa adicional: Workspace/index.tsx
+         re-renderiza cada vez que el chat (3s) O las tareas (10s) consultan
+         en segundo plano, sin importar qué pestaña esté mirando el usuario
+         -ambos hooks se llaman siempre, no solo cuando su pestaña está
+         activa-. ChatTab no estaba memoizado, así que cualquiera de esos
+         polls (aunque no tuviera nada que ver con el chat) lo volvía a
+         dibujar entero -incluyendo re-armar la lista completa de mensajes-,
+         lo cual se siente como una traba si coincide con que el usuario está
+         scrolleando. Arreglo: `ChatTab` envuelto en `React.memo` (se saltea
+         el re-render si ninguna de sus props cambió). Para que el memo
+         funcione de verdad, `handleSendMessage` en Workspace/index.tsx pasó
+         a `useCallback` desestructurando `mutateAsync`/`isPending` del
+         objeto `enviarMensaje` en vez de depender del objeto completo (los
+         métodos mutate de react-query son estables entre renders; el objeto
+         contenedor no necesariamente). Quedó movido antes de los `if (!project)
+         return` / `if (!isParticipant) return` -junto a los demás hooks del
+         chat- porque un Hook no puede llamarse después de un return
+         condicional (regla de los Hooks; el primer intento rompía el build).
+         tsc/lint/build verdes (0 errores, 29 warnings, sin cambio).
+         PENDIENTE: el usuario confirmó que mejoró pero "aún no está del todo
+         solucionado" — no se identificó una causa adicional todavía. Cuando
+         se retome, pedir precisión: ¿es al entrar recién a la pestaña, con
+         muchos mensajes en el historial, en un momento puntual (justo cuando
+         cae un poll), o todo el tiempo por igual? Eso acota si es un tema de
+         cantidad de mensajes (sin virtualización de lista) o de otra cosa.
+
+    [HECHO 2026-08-27, slices 3/4 y 4/4 — RECURSOS+DETALLE DE PROYECTO y
+      SOLICITUDES DE UNIÓN, hechos juntos porque están entrelazados en el
+      código original]
+      - `projectCompleto` (useState<Project|null> + fetch manual en
+        `cargarProyectoDetalle`, llamado desde un useEffect en [id]) ->
+        `useProyecto(id)` (ya existía, la usa también ProjectDetail.tsx).
+      - `projectMembers` (useState<WorkspaceMember[]>, se llenaba dentro de
+        `cargarProyectoDetalle` deduplicando creador+participantes) -> pasó a
+        ser un valor derivado con `useMemo(() => {...}, [project, creador])`
+        en vez de estado propio -ya no hace falta un fetch aparte, esos datos
+        ya vienen dentro de lo que trae `useProyecto`-. Misma lógica de
+        deduplicación y el mismo fallback defensivo `p.usuario ?? p`,
+        palabra por palabra, solo que ahora recalculado en vez de fetcheado.
+      - Los 3 lugares que llamaban a `cargarProyectoDetalle()` a mano después
+        de crear/subir/borrar un recurso (`handleAddFolder`,
+        `handleFileSelected`, `handleDeleteResource`) se sacaron: los hooks
+        `useCrearRecurso`/`useEliminarRecurso` (features/workspace) YA
+        invalidaban `PROYECTOS_KEYS.todos` en su `onSuccess` desde antes de
+        esta sesión -la re-carga manual era redundante, react-query ya lo
+        hacía solo-.
+      - `handleToggleAccesoTareas` (dar/quitar acceso para crear tareas) y
+        `handleSaveProjectInfo` (editar descripción/fecha fin/fotos) hacían
+        `setProjectCompleto(...)` para reflejar el cambio al instante sin
+        esperar a un refetch. Como `projectCompleto` ya no es estado propio,
+        se cambió a `queryClient.setQueryData(PROYECTOS_KEYS.detalle(project.id), ...)`
+        -mismo resultado (parche instantáneo de la caché), ahora escribiendo
+        directo en la caché de react-query en vez de en un useState-. No hay
+        hook dedicado para `cambiarRolParticipante`/`actualizar` de proyecto
+        todavía, así que se siguen llamando esos dos métodos de
+        `proyectosService` directo (como antes), solo cambió cómo se refleja
+        el resultado en la UI.
+      - `projectJoinRequests`/`loadingRequests` (useState + fetch manual en
+        un useEffect que solo corría si `currentUser.id === project.creador_id`)
+        -> `useSolicitudesDeProyecto(esDueno ? project?.id : undefined)` (ya
+        existía, la usa también ProjectRequests.tsx desde una sesión
+        anterior). Pasar `undefined` cuando no es el dueño desactiva el
+        fetch vía el `enabled` interno del hook -mismo efecto que el `if`
+        que cortaba antes-, sin violar la regla de los Hooks (no se puede
+        NO llamar al hook condicionalmente, pero sí controlar qué le llega).
+      - `handleAcceptJoinRequest`/`handleRejectJoinRequest` pasaron de
+        `solicitudesService.aceptar/rechazar` + parche manual de estado a
+        `useResponderSolicitud().mutateAsync({solicitudId, accion})` (ya
+        existía, mismo hook usado en ProjectRequests.tsx) — invalida solo,
+        y de paso ahora muestra un toast de confirmación (el hook lo trae
+        incorporado; antes el código de Workspace no mostraba ninguno).
+      - Import de `ProyectoSolicitud` (tipo que ya no se usaba directo en
+        este archivo) sacado; `solicitudesService` sacado del import de
+        features/proyectos (ya no se llama directo, todo pasa por los hooks).
+      tsc/lint/build verdes (0 errores; 26 -> 25 warnings).
+
+    [HECHO 2026-08-27] Bugs encontrados por el usuario al probar los slices
+      3/4: ver detalle abajo (uno corregido ya, el otro en investigación).
+      1. [HECHO] features/workspace/components/ResourcesTab.tsx usaba el
+         `confirm()` nativo del navegador para borrar un recurso (carpeta o
+         archivo/imagen) — el típico cartel "localhost:5173 dice: ..." que no
+         tiene nada que ver con el diseño de la app. Se cambió por el mismo
+         patrón de confirmación que ya usa AdminUsers.tsx (Modal propio con
+         ícono de alerta, "Cancelar"/"Eliminar", el texto avisa si es una
+         carpeta que "se eliminará también todo su contenido"). Quedan sin
+         tocar otros 2 `confirm()` nativos preexistentes en el resto de la
+         app (AdminCompanyRequest.tsx, AdminCompanyUsers.tsx) — no eran parte
+         de lo reportado ni de lo que se estaba probando esta sesión, mismo
+         defecto pero fuera de alcance por ahora.
+         tsc/lint/build verdes (0 errores, 25 warnings, sin cambio).
+      2. [HECHO 2026-08-27 — BUG DE BACKEND, no de frontend] La hora que se
+         muestra en los mensajes del chat y en los comentarios de tareas no
+         coincidía con la hora actual. Se investigó backend/ (solo lectura)
+         antes de tocar nada, para no parchear a ciegas del lado equivocado.
+         Diagnóstico confirmado: `mensaje.fecha` y `tarea_comentario.fecha_creacion`
+         son columnas Postgres `timestamp WITHOUT time zone`
+         (backend/src/entities/mensaje.entity.ts, tarea-comentario.entity.ts).
+         Postgres corre en un contenedor Docker sin TZ configurado -> UTC. El
+         backend en desarrollo corre suelto en la máquina (`npm run start:dev`,
+         no en su contenedor) con la hora local de la máquina (Bolivia, UTC-4).
+         El driver `pg` interpreta esos timestamps "sin zona" usando la zona
+         horaria del PROCESO DE NODE al leerlos -no la de la base-, así que
+         una hora guardada como 18:30 (UTC, correcta) se leía como si ya fuera
+         18:30 hora local, corriendo el reloj mostrado 4h para adelante.
+         Importante: la escritura SIEMPRE fue correcta (las columnas usan
+         `default: () => 'CURRENT_TIMESTAMP'`, generado por Postgres mismo,
+         Node nunca participa al guardar) — el problema era solo de LECTURA,
+         así que el fix corrige los mensajes viejos también, no hace falta
+         migrar datos. Tampoco es un bug que fuera a aparecer en producción
+         si el backend corre dentro de su contenedor Docker (ahí Postgres y
+         Node están en la misma zona, UTC) — es específico de correr el
+         backend suelto en Windows en desarrollo.
+         Fix aplicado: `TZ=UTC` agregado a backend/.env (para `npm run
+         start:dev`) y al `environment:` del servicio `backend` en
+         docker-compose.yml (explícito, aunque la imagen node:20-alpine ya
+         usa UTC por defecto). Node 20 relee `process.env.TZ` en cada
+         operación de fecha -no la cachea solo al arrancar-, así que alcanza
+         con esto, no hace falta tocar código. REQUIERE reiniciar el proceso
+         del backend a mano (parar y volver a correr `npm run start:dev`) —
+         al ser una variable de entorno y no un archivo de código, el modo
+         watch de NestJS no lo recarga solo.
+         No se tocó nada del frontend para esto (ChatTab.tsx/TaskEditModal.tsx
+         ya estaban bien, el `new Date(...).toLocaleTimeString(...)` es
+         correcto una vez que el backend manda la fecha bien).
+
+PENDIENTE DE VERIFICAR EN NAVEGADOR (sesión 2026-08-27, slice TAREAS + 3 bugs
+corregidos — re-test después de los fixes de Modal/ChatTab/polling):
+  1. npm run dev, entrar a un proyecto -> pestaña Tareas.
+  2. Si el proyecto no tiene tablero todavía: crear la primera tarea y
+     confirmar que arma las 3 columnas por defecto (Por Hacer/En Proceso/
+     Completado) y la tarea cae en "Por Hacer".
+  3. Arrastrar una tarjeta a otra columna: tiene que verse instantáneo al
+     soltarla.
+  4. Abrir una tarea (click en la tarjeta) y en el campo de comentario escribir
+     una frase completa SIN que el foco salte a ningún lado (antes se rompía
+     con la primera letra) -> agregar el comentario, tiene que aparecer al
+     toque.
+  5. Editar título/descripción/prioridad/fecha/asignados y guardar -> confirmar
+     que el cambio se refleja en la tarjeta del tablero.
+  6. Eliminar una tarea desde el modal -> confirmar que desaparece del tablero.
+  7. Sincronía entre usuarios: con dos sesiones (dos navegadores o uno en
+     incógnito) en el mismo proyecto, mover una tarjeta o agregar un
+     comentario en una, y confirmar que en la OTRA aparece solo en unos ~10s
+     sin recargar la página.
+  8. Chat: mandar un mensaje y confirmar que el campo de texto NO pierde el
+     foco (antes había que volver a clickearlo después de cada envío).
+  9. Abrir CUALQUIER OTRO modal de la app (ej. confirmar bloqueo de usuario en
+     Admin > Usuarios) y escribir/interactuar adentro, para confirmar que el
+     fix de Modal.tsx no rompió nada ahí (ese componente lo usan todos los
+     modales, no solo el de tareas).
+  10. Seguí atento a si la barra de scroll del chat se siente lenta/no fluida
+      — contame en qué momento exacto pasa (¿al scrollear vos con el mouse
+      hacia arriba en el historial, o es el "salto" automático hacia abajo
+      cuando llega un mensaje nuevo?) para poder buscarlo con más precisión.
+  11. [Ya se siguió con RECURSOS+DETALLE DE PROYECTO y SOLICITUDES sin esperar
+      confirmación explícita de este punto 11 en particular -el usuario dio
+      el visto bueno general de tareas y pidió continuar-; si algo de la lista
+      de arriba (1-10) todavía no se probó, sigue pendiente igual.]
+
+PENDIENTE DE VERIFICAR EN NAVEGADOR (sesión 2026-08-27, slices 3/4 y 4/4 —
+RECURSOS+DETALLE DE PROYECTO y SOLICITUDES DE UNIÓN):
+  1. npm run dev, entrar a un proyecto -> pestaña Información: confirmar que
+     carga bien nombre/descripción/fechas/fotos (viene de `useProyecto`, no
+     de un fetch manual).
+  2. Si sos Administrador de Empresa con acceso al proyecto: editar
+     descripción/fecha fin/fotos desde esa pestaña y guardar -> confirmar que
+     se ve reflejado al instante (no debería tardar ni recargar).
+  3. Pestaña Recursos: crear una carpeta nueva -> confirmar que aparece sin
+     recargar la página.
+  4. Subir un archivo -> confirmar que aparece en la carpeta actual sin
+     recargar.
+  5. Eliminar un recurso (archivo o carpeta) -> confirmar que desaparece sin
+     recargar.
+  6. Pestaña Equipo: si sos el dueño del proyecto, dar/quitar acceso para
+     crear tareas a un colaborador -> confirmar que el cambio de rol se ve
+     al instante en esa fila.
+  7. Pestaña Solicitudes (solo visible si sos el dueño del proyecto): pedirle
+     a otro usuario que mande una solicitud de unión al proyecto (o generarla
+     de prueba) y confirmar que aparece en la lista de pendientes.
+  8. Aceptar o rechazar una solicitud desde ahí -> confirmar que se mueve a
+     "procesadas" y que sale un toast de confirmación (esto es nuevo: antes
+     no mostraba ningún toast al aceptar/rechazar desde el Workspace).
+  9. Si NO sos el dueño del proyecto: confirmar que la pestaña "Solicitudes"
+     ni siquiera aparece en la lista de pestañas (verifica que el `enabled`
+     condicional del hook sigue cortando el fetch para no-dueños).
+  10. Si algo de esto se ve mal, avisar. Si todo sale bien, con esto se cierra
+      por completo la migración de Workspace/index.tsx a react-query — lo
+      único que queda pendiente en todo el proyecto es lo que ya requiere
+      herramientas de navegador (contraste, zoom 200%) y el scroll del chat
+      "un poco lento" que no se terminó de resolver (punto 6 de la sección
+      CHAT más arriba).
   - [HECHO 2026-08-27] Páginas que leían el PUENTE del context
     (useApp().projects / companies / users / requests) migradas a los hooks
     directos de cada feature: AdminDashboard, Explore, ProjectRequests, Sidebar,
@@ -417,19 +749,24 @@ CÓMO CONTINUAR EN LA PC NUEVA
 1. git clone / pull  y  `git checkout test`.
 2. cd PR-26-Busqueda-Proyectos-main  &&  npm install.
 3. Confirmar base verde:  npx tsc --noEmit  &&  npm run lint  &&  npx vite build.
-   (debe dar 0 errores de tsc, 0 errores de lint + 32 warnings preexistentes
+   (debe dar 0 errores de tsc, 0 errores de lint + 25 warnings preexistentes
    -unused-vars/exhaustive-deps/etc., no `any`-, y build compila.)
-4. Retomar por prioridad (todo lo que queda requiere navegador, nada más es
-   auditable/corregible desde la terminal):
-   a) CONTRASTE con Lighthouse/axe (punto 1 de "FALTA EN FASE 3") — es lo único
-      que bloquea cerrar Fase 3.
-   b) Lo que queda del checklist Manual 11.1-11.4 (punto 4: zoom 200%, espaciado
+4. Retomar por prioridad — Anexo B (FASE 2) y Anexo A (FASE 1) están
+   COMPLETOS en código; todo lo que queda es o (a) probar en navegador algo
+   que ya se hizo, o (b) auditoría de Fase 3 que solo se puede hacer con
+   navegador:
+   a) Probar en navegador el slice 3/4 de Workspace/index.tsx -> react-query
+      (RECURSOS+DETALLE DE PROYECTO y SOLICITUDES DE UNIÓN) — lista de pasos
+      en FASE 2, sección "PENDIENTE DE VERIFICAR EN NAVEGADOR (slices 3/4 y
+      4/4)". Con esto confirmado se cierra el follow-up de Anexo B al 100%.
+   b) CONTRASTE con Lighthouse/axe (punto 1 de "FALTA EN FASE 3") — es lo
+      único que bloquea cerrar Fase 3 formalmente.
+   c) Lo que queda del checklist Manual 11.1-11.4 (punto 4: zoom 200%, espaciado
       de texto, y confirmar visualmente las excepciones de 44px táctil).
-   c) Único follow-up de Anexo B que queda: Workspace/index.tsx a react-query
-      (requiere navegador — ver nota en FASE 2). Todo lo demás de Anexo B ya se
-      resolvió el 2026-08-27: puente del context en las 7 páginas, re-export de
-      tipos, mover TODA la UI de Workspace/Register.tsx/Login.tsx fuera de
-      pages/, B7 `any` -> error, bug de ProjectRequests.tsx.
+   d) Scroll del chat "un poco lento" sin terminar de resolver (no es parte de
+      reglas/ en sí, es un bug de rendimiento encontrado al probar los
+      slices — ver FASE 2, sección CHAT, punto 6, para retomarlo con más
+      precisión del usuario sobre cuándo pasa exactamente).
 5. Trabajar en slices pequeños y verificables; commitear cada slice.
 6. El detalle fino y el historial de decisiones está también en la memoria del
    agente (archivo reglas-carpeta-estandar-vinculante.md del proyecto).

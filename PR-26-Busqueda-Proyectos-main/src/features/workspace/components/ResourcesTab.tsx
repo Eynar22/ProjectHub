@@ -1,10 +1,11 @@
-import { RefObject } from 'react';
+import { RefObject, useState } from 'react';
 import { motion } from 'motion/react';
 import {
-  ChevronRight, FolderPlus, Upload, Loader2, Folder, FileText, Image, Trash2,
+  ChevronRight, FolderPlus, Upload, Loader2, Folder, FileText, Image, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
 import type { Resource } from '@/features/proyectos';
 
 export function ResourcesTab({
@@ -38,6 +39,8 @@ export function ResourcesTab({
   openBase64: (dataUrl: string) => void;
   deleteResource: (id: number) => void;
 }) {
+  const [resourceToDelete, setResourceToDelete] = useState<Resource | null>(null);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -163,7 +166,7 @@ export function ResourcesTab({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm(`¿Eliminar ${res.nombre}?`)) deleteResource(res.id);
+                      setResourceToDelete(res);
                     }}
                     className="absolute top-2 right-2 p-1.5 bg-destructive/10 text-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/20"
                   >
@@ -194,6 +197,42 @@ export function ResourcesTab({
           </div>
         )}
       </Card>
+
+      {/* Confirmación de borrado */}
+      <Modal
+        open={!!resourceToDelete}
+        onClose={() => setResourceToDelete(null)}
+        titulo={resourceToDelete?.tipo === 'carpeta' ? '¿Eliminar esta carpeta?' : '¿Eliminar este archivo?'}
+        size="sm"
+        acciones={
+          <>
+            <Button variant="ghost" onClick={() => setResourceToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                const r = resourceToDelete;
+                setResourceToDelete(null);
+                if (r) deleteResource(r.id);
+              }}
+            >
+              Eliminar
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-danger-subtle text-danger-strong">
+            <AlertTriangle className="h-7 w-7" aria-hidden="true" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            ¿Seguro que querés eliminar{' '}
+            <strong className="text-foreground">{resourceToDelete?.nombre}</strong>?
+            {resourceToDelete?.tipo === 'carpeta' && ' Se eliminará también todo su contenido.'}
+          </p>
+        </div>
+      </Modal>
     </motion.div>
   );
 }
