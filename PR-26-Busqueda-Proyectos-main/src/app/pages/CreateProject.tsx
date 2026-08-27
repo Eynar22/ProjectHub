@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { useCrearProyecto } from '@/features/proyectos';
 import { toast } from 'sonner';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
@@ -24,7 +25,8 @@ const PROJECT_CATEGORIES = [
 ];
 
 export default function CreateProject() {
-  const { currentUser, createProject } = useApp();
+  const { currentUser } = useApp();
+  const crearProyecto = useCrearProyecto();
   const navigate = useNavigate();
   const imageInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -125,7 +127,7 @@ export default function CreateProject() {
 
     setIsSubmitting(true);
     try {
-      await createProject({
+      await crearProyecto.mutateAsync({
         name: formData.name,
         description: formData.description,
         shortDescription: formData.shortDescription,
@@ -134,14 +136,13 @@ export default function CreateProject() {
         pdfFiles: pdfFiles,
         startDate: formData.startDate,
         endDate: formData.endDate,
-        funding: formData.funding ? parseFloat(formData.funding) : undefined,
+        funding: formData.funding || undefined,
         createdByUserId: currentUser!.id,
-        participatingUsers: [currentUser!.id]
       });
 
       setStep('success');
     } catch (err) {
-      // AppContext.createProject ya muestra el toast con el motivo específico del error
+      // useCrearProyecto ya muestra el toast con el motivo específico del error
       console.error(err);
     } finally {
       setIsSubmitting(false);

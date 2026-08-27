@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router';
-import { useApp, type Project } from '../context/AppContext';
-import { api } from '../services/api';
+import { useApp } from '../context/AppContext';
+import {
+  useProyecto,
+  useCrearSolicitud,
+  useTransferirProyecto,
+} from '@/features/proyectos';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { TextArea } from '../components/Input';
-import { toast } from 'sonner';
 import {
   Building2,
   FileText,
@@ -47,7 +50,9 @@ const formatNumber = (num) => {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const { projects, archivedProjects, companies, users, currentUser, createRequest, openBase64, transferProject, requests } = useApp();
+  const { projects, archivedProjects, companies, users, currentUser, openBase64, requests } = useApp();
+  const crearSolicitud = useCrearSolicitud();
+  const transferir = useTransferirProyecto();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,16 +64,9 @@ export default function ProjectDetail() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [selectedNewOwner, setSelectedNewOwner] = useState<number | ''>('');
   const [message, setMessage] = useState('');
-  const [applying, setApplying] = useState(false);
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
-
-  const [projectCompleto, setProjectCompleto] = useState<Project | null>(null);
-  useEffect(() => {
-    setProjectCompleto(null);
-    if (!id) return;
-    api.get<Project>(`/proyectos/${id}`).then(setProjectCompleto).catch(() => {});
-  }, [id]);
+  const { data: projectCompleto } = useProyecto(id);
 
   const project = projectCompleto ?? projectLigero;
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
@@ -120,25 +118,24 @@ export default function ProjectDetail() {
     );
   }
 
-  const handleRequestParticipation = () => {
-    if (applying) return;
-    setApplying(true);
-    createRequest({ proyecto_id: project.id, mensaje: message });
-    setTimeout(() => {
-      setApplying(false);
+  const handleRequestParticipation = async () => {
+    if (crearSolicitud.isPending || !project) return;
+    try {
+      await crearSolicitud.mutateAsync({ proyectoId: project.id, mensaje: message });
       setShowRequestModal(false);
       setMessage('');
-      toast.success('Tu solicitud fue enviada');
-    }, 1500);
+    } catch {
+      /* el toast lo muestra el hook */
+    }
   };
 
   const handleTransfer = async () => {
-    if (!selectedNewOwner) return;
+    if (!selectedNewOwner || !project) return;
     try {
-      await transferProject(project.id, Number(selectedNewOwner));
+      await transferir.mutateAsync({ id: project.id, nuevoCreadorId: Number(selectedNewOwner) });
       setShowTransferModal(false);
-    } catch (error: any) {
-      toast.error(error.message || 'Error al transferir.');
+    } catch {
+      /* el toast lo muestra el hook */
     }
   };
 
@@ -504,8 +501,8 @@ export default function ProjectDetail() {
               />
               <div className="flex gap-3 mt-8">
                 <Button variant="outline" className="flex-1 rounded-2xl" onClick={() => setShowRequestModal(false)}>Cancelar</Button>
-                <Button variant="primary" className="flex-1 rounded-2xl flex items-center justify-center gap-2" onClick={handleRequestParticipation} disabled={applying}>
-                  <Send className="w-4 h-4" /> {applying ? 'Enviando...' : 'Enviar'}
+                <Button variant="primary" className="flex-1 rounded-2xl flex items-center justify-center gap-2" onClick={handleRequestParticipation} disabled={crearSolicitud.isPending}>
+                  <Send className="w-4 h-4" /> {crearSolicitud.isPending ? 'Enviando...' : 'Enviar'}
                 </Button>
               </div>
             </Card>

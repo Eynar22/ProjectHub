@@ -1,8 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { toast } from 'sonner';
 import { storage } from '@/lib/storage';
 import { authService } from '@/features/auth';
+import {
+  proyectosService,
+  solicitudesService,
+  PROYECTOS_KEYS,
+  SOLICITUDES_KEYS,
+  useProyectos,
+  useProyectosArchivados,
+  useSolicitudesEnviadas,
+} from '@/features/proyectos';
 
 /* Los tipos del dominio viven ahora en /shared y /features (Anexo B7).
  * Se re-exportan aquí solo por compatibilidad con imports antiguos
@@ -95,14 +105,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
   const [memberRequests, setMemberRequests] = useState<MemberRequest[]>([]);
-  const [requests, setRequests] = useState<Request[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ── Proyectos y solicitudes: ahora vienen de TanStack Query (feature
+  //    proyectos). Este context solo hace de puente hasta que las páginas
+  //    consuman los hooks directamente. ────────────────────────────────────
+  const queryClient = useQueryClient();
+  const proyectosQuery = useProyectos();
+  const archivadosQuery = useProyectosArchivados(!!currentUser);
+  const solicitudesQuery = useSolicitudesEnviadas(!!currentUser);
+  const projects = proyectosQuery.data ?? [];
+  const archivedProjects = archivadosQuery.data ?? [];
+  const requests = solicitudesQuery.data ?? [];
+  const invalidarProyectos = () =>
+    queryClient.invalidateQueries({ queryKey: PROYECTOS_KEYS.todos });
 
   // Función auxiliar para cargar datos con reintentos
   const fetchWithRetry = async <T,>(fn: () => Promise<T>, retries = 3): Promise<T | null> => {
@@ -131,32 +151,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Load companies and projects with retry logic
+      // Empresas y usuarios (proyectos/solicitudes los maneja TanStack Query).
       const companiesData = await fetchWithRetry(() => api.get<Company[]>('/empresas'));
-      const projectsData = await fetchWithRetry(() => api.get<Project[]>('/proyectos'));
-
       setCompanies(companiesData || []);
-      setProjects(projectsData || []);
 
       const token2 = storage.obtenerToken();
       if (token2) {
         try {
-          const [usersData, requestsData] = await Promise.all([
-            fetchWithRetry(() => api.get<User[]>('/usuarios')),
-            fetchWithRetry(() => api.get<any[]>('/proyectos/usuario/solicitudes-enviadas'))
-          ]);
+          const usersData = await fetchWithRetry(() => api.get<User[]>('/usuarios'));
           setUsers(usersData || []);
-          setRequests(requestsData || []);
         } catch (err) {
-          console.error('Error loading users or requests:', err);
+          console.error('Error loading users:', err);
           setUsers([]);
-          setRequests([]);
         }
       }
     } catch (err) {
       console.error('Error loading initial data:', err);
       setCompanies(prev => prev || []);
-      setProjects(prev => prev || []);
       setUsers(prev => prev || []);
     } finally {
       setLoading(false);
@@ -168,16 +179,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadInitialData();
   }, []);
 
-  // Load archived projects when user logs in (only for owners/superadmin)
-  React.useEffect(() => {
-    if (!currentUser) return;
-    const token = storage.obtenerToken();
-    if (!token) return;
-    api.get<Project[]>('/proyectos/archivados')
-      .then(data => setArchivedProjects(data || []))
-      .catch(() => setArchivedProjects([]));
-  }, [currentUser?.id]);
-
   // Load membership requests when admin of a company logs in
   React.useEffect(() => {
     if (currentUser?.rol === 'admin' && currentUser?.empresa_id) {
@@ -187,31 +188,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [currentUser]);
 
-  // Polling silencioso para actualizaciones en "tiempo real" (cada 15 segundos).
-  // Se salta el ciclo si la pestaña está en segundo plano: no tiene sentido re-descargar
-  // proyectos/empresas/usuarios cada 15s si nadie está mirando la pantalla.
+  // Polling silencioso de empresas / usuarios / solicitudes de membresía
+  // (cada 15s, salta si la pestaña está oculta). Proyectos y solicitudes de
+  // participación ya se refrescan solos vía TanStack Query.
   React.useEffect(() => {
     const interval = setInterval(async () => {
       if (document.hidden) return;
       try {
-        const [companiesData, projectsData] = await Promise.all([
-          api.get<Company[]>('/empresas').catch(() => null),
-          api.get<Project[]>('/proyectos').catch(() => null)
-        ]);
-
+        const companiesData = await api.get<Company[]>('/empresas').catch(() => null);
         if (companiesData) setCompanies(companiesData);
-        if (projectsData) setProjects(projectsData);
 
         const token = storage.obtenerToken();
         if (token) {
           const usersData = await api.get<User[]>('/usuarios').catch(() => null);
           if (usersData) setUsers(usersData);
-
-          const archivedData = await api.get<Project[]>('/proyectos/archivados').catch(() => null);
-          if (archivedData) setArchivedProjects(archivedData);
-
-          const requestsData = await api.get<any[]>('/proyectos/usuario/solicitudes-enviadas').catch(() => null);
-          if (requestsData) setRequests(requestsData);
 
           if (currentUser?.rol === 'admin' && currentUser?.empresa_id) {
             const memberReqs = await api.get<MemberRequest[]>(`/usuarios/solicitudes/empresa/${currentUser.empresa_id}`).catch(() => null);
@@ -306,49 +296,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCurrentUser(await authService.obtenerPerfil());
   };
 
+  // Puente hacia la feature proyectos. Estas funciones se conservan solo para
+  // las páginas que aún consumen useApp(); la lógica real vive en el servicio.
   const createProject = async (project: any) => {
     try {
-      // Upload images if provided and convert to base64
-      let imageBase64s: string[] = [];
-      if (project.imageFiles && project.imageFiles.length > 0) {
-        imageBase64s = await Promise.all(
-          project.imageFiles.map(async (file: File) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            const result = await api.post<any>('/recursos/upload', formData);
-            return result.base64;
-          })
-        );
-      }
-
-      // Upload PDFs if provided and convert to base64
-      let pdfBase64s: string[] = [];
-      if (project.pdfFiles && project.pdfFiles.length > 0) {
-        pdfBase64s = await Promise.all(
-          project.pdfFiles.map(async (file: File) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            const result = await api.post<any>('/recursos/upload', formData);
-            return result.base64;
-          })
-        );
-      }
-
-      // Create project with base64 data - IMPORTANT: Use correct field names from entity
-      const newProject = await api.post<Project>('/proyectos', {
-        nombre: project.name,
-        descripcion_corta: project.shortDescription,
-        descripcion_completa: project.description,
-        categoria: project.categoria || 'Tecnología',
-        fecha_inicio: project.startDate,
-        fecha_fin: project.endDate,
-        financiamiento: project.funding ? parseFloat(project.funding) : null,
-        documento_url: pdfBase64s.length > 0 ? pdfBase64s[0] : null,
-        imagenes_urls: imageBase64s,
-        creador_id: project.createdByUserId,
-      });
-
-      setProjects(prev => [...prev, newProject]);
+      const newProject = await proyectosService.crear(project);
+      invalidarProyectos();
       toast.success('Proyecto creado exitosamente');
       return newProject;
     } catch (err) {
@@ -359,57 +312,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProject = async (id: number, data: Partial<Project>) => {
-    const updated = await api.patch<Project>(`/proyectos/${id}`, data);
-    setProjects(prev => prev.map(p => p.id === id ? updated : p));
+    await proyectosService.actualizar(id, data);
+    invalidarProyectos();
   };
 
   const updateProjectEstado = async (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => {
-    const updated = await api.patch<Project>(`/proyectos/${id}/estado`, { estado });
-
-    // Preserve loaded relations (participantes, imagenes, etc.) by merging with original project
-    const original = projects.find(p => p.id === id) || archivedProjects.find(p => p.id === id);
-    const merged = original ? { ...original, ...updated } : updated;
-
-    if (estado === 'archivado') {
-      // Move from active projects to archived
-      setProjects(prev => prev.filter(p => p.id !== id));
-      setArchivedProjects(prev => {
-        const exists = prev.find(p => p.id === id);
-        return exists ? prev.map(p => p.id === id ? merged : p) : [...prev, merged];
-      });
-    } else {
-      // Could be un-archiving or changing between en_curso/terminado
-      setArchivedProjects(prev => prev.filter(p => p.id !== id));
-      setProjects(prev => {
-        const exists = prev.find(p => p.id === id);
-        return exists ? prev.map(p => p.id === id ? merged : p) : [...prev, merged];
-      });
-    }
-    toast.success(`Proyecto ${estado === 'archivado' ? 'archivado' : estado === 'terminado' ? 'marcado como terminado' : 'reactivado'} correctamente`);
+    await proyectosService.cambiarEstado(id, estado);
+    invalidarProyectos();
+    toast.success(
+      `Proyecto ${estado === 'archivado' ? 'archivado' : estado === 'terminado' ? 'marcado como terminado' : 'reactivado'} correctamente`,
+    );
   };
 
   const refreshProjects = async () => {
-    try {
-      const projectsData = await api.get<Project[]>('/proyectos');
-      setProjects(projectsData || []);
-      const token = localStorage.getItem('token');
-      if (token) {
-        const archived = await api.get<Project[]>('/proyectos/archivados');
-        setArchivedProjects(archived || []);
-      }
-    } catch (err) {
-      console.error('Error refreshing projects:', err);
-    }
+    await invalidarProyectos();
   };
 
   const createRequest = async (request: { proyecto_id: number; mensaje: string }) => {
-    const newReq = await api.post<any>(`/proyectos/${request.proyecto_id}/solicitudes`, { mensaje: request.mensaje });
-    setRequests(prev => [...prev, newReq]);
+    await solicitudesService.crear(request.proyecto_id, request.mensaje);
+    queryClient.invalidateQueries({ queryKey: SOLICITUDES_KEYS.enviadas() });
   };
 
   const updateRequest = async (id: number, status: 'accepted' | 'rejected') => {
-    const endpoint = status === 'accepted' ? 'aceptar' : 'rechazar';
-    await api.patch(`/proyectos/solicitudes/${id}/${endpoint}`, {});
+    if (status === 'accepted') await solicitudesService.aceptar(id);
+    else await solicitudesService.rechazar(id);
+    queryClient.invalidateQueries({ queryKey: SOLICITUDES_KEYS.todas });
+    invalidarProyectos();
   };
 
   const createMessage = async (message: { proyecto_id: number; contenido: string; archivo_url?: string }) => {
@@ -451,22 +379,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addResource = async (resource: any) => {
     const newRes = await api.post<Resource>('/recursos', resource);
     setResources(prev => [...prev, newRes]);
-    // Also update the project's recursos array so UI reflects the change immediately
-    setProjects(prev => prev.map(p =>
-      p.id === resource.proyecto_id
-        ? { ...p, recursos: [...(p.recursos || []), newRes] }
-        : p
-    ));
+    // El proyecto (con su árbol de recursos) se re-descarga vía TanStack Query.
+    invalidarProyectos();
   };
 
   const deleteResource = async (id: number) => {
     await api.delete(`/recursos/${id}`);
     setResources(prev => prev.filter(r => r.id !== id));
-    // Also remove from the project's recursos array
-    setProjects(prev => prev.map(p => ({
-      ...p,
-      recursos: (p.recursos || []).filter(r => r.id !== id),
-    })));
+    invalidarProyectos();
   };
 
   const approveCompany = async (id: number) => {
@@ -532,12 +452,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const transferProject = async (projectId: number, newOwnerId: number) => {
-    await api.patch(`/proyectos/${projectId}/transferir`, { nuevo_creador_id: newOwnerId });
-    setProjects(prev => prev.map(p =>
-      p.id === projectId
-        ? { ...p, creador_id: newOwnerId, suspendido: false }
-        : p
-    ));
+    await proyectosService.transferir(projectId, newOwnerId);
+    invalidarProyectos();
     toast.success('Proyecto transferido exitosamente');
   };
 

@@ -58,7 +58,7 @@ export interface CrearProjectDto {
   categoria?: string;
   startDate: string;
   endDate: string;
-  funding?: string;
+  funding?: string | number;
   createdByUserId: number;
   imageFiles?: File[];
   pdfFiles?: File[];

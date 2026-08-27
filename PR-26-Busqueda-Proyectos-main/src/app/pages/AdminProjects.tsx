@@ -2,7 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import { useApp } from '../context/AppContext';
-import { api } from '../services/api';
+import {
+  useProyectos,
+  useProyectosArchivados,
+  useCambiarEstadoProyecto,
+  useAutoTerminarProyectos,
+} from '@/features/proyectos';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -70,7 +75,7 @@ function EstadoDropdown({
 
   return createPortal(
     <div
-      style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 9999 }}
+      style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 'var(--z-index-popover)' }}
       className="bg-card border border-border rounded-xl shadow-2xl min-w-[160px] overflow-hidden"
     >
       {options.map(opt => {
@@ -139,11 +144,14 @@ function EstadoTableCell({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AdminProjects() {
-  const { projects, archivedProjects, companies, users, updateProjectEstado } = useApp();
+  const { companies, users } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: archivedProjects = [] } = useProyectosArchivados();
+  const cambiarEstado = useCambiarEstadoProyecto();
+  const autoTerminar = useAutoTerminarProyectos();
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<EstadoFilter>('todos');
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [autoTermLoading, setAutoTermLoading] = useState(false);
 
   const allProjects = [...projects, ...archivedProjects];
 
@@ -172,7 +180,7 @@ export default function AdminProjects() {
   const handleEstado = async (projectId: number, nuevoEstado: 'en_curso' | 'terminado' | 'archivado') => {
     setLoadingId(projectId);
     try {
-      await updateProjectEstado(projectId, nuevoEstado);
+      await cambiarEstado.mutateAsync({ id: projectId, estado: nuevoEstado });
     } catch (err) {
       console.error(err);
     } finally {
@@ -180,16 +188,8 @@ export default function AdminProjects() {
     }
   };
 
-  const handleAutoTerminar = async () => {
-    setAutoTermLoading(true);
-    try {
-      const data = await api.post<{ actualizados: number }>('/proyectos/admin/auto-terminar', {});
-      alert(`Proyectos terminados automáticamente: ${data.actualizados}`);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setAutoTermLoading(false);
-    }
+  const handleAutoTerminar = () => {
+    autoTerminar.mutate();
   };
 
   const FILTER_TABS: { key: EstadoFilter; label: string; icon: any }[] = [
@@ -217,9 +217,9 @@ export default function AdminProjects() {
                 variant="outline"
                 className="flex items-center gap-2 text-sm"
                 onClick={handleAutoTerminar}
-                disabled={autoTermLoading}
+                disabled={autoTerminar.isPending}
               >
-                {autoTermLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 text-warning" />}
+                {autoTerminar.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 text-warning" />}
                 Auto-terminar expirados
               </Button>
             </div>

@@ -2,6 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import { useApp } from '../context/AppContext';
+import {
+  useProyectos,
+  useProyectosArchivados,
+  useSolicitudesEnviadas,
+  useCambiarEstadoProyecto,
+} from '@/features/proyectos';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -288,7 +294,11 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function MyProjects() {
-  const { currentUser, projects, archivedProjects, requests, updateProjectEstado } = useApp();
+  const { currentUser } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: archivedProjects = [] } = useProyectosArchivados(!!currentUser);
+  const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
+  const cambiarEstado = useCambiarEstadoProyecto();
   const [tab, setTab] = useState<TabKey>('activos');
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
@@ -310,7 +320,7 @@ export default function MyProjects() {
 
   const handleEstado = async (projectId: number, nuevoEstado: 'en_curso' | 'terminado' | 'archivado') => {
     setLoadingId(projectId);
-    try { await updateProjectEstado(projectId, nuevoEstado); }
+    try { await cambiarEstado.mutateAsync({ id: projectId, estado: nuevoEstado }); }
     catch (err) { console.error(err); }
     finally { setLoadingId(null); }
   };
