@@ -2,142 +2,40 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { api } from '../services/api';
 import { toast } from 'sonner';
 
-// Types
-export type UserRole = 'superadmin' | 'admin' | 'empleado';
+/* Los tipos del dominio viven ahora en /shared y /features (Anexo B7).
+ * Se re-exportan aquí solo por compatibilidad con imports antiguos
+ * (`import type { Project } from '../context/AppContext'`). Migrar esos
+ * imports a los barriles de cada feature y luego eliminar este bloque. */
+import type { User, UserRole } from '@/shared/types/user.types';
+import type {
+  Company,
+  CompanyImagen,
+  CompanyEnlace,
+  CompanyRegistrant,
+  MemberRequest,
+} from '@/features/empresas/types/empresas.types';
+import type {
+  Project,
+  Request,
+  Resource,
+} from '@/features/proyectos/types/proyectos.types';
+import type { Task, TaskComment, Message } from '@/features/workspace/types/workspace.types';
 
-export interface User {
-  id: number;
-  correo: string;
-  nombre_completo: string;
-  cargo?: string; // cargo/posicion dentro de la empresa
-  rol: UserRole;
-  empresa_id?: number | null;
-  estado?: string;
-  documento_url?: string;
-  foto_url?: string;
-  empresa?: { id: number; nombre: string };
-  onboarding_completado?: boolean;
-  debe_cambiar_password?: boolean;
-}
-
-export interface CompanyImagen {
-  id: number;
-  url: string;
-}
-
-export interface CompanyEnlace {
-  id: number;
-  url: string;
-  nombre?: string;
-}
-
-export interface Company {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  num_empleados: number;
-  portafolio: string;
-  contacto: string;
-  estado: 'pendiente' | 'aprobado' | 'bloqueado' | 'rechazado';
-  fecha_creacion: string;
-  logo_url?: string;
-  documento_url?: string;
-  fecha_registro?: string;
-  fecha_aprobacion?: string;
-  usuarios?: User[];
-  imagenes?: CompanyImagen[];
-  enlaces?: CompanyEnlace[];
-}
-
-export interface MemberRequest {
-  id: number;
-  empresa_id: number;
-  usuario_id: number;
-  usuario?: User;
-  documento_url?: string;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
-  fecha_creacion: string;
-}
-
-export interface CompanyRegistrant {
-  name: string;
-  jobTitle: string;
-  email: string;
-}
-
-export interface Project {
-  id: number;
-  nombre: string;
-  descripcion_corta?: string;
-  descripcion_completa?: string;
-  categoria: string;
-  imagenes: { id: number; url: string }[];
-  fecha_inicio: string;
-  fecha_fin: string;
-  financiamiento?: number;
-  documento_url?: string;
-  creador_id: number;
-  creador?: User;
-  estado: 'en_curso' | 'terminado' | 'archivado';
-  suspendido?: boolean;
-  participantes?: { usuario_id: number, rol: string, usuario: User }[];
-  recursos?: Resource[];
-  fecha_creacion?: string;
-}
-
-export interface Request {
-  id: number;
-  proyecto_id: number;
-  usuario_id: number;
-  mensaje: string;
-  estado: 'pendiente' | 'aceptado' | 'rechazado';
-  fecha_creacion: string;
-  usuario?: User;
-}
-
-export interface Message {
-  id: number;
-  chat_id: number;
-  usuario_id: number;
-  contenido: string;
-  archivo_url?: string;
-  fecha: string;
-  usuario?: User;
-}
-
-export interface Task {
-  id: number;
-  proyecto_id: number;
-  columna_id: number;
-  usuario_id?: number;
-  titulo: string;
-  descripcion?: string;
-  prioridad: 'baja' | 'media' | 'alta';
-  fecha_limite: string;
-  orden: number;
-  fecha_creacion: string;
-  usuario?: User;
-  comentarios?: TaskComment[];
-}
-
-export interface TaskComment {
-  id: number;
-  tarea_id: number;
-  usuario_id: number;
-  texto: string;
-  fecha_creacion: string;
-  usuario?: User;
-}
-
-export interface Resource {
-  id: number;
-  proyecto_id: number;
-  nombre: string;
-  tipo: 'archivo' | 'carpeta';
-  url?: string;
-  padre_id?: number | null;
-  fecha_creacion: string;
-}
+export type {
+  User,
+  UserRole,
+  Company,
+  CompanyImagen,
+  CompanyEnlace,
+  CompanyRegistrant,
+  MemberRequest,
+  Project,
+  Request,
+  Resource,
+  Task,
+  TaskComment,
+  Message,
+};
 
 interface AppContextType {
   currentUser: User | null;
