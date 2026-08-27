@@ -63,7 +63,7 @@ export default function ResetPassword() {
           <Card className="p-8">
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                <ShieldCheck className="w-8 h-8 text-white" />
+                <ShieldCheck className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
 

@@ -1,0 +1,1667 @@
+================================================================================
+        MANUAL DE REGLAS UI / UX PARA SITIOS WEB — EDICIÓN 2026
+        Reglas concretas, medibles y accionables. Sin teoría de relleno.
+        Autor de referencia: compilado de W3C/WCAG 2.2, Google web.dev,
+        Material Design 3, Apple HIG, Nielsen Norman Group y práctica actual.
+================================================================================
+
+CÓMO USAR ESTE ARCHIVO
+--------------------------------------------------------------------------------
+- Léelo UNA vez completo para saber qué hay dentro.
+- Después NO lo leas más: úsalo como checklist. Antes de diseñar una pantalla,
+  abre la sección que corresponde y sigue las reglas.
+- Las reglas marcadas [OBLIGATORIO] no se negocian: si las rompes, la página
+  está mal, no importa qué tan bonita se vea.
+- Las reglas marcadas [RECOMENDADO] son buenas prácticas; puedes desviarte si
+  tienes una razón, pero tienes que poder explicarla.
+- Los valores numéricos son puntos de partida probados. Úsalos tal cual hasta
+  que tengas criterio para cambiarlos.
+
+REGLA CERO
+--------------------------------------------------------------------------------
+No diseñas pantallas. Diseñas la resolución de un problema de una persona.
+Si no puedes escribir en una sola frase "esta página existe para que el usuario
+X logre Y", no empieces a diseñar. No tienes brief, tienes un capricho.
+
+
+================================================================================
+PARTE 1 — DIFERENCIA UX vs UI (para no confundirte nunca más)
+================================================================================
+
+UX (Experiencia de Usuario) = ESTRUCTURA Y COMPORTAMIENTO
+    Qué pantallas existen, en qué orden, qué información hay en cada una,
+    cuántos pasos toma completar una tarea, qué pasa si algo falla.
+    Se decide ANTES. Se prueba con usuarios. Se mide con tasas de éxito.
+
+UI (Interfaz de Usuario) = APARIENCIA E INTERACCIÓN VISUAL
+    Colores, tipografía, espaciado, iconos, componentes, animaciones,
+    estados visuales, jerarquía visual.
+    Se decide DESPUÉS de la UX. Se mide con consistencia y accesibilidad.
+
+REGLA [OBLIGATORIO]: Nunca abras Figma para "hacer la UI bonita" antes de tener
+resuelto el flujo. Una interfaz preciosa sobre un flujo malo sigue siendo un
+producto malo — solo que ahora es un producto malo caro de cambiar.
+
+ORDEN DE TRABAJO CORRECTO (no lo alteres):
+    1. Definir objetivo del producto y del usuario
+    2. Definir tareas principales (máximo 3-5)
+    3. Arquitectura de información (qué contenido, cómo se agrupa)
+    4. Flujos de usuario (diagrama de pasos)
+    5. Wireframes en baja fidelidad (cajas grises, sin color, sin fuentes)
+    6. Definir design tokens (color, tipo, espaciado)
+    7. Diseñar componentes
+    8. Ensamblar pantallas en alta fidelidad
+    9. Prototipo interactivo
+   10. Test con 5 usuarios reales
+   11. Corregir
+   12. Entregar a desarrollo (o desarrollar)
+
+
+================================================================================
+PARTE 2 — LEYES Y HEURÍSTICAS QUE DEBES APLICAR SIEMPRE
+================================================================================
+
+2.1 LAS 10 HEURÍSTICAS DE NIELSEN (checklist de usabilidad)
+--------------------------------------------------------------------------------
+Cada pantalla que diseñes debe pasar estas 10 preguntas:
+
+ 1. VISIBILIDAD DEL ESTADO DEL SISTEMA
+    ¿El usuario sabe en todo momento qué está pasando?
+    → Reglas: toda acción que tarde >1s muestra loader. Todo proceso de varios
+      pasos muestra "Paso 2 de 4". Toda acción exitosa da confirmación visible.
+
+ 2. COINCIDENCIA CON EL MUNDO REAL
+    ¿Uso palabras del usuario, no del sistema?
+    → "Mis pedidos" no "Registros de transacción". "Guardar" no "Persistir".
+      Nunca muestres códigos internos, IDs de base de datos ni jerga técnica.
+
+ 3. CONTROL Y LIBERTAD DEL USUARIO
+    ¿Puede salir/deshacer sin castigo?
+    → Todo modal tiene X y se cierra con ESC. Toda acción destructiva tiene
+      confirmación o "Deshacer" durante 5-10s. Nunca atrapes al usuario.
+
+ 4. CONSISTENCIA Y ESTÁNDARES
+    ¿Lo mismo se ve y se comporta igual en todo el sitio?
+    → El botón primario es idéntico en toda la app. El logo siempre lleva al
+      inicio. El carrito siempre arriba a la derecha. No inventes convenciones.
+
+ 5. PREVENCIÓN DE ERRORES
+    ¿Impido el error antes de que ocurra?
+    → Deshabilita opciones inválidas. Usa selectores de fecha en vez de texto
+      libre. Valida el formato mientras escribe, no al enviar.
+
+ 6. RECONOCER EN LUGAR DE RECORDAR
+    ¿Obligo al usuario a memorizar algo?
+    → Muestra las opciones, no las escondas. Muestra el dato ingresado en el
+      paso anterior. Los iconos solos sin etiqueta son un fallo de esta regla.
+
+ 7. FLEXIBILIDAD Y EFICIENCIA
+    ¿El experto puede ir rápido y el novato no se pierde?
+    → Atajos de teclado, búsqueda, filtros guardados, acciones masivas.
+      Opcionales, nunca obligatorios.
+
+ 8. DISEÑO ESTÉTICO Y MINIMALISTA
+    ¿Cada elemento en pantalla se gana su lugar?
+    → Si quitas un elemento y nada se pierde, ese elemento sobraba.
+
+ 9. AYUDA A RECONOCER Y RECUPERARSE DE ERRORES
+    ¿El mensaje de error dice QUÉ pasó y CÓMO arreglarlo?
+    → Mal: "Error 500". Bien: "No pudimos guardar tus cambios. Revisa tu
+      conexión e intenta de nuevo." + botón Reintentar.
+
+10. AYUDA Y DOCUMENTACIÓN
+    ¿Existe ayuda contextual donde se necesita?
+    → Tooltips en campos confusos, ejemplos dentro del formulario, FAQ.
+
+
+2.2 LEYES DE UX (psicología aplicada)
+--------------------------------------------------------------------------------
+LEY DE FITTS
+   El tiempo para alcanzar un objetivo depende de su tamaño y distancia.
+   → Botones importantes: grandes y cerca del pulgar/cursor.
+   → En móvil, las acciones principales van ABAJO (zona del pulgar), no arriba.
+   → Nunca pongas dos botones de acción opuesta pegados (Guardar/Eliminar).
+     Mínimo 24px de separación entre acciones destructivas y normales.
+
+LEY DE HICK
+   Más opciones = más tiempo de decisión.
+   → Menú principal: máximo 7 ítems. Ideal 5.
+   → Formulario: divide en pasos si tiene más de 7 campos.
+   → Página de precios: máximo 4 planes, y marca uno como recomendado.
+
+LEY DE MILLER
+   La memoria de trabajo maneja ~7 elementos (±2). En pantalla, apunta a 5.
+   → Agrupa en bloques de 3-5. Un número de teléfono se lee mejor como
+     7XX-XX-XXX que 7XXXXXXX.
+
+LEY DE JAKOB
+   Los usuarios pasan la mayor parte del tiempo en OTROS sitios.
+   Esperan que el tuyo funcione como los demás.
+   → No reinventes el carrito, el login, el buscador ni el menú.
+     La originalidad va en la marca, no en los patrones de interacción.
+
+LEY DE PROXIMIDAD (Gestalt)
+   Elementos cercanos se perciben como relacionados.
+   → La etiqueta va MÁS CERCA de su campo que del campo anterior.
+     Espacio label→input: 4-8px. Espacio entre campos: 16-24px.
+     Este es el error #1 en formularios mal diseñados.
+
+LEY DE SIMILITUD (Gestalt)
+   Lo que se ve igual, se asume que hace lo mismo.
+   → Si algo es azul y subrayado, debe ser un enlace. Si no lo es, no lo pintes
+     así. Nunca uses el estilo de botón en algo que no es clickeable.
+
+EFECTO VON RESTORFF (aislamiento)
+   Lo diferente se recuerda.
+   → Solo UN elemento por pantalla debe ser el más llamativo: el CTA principal.
+     Si todo grita, nada se escucha.
+
+LEY DE TESLER (conservación de la complejidad)
+   La complejidad no se elimina, solo se mueve.
+   → Si el formulario es complejo, el sistema debe absorber esa complejidad
+     (autocompletado, valores por defecto, detección automática), no el usuario.
+
+EFECTO ZEIGARNIK
+   Las tareas incompletas se recuerdan mejor.
+   → Barras de progreso ("Perfil 60% completo") aumentan la finalización.
+
+REGLA DEL PICO-FINAL
+   La gente juzga una experiencia por su momento más intenso y por su final.
+   → Invierte esfuerzo extra en: el momento de éxito (confirmación de compra,
+     envío de formulario) y en el cierre del flujo. Ahí es donde se gana.
+
+UMBRALES DE TIEMPO DE RESPUESTA (memorízalos)
+   0 – 100 ms   → se siente instantáneo. No necesita feedback.
+   100 – 300 ms → se percibe rápido. Feedback opcional.
+   300 ms – 1 s → se nota. Cambia el cursor o el estado del botón.
+   1 s – 10 s   → el usuario pierde el foco. OBLIGATORIO loader/skeleton.
+   > 10 s       → OBLIGATORIO barra de progreso con % y opción de cancelar.
+
+
+================================================================================
+PARTE 3 — ARQUITECTURA DE INFORMACIÓN Y NAVEGACIÓN
+================================================================================
+
+3.1 REGLAS DE ESTRUCTURA
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Profundidad máxima de navegación: 3 niveles. Si necesitas un
+    cuarto nivel, tu categorización está mal.
+[OBLIGATORIO] Regla de los 3 clics como orientación (no dogma): cualquier
+    contenido importante alcanzable en ~3 interacciones desde el inicio.
+[OBLIGATORIO] El logo, arriba a la izquierda, siempre enlaza al inicio.
+[OBLIGATORIO] En toda página interna que no sea de primer nivel: breadcrumbs.
+    Formato: Inicio > Categoría > Subcategoría > Página actual
+    La página actual NO es un enlace.
+[OBLIGATORIO] El usuario siempre debe saber DÓNDE está: el ítem activo del menú
+    se marca visualmente (color + peso + indicador), no solo con color.
+
+3.2 MENÚ PRINCIPAL
+--------------------------------------------------------------------------------
+- Entre 4 y 7 ítems. Nunca más de 7 en el nivel superior.
+- Ordenados por importancia real para el usuario, no por el organigrama interno.
+- Etiquetas de 1-2 palabras, sustantivos concretos.
+  Bien: Productos, Precios, Nosotros, Contacto
+  Mal: Nuestra propuesta de valor, Soluciones integrales
+- El CTA principal va en el extremo derecho, con estilo de botón, visualmente
+  distinto del resto de ítems.
+- [RECOMENDADO] Header sticky (fijo al hacer scroll) en sitios largos.
+  Altura del header sticky en móvil: máximo 56-64px para no comer pantalla.
+
+3.3 NAVEGACIÓN EN MÓVIL
+--------------------------------------------------------------------------------
+- Menú hamburguesa SOLO en móvil/tablet. [OBLIGATORIO] En escritorio, si hay
+  espacio para mostrar los ítems, MUÉSTRALOS. La hamburguesa en desktop esconde
+  la navegación y baja el uso de secciones.
+- Alternativa superior en apps: barra de navegación inferior (bottom nav) con
+  3-5 ítems e iconos + etiqueta de texto. Nunca iconos sin texto.
+- El menú desplegado debe cerrarse con: la X, tocar fuera, ESC, y el botón
+  atrás del navegador.
+- [OBLIGATORIO] Buscador visible (no escondido tras un icono) si el sitio tiene
+  más de ~50 páginas o es un e-commerce.
+
+3.4 FOOTER
+--------------------------------------------------------------------------------
+Debe contener como mínimo:
+    - Enlaces de navegación secundaria agrupados por categoría
+    - Datos de contacto reales
+    - Enlaces legales: Privacidad, Términos, Cookies
+    - Redes sociales (si existen y están activas; si están muertas, no las pongas)
+    - Copyright con año actual (genéralo dinámicamente, no lo escribas a mano)
+
+
+================================================================================
+PARTE 4 — SISTEMA DE ESPACIADO Y LAYOUT
+================================================================================
+
+4.1 ESCALA DE ESPACIADO — BASE 4 / 8
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Todo espacio (margin, padding, gap) debe ser múltiplo de 4px.
+Usa SOLO estos valores. Prohibido inventar 13px, 27px, 35px.
+
+    --space-0:   0px
+    --space-1:   4px      (separación mínima entre elementos hermanos)
+    --space-2:   8px      (icono ↔ texto, label ↔ input)
+    --space-3:  12px
+    --space-4:  16px      (padding interno estándar de componentes)
+    --space-5:  20px
+    --space-6:  24px      (separación entre campos de formulario)
+    --space-8:  32px      (separación entre bloques dentro de una sección)
+    --space-10: 40px
+    --space-12: 48px      (separación entre secciones en móvil)
+    --space-16: 64px
+    --space-20: 80px      (separación entre secciones en escritorio)
+    --space-24: 96px
+    --space-32: 128px     (secciones muy respiradas / hero)
+
+REGLA DE PROXIMIDAD APLICADA:
+    Espacio DENTRO de un grupo  <  Espacio ENTRE grupos
+    Si el título de una sección está a 24px de su párrafo, la siguiente sección
+    debe empezar a 48px o más. Si no, el usuario no percibe el corte.
+
+4.2 CONTENEDOR Y ANCHOS MÁXIMOS
+--------------------------------------------------------------------------------
+    Ancho máximo de contenido general:      1200px – 1440px
+    Ancho máximo de texto corrido (lectura): 65-75 caracteres  ≈ 600-720px
+    [OBLIGATORIO] Nunca dejes un párrafo ocupar 1400px de ancho. Es ilegible.
+    Padding lateral del contenedor:
+        móvil:     16px  (mínimo absoluto)  — ideal 20-24px
+        tablet:    24-32px
+        escritorio: 40-64px
+
+    CSS recomendado:
+        .container {
+          width: 100%;
+          max-width: 1280px;
+          margin-inline: auto;
+          padding-inline: clamp(1rem, 4vw, 4rem);
+        }
+
+4.3 GRID
+--------------------------------------------------------------------------------
+- Sistema de 12 columnas en escritorio (divisible entre 2, 3, 4, 6).
+- 8 columnas en tablet, 4 columnas en móvil.
+- Gutter (separación entre columnas): 16px móvil / 24px tablet / 32px desktop.
+- [RECOMENDADO 2026] En vez de forzar breakpoints, usa grid intrínseco:
+
+        .grid {
+          display: grid;
+          gap: var(--space-6);
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+  Esto se adapta solo, sin una sola media query. Úsalo para tarjetas,
+  productos, galerías y listados. Es la técnica estándar actual.
+
+4.4 JERARQUÍA VISUAL — CÓMO ORDENAR LA MIRADA
+--------------------------------------------------------------------------------
+El ojo se guía por, en este orden de fuerza:
+    1. Tamaño        (lo más grande se ve primero)
+    2. Contraste     (lo que más resalta del fondo)
+    3. Color         (el color saturado atrae)
+    4. Posición      (arriba-izquierda en occidente; centro en móvil)
+    5. Espacio       (lo aislado destaca)
+
+PATRONES DE LECTURA:
+    - Patrón F: páginas con mucho texto (blogs, resultados de búsqueda).
+      Pon lo importante al inicio de cada línea y en los primeros párrafos.
+    - Patrón Z: landing pages con poco texto. El recorrido es
+      logo → menú → hero → CTA. Coloca el CTA en el final de la Z.
+    - En móvil todo es vertical: la jerarquía es simplemente el orden.
+
+REGLA [OBLIGATORIO]: Una sola acción primaria por pantalla. Todo lo demás es
+secundario (borde) o terciario (solo texto).
+
+
+================================================================================
+PARTE 5 — TIPOGRAFÍA
+================================================================================
+
+5.1 REGLAS DURAS
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Máximo 2 familias tipográficas. Una para títulos (display) y una
+    para cuerpo. Una tercera solo si es monoespaciada para datos/código.
+[OBLIGATORIO] Tamaño mínimo de cuerpo: 16px (1rem). Nunca menos en móvil —
+    iOS hace zoom automático en inputs con font-size < 16px.
+[OBLIGATORIO] Usa rem, no px, para tamaños de fuente. Si el usuario agranda la
+    letra en su navegador, tu sitio debe responder.
+[OBLIGATORIO] Nunca texto justificado en web (crea "ríos" de espacio).
+    Usa alineación a la izquierda.
+[OBLIGATORIO] Nunca escribas párrafos en MAYÚSCULAS. Solo etiquetas cortas.
+[OBLIGATORIO] Longitud de línea entre 45 y 75 caracteres.
+    CSS: max-width: 65ch;
+
+5.2 ESCALA TIPOGRÁFICA FLUIDA (recomendada 2026)
+--------------------------------------------------------------------------------
+En vez de cambiar tamaños en cada breakpoint, usa clamp(). El texto escala
+suave entre un mínimo y un máximo, sin saltos:
+
+    :root {
+      --text-xs:   clamp(0.75rem, 0.73rem + 0.1vw,  0.8125rem);  /* 12→13 */
+      --text-sm:   clamp(0.875rem, 0.85rem + 0.15vw, 0.9375rem); /* 14→15 */
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);      /* 16→18 */
+      --text-lg:   clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);   /* 18→22 */
+      --text-xl:   clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);     /* 22→28 */
+      --text-2xl:  clamp(1.75rem, 1.45rem + 1.4vw, 2.5rem);      /* 28→40 */
+      --text-3xl:  clamp(2.25rem, 1.7rem + 2.5vw, 3.5rem);       /* 36→56 */
+      --text-4xl:  clamp(2.75rem, 1.9rem + 4vw, 4.5rem);         /* 44→72 */
+    }
+
+REGLA DE ORO DE clamp(): el valor mínimo debe ser legible en un móvil de 320px
+y el máximo no debe romper en un monitor de 2560px. Siempre pon mínimo y
+máximo — usar solo vw produce texto ilegible o gigantesco.
+
+5.3 INTERLINEADO (line-height) — VALORES EXACTOS
+--------------------------------------------------------------------------------
+    Títulos grandes (32px+):     1.1 – 1.2
+    Subtítulos (20-28px):        1.2 – 1.3
+    Cuerpo de texto (16-18px):   1.5 – 1.6   ← [OBLIGATORIO] mínimo 1.5 por WCAG
+    Texto pequeño / captions:    1.4 – 1.5
+    Botones y etiquetas:         1.0 – 1.2
+
+    Regla: a MAYOR tamaño de letra, MENOR interlineado.
+
+5.4 ESPACIADO DE LETRAS (letter-spacing)
+--------------------------------------------------------------------------------
+    Títulos muy grandes:  -0.02em a -0.03em  (apretar ligeramente)
+    Cuerpo:                0 (normal)
+    MAYÚSCULAS / etiquetas: +0.05em a +0.1em  (las mayúsculas necesitan aire)
+
+5.5 PESOS
+--------------------------------------------------------------------------------
+    Usa como máximo 3 pesos: 400 (regular), 500/600 (medio/semibold), 700 (bold).
+    [OBLIGATORIO] No uses pesos por debajo de 300 para texto de cuerpo:
+    se vuelve ilegible en pantallas de baja densidad y para gente con baja visión.
+    Nunca uses "bold falso" (font-synthesis); carga el peso real.
+
+5.6 JERARQUÍA DE ENCABEZADOS
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Un solo <h1> por página. Es el título real del contenido.
+[OBLIGATORIO] No saltes niveles: h1 → h2 → h3. Nunca h1 → h4.
+[OBLIGATORIO] El nivel del encabezado se elige por ESTRUCTURA, no por tamaño.
+    Si quieres un h2 pequeño, cámbiale el CSS, no el tag.
+
+5.7 FUENTES Y RENDIMIENTO
+--------------------------------------------------------------------------------
+- Máximo 2 familias × 3 pesos = 6 archivos. Cada archivo extra retrasa la carga.
+- [OBLIGATORIO] Formato woff2. Nada de ttf/otf en producción.
+- [OBLIGATORIO] font-display: swap;  (evita texto invisible mientras carga)
+- [OBLIGATORIO] Precarga la fuente crítica:
+    <link rel="preload" href="/fonts/x.woff2" as="font" type="font/woff2" crossorigin>
+- [RECOMENDADO] Autoaloja las fuentes (no las llames desde un CDN externo):
+  mejora LCP y privacidad.
+- [RECOMENDADO] Fuentes variables: un solo archivo cubre todos los pesos.
+- Define siempre una pila de respaldo similar en métrica para evitar salto (CLS):
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+
+================================================================================
+PARTE 6 — COLOR
+================================================================================
+
+6.1 ESTRUCTURA DE UNA PALETA (no elijas colores sueltos, construye un sistema)
+--------------------------------------------------------------------------------
+Toda paleta necesita estos roles. Ni uno más, ni uno menos:
+
+  PRIMARIO      → color de marca. Se usa en el CTA principal y poco más.
+  SECUNDARIO    → acciones secundarias, acentos.
+  NEUTRALES     → LA BASE REAL DEL DISEÑO. 8-10 tonos de gris.
+                  Aquí vive el 90% de tu interfaz: fondos, bordes, textos.
+  SEMÁNTICOS    → éxito (verde), error (rojo), advertencia (ámbar), info (azul).
+  SUPERFICIES   → fondo de página, fondo de tarjeta, fondo elevado.
+
+REGLA 60-30-10:
+    60% neutro (fondos y superficies)
+    30% color secundario / tonos de apoyo
+    10% color primario (acentos y CTA)
+Si tu página es 60% morado, no tienes diseño, tienes un problema.
+
+6.2 ESCALA DE NEUTRALES (cópiala y adáptala al tono de tu marca)
+--------------------------------------------------------------------------------
+    --gray-50:  #F9FAFB   fondo de página alternativo
+    --gray-100: #F3F4F6   fondo de secciones, hover sutil
+    --gray-200: #E5E7EB   bordes, divisores          ← borde estándar
+    --gray-300: #D1D5DB   bordes de inputs
+    --gray-400: #9CA3AF   placeholders, iconos apagados, texto deshabilitado
+    --gray-500: #6B7280   texto secundario           ← mínimo legible en blanco
+    --gray-600: #4B5563   texto de apoyo
+    --gray-700: #374151   texto de cuerpo alternativo
+    --gray-800: #1F2937   títulos
+    --gray-900: #111827   texto principal            ← texto de cuerpo
+
+TRUCO PROFESIONAL: no uses grises puros (#808080). Añade una pizca del tono
+de tu color primario a todos los neutros. La interfaz se ve cohesionada al
+instante. Es la diferencia entre "plantilla" y "diseñado".
+
+6.3 CONTRASTE — REGLAS NO NEGOCIABLES (WCAG 2.2)
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Texto normal (<18.66px o <24px si es bold):  mínimo 4.5:1
+[OBLIGATORIO] Texto grande (≥24px, o ≥18.66px en bold):     mínimo 3:1
+[OBLIGATORIO] Componentes de interfaz y gráficos (bordes de
+              inputs, iconos con significado, estados):     mínimo 3:1
+[OBLIGATORIO] Indicador de foco del teclado contra el fondo: mínimo 3:1
+[RECOMENDADO / nivel AAA] Texto normal 7:1, texto grande 4.5:1
+
+CONSECUENCIAS PRÁCTICAS:
+    - Texto gris claro sobre blanco: PROHIBIDO. #9CA3AF sobre blanco da ~2.5:1.
+      No pasa. Para texto secundario usa mínimo #6B7280 (~4.8:1).
+    - Placeholder gris clarito: es texto, debe cumplir contraste igual.
+    - Texto blanco sobre imagen: [OBLIGATORIO] capa de oscurecimiento
+      (rgba(0,0,0,.45)) o degradado. Nunca confíes en la foto sola.
+    - [OBLIGATORIO] El color NUNCA es el único medio para transmitir
+      información. Un campo con error debe tener: borde rojo + icono +
+      mensaje de texto. El 8% de los hombres no distingue rojo/verde.
+
+HERRAMIENTAS DE VERIFICACIÓN (úsalas, no adivines):
+    - WebAIM Contrast Checker
+    - Extensión axe DevTools
+    - Panel de accesibilidad de Chrome DevTools (muestra el ratio al inspeccionar)
+    - Coolors / Realtime Colors para generar y probar la paleta
+
+6.4 USO CORRECTO DEL COLOR
+--------------------------------------------------------------------------------
+- El color primario se reserva para lo accionable. Si pintas un título con el
+  color del botón, la gente intentará hacerle clic.
+- Rojo = destructivo o error. Nunca uses rojo para un botón de "Guardar".
+- Verde = éxito o confirmación.
+- Los degradados: sutiles, entre tonos vecinos. Un degradado de morado a
+  naranja grita 2014.
+- [OBLIGATORIO] Define TODOS los colores como variables CSS. Cero valores hex
+  escritos directamente en los componentes. Sin esto no puedes hacer modo
+  oscuro ni cambiar la marca sin reescribir todo.
+
+
+================================================================================
+PARTE 7 — DESIGN TOKENS Y SISTEMA DE DISEÑO
+================================================================================
+
+7.1 QUÉ SON
+--------------------------------------------------------------------------------
+Un token es una decisión de diseño guardada como variable con nombre.
+En vez de "#3B82F6" escribes "--color-primary". En vez de "8px" escribes
+"--space-2". Todo el sistema se controla desde un solo archivo.
+
+7.2 NIVELES DE TOKENS (así los organizan los sistemas serios)
+--------------------------------------------------------------------------------
+  NIVEL 1 — PRIMITIVOS: el valor crudo, sin significado.
+      --blue-500: #3B82F6;
+      --space-4: 16px;
+
+  NIVEL 2 — SEMÁNTICOS: el valor con un propósito. Apuntan al nivel 1.
+      --color-action: var(--blue-500);
+      --color-text-primary: var(--gray-900);
+      --color-border-default: var(--gray-200);
+
+  NIVEL 3 — DE COMPONENTE: específicos de un componente. Apuntan al nivel 2.
+      --button-bg: var(--color-action);
+      --button-padding-x: var(--space-6);
+
+[OBLIGATORIO] En tus componentes usa SOLO tokens de nivel 2 o 3. Nunca
+llames a --blue-500 directamente desde un botón. Esa disciplina es lo que
+permite cambiar toda la marca modificando 5 líneas.
+
+7.3 OTROS TOKENS QUE DEBES DEFINIR
+--------------------------------------------------------------------------------
+  RADIOS (border-radius) — elige UNA personalidad y sé consistente:
+      --radius-sm:   4px    (badges, tags)
+      --radius-md:   8px    (botones, inputs)      ← el estándar actual
+      --radius-lg:  12px    (tarjetas)
+      --radius-xl:  16-24px (modales, contenedores grandes)
+      --radius-full: 9999px (avatares, píldoras, botones circulares)
+      Regla: el radio del hijo = radio del padre − padding. Si una tarjeta con
+      radio 16px y padding 8px contiene una imagen, esa imagen lleva radio 8px.
+
+  SOMBRAS — sutiles y con una sola fuente de luz (desde arriba):
+      --shadow-xs: 0 1px 2px rgba(16,24,40,.05);
+      --shadow-sm: 0 1px 3px rgba(16,24,40,.1), 0 1px 2px rgba(16,24,40,.06);
+      --shadow-md: 0 4px 8px -2px rgba(16,24,40,.1), 0 2px 4px -2px rgba(16,24,40,.06);
+      --shadow-lg: 0 12px 16px -4px rgba(16,24,40,.08), 0 4px 6px -2px rgba(16,24,40,.03);
+      --shadow-xl: 0 20px 24px -4px rgba(16,24,40,.08);
+      Regla: mientras más elevado el elemento, más grande y más difusa la sombra.
+      Nunca uses sombras negras puras al 50%. Se ven sucias.
+
+  ELEVACIÓN (z-index) — define una escala y NO improvises:
+      --z-base: 0
+      --z-dropdown: 1000
+      --z-sticky: 1100
+      --z-overlay: 1200
+      --z-modal: 1300
+      --z-popover: 1400
+      --z-toast: 1500
+      Prohibido escribir z-index: 9999 en cualquier parte del proyecto.
+
+  DURACIONES DE ANIMACIÓN:
+      --duration-fast:   150ms  (hover, cambios de color)
+      --duration-normal: 250ms  (dropdowns, acordeones)
+      --duration-slow:   400ms  (modales, transiciones de página)
+
+  CURVAS DE ACELERACIÓN:
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);     ← entradas (lo más usado)
+      --ease-in:  cubic-bezier(0.7, 0, 0.84, 0);     ← salidas
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); ← movimientos continuos
+      Regla: las cosas que ENTRAN usan ease-out (rápido al inicio, frenan).
+      Nunca uses linear salvo para loaders que giran.
+
+
+================================================================================
+PARTE 8 — REGLAS POR COMPONENTE
+================================================================================
+
+8.1 BOTONES
+--------------------------------------------------------------------------------
+JERARQUÍA (define exactamente 3, no más):
+   PRIMARIO   → fondo sólido con color de marca. Máximo 1 por pantalla/sección.
+   SECUNDARIO → borde de 1px, fondo transparente o neutro claro.
+   TERCIARIO  → solo texto, sin borde ni fondo (parece enlace pero con padding).
+   DESTRUCTIVO → variante roja del primario. Solo para eliminar/cancelar cuentas.
+
+MEDIDAS [OBLIGATORIO]:
+   Altura mínima táctil: 44×44px (Apple) / 48×48px (Material).
+   WCAG 2.2 exige mínimo 24×24px de área de destino, pero 44px es el estándar real.
+   Padding horizontal: 16px (sm) / 24px (md) / 32px (lg)
+   Padding vertical:    8px (sm) / 12px (md) / 16px (lg)
+   Espacio icono ↔ texto: 8px
+   Separación entre botones adyacentes: mínimo 8px, ideal 12-16px
+
+REGLAS:
+   - El texto del botón es un VERBO que describe lo que pasará.
+     Bien: "Crear cuenta", "Enviar mensaje", "Descargar factura"
+     Mal: "Enviar", "OK", "Aceptar", "Click aquí"
+   - [OBLIGATORIO] El botón debe mantener el mismo nombre en toda la app.
+     Si el botón dice "Publicar", la confirmación dice "Publicado".
+   - Botón de ancho completo: solo en móvil o dentro de tarjetas estrechas.
+   - [OBLIGATORIO] Estado de carga: el botón se deshabilita, muestra spinner y
+     conserva su ancho (para no mover el layout). Texto: "Guardando…"
+   - [OBLIGATORIO] Nunca deshabilites un botón sin explicar por qué.
+     Es preferible dejarlo activo y mostrar los errores al pulsar.
+   - Nunca uses <div> como botón. Usa <button> o <a>. Si no es navegación,
+     no es <a>.
+
+8.2 ENLACES
+--------------------------------------------------------------------------------
+   - [OBLIGATORIO] Los enlaces dentro de texto corrido van subrayados. El color
+     solo no basta (WCAG 1.4.1) salvo que el contraste con el texto vecino sea ≥3:1.
+   - Los enlaces que abren en pestaña nueva se anuncian (icono + aria-label).
+     Usa target="_blank" solo cuando de verdad haga falta, y añade
+     rel="noopener noreferrer".
+   - Texto del enlace descriptivo. "Ver política de privacidad", no "aquí".
+
+8.3 CAMPOS DE FORMULARIO (INPUTS)
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Todo input lleva una etiqueta <label> visible y asociada con
+    for/id. El placeholder NO es una etiqueta: desaparece al escribir y el
+    usuario olvida qué debía poner.
+[OBLIGATORIO] Etiqueta ARRIBA del campo, alineada a la izquierda. Es el layout
+    que más rápido se completa. Nada de etiquetas a la izquierda del campo.
+[OBLIGATORIO] Altura mínima del input: 44px. Font-size mínimo 16px (evita zoom
+    automático en iOS).
+[OBLIGATORIO] El campo debe tener borde visible con contraste ≥3:1. Los inputs
+    "invisibles" (solo una línea gris clara) fallan accesibilidad.
+[OBLIGATORIO] Estado de foco visible: outline de 2px + offset de 2px, contraste
+    ≥3:1. NUNCA escribas outline: none sin poner un reemplazo.
+
+REGLAS ADICIONALES:
+   - El ancho del campo sugiere el largo esperado. Un campo de código postal
+     no debe medir lo mismo que uno de dirección.
+   - Marca los campos OPCIONALES, no los obligatorios (normalmente hay menos
+     opcionales). Si marcas obligatorios, usa "*" + leyenda explicativa.
+   - Usa el tipo correcto: type="email", "tel", "number", "date", "url".
+     En móvil cambia el teclado y ahorra frustración.
+   - [OBLIGATORIO] autocomplete correcto en todos los campos:
+     autocomplete="name" | "email" | "tel" | "street-address" |
+     "postal-code" | "cc-number" | "current-password" | "new-password"
+     WCAG 2.2 penaliza pedir datos que el navegador ya puede rellenar.
+   - Texto de ayuda (hint) debajo del campo, en gris con contraste válido,
+     ANTES de que el usuario se equivoque.
+   - Mensaje de error debajo del campo, en rojo, con icono, describiendo la
+     solución: "El correo debe incluir @" no "Campo inválido".
+   - Validación: valida al SALIR del campo (blur), no en cada tecla.
+     Excepción: fuerza de contraseña, que sí se muestra en tiempo real.
+   - [OBLIGATORIO] Al enviar con errores: enfoca el primer campo con error y
+     muestra un resumen arriba con enlaces a cada error.
+   - Nunca borres el formulario cuando hay un error. Conserva lo escrito.
+
+8.4 FORMULARIOS COMPLETOS
+--------------------------------------------------------------------------------
+   - Una sola columna. Los formularios de dos columnas se completan más lento
+     y provocan más errores. Excepción: campos naturalmente cortos y
+     relacionados (Ciudad + Código postal, Mes + Año).
+   - Máximo 7 campos por pantalla. Más que eso, divide en pasos con indicador
+     de progreso.
+   - Pide SOLO lo que necesitas ahora. Cada campo extra reduce la conversión.
+   - Agrupa campos relacionados con <fieldset> y <legend>.
+   - El botón de envío al final, alineado con los campos, ancho completo en móvil.
+   - [OBLIGATORIO WCAG 2.2] No pidas volver a escribir información que ya
+     ingresó antes en el mismo proceso (ej. repetir la dirección). Ofrécela
+     precargada o seleccionable.
+   - [OBLIGATORIO WCAG 2.2] No exijas pruebas cognitivas para autenticarse
+     (resolver acertijos, recordar datos). Permite pegar la contraseña y
+     permite gestores de contraseñas.
+
+8.5 TARJETAS (CARDS)
+--------------------------------------------------------------------------------
+   - Padding interno: 16px (móvil) / 24px (escritorio). Uniforme en los 4 lados.
+   - Todas las tarjetas de una misma fila deben tener la misma altura.
+     CSS: usa grid, no flex con alturas automáticas.
+   - Si toda la tarjeta es clickeable, el título debe ser el enlace real y la
+     tarjeta extiende el área táctil (técnica de "stretched link"). No pongas
+     enlaces anidados dentro de un contenedor clickeable.
+   - Jerarquía dentro de la tarjeta: imagen → categoría/eyebrow → título →
+     descripción (2-3 líneas máx, truncada) → metadatos → acción.
+   - Estado hover: elevación sutil + leve desplazamiento (-2px). No la agrandes
+     al 105%: mueve el layout de alrededor.
+
+8.6 MODALES / DIÁLOGOS
+--------------------------------------------------------------------------------
+   - Úsalos solo para: confirmar acciones destructivas, formularios cortos,
+     información crítica que bloquea el flujo. Para todo lo demás, usa una
+     página o un panel lateral.
+   - [OBLIGATORIO] Se cierran con: botón X, tecla ESC, clic en el fondo oscuro.
+     Excepción: si hay datos sin guardar, el clic fuera pide confirmación.
+   - [OBLIGATORIO] Atrapa el foco dentro del modal (focus trap). Tab no debe
+     salir al fondo.
+   - [OBLIGATORIO] Al abrir, el foco va al primer elemento interactivo o al
+     título. Al cerrar, el foco VUELVE al botón que lo abrió.
+   - [OBLIGATORIO] role="dialog" aria-modal="true" y aria-labelledby apuntando
+     al título. Mejor aún: usa el elemento nativo <dialog>.
+   - El fondo de la página no debe hacer scroll mientras el modal está abierto.
+   - Ancho máximo 480-640px. En móvil, ocupa todo el ancho con márgenes de 16px
+     o se convierte en hoja inferior (bottom sheet).
+   - Botones: acción primaria a la derecha, cancelar a la izquierda (en web).
+   - Nunca dos modales encima del otro. Jamás.
+
+8.7 TABLAS DE DATOS
+--------------------------------------------------------------------------------
+   - Encabezados <th> con scope="col". Nada de tablas hechas con divs.
+   - Alinea números a la DERECHA, texto a la izquierda, fechas a la izquierda.
+     Usa tabular-nums para que las columnas de números se alineen.
+   - Filas con alternancia sutil o divisores de 1px. Elige uno, no ambos.
+   - En móvil: NO hagas scroll horizontal invisible. Opciones válidas:
+       a) Convertir cada fila en una tarjeta apilada.
+       b) Mostrar solo 2-3 columnas clave + "Ver detalle".
+       c) Scroll horizontal CON indicador visual claro y primera columna fija.
+   - Acciones por fila: máximo 2 visibles, el resto en menú "…".
+   - Paginación o scroll infinito: si el usuario necesita volver a un ítem
+     concreto, usa paginación. El scroll infinito rompe el botón "atrás".
+
+8.8 MENSAJES, ALERTAS Y NOTIFICACIONES
+--------------------------------------------------------------------------------
+   TOAST (aviso flotante temporal): para confirmaciones no críticas.
+       Duración: 4-6 segundos. Si tiene acción ("Deshacer"), 8-10 segundos.
+       Posición: abajo-centro en móvil, abajo-derecha o arriba-derecha en desktop.
+       [OBLIGATORIO] Nunca pongas información crítica solo en un toast: se va.
+       [OBLIGATORIO] aria-live="polite" para que el lector de pantalla lo anuncie.
+   ALERTA EN LÍNEA: para errores de formulario o avisos del contexto.
+       Se queda hasta que se resuelve. Lleva icono + color + texto.
+   BANNER: para avisos globales (mantenimiento, cookies). Descartable.
+   [OBLIGATORIO] Los 4 tipos semánticos deben distinguirse por icono, no solo
+   por color: ✓ éxito, ✕ error, ⚠ advertencia, ℹ información.
+
+8.9 ESTADOS VACÍOS, DE CARGA Y DE ERROR
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Toda lista, tabla o sección con datos dinámicos necesita
+diseñar estos 4 estados. Olvidarlos es el error más común de los proyectos:
+
+   1. VACÍO (aún no hay datos):
+      ilustración o icono + título + una frase explicando + botón para crear
+      el primer elemento. Nunca dejes un espacio en blanco.
+      Ejemplo: "Aún no tienes proyectos. Crea el primero para empezar."
+   2. CARGANDO:
+      usa SKELETON (bloques grises con la forma del contenido real), no un
+      spinner centrado. El skeleton reduce la percepción de espera y evita CLS.
+   3. ERROR:
+      qué falló + qué hacer + botón Reintentar. Nunca muestres el error técnico
+      crudo al usuario final.
+   4. SIN RESULTADOS (búsqueda/filtros):
+      "No encontramos resultados para «X»" + sugerencias + botón Limpiar filtros.
+
+8.10 IMÁGENES Y AVATARES
+--------------------------------------------------------------------------------
+   - [OBLIGATORIO] width y height (o aspect-ratio) en TODAS las imágenes.
+     Sin esto, la página salta al cargar y arruinas el CLS.
+   - [OBLIGATORIO] alt descriptivo en imágenes con contenido; alt="" en
+     imágenes puramente decorativas (para que el lector las ignore).
+   - object-fit: cover para que nunca se deformen.
+   - Avatares: círculo, con iniciales de respaldo si no hay foto.
+     Tamaños: 24 / 32 / 40 / 48 / 64px.
+
+8.11 ICONOS
+--------------------------------------------------------------------------------
+   - Una sola familia de iconos en todo el proyecto. Mezclar sets se nota.
+     Recomendados: Lucide, Phosphor, Heroicons, Material Symbols.
+   - Tamaños: 16 / 20 / 24px. El grosor de trazo debe ser consistente (1.5-2px).
+   - [OBLIGATORIO] Un icono solo, sin texto, necesita aria-label.
+   - [OBLIGATORIO] Los iconos decorativos llevan aria-hidden="true".
+   - Icono + texto siempre que quepa. Un icono solo se entiende bien únicamente
+     si es universal: buscar, cerrar, menú, carrito, usuario, flechas.
+
+
+================================================================================
+PARTE 9 — ESTADOS INTERACTIVOS (los 7 estados obligatorios)
+================================================================================
+
+[OBLIGATORIO] TODO elemento interactivo debe tener diseñados estos estados.
+Si entregas un componente sin ellos, el componente está incompleto:
+
+   1. DEFAULT   — estado de reposo.
+   2. HOVER     — cursor encima (solo en dispositivos con puntero).
+                  Cambio sutil: oscurecer/aclarar 5-10%, o elevar 1-2px.
+                  [OBLIGATORIO] cursor: pointer.
+                  [OBLIGATORIO] Envuélvelo en @media (hover: hover) para que no
+                  se quede "pegado" en pantallas táctiles.
+   3. FOCUS     — navegación con teclado (Tab).
+                  [OBLIGATORIO] outline: 2px solid; outline-offset: 2px;
+                  contraste ≥3:1 con el fondo. Usa :focus-visible para que no
+                  aparezca en clics de ratón pero sí con teclado.
+                  [OBLIGATORIO WCAG 2.2] El elemento enfocado no puede quedar
+                  tapado por headers sticky, cookies o chats flotantes.
+                  Solución: scroll-margin-top igual a la altura del header.
+   4. ACTIVE    — mientras se presiona. Feedback inmediato: escala 0.98 o
+                  color más oscuro. Duración ~100ms.
+   5. DISABLED  — opacidad 0.5, cursor: not-allowed, sin hover.
+                  [OBLIGATORIO] Explica por qué está deshabilitado (tooltip o
+                  texto). Un botón muerto sin explicación es un callejón sin salida.
+   6. LOADING   — spinner + texto en gerundio + ancho preservado + no clickeable.
+   7. ERROR / SELECTED / CHECKED — según el componente.
+
+REGLA DE ORO DEL FOCO: si al navegar con Tab por tu sitio no ves DÓNDE estás,
+tu sitio es inaccesible. Pruébalo ahora mismo en cualquier página que hayas hecho.
+
+
+================================================================================
+PARTE 10 — DISEÑO RESPONSIVO (el núcleo de este manual)
+================================================================================
+
+10.1 MOBILE-FIRST [OBLIGATORIO]
+--------------------------------------------------------------------------------
+Diseña y escribe el CSS para la pantalla más pequeña PRIMERO, y luego amplía
+con min-width. Nunca al revés.
+
+Por qué: si diseñas para escritorio y luego recortas, terminas escondiendo
+cosas ("esto lo ocultamos en móvil") y el móvil queda como versión mutilada.
+Empezando por móvil te obligas a priorizar: lo que sobrevive en 360px es lo
+que de verdad importa.
+
+    /* CORRECTO: base móvil, se amplía hacia arriba */
+    .card { padding: 1rem; }
+    @media (min-width: 48rem) { .card { padding: 2rem; } }
+
+    /* INCORRECTO: base escritorio, se recorta hacia abajo */
+    .card { padding: 2rem; }
+    @media (max-width: 48rem) { .card { padding: 1rem; } }
+
+10.2 BREAKPOINTS DE REFERENCIA
+--------------------------------------------------------------------------------
+Rangos estándar (punto de partida, no dogma):
+       320 – 480px    móvil vertical
+       481 – 768px    móvil horizontal / tablet pequeña
+       769 – 1024px   tablet
+      1025 – 1200px   laptop
+      1201px +        escritorio grande
+
+Implementación con min-width (mobile-first) y unidades rem:
+       sm:   30rem  (480px)
+       md:   48rem  (768px)
+       lg:   64rem  (1024px)
+       xl:   80rem  (1280px)
+      2xl:   96rem  (1536px)
+
+[REGLA CLAVE] Los breakpoints los define TU CONTENIDO, no los dispositivos.
+Si tu layout se rompe a 850px, pon un breakpoint en 850px aunque no esté en
+ninguna lista. Redimensiona lentamente la ventana y añade un breakpoint donde
+se vea feo. Ese es el método correcto.
+
+[REGLA] Diseña para 320px de ancho como mínimo absoluto. Es el suelo real.
+[REGLA] Prueba también a 1920px: muchos diseños se ven perdidos y estirados
+en monitores grandes por falta de max-width.
+
+10.3 CONTAINER QUERIES — LA TÉCNICA ACTUAL (2026)
+--------------------------------------------------------------------------------
+Las media queries preguntan por el ancho de la VENTANA. Las container queries
+preguntan por el ancho del CONTENEDOR donde vive el componente. Esto resuelve
+el problema clásico: la misma tarjeta en una barra lateral estrecha y en un
+grid ancho necesita verse distinto, y la ventana no lo sabe.
+
+Soporte de navegadores: ampliamente disponible desde 2025 (>92%). Úsalo.
+
+    .card-wrapper {
+      container-type: inline-size;
+      container-name: card;
+    }
+
+    .card { display: block; }
+
+    @container card (min-width: 400px) {
+      .card { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; }
+    }
+
+CUÁNDO USAR CADA UNO:
+    Media query      → estructura de PÁGINA (sidebar sí/no, columnas globales)
+    Container query  → comportamiento de COMPONENTES reutilizables
+    clamp()          → tipografía y espaciado fluidos
+    Grid intrínseco  → listados que se acomodan solos, sin breakpoints
+
+10.4 UNIDADES: CUÁL USAR Y CUÁNDO
+--------------------------------------------------------------------------------
+    rem   → tipografía, espaciado, breakpoints. Respeta la config del usuario.
+    em    → espaciado relativo al texto del propio componente.
+    %     → anchos dentro de contenedores.
+    fr    → columnas de grid.
+    ch    → ancho máximo de líneas de texto (65ch).
+    vw/vh → solo para elementos de pantalla completa, y siempre acotados.
+    px    → bordes (1px), sombras, y poco más.
+
+    [OBLIGATORIO] Nada de anchos fijos en px para contenedores. Crea zonas
+    muertas entre breakpoints.
+    [OBLIGATORIO] En móvil, usa dvh (dynamic viewport height) en vez de vh:
+    100vh no cuenta la barra del navegador y produce cortes.
+        .hero { min-height: 100dvh; }
+    [OBLIGATORIO] Nunca uses vw solo para font-size. Siempre dentro de clamp().
+
+10.5 IMÁGENES RESPONSIVAS
+--------------------------------------------------------------------------------
+    [OBLIGATORIO] Base para todas:
+        img { max-width: 100%; height: auto; display: block; }
+
+    [OBLIGATORIO] Formatos modernos: AVIF primero, WebP de respaldo, JPG último.
+        <picture>
+          <source srcset="foto.avif" type="image/avif">
+          <source srcset="foto.webp" type="image/webp">
+          <img src="foto.jpg" alt="Descripción real" width="1200" height="800"
+               loading="lazy" decoding="async">
+        </picture>
+
+    [OBLIGATORIO] srcset + sizes para servir el tamaño adecuado a cada pantalla:
+        <img src="foto-800.jpg"
+             srcset="foto-400.jpg 400w, foto-800.jpg 800w, foto-1600.jpg 1600w"
+             sizes="(max-width: 768px) 100vw, 50vw"
+             alt="..." width="800" height="533">
+
+    [OBLIGATORIO] loading="lazy" en TODAS las imágenes salvo la del hero.
+    [OBLIGATORIO] La imagen del hero lleva fetchpriority="high" y NO lleva lazy.
+    [OBLIGATORIO] aspect-ratio o width+height siempre, para reservar el espacio.
+    [RECOMENDADO] Art direction: en móvil no recortes una foto panorámica;
+    sirve una versión vertical distinta con <picture> + media.
+
+    Video embebido responsivo sin hacks:
+        .video { aspect-ratio: 16 / 9; width: 100%; }
+
+10.6 TOQUE Y ERGONOMÍA MÓVIL
+--------------------------------------------------------------------------------
+    [OBLIGATORIO] Área táctil mínima 44×44px (48×48px recomendado).
+      WCAG 2.2 (2.5.8) exige 24×24px como mínimo legal; 44px es lo correcto.
+    [OBLIGATORIO] Separación mínima entre objetivos táctiles: 8px.
+    [OBLIGATORIO] Acciones principales en la zona del pulgar: mitad inferior
+      de la pantalla. Lo de arriba-izquierda es la zona más difícil de alcanzar.
+    [OBLIGATORIO WCAG 2.2 - 2.5.7] Toda acción que requiera arrastrar debe
+      tener una alternativa con un solo toque (botones de subir/bajar, menú).
+      Si tu app usa drag & drop y no tiene alternativa, incumple.
+    [OBLIGATORIO] Nada de hover como único medio para revelar contenido: en
+      táctil no existe hover. Todo lo que aparece al pasar el mouse debe ser
+      alcanzable con toque o teclado.
+    [OBLIGATORIO] Respeta las áreas seguras de los móviles con notch:
+        padding-bottom: env(safe-area-inset-bottom);
+    [OBLIGATORIO] Meta viewport correcto y sin bloquear el zoom:
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      PROHIBIDO: user-scalable=no o maximum-scale=1. Impide el zoom y es un
+      fallo de accesibilidad directo.
+
+10.7 CONTENIDO Y ORIENTACIÓN
+--------------------------------------------------------------------------------
+    [OBLIGATORIO] El sitio debe funcionar en vertical Y horizontal. No bloquees
+      la orientación (WCAG 1.3.4) salvo casos justificados (un juego, un piano).
+    [OBLIGATORIO] Reflow (WCAG 1.4.10): a 320px de ancho equivalente (o zoom
+      400%) no debe aparecer scroll horizontal. Prueba tu sitio con Ctrl+ hasta
+      400%: si aparece barra horizontal, está mal.
+    [OBLIGATORIO] Espaciado de texto (WCAG 1.4.12): el contenido no debe
+      romperse si el usuario fuerza line-height 1.5, espaciado de letras 0.12em
+      y de palabras 0.16em. Traducción práctica: no uses alturas fijas en
+      contenedores de texto. Usa min-height.
+    [REGLA] No escondas contenido en móvil "porque no cabe". Reorganízalo.
+      Si algo no vale la pena en móvil, probablemente no valía en escritorio.
+
+10.8 CÓMO PROBAR (obligatorio antes de entregar)
+--------------------------------------------------------------------------------
+    1. DevTools → modo dispositivo → arrastra el ancho LENTAMENTE de 320 a 1920.
+       Busca: solapamientos, texto cortado, scroll horizontal, saltos feos.
+    2. Prueba en un móvil Android de gama media REAL. No solo en tu iPhone ni
+       en el emulador. Es el dispositivo que usa la mayoría del mundo.
+    3. Prueba con conexión 4G lenta (DevTools → Network → Slow 4G).
+    4. Prueba con el teclado solamente (Tab, Enter, ESC, flechas).
+    5. Prueba con zoom del navegador al 200% y al 400%.
+    6. Prueba en modo oscuro del sistema.
+    7. Prueba con las imágenes bloqueadas (¿se entiende igual?).
+
+
+================================================================================
+PARTE 11 — ACCESIBILIDAD (WCAG 2.2 — CHECKLIST COMPLETO NIVEL AA)
+================================================================================
+
+WCAG 2.2 es la versión vigente (publicada en octubre de 2023, actualizada en
+diciembre de 2024). Es el estándar de referencia mundial y en varias
+jurisdicciones ya es obligación legal para servicios digitales.
+
+Se organiza en 4 principios, resumidos como POUR:
+    P - Perceptible: el usuario puede percibir la información.
+    O - Operable: puede usar la interfaz.
+    U - Understandable (Comprensible): entiende lo que ve y lo que pasa.
+    R - Robust (Robusto): funciona con tecnologías de asistencia.
+
+11.1 PERCEPTIBLE
+--------------------------------------------------------------------------------
+[ ] Toda imagen informativa tiene alt descriptivo; las decorativas alt=""
+[ ] Los videos tienen subtítulos; los audios tienen transcripción
+[ ] La estructura usa HTML semántico: header, nav, main, section, article,
+    aside, footer. Un solo <main> por página.
+[ ] Los encabezados siguen orden jerárquico sin saltos
+[ ] Las listas usan <ul>/<ol>, las tablas usan <table> con <th>
+[ ] Contraste de texto ≥4.5:1 (normal) / ≥3:1 (grande)
+[ ] Contraste de componentes e iconos significativos ≥3:1
+[ ] El color no es el único portador de información
+[ ] El texto puede ampliarse al 200% sin perder funcionalidad
+[ ] Reflow a 320px sin scroll horizontal
+[ ] Espaciado de texto ajustable sin romper el layout
+[ ] Nada de texto dentro de imágenes (salvo logos)
+
+11.2 OPERABLE
+--------------------------------------------------------------------------------
+[ ] Todo es alcanzable y usable SOLO con teclado
+[ ] El orden de tabulación sigue el orden visual y lógico
+[ ] No hay trampas de teclado (poder entrar y salir de todo componente)
+[ ] Enlace "Saltar al contenido" como primer elemento enfocable
+[ ] Foco visible siempre, con contraste ≥3:1 (WCAG 2.2 - 2.4.11)
+[ ] El elemento enfocado NO queda oculto tras headers/banners fijos (2.4.11)
+[ ] Objetivos táctiles ≥24×24px como mínimo legal, 44×44px recomendado (2.5.8)
+[ ] Toda acción de arrastre tiene alternativa de un solo toque (2.5.7)
+[ ] Nada parpadea más de 3 veces por segundo
+[ ] Los temporizadores se pueden extender, pausar o desactivar
+[ ] Se puede pausar/detener cualquier animación automática o carrusel
+[ ] Títulos de página únicos y descriptivos
+[ ] Texto de enlace comprensible fuera de contexto
+
+11.3 COMPRENSIBLE
+--------------------------------------------------------------------------------
+[ ] <html lang="es"> declarado correctamente
+[ ] La navegación es consistente en todas las páginas (mismo orden, mismo sitio)
+[ ] Los componentes que hacen lo mismo se identifican igual en todo el sitio
+[ ] La ayuda (chat, contacto, FAQ) aparece en el mismo lugar en todas las
+    páginas donde exista (WCAG 2.2 - 3.2.6 Ayuda consistente)
+[ ] Los errores se identifican en texto, no solo con color
+[ ] Se dan sugerencias concretas para corregir errores
+[ ] Las acciones legales/financieras/de borrado son reversibles, verificables
+    o confirmables antes de ejecutarse
+[ ] No se pide reingresar información ya proporcionada en el mismo proceso
+    (WCAG 2.2 - 3.3.7 Entrada redundante)
+[ ] La autenticación no exige memorizar ni resolver acertijos; se permite
+    pegar y usar gestores de contraseñas (WCAG 2.2 - 3.3.8)
+[ ] Ningún cambio de contexto ocurre solo por enfocar o escribir en un campo
+
+11.4 ROBUSTO
+--------------------------------------------------------------------------------
+[ ] HTML válido, sin IDs duplicados, sin etiquetas mal anidadas
+[ ] Cada control tiene nombre accesible, rol y valor correctos
+[ ] Los mensajes dinámicos se anuncian con aria-live
+[ ] Se usa HTML nativo antes que ARIA. Regla número uno de ARIA:
+    "no usar ARIA es mejor que usar ARIA mal". Un <button> real siempre gana
+    a un <div role="button">.
+
+11.5 HERRAMIENTAS DE AUDITORÍA
+--------------------------------------------------------------------------------
+    - axe DevTools (extensión) — la más fiable para automatizado
+    - Lighthouse (integrado en Chrome) — pestaña Accessibility
+    - WAVE (wave.webaim.org)
+    - Lector de pantalla: NVDA (Windows, gratis) o VoiceOver (Mac, integrado)
+    - Navegación con teclado: hazla tú mismo, no hay herramienta que la sustituya
+
+ADVERTENCIA: las herramientas automáticas detectan aproximadamente entre un
+tercio y la mitad de los problemas reales. El resto solo aparece probando
+manualmente con teclado y lector de pantalla.
+
+11.6 PREFERENCIAS DEL SISTEMA QUE DEBES RESPETAR [OBLIGATORIO]
+--------------------------------------------------------------------------------
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) { /* variables del modo oscuro */ }
+    @media (prefers-contrast: more)     { /* aumentar contraste */ }
+
+    Ignorar prefers-reduced-motion no es un detalle: hay personas a las que el
+    movimiento en pantalla les provoca mareo y náusea real.
+
+
+================================================================================
+PARTE 12 — RENDIMIENTO Y CORE WEB VITALS
+================================================================================
+
+El rendimiento es parte de la UX, no un tema aparte. Una página bonita que
+tarda 5 segundos es una página mala.
+
+12.1 LAS TRES MÉTRICAS Y SUS UMBRALES (vigentes 2026)
+--------------------------------------------------------------------------------
+   LCP — Largest Contentful Paint (velocidad de carga del contenido principal)
+        BUENO: ≤ 2.5 s      Necesita mejora: 2.5–4 s     Malo: > 4 s
+
+   INP — Interaction to Next Paint (capacidad de respuesta a las interacciones)
+        BUENO: ≤ 200 ms     Necesita mejora: 200–500 ms  Malo: > 500 ms
+        Sustituyó a FID en marzo de 2024. Cualquier guía que aún hable de FID
+        está desactualizada.
+
+   CLS — Cumulative Layout Shift (estabilidad visual: cuánto salta el layout)
+        BUENO: ≤ 0.1        Necesita mejora: 0.1–0.25    Malo: > 0.25
+
+Google evalúa estas métricas con datos de usuarios reales (CrUX), en el
+percentil 75, sobre una ventana móvil de 28 días. Es decir: no basta con que
+te funcione rápido en tu laptop con fibra; el 75% de las visitas reales,
+incluidas las de móviles modestos, debe estar en verde. Se aprueba solo
+cuando las tres métricas están en verde a la vez.
+
+12.2 CÓMO MEJORAR CADA MÉTRICA
+--------------------------------------------------------------------------------
+  PARA MEJORAR LCP (normalmente la imagen o el título del hero):
+    - Optimiza la imagen del hero: AVIF/WebP, tamaño correcto, sin lazy loading
+    - fetchpriority="high" en la imagen del hero
+    - preconnect a dominios de terceros críticos
+    - Precarga la fuente crítica
+    - CSS crítico en línea; el resto diferido
+    - Reduce el tiempo de respuesta del servidor (TTFB): caché, CDN
+    - Elimina recursos que bloquean el renderizado
+
+  PARA MEJORAR INP (casi siempre es JavaScript):
+    - Envía MENOS JavaScript. Es la solución real.
+    - Divide tareas largas (>50ms) del hilo principal
+    - Code splitting: carga solo lo que la página necesita
+    - Elimina librerías pesadas usadas para una sola cosa
+    - Debounce/throttle en eventos de scroll, resize e input
+    - Cuidado con los scripts de terceros: chats, píxeles, analíticas.
+      Cada uno cuesta. Cárgalos con defer o después de la interacción.
+
+  PARA MEJORAR CLS (es el más fácil de arreglar):
+    - width y height (o aspect-ratio) en TODAS las imágenes, videos e iframes
+    - Reserva espacio para anuncios, banners y contenido que llega después
+    - font-display: swap + fuente de respaldo con métricas similares
+    - Nunca insertes contenido ARRIBA de contenido ya visible
+    - Usa transform para animar, nunca top/left/width/height
+    - Los skeleton loaders deben tener el tamaño exacto del contenido final
+
+12.3 PRESUPUESTO DE RENDIMIENTO (fíjalo antes de empezar)
+--------------------------------------------------------------------------------
+    Peso total de la página (primera carga):  < 1 MB   (ideal < 500 KB)
+    JavaScript:                                < 200 KB comprimido
+    CSS:                                       < 100 KB comprimido
+    Imagen individual:                         < 200 KB
+    Peticiones HTTP:                           < 50
+    Tiempo hasta interactivo en 4G:            < 3.5 s
+    Fuentes:                                   máximo 2 familias, 4-6 archivos
+
+12.4 HERRAMIENTAS DE MEDICIÓN
+--------------------------------------------------------------------------------
+    PageSpeed Insights — combina laboratorio y datos reales
+    Chrome DevTools → Lighthouse y pestaña Performance
+    Google Search Console → informe de Core Web Vitals (datos reales de tu sitio)
+    WebPageTest — para pruebas detalladas por dispositivo y red
+
+NOTA IMPORTANTE: tras publicar un arreglo, los datos reales tardan ~28 días en
+reflejarlo. No juzgues el resultado al día siguiente.
+
+
+================================================================================
+PARTE 13 — MOVIMIENTO Y MICROINTERACCIONES
+================================================================================
+
+13.1 REGLAS DE ANIMACIÓN
+--------------------------------------------------------------------------------
+[OBLIGATORIO] Toda animación debe tener una razón funcional: dar feedback,
+    mostrar relación entre elementos, dirigir la atención u ocultar una espera.
+    La animación decorativa porque "se ve bonito" envejece mal y cansa.
+[OBLIGATORIO] Duraciones: 150-250ms para microinteracciones, 250-400ms para
+    transiciones de elementos grandes. Nada supera 500ms.
+    Más de 500ms se percibe como lentitud, no como elegancia.
+[OBLIGATORIO] Anima solo transform y opacity. Son las únicas propiedades que
+    el navegador puede animar en la GPU sin recalcular el layout.
+    PROHIBIDO animar: width, height, top, left, margin, padding.
+[OBLIGATORIO] Respeta prefers-reduced-motion (ver 11.6).
+[REGLA] Nada de animaciones al hacer scroll que retrasen la lectura del
+    contenido. Si el usuario tiene que esperar a que aparezca el texto, has
+    convertido tu diseño en un obstáculo.
+[REGLA] Un solo momento animado destacado por página. Si todo se mueve, nada
+    llama la atención y la página se siente hecha por plantilla.
+
+13.2 MICROINTERACCIONES QUE SÍ VALEN LA PENA
+--------------------------------------------------------------------------------
+    - Botón que responde al presionar (escala 0.98)
+    - Campo que resalta al recibir foco
+    - Checkbox con animación de marcado
+    - Toast que entra deslizando y sale desvaneciéndose
+    - Skeleton con brillo sutil mientras carga
+    - Acordeón que se despliega con altura animada
+    - Feedback inmediato al copiar algo ("Copiado ✓")
+    - Contador o barra de progreso que avanza
+
+13.3 CARRUSELES — ADVERTENCIA
+--------------------------------------------------------------------------------
+Los carruseles automáticos tienen tasas de interacción muy bajas y suelen
+perjudicar la accesibilidad. Si vas a usar uno:
+    [OBLIGATORIO] Botón de pausa visible
+    [OBLIGATORIO] Controles anterior/siguiente accesibles con teclado
+    [OBLIGATORIO] Indicadores de posición clickeables
+    [OBLIGATORIO] No avanzar automáticamente si el usuario ya interactuó
+    [RECOMENDADO] Mejor aún: no uses carrusel. Muestra el contenido apilado.
+
+
+================================================================================
+PARTE 14 — UX WRITING (las palabras también son diseño)
+================================================================================
+
+REGLAS:
+ 1. Escribe desde el lado del usuario, no del sistema.
+    Bien: "Tus notificaciones"      Mal: "Configuración de webhooks"
+ 2. Voz activa y verbos concretos. El botón dice exactamente qué pasará.
+    Bien: "Guardar cambios"          Mal: "Enviar" / "Aceptar" / "OK"
+ 3. Un elemento, un trabajo. La etiqueta etiqueta; el ejemplo ejemplifica.
+ 4. Consistencia de vocabulario: si es "Proyecto" en un sitio, es "Proyecto"
+    en todos. Nunca alternes "Proyecto/Trabajo/Caso" para lo mismo.
+ 5. Sentence case (solo la primera letra en mayúscula) en botones, títulos y
+    etiquetas. Es más legible que Title Case Con Todo En Mayúscula.
+ 6. Los errores no piden disculpas ni son vagos: dicen qué pasó y qué hacer.
+    Bien: "No pudimos procesar el pago. Verifica los datos de tu tarjeta."
+    Mal:  "Ups! Algo salió mal :("
+ 7. Las pantallas vacías son una invitación a actuar, no un espacio muerto.
+ 8. Sin jerga técnica ni nombres internos del sistema.
+ 9. Sin relleno: elimina "por favor", "simplemente", "solo tienes que".
+10. Números y datos concretos ganan a adjetivos. "Listo en 2 minutos" vence a
+    "Rápido y sencillo".
+11. Sin sorpresas: el texto del enlace debe describir el destino.
+12. Escribe en el mismo idioma y registro de tu usuario. Si tu público es
+    boliviano, no escribas en español de España.
+
+
+================================================================================
+PARTE 15 — ESTRUCTURA DE UNA LANDING PAGE QUE CONVIERTE
+================================================================================
+
+Orden probado de secciones. Adáptalo, pero no lo desordenes sin motivo:
+
+ 1. HEADER
+    Logo | Navegación (4-6 ítems) | CTA principal
+    Sticky, altura ≤64px en móvil.
+
+ 2. HERO (la parte visible sin hacer scroll)
+    [OBLIGATORIO] Debe responder en 5 segundos: qué es, para quién y qué gano.
+    - Titular (h1): la propuesta de valor en una frase clara, no un eslogan
+      críptico. 6-12 palabras.
+    - Subtítulo: 1-2 líneas explicando el cómo. Máximo 25 palabras.
+    - CTA primario + CTA secundario (opcional, "Ver demo")
+    - Elemento visual: producto real, no una foto de banco de imágenes con
+      gente sonriendo señalando una pantalla.
+    - [RECOMENDADO] Prueba social mínima justo debajo del CTA
+      (logos de clientes, "+2.000 usuarios", calificación).
+
+ 3. PRUEBA SOCIAL
+    Logos, cifras, calificaciones. Va temprano: reduce la desconfianza inicial.
+
+ 4. PROBLEMA / SOLUCIÓN
+    Nombra el dolor del usuario antes de vender la solución. Si el usuario no
+    se reconoce en el problema, no le interesa tu producto.
+
+ 5. BENEFICIOS (no características)
+    3-6 bloques con icono + título + 1-2 líneas.
+    Característica: "Sincronización en la nube"
+    Beneficio: "Accede a tus datos desde cualquier dispositivo, sin configurar nada"
+    Escribe siempre el beneficio; la característica va en letra pequeña.
+
+ 6. CÓMO FUNCIONA
+    3-4 pasos numerados. Aquí SÍ tiene sentido numerar, porque hay secuencia
+    real. No numeres bloques que no son una secuencia.
+
+ 7. TESTIMONIOS
+    Con nombre real, foto y cargo. Un testimonio anónimo no vale nada.
+    Mejor 2 testimonios verificables que 8 inventados.
+
+ 8. PRECIOS (si aplica)
+    Máximo 4 planes. Uno marcado como recomendado. Precios visibles.
+    Esconder el precio detrás de "Contáctanos" reduce la conversión salvo en
+    ventas empresariales grandes.
+
+ 9. FAQ
+    Las 5-8 objeciones reales que impiden comprar. En acordeón.
+    [OBLIGATORIO] El acordeón debe ser accesible: <button> con aria-expanded.
+
+10. CTA FINAL
+    Repite la acción principal con un cierre fuerte. Aquí el usuario ya sabe
+    de qué se trata; el mensaje puede ser más directo.
+
+11. FOOTER
+    Ver sección 3.4.
+
+REGLAS TRANSVERSALES DE LA LANDING:
+    - Una sola acción principal en toda la página, repetida 3-4 veces.
+      Si pides "Registrarse", "Descargar el PDF", "Suscribirse al boletín" y
+      "Agendar demo" en la misma página, no consigues ninguna.
+    - Sin autoplay con sonido. Nunca.
+    - Sin popup de suscripción en los primeros 30 segundos. Si lo usas: al
+      salir del sitio o tras un scroll del 50%, y siempre con X visible.
+    - Longitud de sección: 400-800px de alto en escritorio. Secciones de 2000px
+      hacen abandonar.
+
+
+================================================================================
+PARTE 16 — MODO OSCURO
+================================================================================
+
+[REGLA 1] El modo oscuro NO es invertir los colores. Es un tema aparte.
+[REGLA 2] Nunca uses negro puro (#000) como fondo. Usa #0F1115 – #18181B.
+          El negro puro con texto blanco produce halo y fatiga visual.
+[REGLA 3] Nunca uses blanco puro (#FFF) para el texto. Usa #E8E8EA – #F0F0F2.
+[REGLA 4] En modo oscuro, la elevación se comunica con FONDOS MÁS CLAROS, no
+          con sombras (las sombras no se ven sobre fondo oscuro).
+              Nivel 0 (página):   #0F1115
+              Nivel 1 (tarjeta):  #17191F
+              Nivel 2 (modal):    #1E212A
+              Nivel 3 (popover):  #262A34
+[REGLA 5] Desatura los colores de marca. Un color muy saturado sobre fondo
+          oscuro vibra y cansa. Baja la saturación 10-20% y sube la luminosidad.
+[REGLA 6] Verifica el contraste OTRA VEZ en modo oscuro. Los ratios cambian.
+[REGLA 7] Las imágenes con fondo blanco destacan feo. Aplica un ligero
+          atenuado o sirve variantes.
+[REGLA 8] Respeta prefers-color-scheme por defecto, pero ofrece un selector
+          manual con 3 opciones: Claro / Oscuro / Sistema. Guarda la elección.
+[REGLA 9] Evita el parpadeo blanco al cargar: aplica el tema con un script
+          en línea en el <head>, antes de pintar.
+
+Implementación limpia con tokens:
+      :root {
+        --bg: #FFFFFF;  --surface: #F9FAFB;  --text: #111827;
+      }
+      [data-theme="dark"] {
+        --bg: #0F1115;  --surface: #17191F;  --text: #E8E8EA;
+      }
+   Todos los componentes usan var(--bg), var(--text)… y el tema se cambia con
+   un solo atributo en <html>.
+
+
+================================================================================
+PARTE 17 — SEO TÉCNICO BÁSICO (lo mínimo que no puedes ignorar)
+================================================================================
+
+[ ] <title> único por página, 50-60 caracteres, con la palabra clave al inicio
+[ ] <meta name="description"> de 140-160 caracteres, escrita para humanos
+[ ] Un solo <h1> por página, que coincida con el tema real
+[ ] URLs limpias, en minúsculas, con guiones: /servicios/diseno-web
+[ ] HTML semántico (los buscadores leen la estructura)
+[ ] Etiquetas Open Graph para cómo se ve al compartir en redes:
+        og:title, og:description, og:image (1200×630px), og:url, og:type
+[ ] Datos estructurados JSON-LD según el tipo de contenido
+    (Organization, Article, Product, FAQPage, BreadcrumbList)
+[ ] sitemap.xml y robots.txt
+[ ] Canonical en páginas con contenido duplicable
+[ ] HTTPS obligatorio
+[ ] Todas las imágenes con alt real (sirve para accesibilidad Y para SEO)
+[ ] Core Web Vitals en verde (son señal de ranking)
+[ ] Diseño responsivo real (la indexación de Google es mobile-first)
+[ ] favicon y apple-touch-icon
+
+
+================================================================================
+PARTE 18 — ERRORES PROHIBIDOS (la lista negra)
+================================================================================
+
+DISEÑO VISUAL
+ ✗ Más de 2 tipografías
+ ✗ Espaciados inventados fuera de la escala (13px, 27px, 35px)
+ ✗ Texto gris claro sobre fondo blanco
+ ✗ Texto blanco sobre foto sin capa de contraste
+ ✗ Más de un botón primario compitiendo en la misma vista
+ ✗ Sombras negras duras y grandes
+ ✗ Degradados de colores opuestos del círculo cromático
+ ✗ Iconos de familias distintas mezclados
+ ✗ Bordes redondeados inconsistentes entre componentes
+ ✗ Centrar párrafos largos
+
+UX
+ ✗ Menú hamburguesa en escritorio teniendo espacio
+ ✗ Formularios de más de 7 campos sin dividir en pasos
+ ✗ Placeholder usado como etiqueta
+ ✗ Errores que borran lo que el usuario ya escribió
+ ✗ Acciones destructivas sin confirmación ni deshacer
+ ✗ Modal que no se cierra con ESC ni con clic fuera
+ ✗ Scroll infinito en contenido que el usuario necesita volver a encontrar
+ ✗ Popup de newsletter en los primeros segundos
+ ✗ Carrusel automático sin pausa
+ ✗ Autoplay con sonido
+ ✗ Estados vacíos sin diseñar
+ ✗ Mensajes de error técnicos mostrados al usuario final
+
+TÉCNICO
+ ✗ outline: none sin reemplazo visible
+ ✗ user-scalable=no en el viewport
+ ✗ Imágenes sin width/height
+ ✗ Imágenes sin lazy loading (excepto el hero)
+ ✗ <div onclick> en lugar de <button>
+ ✗ z-index: 9999
+ ✗ Colores hex escritos directamente en los componentes
+ ✗ Anchos fijos en px para contenedores
+ ✗ font-size en px para texto
+ ✗ 100vh en móvil en vez de 100dvh
+ ✗ Animar width/height/top/left
+ ✗ Cargar 6 pesos de fuente "por si acaso"
+
+
+================================================================================
+PARTE 19 — CHECKLIST FINAL ANTES DE PUBLICAR
+================================================================================
+
+ESTRUCTURA Y CONTENIDO
+[ ] Cada página tiene un objetivo claro y una acción principal
+[ ] Jerarquía de encabezados correcta, un solo h1
+[ ] Todos los textos revisados (sin lorem ipsum, sin faltas de ortografía)
+[ ] Todos los enlaces funcionan; no hay 404 internos
+[ ] Página 404 personalizada con enlace al inicio y buscador
+
+VISUAL
+[ ] Todos los colores salen de tokens
+[ ] Todos los espaciados son múltiplos de 4
+[ ] Escala tipográfica aplicada de forma consistente
+[ ] Los 7 estados diseñados en todos los componentes interactivos
+[ ] Radios y sombras consistentes en todo el sitio
+
+RESPONSIVO
+[ ] Probado de 320px a 1920px sin roturas
+[ ] Sin scroll horizontal en ninguna resolución
+[ ] Probado en un móvil Android real de gama media
+[ ] Áreas táctiles ≥44px con separación ≥8px
+[ ] Funciona en vertical y horizontal
+[ ] Zoom al 200% y 400% sin perder funcionalidad
+
+ACCESIBILIDAD
+[ ] Navegación completa con teclado
+[ ] Foco visible en todo, nunca tapado por elementos fijos
+[ ] Contrastes verificados con herramienta (no a ojo)
+[ ] Todas las imágenes con alt correcto
+[ ] Formularios con labels asociados y autocomplete
+[ ] prefers-reduced-motion respetado
+[ ] lang declarado
+[ ] Probado con lector de pantalla al menos en el flujo principal
+[ ] Puntuación de accesibilidad en Lighthouse ≥95
+
+RENDIMIENTO
+[ ] LCP ≤ 2.5s / INP ≤ 200ms / CLS ≤ 0.1
+[ ] Imágenes en AVIF/WebP con srcset
+[ ] lazy loading aplicado (menos el hero)
+[ ] Fuentes en woff2, precargadas, con font-display: swap
+[ ] JavaScript diferido y dividido
+[ ] Peso total dentro del presupuesto
+
+FUNCIONAL
+[ ] Formularios envían y confirman correctamente
+[ ] Estados de carga, error y vacío probados de verdad
+[ ] Probado en Chrome, Firefox, Safari y Edge
+[ ] Modo oscuro revisado si existe
+[ ] Analítica instalada
+[ ] Sitemap y robots.txt subidos
+[ ] HTTPS activo
+[ ] Metadatos Open Graph verificados compartiendo el enlace
+
+
+================================================================================
+PARTE 20 — BASE CSS LISTA PARA COPIAR
+================================================================================
+
+/* ---------- RESET MODERNO ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  min-height: 100dvh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+img, picture, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+input, button, textarea, select { font: inherit; color: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; }
+p { text-wrap: pretty; max-width: 65ch; }
+ul[role="list"], ol[role="list"] { list-style: none; padding: 0; }
+
+/* ---------- TOKENS ---------- */
+:root {
+  /* color */
+  --color-bg: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-border: #E5E7EB;
+  --color-text: #111827;
+  --color-text-muted: #6B7280;
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+
+  /* tipografía */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-body);
+  --text-sm:   clamp(0.875rem, 0.85rem + 0.15vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --text-xl:   clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --text-2xl:  clamp(1.75rem, 1.45rem + 1.4vw, 2.5rem);
+  --text-3xl:  clamp(2.25rem, 1.7rem + 2.5vw, 3.5rem);
+
+  /* espaciado */
+  --space-1: 0.25rem;  --space-2: 0.5rem;   --space-3: 0.75rem;
+  --space-4: 1rem;     --space-6: 1.5rem;   --space-8: 2rem;
+  --space-12: 3rem;    --space-16: 4rem;    --space-20: 5rem;
+  --section-y: clamp(3rem, 2rem + 4vw, 7rem);
+
+  /* forma */
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px rgba(16,24,40,.1), 0 1px 2px rgba(16,24,40,.06);
+  --shadow-md: 0 4px 8px -2px rgba(16,24,40,.1), 0 2px 4px -2px rgba(16,24,40,.06);
+
+  /* movimiento */
+  --duration-fast: 150ms; --duration-normal: 250ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* capas */
+  --z-dropdown: 1000; --z-sticky: 1100; --z-modal: 1300; --z-toast: 1500;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0F1115;
+  --color-surface: #17191F;
+  --color-border: #2A2E38;
+  --color-text: #E8E8EA;
+  --color-text-muted: #9BA1AC;
+  --color-primary: #60A5FA;
+}
+
+/* ---------- LAYOUT ---------- */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 4rem);
+}
+.section { padding-block: var(--section-y); }
+.grid-auto {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.stack > * + * { margin-block-start: var(--space-4); }
+
+/* ---------- FOCO ACCESIBLE (no lo borres nunca) ---------- */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+/* evita que el header fijo tape el elemento enfocado (WCAG 2.4.11) */
+:target, [tabindex], a, button, input, select, textarea { scroll-margin-top: 6rem; }
+
+/* ---------- SALTAR AL CONTENIDO ---------- */
+.skip-link {
+  position: absolute; left: -9999px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary); color: #fff; z-index: var(--z-toast);
+}
+.skip-link:focus { left: var(--space-4); top: var(--space-4); }
+
+/* ---------- BOTÓN ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base); font-weight: 600; line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+}
+.btn--primary { background: var(--color-primary); color: #fff; }
+@media (hover: hover) {
+  .btn--primary:hover { background: var(--color-primary-hover); }
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ---------- CAMPO DE FORMULARIO ---------- */
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.field + .field { margin-block-start: var(--space-6); }
+.field label { font-size: var(--text-sm); font-weight: 500; }
+.field input, .field select, .field textarea {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  font-size: 1rem;               /* nunca menos: iOS haría zoom */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+.field input[aria-invalid="true"] { border-color: var(--color-danger); }
+.field .hint  { font-size: var(--text-sm); color: var(--color-text-muted); }
+.field .error { font-size: var(--text-sm); color: var(--color-danger); }
+
+/* ---------- COMPONENTE ADAPTATIVO CON CONTAINER QUERY ---------- */
+.card-wrap { container-type: inline-size; }
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+@container (min-width: 420px) {
+  .card { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-6); }
+}
+
+/* ---------- MOVIMIENTO REDUCIDO ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+================================================================================
+PARTE 21 — TENDENCIAS 2026 (úsalas con criterio, no por moda)
+================================================================================
+
+Lo que está marcando el diseño de interfaces este año:
+
+ - TIPOGRAFÍA GRANDE Y CON CARÁCTER ("make it big"): titulares enormes como
+   elemento visual principal. Funciona cuando la tipografía comunica la
+   identidad de la marca; no cuando es solo texto grande porque sí.
+ - MATERIAL 3 EXPRESSIVE: la actualización de Google apuesta por colores más
+   vivos, tipografía audaz y animación con más presencia. Referencia útil si
+   trabajas en Android o buscas un lenguaje visual más emocional.
+ - EFECTOS TRANSLÚCIDOS / "liquid glass": transparencias y refracción para
+   comunicar capas y profundidad. Riesgo alto de arruinar el contraste:
+   si lo usas, verifica accesibilidad después.
+ - MINIMALISMO CON PERSONALIDAD: fondos limpios y pocos elementos, pero con
+   color intenso y tipografía fuerte. El minimalismo frío y genérico quedó atrás.
+ - MODO OSCURO Y ALTO CONTRASTE: por fatiga visual, ya no es un extra.
+ - MICROINTERACCIONES CON PROPÓSITO: ajustadas y sutiles, no efectistas.
+ - FORMAS ORGÁNICAS Y ESQUINAS REDONDEADAS: rompen la rigidez de la cuadrícula.
+ - ACCESIBILIDAD E INCLUSIÓN COMO BASE, no como revisión final. En 2026 se
+   diseña accesible desde el primer día, y en varias regiones ya es exigencia
+   legal para servicios digitales.
+ - SOSTENIBILIDAD DIGITAL: interfaces más ligeras, menos recursos, menos peso.
+   Coincide exactamente con lo que pide el rendimiento.
+ - IA INTEGRADA EN LA INTERFAZ: buscadores conversacionales, personalización,
+   asistentes contextuales. Regla: la IA debe reducir pasos, no añadir una
+   ventana de chat que el usuario no pidió.
+
+ADVERTENCIA SOBRE TENDENCIAS: las tendencias caducan; los principios de este
+manual no. Si una tendencia entra en conflicto con una regla [OBLIGATORIO],
+gana la regla. Un sitio con glassmorphism precioso y contraste 2:1 es un sitio
+roto que además se ve del 2026.
+
+
+================================================================================
+PARTE 22 — FUENTES OFICIALES PARA SEGUIR APRENDIENDO
+================================================================================
+
+ESTÁNDARES (la verdad, no opiniones)
+    W3C / WCAG 2.2 .................. w3.org/WAI/standards-guidelines/wcag
+    MDN Web Docs .................... developer.mozilla.org
+    web.dev (Google) ................ web.dev
+
+SISTEMAS DE DISEÑO DE REFERENCIA
+    Material Design 3 ............... m3.material.io
+    Apple Human Interface Guidelines  developer.apple.com/design
+    Fluent 2 (Microsoft) ............ fluent2.microsoft.design
+    Primer (GitHub), Polaris (Shopify), Carbon (IBM), Atlassian Design System
+
+PRINCIPIOS Y PATRONES
+    Laws of UX ...................... lawsofux.com
+    Nielsen Norman Group ............ nngroup.com
+    Refactoring UI (libro) .......... para desarrolladores que quieren diseñar
+    Inclusive Components ............ inclusive-components.design
+
+REFERENCIA VISUAL
+    Mobbin ...... capturas reales de apps organizadas por patrón
+    Land-book / Godly / Awwwards ..... referencias de sitios web
+    Dribbble / Behance ............... inspiración visual (con criterio:
+                                       mucho de ahí no es usable en producción)
+
+HERRAMIENTAS
+    Figma + Figma Learn .............. diseño
+    Realtime Colors / Coolors ........ paletas
+    Type Scale / Utopia .............. escalas tipográficas fluidas
+    WebAIM Contrast Checker .......... contraste
+    axe DevTools / WAVE .............. accesibilidad
+    PageSpeed Insights / Lighthouse .. rendimiento
+    Squoosh .......................... optimizar imágenes
+
+
+================================================================================
+CIERRE — LAS 10 REGLAS QUE RESUMEN TODO
+================================================================================
+
+ 1. Resuelve el flujo antes de tocar el color.
+ 2. Todo espacio es múltiplo de 4. Todo color sale de un token.
+ 3. Una sola acción principal por pantalla.
+ 4. Contraste mínimo 4.5:1 en texto. Verifícalo con herramienta.
+ 5. Todo debe funcionar solo con teclado, con foco siempre visible.
+ 6. Mobile-first, de 320px hacia arriba. Área táctil de 44px.
+ 7. Diseña los estados vacío, cargando y error. Siempre.
+ 8. LCP ≤2.5s, INP ≤200ms, CLS ≤0.1. El rendimiento es UX.
+ 9. Sé consistente antes que original. La originalidad va en la marca,
+    no en los patrones de interacción.
+10. Si un elemento no aporta nada al usuario, elimínalo.
+
+================================================================================
+Fin del manual. Consulta por secciones, no lo memorices.
+Última actualización de contenidos: agosto de 2026.
+================================================================================

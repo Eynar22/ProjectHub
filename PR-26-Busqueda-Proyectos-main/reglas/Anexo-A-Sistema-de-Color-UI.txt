@@ -1,0 +1,740 @@
+================================================================================
+     ANEXO A — SISTEMA DE COLOR: CUÁNTOS, CUÁLES, CÓMO COMBINARLOS
+     Y QUÉ COLOR EXACTO VA EN CADA ELEMENTO DE LA INTERFAZ
+     Complemento del Manual de Reglas UI/UX Web 2026 (Partes 6 y 8.1)
+================================================================================
+
+ÍNDICE
+   A1.  Cuántos colores necesitas (la respuesta corta)
+   A2.  Los 5 roles obligatorios de una paleta
+   A3.  Porcentajes de uso: la regla 60-30-10 explicada de verdad
+   A4.  Cómo elegir el color primario (método, no gusto)
+   A5.  Esquemas de combinación (armonías) y cuándo usar cada uno
+   A6.  Cómo construir la escala 50→950 de un color
+   A7.  TABLA MAESTRA: qué color va en qué elemento (la parte que buscabas)
+   A8.  Jerarquía de botones con especificación exacta de color
+   A9.  Colores semánticos: los 4 fijos y sus variantes
+   A10. Cómo asignar color por tipo de proyecto/industria
+   A11. Reglas de combinación que no se rompen
+   A12. Modo oscuro: cómo se traduce cada color
+   A13. Método completo en 8 pasos (de cero a paleta terminada)
+   A14. Errores de color que delatan a un principiante
+   A15. Herramientas
+
+
+================================================================================
+A1 — ¿CUÁNTOS COLORES NECESITAS? RESPUESTA CORTA
+================================================================================
+
+    1 color PRIMARIO       ← el de tu marca. Uno. No dos.
+    1 color SECUNDARIO     ← opcional. Solo si lo necesitas de verdad.
+    1 color ACENTO         ← opcional. Solo para destacar algo puntual.
+    1 escala de NEUTRALES  ← 10 tonos de gris. OBLIGATORIA.
+    4 colores SEMÁNTICOS   ← éxito, error, advertencia, información. Fijos.
+
+TOTAL REAL: entre 1 y 3 colores "de marca" + grises + 4 semánticos.
+
+[REGLA DURA] Si estás usando más de 3 colores de marca, tu diseño no tiene
+una paleta: tiene un desorden. Los sitios que se ven profesionales usan
+MENOS color del que crees, no más.
+
+PRUEBA RÁPIDA: mira Stripe, Linear, Notion, Vercel, Apple. Casi todo es gris
+y blanco. El color aparece en el botón principal y en poco más. Esa contención
+es exactamente lo que se lee como "profesional".
+
+CUÁNDO SÍ NECESITAS UN SECUNDARIO:
+    - Tienes dos tipos de acción que conviven y compiten (ej. "Comprar" vs
+      "Vender" en una plataforma financiera).
+    - Tu producto tiene categorías que se identifican por color (ej. materias
+      en una app educativa, estados de un tablero kanban).
+    - Tu marca ya tiene dos colores definidos y no puedes cambiarlo.
+    En cualquier otro caso: no lo necesitas.
+
+
+================================================================================
+A2 — LOS 5 ROLES OBLIGATORIOS DE UNA PALETA
+================================================================================
+
+No pienses "quiero azul y naranja". Piensa en ROLES. Cada color debe tener un
+trabajo asignado. Si un color no tiene trabajo, sobra.
+
+  ROL 1 — PRIMARIO / ACCIÓN
+      Qué hace: marca lo que se puede hacer. Es el color de "haz clic aquí".
+      Dónde vive: botón primario, enlaces, iconos activos, foco, checkbox
+                  marcado, barra de progreso, pestaña activa.
+      Cuánta pantalla ocupa: ~10%.
+      Cuántos tonos necesita: 5 como mínimo (claro, base, hover, activo, muy claro
+                  para fondos suaves).
+
+  ROL 2 — NEUTRALES
+      Qué hace: TODO lo demás. Es la estructura del diseño.
+      Dónde vive: fondos, tarjetas, bordes, divisores, texto, iconos inactivos,
+                  sombras, placeholders.
+      Cuánta pantalla ocupa: ~85-90%.
+      Cuántos tonos necesita: 10 (50, 100, 200, 300, 400, 500, 600, 700, 800, 900).
+      [ESTO ES LO QUE MÁS SE SUBESTIMA] Un diseño se ve bien o mal según sus
+      grises, no según su color de marca.
+
+  ROL 3 — SEMÁNTICOS
+      Qué hace: comunica estado del sistema. Su significado es universal y no
+                se negocia.
+      Verde = éxito | Rojo = error/destructivo | Ámbar = advertencia | Azul = info
+      Cuánta pantalla ocupa: ~1-2%. Aparecen y desaparecen.
+      [REGLA] Nunca uses estos colores con otro significado. Si tu marca es roja,
+      tu botón primario rojo se confundirá con "eliminar". Es un problema real:
+      resuélvelo cambiando el tono del rojo destructivo o el de marca.
+
+  ROL 4 — SUPERFICIES
+      Qué hace: crea las capas de profundidad.
+      Fondo de página → fondo de sección → fondo de tarjeta → fondo elevado.
+      Salen de la escala de neutrales, no son colores nuevos.
+
+  ROL 5 — ACENTO (opcional)
+      Qué hace: destaca UNA cosa concreta y poco frecuente.
+      Dónde vive: badge "Nuevo", plan recomendado, notificación no leída,
+                  etiqueta de oferta.
+      Cuánta pantalla ocupa: <1%. Si aparece mucho, deja de destacar.
+
+
+================================================================================
+A3 — PORCENTAJES DE USO: LA REGLA 60-30-10 EXPLICADA DE VERDAD
+================================================================================
+
+La regla original viene del diseño de interiores y en web se malinterpreta.
+Así se aplica correctamente en una interfaz:
+
+    60% → DOMINANTE: fondos y superficies. Casi siempre blanco/gris muy claro
+          (o gris muy oscuro en dark mode). No es "tu color de marca al 60%".
+    30% → SECUNDARIO: texto, bordes, iconos, elementos estructurales.
+          Son los neutrales medios y oscuros.
+    10% → ACENTO: tu color primario. Botones, enlaces, elementos activos.
+
+DESGLOSE REAL DE UNA PANTALLA BIEN DISEÑADA:
+
+    Fondos y superficies (blanco/gris 50-100) .......... 55-65%
+    Texto e iconos (gris 600-900) ...................... 20-30%
+    Bordes y divisores (gris 200-300) .................. 3-5%
+    Color primario (botones, enlaces, activos) ......... 5-10%
+    Colores semánticos (solo cuando hay estado) ........ 0-2%
+    Acento (rarísimo) .................................. 0-1%
+
+CÓMO VERIFICARLO SIN MEDIR NADA:
+    Toma una captura de tu pantalla, achícala hasta que no se lea el texto y
+    entrecierra los ojos. Deberías ver: mucho claro, bloques grises, y UNA
+    manchita de color donde está el botón principal. Si ves color por todas
+    partes, estás pasado.
+
+PORCENTAJE DE COLOR POR TIPO DE BOTÓN (lo que preguntaste):
+    No es un porcentaje de la paleta, es una jerarquía de INTENSIDAD:
+
+    PRIMARIO    → 100% del color: fondo sólido, saturación completa.
+                  Cantidad por pantalla: 1 (máximo 2 si están muy separados).
+    SECUNDARIO  → ~15% del color: borde de 1px del color + fondo transparente,
+                  o fondo del tono 50/100 del primario. Texto en tono 700.
+                  Cantidad por pantalla: 1-3.
+    TERCIARIO   → ~0% de fondo: solo texto en color primario, sin borde.
+                  Cantidad por pantalla: libre, pero sin abusar.
+    DESTRUCTIVO → 100% del rojo, pero solo si la acción es realmente grave.
+                  Para acciones destructivas menores, usa borde rojo + texto rojo.
+    DESHABILITADO → 0% de color: gris 200 de fondo, gris 400 de texto.
+
+    [REGLA DE ORO] En una misma pantalla, la suma de botones primarios debe
+    ser 1. Si tienes dos botones sólidos de color compitiendo, el usuario no
+    sabe cuál es la acción principal — y esa duda cuesta conversiones.
+
+
+================================================================================
+A4 — CÓMO ELEGIR EL COLOR PRIMARIO (método, no gusto personal)
+================================================================================
+
+PASO 1 — Define qué debe sentir el usuario en 3 palabras.
+    Ej: "confiable, técnico, serio" / "cercano, fresco, joven" / "natural, sano"
+
+PASO 2 — Traduce a un rango de tono (hue). Referencia práctica:
+
+    AZUL (200-250°)     confianza, tecnología, estabilidad, seguridad
+                        Usos: banca, salud, SaaS, educación, gobierno, corporativo
+                        Riesgo: es la opción por defecto. Seguro pero genérico.
+
+    VERDE (120-160°)    crecimiento, naturaleza, salud, dinero, aprobación
+                        Usos: agro, medioambiente, finanzas personales, bienestar
+                        Riesgo: se confunde con el verde de "éxito". Diferéncialo.
+
+    TEAL / CIAN (170-200°) equilibrio entre confianza y frescura, moderno, limpio
+                        Usos: salud digital, productividad, fintech
+                        Riesgo: bajo. Buena alternativa al azul genérico.
+
+    MORADO (270-300°)   creatividad, innovación, premium, imaginación
+                        Usos: creatividad, IA, entretenimiento, productos premium
+                        Riesgo: muy usado por startups de IA desde 2023.
+
+    NARANJA (25-45°)    energía, cercanía, acción, entusiasmo, urgencia
+                        Usos: comercio, comida, deportes, comunidad, ofertas
+                        Riesgo: cansa si se abusa. Excelente como acento.
+
+    ROJO (0-15°)        urgencia, pasión, alerta, apetito
+                        Usos: comida, deportes, ofertas, entretenimiento
+                        Riesgo ALTO: choca con el rojo de error. Piénsalo dos veces.
+
+    AMARILLO (50-70°)   optimismo, atención, claridad
+                        Usos: acentos, destacar, advertencias
+                        Riesgo ALTO: contraste malísimo sobre blanco. Casi nunca
+                        sirve como primario. Úsalo como acento sobre oscuro.
+
+    ROSA / MAGENTA (320-350°) moderno, audaz, empático, disruptivo
+                        Usos: moda, comunidad, productos dirigidos a jóvenes
+
+    NEGRO / GRIS OSCURO  lujo, sobriedad, minimalismo, autoridad
+                        Usos: moda, arquitectura, portafolios, productos premium
+                        El "no color" es una decisión válida y muy elegante.
+
+PASO 3 — Mira a tu competencia y DIFERÉNCIATE.
+    Si las 5 apps de tu sector son azules, ser la sexta azul no te ayuda.
+
+PASO 4 — Verifica que el tono elegido pueda cumplir contraste.
+    Prueba: ¿el texto blanco sobre ese color da ≥4.5:1? Si no, necesitarás
+    oscurecerlo para los botones. Los amarillos y cianes claros fallan casi siempre.
+
+PASO 5 — Comprueba que funcione en modo oscuro.
+    Los colores muy oscuros desaparecen sobre fondo oscuro; los muy saturados
+    vibran. Tu primario debe tener una versión clara utilizable.
+
+
+================================================================================
+A5 — ESQUEMAS DE COMBINACIÓN (ARMONÍAS) Y CUÁNDO USAR CADA UNO
+================================================================================
+
+Todos se calculan sobre el círculo cromático (0-360°) a partir de tu tono base.
+
+ 1. MONOCROMÁTICO — un solo tono, variando claridad y saturación.
+    Cómo: tomas tu primario y generas 10 tonos. Ya está.
+    Sensación: limpio, sobrio, muy fácil de mantener coherente.
+    Cuándo usarlo: dashboards, apps de productividad, cuando no quieres arriesgar.
+    RECOMENDADO PARA TI si es tu primer sistema de color. Es imposible fallar.
+
+ 2. ANÁLOGO — tu tono + los dos vecinos, dentro de ±30°.
+    Ej: azul 220° + azul-cian 195° + azul-violeta 250°
+    Sensación: armónico, natural, tranquilo.
+    Cuándo: marcas suaves, salud, naturaleza, educación.
+    Regla: uno domina (60%), los otros dos apoyan (30% y 10%).
+
+ 3. COMPLEMENTARIO — tu tono + el opuesto exacto (+180°).
+    Ej: azul 220° ↔ naranja 40°
+    Sensación: máximo contraste, energía, tensión.
+    Cuándo: cuando necesitas que un CTA reviente sobre el resto.
+    [ADVERTENCIA] Nunca uses los dos al 50%. Uno es la base (mucho),
+    el otro es el acento (poquísimo). Al 50/50 vibra y marea.
+
+ 4. COMPLEMENTARIO DIVIDIDO — tu tono + los dos vecinos de su opuesto (+150°, +210°).
+    Sensación: contraste fuerte pero menos agresivo que el complementario puro.
+    Cuándo: es la opción segura cuando quieres contraste. Muy recomendable.
+
+ 5. TRIÁDICO — tres tonos separados 120°.
+    Ej: 220° / 340° / 100°
+    Sensación: vivo, juvenil, equilibrado.
+    Cuándo: apps para jóvenes, educación infantil, productos lúdicos.
+    Regla: uno domina, los otros dos son acentos pequeños.
+
+ 6. TETRÁDICO — cuatro tonos (dos pares complementarios).
+    Sensación: rico pero difícil de controlar.
+    Cuándo: casi nunca en UI. Requiere mucho oficio.
+
+[REGLA GENERAL] Para una interfaz de producto, el orden de seguridad es:
+    Monocromático > Análogo > Complementario dividido > Triádico > Tetrádico
+Empieza por la izquierda. Muévete a la derecha solo cuando tengas criterio.
+
+[ATAJO PROFESIONAL] La combinación más usada por productos serios:
+    UN color primario + escala de grises tintados con ese mismo tono + los 4
+    semánticos. Nada más. Esa es la fórmula de Stripe, Linear, GitHub, Figma.
+
+
+================================================================================
+A6 — CÓMO CONSTRUIR LA ESCALA 50→950 DE UN COLOR
+================================================================================
+
+No elijas 10 azules a ojo. Genera una escala. Cada peldaño tiene un uso fijo:
+
+    50   fondo muy suave (alertas informativas, hover de fila, chips)
+    100  fondo suave (badges, estados seleccionados leves)
+    200  bordes de elementos coloreados, divisores del color
+    300  bordes más marcados, estados deshabilitados del color
+    400  iconos decorativos, texto sobre fondo oscuro
+    500  ← EL COLOR BASE DE LA MARCA. Botón primario en reposo.
+    600  hover del botón primario, enlaces sobre fondo blanco
+    700  estado activo/presionado, texto de color sobre fondo claro
+    800  texto de color de alto contraste
+    900  fondos oscuros de marca, encabezados
+    950  fondo de marca en modo oscuro
+
+[TÉCNICA ACTUAL 2026 — OKLCH]
+Genera la escala en OKLCH, no en HSL. En HSL, dos colores con la misma
+"luminosidad" se ven con brillos totalmente distintos (un amarillo al 50% se
+ve mucho más brillante que un azul al 50%). OKLCH es perceptualmente uniforme:
+si subes la luminosidad en el mismo número, el salto visual es el mismo sin
+importar el tono. Por eso las escalas salen parejas y los contrastes son
+predecibles. Soporte de navegadores: ~93-95% en 2026 (Chrome/Edge 111+,
+Safari 15.4+, Firefox 113+). Tailwind v4 ya usa OKLCH internamente.
+
+Sintaxis:  oklch(Luminosidad Croma Tono)
+           L = 0 a 1 (o 0% a 100%)   C = 0 a ~0.37   H = 0 a 360
+
+Escala azul de ejemplo (mismo tono 250°, luminosidad decreciente):
+    --primary-50:  oklch(0.97 0.02 250);
+    --primary-100: oklch(0.94 0.04 250);
+    --primary-200: oklch(0.88 0.07 250);
+    --primary-300: oklch(0.80 0.11 250);
+    --primary-400: oklch(0.70 0.15 250);
+    --primary-500: oklch(0.60 0.18 250);   /* base */
+    --primary-600: oklch(0.53 0.18 250);   /* hover */
+    --primary-700: oklch(0.45 0.16 250);   /* activo */
+    --primary-800: oklch(0.37 0.13 250);
+    --primary-900: oklch(0.28 0.09 250);
+    --primary-950: oklch(0.20 0.06 250);
+
+Patrón: el TONO no cambia. La LUMINOSIDAD baja de forma pareja. El CROMA sube
+hacia el centro de la escala y baja en los extremos (los colores muy claros y
+muy oscuros no pueden ser muy saturados sin verse mal).
+
+Si no quieres tocar OKLCH todavía, usa un generador (ver A15) y exporta a HEX.
+Lo importante es que la escala sea uniforme, no la sintaxis.
+
+[GRISES TINTADOS — el truco que más diferencia]
+No uses grises puros. Añade el tono de tu primario con croma bajísimo:
+    --gray-50:  oklch(0.98 0.003 250);
+    --gray-500: oklch(0.60 0.015 250);
+    --gray-900: oklch(0.21 0.02 250);
+El croma entre 0.003 y 0.02 es imperceptible como color, pero hace que toda
+la interfaz se sienta de una sola pieza. Es la diferencia entre "plantilla
+descargada" y "diseñado a propósito".
+
+
+================================================================================
+A7 — TABLA MAESTRA: QUÉ COLOR VA EN QUÉ ELEMENTO
+================================================================================
+(Notación: P = primario, G = gris. El número es el peldaño de la escala.)
+
+FONDOS Y ESTRUCTURA
+--------------------------------------------------------------------------------
+  Fondo de página ............................ blanco puro  o  G-50
+  Fondo de sección alterna ................... G-50  o  G-100
+  Fondo de tarjeta ........................... blanco (sobre G-50) o G-50 (sobre blanco)
+  Fondo elevado (dropdown, popover) .......... blanco + sombra md
+  Fondo del overlay de modal ................. negro al 40-60% de opacidad
+  Fondo de barra lateral ..................... G-50 o G-900 (si es oscura)
+  Fondo de header ............................ blanco con borde inferior G-200
+  Fondo destacado / hero ..................... G-50, P-50, o P-900 (hero oscuro)
+
+BORDES Y DIVISORES
+--------------------------------------------------------------------------------
+  Borde de tarjeta ........................... G-200
+  Borde de input en reposo ................... G-300
+  Borde de input con foco .................... P-500  (+ outline P-500)
+  Borde de input con error ................... rojo-500
+  Divisor entre filas de lista ............... G-200 (1px)
+  Divisor de sección ......................... G-200
+  Borde de elemento seleccionado ............. P-500  (2px)
+
+TEXTO
+--------------------------------------------------------------------------------
+  Título principal (h1, h2) .................. G-900
+  Subtítulos (h3, h4) ........................ G-800
+  Texto de cuerpo ............................ G-700  o  G-900
+  Texto secundario / descripciones ........... G-600   ← nunca más claro que 500
+  Texto de ayuda / captions .................. G-500   ← el límite legible
+  Placeholder ................................ G-400   (verifica contraste igual)
+  Texto deshabilitado ........................ G-400
+  Texto sobre fondo de color ................. blanco  (verifica ≥4.5:1)
+  Etiqueta de formulario ..................... G-700, peso 500
+  Enlace en texto ............................ P-600 + subrayado
+  Enlace visitado ............................ P-700 (opcional)
+  Texto de error ............................. rojo-600
+  Texto de éxito ............................. verde-700
+  Precio / dato destacado .................... G-900, peso 700
+
+BOTONES  (detalle completo en A8)
+--------------------------------------------------------------------------------
+  Primario: fondo P-500, texto blanco, hover P-600, activo P-700
+  Secundario: fondo transparente, borde G-300, texto G-700, hover fondo G-50
+  Terciario: sin fondo ni borde, texto P-600, hover fondo P-50
+  Destructivo: fondo rojo-600, texto blanco, hover rojo-700
+  Deshabilitado: fondo G-200, texto G-400
+
+ICONOS
+--------------------------------------------------------------------------------
+  Icono decorativo ........................... G-400
+  Icono junto a texto ........................ hereda el color del texto
+  Icono de acción (clickeable) ............... G-600, hover G-900
+  Icono activo / seleccionado ................ P-500
+  Icono dentro de botón primario ............. blanco
+  Icono de estado ............................ el semántico correspondiente
+
+ESTADOS DE NAVEGACIÓN
+--------------------------------------------------------------------------------
+  Ítem de menú en reposo ..................... G-600
+  Ítem de menú en hover ...................... G-900 + fondo G-50
+  Ítem de menú ACTIVO ........................ P-600 + fondo P-50 + barra P-500
+  Pestaña activa ............................. texto G-900 + subrayado P-500 (2px)
+  Pestaña inactiva ........................... texto G-500
+  Breadcrumb (niveles previos) ............... G-500, enlaces
+  Breadcrumb (página actual) ................. G-900, sin enlace
+
+FORMULARIOS
+--------------------------------------------------------------------------------
+  Fondo del input ............................ blanco
+  Fondo del input deshabilitado .............. G-100
+  Checkbox/radio sin marcar .................. borde G-300, fondo blanco
+  Checkbox/radio marcado ..................... fondo P-500, check blanco
+  Toggle apagado ............................. fondo G-300
+  Toggle encendido ........................... fondo P-500
+  Slider (recorrido) ......................... G-200
+  Slider (progreso) .......................... P-500
+  Barra de progreso (fondo) .................. G-200
+  Barra de progreso (avance) ................. P-500 (o verde si es completitud)
+
+TABLAS Y LISTAS
+--------------------------------------------------------------------------------
+  Fondo de encabezado ........................ G-50
+  Texto de encabezado ........................ G-600, peso 600, tamaño sm
+  Borde entre filas .......................... G-200
+  Hover de fila .............................. G-50
+  Fila seleccionada .......................... P-50 + borde izquierdo P-500
+  Texto de celda ............................. G-900
+  Texto secundario de celda .................. G-500
+
+BADGES / ETIQUETAS / CHIPS
+--------------------------------------------------------------------------------
+  Neutro ..................................... fondo G-100, texto G-700
+  Informativo ................................ fondo azul-50, texto azul-700
+  Éxito ...................................... fondo verde-50, texto verde-700
+  Advertencia ................................ fondo ámbar-50, texto ámbar-800
+  Error ...................................... fondo rojo-50, texto rojo-700
+  De marca / destacado ....................... fondo P-50, texto P-700
+  [REGLA] Los badges usan el tono 50 de fondo con texto 700. Nunca fondo 500
+  con texto blanco, salvo que sea una alerta crítica.
+
+ALERTAS EN LÍNEA
+--------------------------------------------------------------------------------
+  Estructura fija: fondo tono-50 + borde izquierdo 4px tono-500 + icono tono-600
+  + título tono-900 + texto tono-800
+
+SOMBRAS
+--------------------------------------------------------------------------------
+  Nunca negro puro. Usa el gris más oscuro de tu escala con alpha:
+      rgba(16, 24, 40, 0.05 – 0.10)
+  Si tus grises están tintados de azul, la sombra también debe estarlo.
+
+
+================================================================================
+A8 — JERARQUÍA DE BOTONES: ESPECIFICACIÓN EXACTA
+================================================================================
+
+BOTÓN PRIMARIO  — "la acción que quiero que hagas"
+    Fondo:      P-500          Texto: blanco       Borde: ninguno
+    Hover:      P-600          Activo: P-700
+    Foco:       outline 2px P-500 + offset 2px
+    Deshab.:    fondo G-200, texto G-400
+    Cantidad:   1 por pantalla (o 1 por sección claramente separada)
+    Contraste:  el texto blanco sobre P-500 debe dar ≥4.5:1. VERIFÍCALO.
+                Si tu P-500 es claro (amarillos, cianes, verdes lima), usa
+                P-600 o P-700 como fondo y no P-500.
+
+BOTÓN SECUNDARIO — "otra opción válida, pero no la principal"
+    Opción A (contorno):
+        Fondo: transparente   Borde: 1px G-300   Texto: G-700
+        Hover: fondo G-50, borde G-400
+    Opción B (suave, coloreado):
+        Fondo: P-50   Borde: ninguno   Texto: P-700
+        Hover: fondo P-100
+    Elige UNA de las dos para todo el proyecto. No mezcles.
+    Cantidad: 1-3 por pantalla.
+
+BOTÓN TERCIARIO / GHOST — "acción menor"
+    Fondo: transparente   Borde: ninguno   Texto: P-600 (o G-700 si es neutro)
+    Hover: fondo G-50 o P-50
+    Uso: "Cancelar", "Ver más", acciones dentro de tarjetas y tablas.
+
+BOTÓN DESTRUCTIVO
+    Grave (borrar cuenta, eliminar definitivo):
+        Fondo rojo-600, texto blanco, hover rojo-700
+    Menor (quitar un ítem de una lista):
+        Fondo transparente, texto rojo-600, hover fondo rojo-50
+    [REGLA] El botón destructivo NUNCA va en la posición donde el usuario
+    espera el primario. Sepáralo o ponlo a la izquierda.
+
+BOTÓN DE ÉXITO / CONFIRMACIÓN
+    En general NO existe. "Guardar" es una acción primaria, no un éxito.
+    Usa el primario. El verde se reserva para el mensaje DESPUÉS de guardar.
+
+COMBINACIONES CORRECTAS EN UN MISMO GRUPO:
+    ✓ [Primario sólido] + [Secundario contorno]
+    ✓ [Primario sólido] + [Terciario texto]
+    ✓ [Destructivo sólido] + [Terciario "Cancelar"]
+    ✗ [Primario sólido] + [Otro primario sólido de otro color]
+    ✗ [Tres botones sólidos de colores distintos]
+
+ORDEN EN PANTALLA (web occidental):
+    Acción primaria a la DERECHA, cancelar a la izquierda.
+    En móvil, apilados: primario ARRIBA, cancelar debajo.
+
+
+================================================================================
+A9 — COLORES SEMÁNTICOS: LOS 4 FIJOS
+================================================================================
+
+Estos NO los eliges por gusto. Son convención universal y romperlos confunde.
+
+  ÉXITO — VERDE (tono ~145°)
+      Base: #16A34A  |  Fondo suave: #F0FDF4  |  Texto: #15803D
+      Uso: confirmaciones, validación correcta, estado activo/en línea,
+           progreso completado, tendencia positiva.
+
+  ERROR / DESTRUCTIVO — ROJO (tono ~25° en OKLCH / ~0° en HSL)
+      Base: #DC2626  |  Fondo suave: #FEF2F2  |  Texto: #B91C1C
+      Uso: errores de validación, fallos, eliminar, alertas críticas,
+           tendencia negativa, campos obligatorios sin llenar.
+
+  ADVERTENCIA — ÁMBAR (tono ~70°)
+      Base: #D97706  |  Fondo suave: #FFFBEB  |  Texto: #B45309
+      Uso: acciones con consecuencias, datos incompletos, sesión por expirar,
+           advertencias no bloqueantes.
+      [OJO] El amarillo puro (#FFD700) tiene contraste malísimo sobre blanco.
+      Usa ámbar/naranja oscuro, no amarillo, para texto.
+
+  INFORMACIÓN — AZUL (tono ~250°)
+      Base: #2563EB  |  Fondo suave: #EFF6FF  |  Texto: #1D4ED8
+      Uso: avisos neutros, consejos, cambios recientes, ayuda contextual.
+
+CONFLICTO FRECUENTE: si tu marca es azul, el azul informativo se confunde con
+el primario. Solución: usa un azul claramente distinto (más cian o más gris)
+para lo informativo, o usa el gris neutro para avisos no urgentes.
+
+CONFLICTO FRECUENTE 2: si tu marca es verde (típico en agro, salud, finanzas),
+tu botón primario verde se confunde con "éxito". Solución: usa un verde más
+oscuro/azulado para la marca y reserva el verde brillante para confirmaciones.
+
+[REGLA OBLIGATORIA] Todo estado semántico se comunica con TRES señales:
+color + icono + texto. Nunca solo color. Aproximadamente 1 de cada 12 hombres
+no distingue rojo de verde.
+
+
+================================================================================
+A10 — CÓMO ASIGNAR COLOR POR TIPO DE PROYECTO
+================================================================================
+
+  SISTEMA IoT / MONITOREO AGRÍCOLA
+      Primario: verde azulado oscuro (teal 180-190°) o verde tierra (140°)
+      Por qué: comunica campo/naturaleza sin caer en el verde de "éxito".
+      Semánticos: cuidado especial — en monitoreo, verde/ámbar/rojo ya
+      significan "rango normal / atención / crítico". No uses esos tonos
+      para la marca. Deja tu primario en teal o azul.
+      Datos: para gráficas de variables (humedad, temperatura, pH) usa una
+      paleta categórica de 5-6 tonos distinguibles, no degradados del primario.
+
+  DASHBOARD / PANEL ADMINISTRATIVO
+      Primario: azul o índigo. Fondo: gris muy claro (no blanco puro) para
+      que las tarjetas blancas resalten.
+      Color mínimo: en dashboards el color debe indicar DATOS, no decorar.
+      Deja la interfaz casi monocroma para que los gráficos se lean.
+
+  E-COMMERCE
+      Primario: el de la marca. Acento cálido (naranja/rojo) SOLO para
+      precios rebajados y "Añadir al carrito".
+      Verde: reservado para disponibilidad ("En stock") y confirmación de compra.
+      Rojo: solo para descuentos y errores. No para el botón de compra si ya
+      lo usas en descuentos.
+
+  SALUD / MÉDICO
+      Primario: azul o teal. Evita el rojo como color de marca.
+      Fondo: blanco o gris muy claro. Alta legibilidad, tipografía grande.
+      El color debe transmitir calma, no urgencia.
+
+  EDUCACIÓN
+      Primario: azul, morado o teal. Acentos por materia/categoría (aquí sí
+      tiene sentido una paleta categórica de 4-6 tonos).
+      Si el público es infantil: triádico con saturación alta.
+      Si es universitario o profesional: monocromático sobrio.
+
+  FINTECH / GESTIÓN DE PAGOS
+      Primario: azul oscuro, índigo o negro. Transmite seguridad.
+      Verde/rojo: reservados exclusivamente para entrada/salida de dinero.
+      Nunca uses verde de marca en una app financiera: se lee como "ganancia".
+
+  PORTAFOLIO / AGENCIA CREATIVA
+      Aquí sí puedes arriesgar. Negro + un acento vibrante funciona siempre.
+      Monocromático oscuro con tipografía grande es la fórmula más elegante.
+
+  INSTITUCIONAL / GOBIERNO / ONG
+      Primario: azul institucional o el color oficial de la entidad.
+      Prioriza accesibilidad AA estricta sobre estética.
+      Evita degradados y efectos: se lee como poco serio.
+
+
+================================================================================
+A11 — REGLAS DE COMBINACIÓN QUE NO SE ROMPEN
+================================================================================
+
+ 1. NUNCA combines dos colores saturados en proporciones iguales.
+    Uno manda, el otro acompaña. 90/10, no 50/50.
+
+ 2. NUNCA pongas dos colores saturados uno junto al otro sin un neutro
+    en medio. El blanco, el gris o el espacio en blanco son el separador.
+
+ 3. NUNCA uses color saturado para grandes superficies de fondo.
+    Un fondo azul intenso a pantalla completa cansa en 10 segundos.
+    Si quieres fondo de color: usa el tono 50 o el 900.
+
+ 4. NUNCA uses texto de color sobre fondo de color. Texto oscuro sobre fondo
+    claro, o blanco sobre fondo oscuro. Punto.
+    Excepción controlada: texto tono-700 sobre fondo tono-50 (badges). Funciona
+    porque la diferencia de luminosidad es enorme.
+
+ 5. NUNCA uses colores complementarios puros en contacto directo (rojo sobre
+    verde, azul sobre naranja). Vibran y provocan fatiga visual.
+
+ 6. NUNCA uses más de 3 colores en un mismo componente. Un botón tiene fondo
+    y texto. Una tarjeta tiene fondo, borde y texto. Eso es todo.
+
+ 7. NUNCA uses el color primario para texto de cuerpo. Solo para enlaces
+    y elementos accionables.
+
+ 8. NUNCA repitas el color primario en elementos no clickeables. Si pintas
+    un título del color del botón, la gente va a intentar hacerle clic.
+
+ 9. SIEMPRE mantén la misma temperatura. Si tus grises son fríos (tintados de
+    azul), no metas un beige cálido. Se ve sucio.
+
+10. SIEMPRE verifica el contraste con herramienta, no a ojo. El ojo se
+    acostumbra y te engaña después de 20 minutos mirando lo mismo.
+
+11. SIEMPRE prueba tu paleta en escala de grises. Si en blanco y negro no se
+    distingue la jerarquía, tu diseño depende del color y eso es un fallo.
+
+12. SIEMPRE define primero el gris más oscuro (texto) y el fondo. El 90% de
+    tu pantalla son esos dos. El color de marca es lo último que decides.
+
+
+================================================================================
+A12 — MODO OSCURO: CÓMO SE TRADUCE CADA COLOR
+================================================================================
+
+No inviertas. Traduce con esta tabla:
+
+    MODO CLARO                      →  MODO OSCURO
+    -------------------------------    -------------------------------
+    Fondo blanco                    →  G-950 (#0F1115), nunca #000
+    Fondo G-50                      →  G-900
+    Tarjeta blanca                  →  G-900 (#17191F)
+    Modal blanco                    →  G-800 (más claro que la tarjeta)
+    Borde G-200                     →  G-800 (bordes sutiles, no blancos)
+    Texto G-900                     →  G-100 (#E8E8EA), nunca #FFF puro
+    Texto secundario G-600          →  G-400
+    Placeholder G-400               →  G-500
+    Primario P-500 (botón)          →  P-500 o P-400 (súbelo si se pierde)
+    Enlace P-600                    →  P-400  (los enlaces oscuros no se ven)
+    Fondo suave P-50                →  P-950 al 20% de opacidad
+    Sombras                         →  casi invisibles: usa fondos más claros
+                                       para comunicar elevación
+
+REGLAS ESPECÍFICAS:
+    - Baja la SATURACIÓN de los colores 10-20% en modo oscuro. Un color muy
+      saturado sobre fondo oscuro vibra y cansa la vista.
+    - Sube la LUMINOSIDAD de los colores para que mantengan contraste.
+    - Los semánticos también cambian: el rojo #DC2626 sobre fondo oscuro
+      queda apagado; usa #F87171 (rojo-400).
+    - Verifica TODOS los contrastes otra vez. Los ratios no se conservan.
+    - [VENTAJA DE OKLCH] Si construiste la escala en OKLCH, el modo oscuro es
+      casi automático: mantienes tono y croma, e inviertes la luminosidad.
+      El "azul oscuro" sigue siendo azul y no se vuelve morado sucio.
+
+
+================================================================================
+A13 — MÉTODO COMPLETO: DE CERO A PALETA TERMINADA EN 8 PASOS
+================================================================================
+
+PASO 1. Escribe las 3 palabras que debe sentir el usuario.
+PASO 2. Elige UN tono base según A4. Anota el número de grado (ej. 250°).
+PASO 3. Genera la escala 50→950 de ese tono en un generador OKLCH.
+PASO 4. Genera la escala de neutrales usando el MISMO tono con croma 0.003-0.02.
+PASO 5. Toma los 4 semánticos de A9 tal cual. No los rediseñes.
+PASO 6. Verifica estos 6 pares de contraste (los únicos que importan de verdad):
+            texto G-900 sobre fondo blanco ................ debe dar ≥7:1
+            texto G-600 sobre fondo blanco ................ debe dar ≥4.5:1
+            texto blanco sobre P-500 ...................... debe dar ≥4.5:1
+            borde G-300 sobre fondo blanco ................ debe dar ≥3:1
+            outline de foco P-500 sobre blanco ............ debe dar ≥3:1
+            texto rojo-600 sobre fondo blanco ............. debe dar ≥4.5:1
+        Si alguno falla, ajusta ESE tono, no toda la paleta.
+PASO 7. Escribe los tokens semánticos (--color-text, --color-action, etc.)
+        apuntando a los peldaños. Nunca uses los peldaños directamente en
+        los componentes.
+PASO 8. Duplica los tokens para modo oscuro con la tabla de A12.
+
+Tiempo total si usas generador: 20-30 minutos. Una sola vez por proyecto.
+
+
+================================================================================
+A14 — ERRORES DE COLOR QUE DELATAN A UN PRINCIPIANTE
+================================================================================
+
+ ✗ Usar 5 colores de marca porque "se ven bonitos juntos"
+ ✗ Grises puros sin tintar (#808080, #CCCCCC)
+ ✗ Negro puro #000 en texto o fondos
+ ✗ Blanco puro #FFF como texto en modo oscuro
+ ✗ Degradados entre colores opuestos del círculo (morado→naranja)
+ ✗ Elegir colores a ojo en vez de generar escalas
+ ✗ Texto gris claro sobre blanco porque "se ve más limpio"
+ ✗ Botón primario de un color y otro botón igual de llamativo al lado
+ ✗ Usar verde de marca y verde de éxito idénticos
+ ✗ Usar rojo como color de marca en una app con formularios
+ ✗ Fondos de color saturado a pantalla completa
+ ✗ Colores hex escritos directamente en los componentes en vez de tokens
+ ✗ Modo oscuro hecho invirtiendo los colores automáticamente
+ ✗ Amarillo como color primario (falla contraste casi siempre)
+ ✗ Cambiar el tono del color entre peldaños de la escala (el azul 100 debe
+   ser el mismo azul que el 900, más claro; no un celeste distinto)
+ ✗ Poner color en elementos que no son clickeables
+ ✗ No probar la paleta en escala de grises
+
+
+================================================================================
+A15 — HERRAMIENTAS
+================================================================================
+
+GENERAR ESCALAS Y PALETAS
+    oklch.com ................ selector OKLCH visual, el más directo
+    atmos.style .............. paletas perceptualmente uniformes + contraste
+    uicolors.app ............. genera escala 50-950 desde un HEX
+    coolors.co ............... explorar armonías rápido
+    huemint.com .............. paletas por tipo de interfaz
+    realtimecolors.com ....... probar tu paleta sobre una web real al instante
+
+VERIFICAR CONTRASTE
+    webaim.org/resources/contrastchecker/
+    Chrome DevTools → inspeccionar texto → el selector muestra el ratio
+    axe DevTools (extensión) → audita toda la página
+    accessible-colors.com → te sugiere el ajuste mínimo para aprobar
+
+SIMULAR DALTONISMO
+    Chrome DevTools → Rendering → Emulate vision deficiencies
+    Coblis (color-blindness.com)
+
+REFERENCIA DE PALETAS BIEN HECHAS (estúdialas, no las copies)
+    Tailwind CSS default palette
+    Radix Colors (radix-ui.com/colors) — escalas pensadas por función
+    Material Design 3 color system
+    IBM Carbon color tokens
+    Open Color (yeun.github.io/open-color)
+
+
+================================================================================
+RESUMEN EN 8 LÍNEAS
+================================================================================
+ 1. Un color primario. Uno. Más grises. Más 4 semánticos fijos.
+ 2. 60% fondos claros / 30% texto y estructura / 10% color.
+ 3. Genera escalas de 10 peldaños, no elijas colores sueltos.
+ 4. Tinta tus grises con el tono del primario.
+ 5. Un solo botón primario sólido por pantalla.
+ 6. El color marca lo accionable. Si no se hace clic, no lleva color.
+ 7. Verde=éxito, rojo=error, ámbar=aviso, azul=info. No los toques.
+ 8. Verifica contraste con herramienta, siempre, antes de entregar.
+================================================================================

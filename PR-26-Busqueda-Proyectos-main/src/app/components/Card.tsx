@@ -11,8 +11,14 @@ interface CardProps {
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
   return (
     <motion.div
-      whileHover={hover ? { y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' } : {}}
-      className={`bg-card rounded-xl border border-border shadow-sm ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      /* Hover sutil: elevación + desplazamiento -2px, sin agrandar (Manual 8.5). */
+      whileHover={hover ? { y: -2 } : undefined}
+      className={
+        `bg-card rounded-xl border border-border shadow-sm transition-shadow duration-150 ease-out ` +
+        (hover ? 'hover:shadow-md ' : '') +
+        (onClick ? 'cursor-pointer ' : '') +
+        className
+      }
       onClick={onClick}
     >
       {children}

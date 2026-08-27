@@ -607,11 +607,11 @@ export default function Workspace() {
           )}
 
           {project.estado === 'archivado' && (
-            <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg flex items-start gap-3">
-              <AlertOctagon className="w-6 h-6 text-slate-500 mt-0.5 flex-shrink-0" />
+            <div className="mb-6 p-4 bg-muted border border-border rounded-lg flex items-start gap-3">
+              <AlertOctagon className="w-6 h-6 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-slate-700">Espacio de Trabajo Archivado</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="font-semibold text-foreground">Espacio de Trabajo Archivado</h3>
+                <p className="text-sm text-muted-foreground">
                   Este proyecto ha sido archivado y no está visible al público general.
                   Actualmente puedes navegar por su contenido en modo "solo lectura".
                 </p>
@@ -620,11 +620,11 @@ export default function Workspace() {
           )}
 
           {project.estado === 'terminado' && (
-            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <div className="mb-6 p-4 bg-success-subtle border border-success/30 rounded-lg flex items-start gap-3">
+              <CheckCircle2 className="w-6 h-6 text-success-strong mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-emerald-800">Espacio de Trabajo Terminado</h3>
-                <p className="text-sm text-emerald-700">
+                <h3 className="font-semibold text-success-strong">Espacio de Trabajo Terminado</h3>
+                <p className="text-sm text-success-strong">
                   Este proyecto ha sido finalizado con éxito.
                   Puedes seguir consultando todo su historial y recursos en modo "solo lectura".
                 </p>

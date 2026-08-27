@@ -56,18 +56,18 @@ export default function CompanyProfile() {
   }, [userCompany?.id]);
 
   const rolConfig = {
-    superadmin: { label: 'Administrador del Sistema', icon: Shield, color: 'text-purple-600', bg: 'bg-purple-100' },
-    admin:      { label: 'Administrador de Empresa',  icon: Crown,  color: 'text-blue-600',   bg: 'bg-blue-100'   },
-    empleado:   { label: 'Empleado',                  icon: Users,  color: 'text-slate-600',  bg: 'bg-slate-100'  },
+    superadmin: { label: 'Administrador del Sistema', icon: Shield, color: 'text-primary', bg: 'bg-muted' },
+    admin:      { label: 'Administrador de Empresa',  icon: Crown,  color: 'text-info-strong',   bg: 'bg-info-subtle'   },
+    empleado:   { label: 'Empleado',                  icon: Users,  color: 'text-muted-foreground',  bg: 'bg-muted'  },
   };
   const rol = rolConfig[currentUser?.rol || 'empleado'];
   const RolIcon = rol.icon;
 
   const estadoCompany = {
-    aprobado: { label: 'Empresa Aprobada', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-    pendiente: { label: 'Pendiente de Aprobación', icon: Clock,        color: 'text-amber-600',  bg: 'bg-amber-50',  border: 'border-amber-200'  },
-    bloqueado: { label: 'Empresa Bloqueada',       icon: AlertCircle, color: 'text-red-600',    bg: 'bg-red-50',    border: 'border-red-200'    },
-    rechazado: { label: 'Empresa Rechazada',       icon: AlertCircle, color: 'text-red-600',    bg: 'bg-red-50',    border: 'border-red-200'    },
+    aprobado: { label: 'Empresa Aprobada', icon: CheckCircle2, color: 'text-success-strong', bg: 'bg-success-subtle', border: 'border-success/30' },
+    pendiente: { label: 'Pendiente de Aprobación', icon: Clock,        color: 'text-warning-strong',  bg: 'bg-warning-subtle',  border: 'border-warning/30'  },
+    bloqueado: { label: 'Empresa Bloqueada',       icon: AlertCircle, color: 'text-danger-strong',    bg: 'bg-danger-subtle',    border: 'border-danger/30'    },
+    rechazado: { label: 'Empresa Rechazada',       icon: AlertCircle, color: 'text-danger-strong',    bg: 'bg-danger-subtle',    border: 'border-danger/30'    },
   };
   const companyEstado = estadoCompany[userCompany?.estado || 'pendiente'];
   const EstadoIcon = companyEstado.icon;
@@ -274,7 +274,7 @@ export default function CompanyProfile() {
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto mb-8 flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <User className="w-6 h-6 text-white" />
+              <User className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
               <h1 className="text-3xl font-bold">Mi Perfil</h1>
@@ -300,7 +300,7 @@ export default function CompanyProfile() {
                         className="w-20 h-20 rounded-2xl object-cover shadow-xl"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-black shadow-xl">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl">
                         {initials}
                       </div>
                     )}
@@ -309,7 +309,7 @@ export default function CompanyProfile() {
                         type="button"
                         onClick={() => photoInputRef.current?.click()}
                         disabled={uploadingPhoto}
-                        className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60"
+                        className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60"
                         title="Cambiar foto"
                       >
                         {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
@@ -558,7 +558,7 @@ export default function CompanyProfile() {
                             type="button"
                             onClick={() => logoInputRef.current?.click()}
                             disabled={uploadingLogo}
-                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary text-white flex items-center justify-center shadow hover:opacity-90 transition-opacity disabled:opacity-60"
+                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary text-primary-foreground flex items-center justify-center shadow hover:opacity-90 transition-opacity disabled:opacity-60"
                           >
                             {uploadingLogo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
                           </button>
@@ -627,7 +627,7 @@ export default function CompanyProfile() {
                                 <button
                                   type="button"
                                   onClick={() => removeGalleryImage(i)}
-                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>

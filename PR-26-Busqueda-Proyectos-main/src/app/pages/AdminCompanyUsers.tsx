@@ -96,7 +96,7 @@ export default function AdminCompanyUsers() {
             </motion.div>
 
             {/* Company info banner showing admins count */}
-            <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
+            <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-info-subtle border border-info/30 rounded-xl text-sm text-info-strong">
               <Building2 className="w-4 h-4 flex-shrink-0" />
               <span>
                 Admins activos en esta empresa: <strong>{activeAdminsCount()}</strong>
@@ -131,16 +131,16 @@ export default function AdminCompanyUsers() {
                     transition={{ delay: index * 0.05 }}
                   >
                     <Card className={`p-5 flex items-center justify-between hover:border-primary/50 transition-colors ${
-                      isBlocked ? 'opacity-70 bg-red-50/30' : ''
+                      isBlocked ? 'opacity-70 bg-danger-subtle/30' : ''
                     }`}>
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative ${
-                          isBlocked ? 'bg-red-100 text-red-400' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'
+                          isBlocked ? 'bg-danger-subtle text-danger' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'
                         }`}>
                           {member.nombre_completo.charAt(0).toUpperCase()}
                           {isBlocked && (
-                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                              <Lock className="w-2.5 h-2.5 text-white" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center">
+                              <Lock className="w-2.5 h-2.5 text-primary-foreground" />
                             </div>
                           )}
                         </div>
@@ -151,8 +151,8 @@ export default function AdminCompanyUsers() {
                             {/* Role Badge */}
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 ${
                               member.rol === 'admin' 
-                                ? 'bg-blue-100 text-blue-700' 
-                                : 'bg-slate-100 text-slate-600 border border-border'
+                                ? 'bg-info-subtle text-info-strong' 
+                                : 'bg-muted text-muted-foreground border border-border'
                             }`}>
                               {member.rol === 'admin' ? (
                                 <>
@@ -169,7 +169,7 @@ export default function AdminCompanyUsers() {
 
                             {/* Only-admin warning */}
                             {isOnlyAdmin && !isBlocked && (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-warning-strong bg-warning-subtle px-2 py-0.5 rounded-full border border-warning/30">
                                 <AlertTriangle className="w-2.5 h-2.5" />
                                 Único admin activo
                               </span>
@@ -195,7 +195,7 @@ export default function AdminCompanyUsers() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="flex items-center gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                                className="flex items-center gap-1.5 text-success-strong border-success/40 hover:bg-success-subtle"
                                 onClick={() => handleAction(() => unblockUser(member.id), member.id, `${member.nombre_completo} desbloqueado`)}
                               >
                                 <Unlock className="w-3.5 h-3.5" />
@@ -205,7 +205,7 @@ export default function AdminCompanyUsers() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="flex items-center gap-1.5 text-red-500 border-red-300 hover:bg-red-50 disabled:opacity-40"
+                                className="flex items-center gap-1.5 text-danger border-danger/40 hover:bg-danger-subtle disabled:opacity-40"
                                 disabled={isOnlyAdmin}
                                 title={isOnlyAdmin ? 'Asigna otro admin antes de bloquear este' : ''}
                                 onClick={() => {
@@ -225,7 +225,7 @@ export default function AdminCompanyUsers() {
                                 <Button 
                                   variant="outline"
                                   size="sm"
-                                  className="flex items-center gap-1.5 text-slate-600 disabled:opacity-40"
+                                  className="flex items-center gap-1.5 text-muted-foreground disabled:opacity-40"
                                   disabled={isOnlyAdmin}
                                   title={isOnlyAdmin ? 'Asigna otro admin antes de degradar' : ''}
                                   onClick={() => handleAction(() => demoteToUser(member.id), member.id, `${member.nombre_completo} es ahora Empleado`)}
@@ -237,7 +237,7 @@ export default function AdminCompanyUsers() {
                                 <Button 
                                   variant="outline"
                                   size="sm"
-                                  className="flex items-center gap-1.5 text-blue-600 border-blue-300 hover:bg-blue-50"
+                                  className="flex items-center gap-1.5 text-info-strong border-info/40 hover:bg-info-subtle"
                                   onClick={() => handleAction(() => promoteToAdmin(member.id), member.id, `${member.nombre_completo} es ahora Admin`)}
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />

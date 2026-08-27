@@ -170,7 +170,7 @@ export default function Register() {
             <Card className="p-8 text-center">
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-success to-accent rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-white" />
+                  <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
               <h1 className="text-3xl font-bold mb-4">¡Solicitud Enviada!</h1>
@@ -200,7 +200,7 @@ export default function Register() {
             <Card className="p-8">
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                  <Building2 className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
               <h1 className="text-3xl font-bold text-center mb-2">Crear Cuenta</h1>
@@ -246,7 +246,7 @@ export default function Register() {
                               <div className="flex items-start gap-3 p-4 pt-0">
                                 {company.logo_url
                                   ? <img src={company.logo_url} alt={company.nombre} className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border-2 border-card shadow-md -mt-6 bg-card" />
-                                  : <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-card shadow-md -mt-6"><Building2 className="w-5 h-5 text-white" /></div>
+                                  : <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-card shadow-md -mt-6"><Building2 className="w-5 h-5 text-primary-foreground" /></div>
                                 }
                                 <div className="min-w-0 flex-1 pt-2">
                                   <div className="flex items-center gap-2 flex-wrap">
@@ -298,7 +298,7 @@ export default function Register() {
                 <div className="flex items-start gap-4 mb-6">
                   {company?.logo_url
                     ? <img src={company.logo_url} alt={company.nombre} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-                    : <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0"><Building2 className="w-7 h-7 text-white" /></div>
+                    : <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0"><Building2 className="w-7 h-7 text-primary-foreground" /></div>
                   }
                   <div className="min-w-0">
                     <h1 className="text-2xl font-bold">{company?.nombre}</h1>
@@ -347,7 +347,7 @@ export default function Register() {
               <button onClick={() => setMode('choose')} className="text-sm text-muted-foreground hover:text-foreground mb-6 flex items-center gap-1">← Volver</button>
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                  <Building2 className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
               <h1 className="text-3xl font-bold text-center mb-2">Registrar Empresa</h1>

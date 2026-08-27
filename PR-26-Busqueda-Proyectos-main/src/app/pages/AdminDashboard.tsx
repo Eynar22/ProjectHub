@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       value: companies.length,
       subtext: `${approvedCompanies} aprobadas`,
       icon: Building2,
-      color: 'from-primary to-secondary',
+      color: 'bg-primary',
       link: '/admin/companies'
     },
     {
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
       value: totalProjects,
       subtext: 'Activos en la plataforma',
       icon: FolderKanban,
-      color: 'from-accent to-success',
+      color: 'bg-muted',
       link: '/admin/projects'
     },
     {
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
       value: pendingCompanies,
       subtext: 'Requieren aprobación',
       icon: Users,
-      color: 'from-warning to-destructive',
+      color: 'bg-warning',
       link: '/admin/companies?filter=pending'
     },
     {
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
       value: users.length,
       subtext: 'En la plataforma',
       icon: Users,
-      color: 'from-secondary to-accent',
+      color: 'bg-muted',
       link: '/admin/users'
     }
   ];
@@ -72,9 +72,9 @@ export default function AdminDashboard() {
   });
 
   const companyStatusData = [
-    { name: 'Aprobadas', value: approvedCompanies, color: '#10b981' },
-    { name: 'Pendientes', value: pendingCompanies, color: '#f97316' },
-    { name: 'Bloqueadas', value: companies.filter(c => c.estado === 'bloqueado').length, color: '#ef4444' }
+    { name: 'Aprobadas', value: approvedCompanies, color: 'var(--color-success)' },
+    { name: 'Pendientes', value: pendingCompanies, color: 'var(--color-warning)' },
+    { name: 'Bloqueadas', value: companies.filter(c => c.estado === 'bloqueado').length, color: 'var(--color-danger)' }
   ];
 
   return (
@@ -113,8 +113,8 @@ export default function AdminDashboard() {
                   <Link to={stat.link}>
                     <Card hover className="p-6 transition-all">
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                          <Icon className="w-6 h-6 text-white" />
+                        <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
+                          <Icon className="w-6 h-6 text-primary-foreground" />
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
@@ -134,21 +134,21 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-semibold mb-4">Proyectos por Mes</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={projectsByMonth}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" stroke="#64748b" />
-                  <YAxis stroke="#64748b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                  <XAxis dataKey="month" stroke="var(--color-muted-foreground)" />
+                  <YAxis stroke="var(--color-muted-foreground)" />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#ffffff', 
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'var(--color-card)', 
+                      border: '1px solid var(--color-border)',
                       borderRadius: '8px'
                     }}
                   />
                   <Bar dataKey="projects" fill="url(#colorGradient)" radius={[8, 8, 0, 0]} />
                   <defs>
                     <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" />
-                      <stop offset="100%" stopColor="#8b5cf6" />
+                      <stop offset="0%" stopColor="var(--color-chart-1)" />
+                      <stop offset="100%" stopColor="var(--color-chart-2)" />
                     </linearGradient>
                   </defs>
                 </BarChart>
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
                     innerRadius={60}
                     outerRadius={100}
                     paddingAngle={2}
-                    fill="#8884d8"
+                    fill="var(--color-chart-1)"
                     dataKey="value"
                   >
                     {companyStatusData.map((entry, index) => (
@@ -201,8 +201,8 @@ export default function AdminDashboard() {
                         className="w-10 h-10 rounded-lg object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-primary-foreground" />
                       </div>
                     )}
                     <div>
@@ -245,8 +245,8 @@ export default function AdminDashboard() {
                     className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/70 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-accent to-success rounded-lg flex items-center justify-center">
-                        <FolderKanban className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                        <FolderKanban className="w-5 h-5 text-primary-foreground" />
                       </div>
                       <div>
                         <div className="font-semibold flex items-center gap-2">

@@ -139,7 +139,7 @@ export function OnboardingWizard() {
             {step === 'bienvenida' && (
               <motion.div key="bienvenida" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Rocket className="w-8 h-8 text-white" />
+                  <Rocket className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">¡Bienvenido a ProjectHub, {currentUser?.nombre_completo?.split(' ')[0]}!</h2>
                 <p className="text-muted-foreground mb-8">

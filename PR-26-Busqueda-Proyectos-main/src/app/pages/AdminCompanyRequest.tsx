@@ -80,7 +80,7 @@ export default function AdminCompanyRequest() {
                 onClick={() => navigate('/admin/companies')}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
               >
-                <div className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center group-hover:border-primary transition-colors">
+                <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center group-hover:border-primary transition-colors">
                   <ArrowLeft className="w-4 h-4" />
                 </div>
                 <span className="font-medium">Volver a Empresas</span>
@@ -93,7 +93,7 @@ export default function AdminCompanyRequest() {
                     : company.estado === 'pendiente'
                     ? 'bg-warning/10 text-warning border border-warning/20 animate-pulse'
                     : company.estado === 'bloqueado'
-                    ? 'bg-orange-100 text-orange-600 border border-orange-200'
+                    ? 'bg-warning-subtle text-warning-strong border border-warning/30'
                     : 'bg-destructive/10 text-destructive border border-destructive/20'
                 }`}>
                   {company.estado === 'aprobado' ? '✓ Aprobada' : 
@@ -129,30 +129,30 @@ export default function AdminCompanyRequest() {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+                    <div className="grid md:grid-cols-2 gap-8 pt-8 border-t border-border">
                       <div>
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Información Corporativa</h3>
+                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Información Corporativa</h3>
                         <div className="space-y-4">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-50 rounded-lg"><Users className="w-4 h-4 text-slate-500" /></div>
+                            <div className="p-2 bg-muted rounded-lg"><Users className="w-4 h-4 text-muted-foreground" /></div>
                             <div>
-                              <p className="text-xs text-slate-400 font-medium">Tamaño del Equipo</p>
+                              <p className="text-xs text-muted-foreground font-medium">Tamaño del Equipo</p>
                               <p className="text-sm font-bold">{company.num_empleados} empleados</p>
                             </div>
                           </div>
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-slate-50 rounded-lg"><Calendar className="w-4 h-4 text-slate-500" /></div>
+                              <div className="p-2 bg-muted rounded-lg"><Calendar className="w-4 h-4 text-muted-foreground" /></div>
                               <div>
-                                <p className="text-xs text-slate-400 font-medium">Fecha de Solicitud</p>
+                                <p className="text-xs text-muted-foreground font-medium">Fecha de Solicitud</p>
                                 <p className="text-sm font-bold">{company.fecha_registro ? new Date(company.fecha_registro).toLocaleDateString() : 'Reciente'}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-slate-50 rounded-lg">
-                                <ShieldCheck className={`w-4 h-4 ${company.estado === 'aprobado' ? 'text-success' : 'text-slate-500'}`} />
+                              <div className="p-2 bg-muted rounded-lg">
+                                <ShieldCheck className={`w-4 h-4 ${company.estado === 'aprobado' ? 'text-success' : 'text-muted-foreground'}`} />
                               </div>
                               <div>
-                                <p className="text-xs text-slate-400 font-medium">Fecha de Aprobación</p>
+                                <p className="text-xs text-muted-foreground font-medium">Fecha de Aprobación</p>
                                 <p className={`text-sm font-bold ${company.estado === 'aprobado' ? 'text-success' : 'text-warning'}`}>
                                   {company.fecha_aprobacion ? new Date(company.fecha_aprobacion).toLocaleDateString() : 'Aún Pendiente'}
                                 </p>
@@ -161,9 +161,9 @@ export default function AdminCompanyRequest() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Experiencia y Portafolio</h3>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                          <p className="text-sm leading-relaxed text-slate-600 italic">
+                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Experiencia y Portafolio</h3>
+                        <div className="bg-muted rounded-xl p-4 border border-border">
+                          <p className="text-sm leading-relaxed text-muted-foreground italic">
                             "{company.portafolio}"
                           </p>
                         </div>
@@ -193,17 +193,17 @@ export default function AdminCompanyRequest() {
                         <div 
                           key={i} 
                           onClick={() => openBase64(doc.file)}
-                          className="group p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-secondary/50 hover:bg-white transition-all cursor-pointer"
+                          className="group p-5 bg-muted rounded-2xl border border-border hover:border-secondary/50 hover:bg-card transition-all cursor-pointer"
                         >
                           <div className="flex items-start justify-between mb-4">
-                            <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100 text-secondary group-hover:scale-110 transition-transform">
+                            <div className="p-3 bg-card rounded-xl shadow-sm border border-border text-secondary group-hover:scale-110 transition-transform">
                               <FileText className="w-6 h-6" />
                             </div>
                             <div className="text-[10px] font-bold px-2 py-1 bg-secondary/10 text-secondary rounded-lg uppercase tracking-tight">PDF</div>
                           </div>
                           <div>
-                            <h3 className="font-bold text-slate-800 mb-1">{doc.title}</h3>
-                            <p className="text-xs text-slate-400 mb-4">{doc.hint}</p>
+                            <h3 className="font-bold text-foreground mb-1">{doc.title}</h3>
+                            <p className="text-xs text-muted-foreground mb-4">{doc.hint}</p>
                             <div className="flex items-center gap-2 text-xs font-bold text-secondary uppercase group-hover:underline">
                               <ExternalLink className="w-3 h-3" />
                               VER DOCUMENTO
@@ -225,31 +225,31 @@ export default function AdminCompanyRequest() {
                   >
                     <Card className="p-6 border-none shadow-sm overflow-hidden relative">
                       <div className="absolute top-0 left-0 w-1 h-full bg-success" />
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-2">Responsable de Solicitud</h3>
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 px-2">Responsable de Solicitud</h3>
                       
                       <div className="flex flex-col items-center text-center px-2">
                         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center mb-4 border-2 border-white shadow-lg overflow-hidden">
                           <span className="text-3xl font-black text-success">{registrant.nombre_completo.charAt(0).toUpperCase()}</span>
                         </div>
-                        <h4 className="text-xl font-bold text-slate-800 mb-1">{registrant.nombre_completo}</h4>
+                        <h4 className="text-xl font-bold text-foreground mb-1">{registrant.nombre_completo}</h4>
                         <div className="flex items-center gap-1.5 text-success mb-6">
                           <ShieldCheck className="w-4 h-4" />
                           <span className="text-xs font-black uppercase tracking-widest leading-none pt-0.5">Admin Designado</span>
                         </div>
                       </div>
 
-                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                      <div className="space-y-4 pt-4 border-t border-border">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-slate-50 rounded-lg"><Briefcase className="w-4 h-4 text-slate-500" /></div>
+                          <div className="p-2 bg-muted rounded-lg"><Briefcase className="w-4 h-4 text-muted-foreground" /></div>
                           <div>
-                            <p className="text-xs text-slate-400 font-medium">Cargo Actual</p>
+                            <p className="text-xs text-muted-foreground font-medium">Cargo Actual</p>
                             <p className="text-sm font-bold">{registrant.cargo || 'No especificado'}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-slate-50 rounded-lg"><Mail className="w-4 h-4 text-slate-500" /></div>
+                          <div className="p-2 bg-muted rounded-lg"><Mail className="w-4 h-4 text-muted-foreground" /></div>
                           <div>
-                            <p className="text-xs text-slate-400 font-medium">Correo Electrónico</p>
+                            <p className="text-xs text-muted-foreground font-medium">Correo Electrónico</p>
                             <p className="text-sm font-bold truncate max-w-[180px]">{registrant.correo}</p>
                           </div>
                         </div>
@@ -264,9 +264,9 @@ export default function AdminCompanyRequest() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="p-6 border-none shadow-lg bg-white relative overflow-hidden">
+                  <Card className="p-6 border-none shadow-lg bg-card relative overflow-hidden">
                     <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/5 rounded-full" />
-                    <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-foreground mb-6 flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-primary" />
                       Decisión Administrativa
                     </h3>
@@ -276,7 +276,7 @@ export default function AdminCompanyRequest() {
                       {company.estado === 'pendiente' && (
                         <Button 
                           variant="success" 
-                          className="w-full py-6 flex items-center justify-center gap-3 text-white font-bold text-lg shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          className="w-full py-6 flex items-center justify-center gap-3 text-primary-foreground font-bold text-lg shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                           onClick={async () => {
                             await approveCompany(company.id);
                             toast.success('Empresa aprobada exitosamente');
@@ -292,7 +292,7 @@ export default function AdminCompanyRequest() {
                       {company.estado === 'rechazado' && (
                         <Button 
                           variant="success" 
-                          className="w-full py-6 flex items-center justify-center gap-3 text-white font-bold shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          className="w-full py-6 flex items-center justify-center gap-3 text-primary-foreground font-bold shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                           onClick={async () => {
                             await approveCompany(company.id);
                             toast.success('Empresa aprobada exitosamente');
@@ -340,7 +340,7 @@ export default function AdminCompanyRequest() {
                       {company.estado === 'pendiente' && (
                         <Button 
                           variant="outline" 
-                          className="w-full py-4 flex items-center justify-center gap-2 border-slate-200 text-slate-400 hover:text-destructive hover:border-destructive transition-all"
+                          className="w-full py-4 flex items-center justify-center gap-2 border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-all"
                           onClick={async () => {
                             if (confirm('¿Rechazar esta solicitud? Se notificará al responsable por correo.')) {
                               await deleteCompany(company.id);
@@ -355,10 +355,10 @@ export default function AdminCompanyRequest() {
                       )}
                     </div>
 
-                    <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="mt-8 p-4 bg-muted rounded-xl border border-border">
                       <div className="flex gap-3">
-                        <Info className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                        <p className="text-[10px] text-slate-400 leading-normal">
+                        <Info className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        <p className="text-[10px] text-muted-foreground leading-normal">
                           {company.estado === 'pendiente' && 'Al aprobar, el responsable recibirá un correo y podrá comenzar a publicar proyectos en nombre de la empresa.'}
                           {company.estado === 'aprobado' && 'Al bloquear, la empresa y sus usuarios no podrán iniciar sesión hasta que sea desbloqueada.'}
                           {company.estado === 'bloqueado' && 'Al desbloquear, la empresa volverá a estar activa y sus usuarios podrán iniciar sesión nuevamente.'}

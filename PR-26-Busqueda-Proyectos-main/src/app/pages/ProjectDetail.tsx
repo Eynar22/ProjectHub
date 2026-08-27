@@ -184,7 +184,7 @@ export default function ProjectDetail() {
           bottom: -35px;
         }
         .side-cover-flow .slick-dots li button:before {
-          color: var(--color-primary, #6366f1);
+          color: var(--color-primary);
         }
       `}</style>
 
@@ -286,26 +286,26 @@ export default function ProjectDetail() {
                   {/* Presupuesto y Participantes */}
                   <div className="grid grid-cols-2 gap-4">
                     {/* Presupuesto */}
-                    <div className="flex items-center gap-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4">
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                        <DollarSign className="w-6 h-6 text-emerald-600" />
+                    <div className="flex items-center gap-4 bg-success/5 border border-success/30 rounded-2xl p-4">
+                      <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="w-6 h-6 text-success-strong" />
                       </div>
                       <div>
                         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Presupuesto</div>
-                        <div className="text-2xl font-black text-emerald-600">
+                        <div className="text-2xl font-black text-success-strong">
                           {project.financiamiento ? formatNumber(project.financiamiento) : '--'}
                         </div>
                       </div>
                     </div>
 
                     {/* Participantes */}
-                    <div className="flex items-center gap-4 bg-blue-500/5 border border-blue-500/20 rounded-2xl p-4">
-                      <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                        <Users className="w-6 h-6 text-blue-600" />
+                    <div className="flex items-center gap-4 bg-info-subtle border border-info/30 rounded-2xl p-4">
+                      <div className="w-12 h-12 rounded-full bg-info-subtle flex items-center justify-center flex-shrink-0">
+                        <Users className="w-6 h-6 text-info-strong" />
                       </div>
                       <div>
                         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Usuarios</div>
-                        <div className="text-2xl font-black text-blue-600">
+                        <div className="text-2xl font-black text-info-strong">
                           {participatingUsers.length}
                         </div>
                       </div>
@@ -315,7 +315,7 @@ export default function ProjectDetail() {
                   {canRequestParticipation && (
                     <button 
                       onClick={() => setShowRequestModal(true)}
-                      className="w-full bg-primary text-white hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                     >
                       Solicitar Participación <Send className="w-4 h-4" />
                     </button>
@@ -331,7 +331,7 @@ export default function ProjectDetail() {
                   )}
 
                   {hasPendingRequest && (
-                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                    <div className="p-4 rounded-2xl bg-warning-subtle border border-warning/30 text-warning-strong text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2">
                       <RefreshCcw className="w-4 h-4 animate-spin-slow" />
                       Solicitud en Revisión
                     </div>
@@ -339,7 +339,7 @@ export default function ProjectDetail() {
 
                   {(isOwner || isParticipant) && !project.suspendido && (
                     <Link to={`/grupo-trabajo/${project.id}`} className="block">
-                      <button className="w-full bg-primary text-white hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                      <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                         Ir al Espacio de Trabajo <ArrowRight className="w-4 h-4" />
                       </button>
                     </Link>
@@ -448,7 +448,7 @@ export default function ProjectDetail() {
                   <Card className="bg-card border border-border/50 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Participantes</h3>
-                      <div className="flex items-center justify-center bg-blue-500/10 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                      <div className="flex items-center justify-center bg-info-subtle text-info-strong text-xs font-bold px-2 py-0.5 rounded-full">
                         <Users className="w-3 h-3 mr-1" /> {participatingUsers.length}
                       </div>
                     </div>
@@ -459,7 +459,7 @@ export default function ProjectDetail() {
                         const userComp = companies.find(c => c.id === user.empresa_id);
                         return (
                           <div key={user.id || idx} className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm flex-shrink-0">
                               {user.nombre_completo.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
@@ -485,7 +485,7 @@ export default function ProjectDetail() {
 
       {/* MODALES DE ACCIÓN */}
       {showRequestModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-modal p-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
             <Card className="p-8 rounded-[2rem] shadow-2xl border-border/50 bg-card">
               <h2 className="text-2xl font-bold mb-6 text-foreground">Solicitar Participación</h2>
@@ -514,7 +514,7 @@ export default function ProjectDetail() {
       )}
 
       {showTransferModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-modal p-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
             <Card className="p-8 rounded-[2rem] shadow-2xl border-border/50 bg-card">
               <h2 className="text-2xl font-bold mb-4 text-foreground">Transferir Proyecto</h2>

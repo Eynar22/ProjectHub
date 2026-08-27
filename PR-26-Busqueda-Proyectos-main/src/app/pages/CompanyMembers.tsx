@@ -84,8 +84,8 @@ export default function CompanyMembers() {
             <div className="grid grid-cols-3 gap-4 mb-8">
               {[
                 { label: 'Miembros Activos', value: companyMembers.length, color: 'from-primary to-secondary', icon: Users },
-                { label: 'Solicitudes Pendientes', value: pendingRequests.length, color: pendingRequests.length > 0 ? 'from-warning to-orange-500' : 'from-slate-300 to-slate-400', icon: Clock },
-                { label: 'Aprobadas', value: approvedRequests.length, color: 'from-success to-emerald-600', icon: CheckCircle2 },
+                { label: 'Solicitudes Pendientes', value: pendingRequests.length, color: pendingRequests.length > 0 ? 'from-warning to-warning' : 'from-muted to-muted', icon: Clock },
+                { label: 'Aprobadas', value: approvedRequests.length, color: 'from-success to-success', icon: CheckCircle2 },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -93,13 +93,13 @@ export default function CompanyMembers() {
                     <Card className="p-5 border-none shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-slate-400 font-medium mb-0.5">{stat.label}</p>
+                          <p className="text-xs text-muted-foreground font-medium mb-0.5">{stat.label}</p>
                           <p className="text-3xl font-black">{stat.value}</p>
                         </div>
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md relative`}>
-                          <Icon className="w-6 h-6 text-white" />
+                          <Icon className="w-6 h-6 text-primary-foreground" />
                           {stat.label === 'Solicitudes Pendientes' && stat.value > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
                               {stat.value}
                             </span>
                           )}
@@ -152,7 +152,7 @@ export default function CompanyMembers() {
                               <div className="flex items-start gap-5 justify-between">
                                 {/* Left: avatar + info */}
                                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                                  <div className="w-14 h-14 bg-gradient-to-br from-warning to-orange-500 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md flex-shrink-0">
+                                  <div className="w-14 h-14 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
                                     {mr.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -258,7 +258,7 @@ export default function CompanyMembers() {
                               <div className="p-6 pl-7">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md flex-shrink-0 ${isAdmin ? 'bg-gradient-to-br from-primary to-purple-500' : 'bg-gradient-to-br from-success to-emerald-600'}`}>
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0 ${isAdmin ? 'bg-gradient-to-br from-primary to-primary' : 'bg-gradient-to-br from-success to-success'}`}>
                                       {member.nombre_completo.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -415,7 +415,7 @@ export default function CompanyMembers() {
                         <div>
                           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Datos Personales</h3>
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-warning to-orange-500 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg">
+                            <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
                               {selectedRequest.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                             </div>
                             <div>
@@ -528,20 +528,20 @@ export default function CompanyMembers() {
                 >
                   <Card className="border-none shadow-2xl overflow-hidden relative">
                     {/* Upper decorative warning bar */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-orange-500" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-danger to-danger" />
                     
                     <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600 shadow-inner">
+                      <div className="w-16 h-16 bg-danger-subtle rounded-full flex items-center justify-center mx-auto mb-6 text-danger-strong shadow-inner">
                         <AlertTriangle className="w-8 h-8 animate-bounce-slow" />
                       </div>
                       
-                      <h2 className="text-2xl font-black text-slate-800 mb-3">¿Eliminar Registro de Rechazo?</h2>
+                      <h2 className="text-2xl font-black text-foreground mb-3">¿Eliminar Registro de Rechazo?</h2>
                       
-                      <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                        Si eliminas el rechazo de <strong className="text-slate-700">{requestToDelete.usuario?.nombre_completo}</strong>, 
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                        Si eliminas el rechazo de <strong className="text-foreground">{requestToDelete.usuario?.nombre_completo}</strong>, 
                         su cuenta y datos se borrarán por completo de la base de datos.
                         <br />
-                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-200 mt-3 inline-block font-semibold">
+                        <span className="text-xs text-warning-strong bg-warning-subtle px-2 py-1.5 rounded-lg border border-warning/30 mt-3 inline-block font-semibold">
                           ⚠️ Esto permitirá que el usuario pueda registrarse y volver a solicitar unirse a tu empresa.
                         </span>
                       </p>
@@ -549,14 +549,14 @@ export default function CompanyMembers() {
                       <div className="flex gap-3">
                         <Button
                           variant="ghost"
-                          className="flex-1 py-3 text-slate-500 hover:bg-slate-100 font-bold"
+                          className="flex-1 py-3 text-muted-foreground hover:bg-muted font-bold"
                           onClick={() => setRequestToDelete(null)}
                         >
                           Cancelar
                         </Button>
                         <Button
                           variant="primary"
-                          className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold shadow-lg shadow-red-500/20"
+                          className="flex-1 py-3 bg-gradient-to-r from-destructive to-destructive hover:brightness-95 text-primary-foreground font-bold shadow-lg"
                           onClick={() => {
                             deleteMemberRequest(requestToDelete.id);
                             setRequestToDelete(null);

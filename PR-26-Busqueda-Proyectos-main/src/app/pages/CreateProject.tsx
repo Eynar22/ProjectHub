@@ -165,7 +165,7 @@ export default function CreateProject() {
               <Card className="p-8 text-center">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-success to-accent rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8 text-white" />
+                    <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                   </div>
                 </div>
 
@@ -210,7 +210,7 @@ export default function CreateProject() {
             className="max-w-3xl mx-auto mb-10">
             <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Plus className="w-6 h-6 text-white" />
+                <Plus className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold">Crear Nuevo Proyecto</h1>
@@ -307,10 +307,10 @@ export default function CreateProject() {
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button type="button" onClick={() => removeImage(i)}
                               className="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
-                              <X className="w-4 h-4 text-white" />
+                              <X className="w-4 h-4 text-primary-foreground" />
                             </button>
                           </div>
-                          <div className="absolute bottom-1 left-1 right-1 text-[10px] text-white/80 truncate px-1">{file.name}</div>
+                          <div className="absolute bottom-1 left-1 right-1 text-[10px] text-primary-foreground/80 truncate px-1">{file.name}</div>
                         </div>
                       ))}
                     </div>
@@ -329,9 +329,9 @@ export default function CreateProject() {
             {/* Section 4: PDFs */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500/8 to-transparent border-b border-border">
-                  <div className="w-7 h-7 rounded-lg bg-orange-500/15 flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-orange-500" />
+                <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-warning/10 to-transparent border-b border-border">
+                  <div className="w-7 h-7 rounded-lg bg-warning-subtle flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-warning-strong" />
                   </div>
                   <h2 className="font-bold text-base">Documentos PDF</h2>
                   <span className="ml-auto text-xs text-muted-foreground">{pdfFiles.length} añadido(s)</span>
@@ -340,9 +340,9 @@ export default function CreateProject() {
                   {pdfFiles.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {pdfFiles.map((file, i) => (
-                        <div key={i} className="flex items-center gap-3 px-4 py-3 bg-orange-50 border border-orange-100 rounded-xl">
-                          <div className="w-9 h-9 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <File className="w-5 h-5 text-orange-500" />
+                        <div key={i} className="flex items-center gap-3 px-4 py-3 bg-warning-subtle border border-warning/30 rounded-xl">
+                          <div className="w-9 h-9 bg-warning-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+                            <File className="w-5 h-5 text-warning-strong" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{file.name}</p>
@@ -358,7 +358,7 @@ export default function CreateProject() {
                   )}
                   <input ref={pdfInputRef} type="file" multiple accept="application/pdf" onChange={handlePdfSelect} className="hidden" />
                   <button type="button" onClick={() => pdfInputRef.current?.click()}
-                    className="w-full border-2 border-dashed border-border hover:border-orange-400/60 hover:bg-orange-50/50 rounded-xl py-6 flex flex-col items-center gap-2 text-muted-foreground hover:text-orange-600 transition-all">
+                    className="w-full border-2 border-dashed border-border hover:border-warning/50 hover:bg-warning-subtle/50 rounded-xl py-6 flex flex-col items-center gap-2 text-muted-foreground hover:text-warning-strong transition-all">
                     <FileText className="w-6 h-6" />
                     <span className="text-sm font-medium">Haz clic para añadir PDFs</span>
                     <span className="text-xs">Documentos de proyecto, especificaciones técnicas</span>

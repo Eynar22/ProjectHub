@@ -145,12 +145,12 @@ export function ResourcesTab({
                   ) : isPdf ? (
                     <div className="relative mb-2">
                       <FileText className="w-10 h-10 text-destructive" />
-                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-destructive text-white px-1 rounded">PDF</span>
+                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-destructive text-primary-foreground px-1 rounded">PDF</span>
                     </div>
                   ) : isImage ? (
                     <div className="relative mb-2">
                       <Image className="w-10 h-10 text-accent" />
-                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-accent text-white px-1 rounded">IMG</span>
+                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-accent text-primary-foreground px-1 rounded">IMG</span>
                     </div>
                   ) : (
                     <FileText className="w-10 h-10 text-muted-foreground mb-2" />

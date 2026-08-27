@@ -1,12 +1,14 @@
 import { ChevronDown, Users, X } from 'lucide-react';
 
+/* Paleta categórica para distinguir responsables (Anexo A1: categorías por
+ * color permitidas). Usa los tokens de la paleta de gráficas. */
 const AVATAR_COLORS = [
-  'from-violet-500 to-purple-600',
-  'from-emerald-400 to-teal-500',
-  'from-amber-400 to-orange-500',
-  'from-rose-400 to-pink-500',
-  'from-sky-400 to-blue-500',
-  'from-lime-400 to-green-500',
+  'bg-chart-1',
+  'bg-chart-2',
+  'bg-chart-3',
+  'bg-chart-4',
+  'bg-chart-5',
+  'bg-primary',
 ];
 
 export function AssigneeSelector({
@@ -48,7 +50,7 @@ export function AssigneeSelector({
               key={u.id}
               className="flex items-center gap-1.5 pl-1 pr-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 border border-primary/30 text-primary"
             >
-              <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${getColor(u.id)} flex items-center justify-center text-white text-[9px] font-black flex-shrink-0`}>
+              <div className={`w-5 h-5 rounded-full ${getColor(u.id)} flex items-center justify-center text-primary-foreground text-[9px] font-black flex-shrink-0`}>
                 {u.nombre_completo.charAt(0).toUpperCase()}
               </div>
               <span>{compact ? u.nombre_completo.split(' ')[0] : u.nombre_completo}</span>

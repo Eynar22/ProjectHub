@@ -234,10 +234,10 @@ export default function Explore() {
                       <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-[2.5rem] blur-xl opacity-0 group-hover/card:opacity-40 transition-opacity duration-500 -z-10" />
 
                       {/* Tarjeta Principal */}
-                      <Card className="relative overflow-hidden h-[480px] flex flex-col border border-white/10 bg-slate-900 shadow-[0_10px_30px_rgba(0,0,0,0.3)] group-hover/card:-translate-y-2 transition-transform duration-500 rounded-[2rem]">
+                      <Card className="relative overflow-hidden h-[480px] flex flex-col border border-white/10 bg-surface-inverse shadow-[0_10px_30px_rgba(0,0,0,0.3)] group-hover/card:-translate-y-2 transition-transform duration-500 rounded-[2rem]">
                         
                         {/* 1. FONDO E IMÁGENES */}
-                        <div className="absolute inset-0 z-0 bg-slate-900">
+                        <div className="absolute inset-0 z-0 bg-surface-inverse">
                           {project.imagenes && project.imagenes.length > 0 ? (
                             <Slider {...sliderSettings} className="h-full">
                               {project.imagenes.map((img, idx) => (
@@ -251,7 +251,7 @@ export default function Explore() {
                               ))}
                             </Slider>
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 flex items-center justify-center transition-transform duration-1000 group-hover/card:scale-110">
+                            <div className="w-full h-full bg-gradient-to-br from-surface-inverse to-surface-inverse flex items-center justify-center transition-transform duration-1000 group-hover/card:scale-110">
                               <Building2 className="w-20 h-20 text-white/10" />
                             </div>
                           )}
@@ -297,7 +297,7 @@ export default function Explore() {
                               </div>
 
                               {project.financiamiento && (
-                                <div className="bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-emerald-300 shadow-sm">
+                                <div className="bg-success/20 backdrop-blur-md border border-success/40 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-[color:var(--green-on-dark)] shadow-sm">
                                   <DollarSign className="w-3.5 h-3.5" />
                                   <span>${project.financiamiento?.toLocaleString()}</span>
                                 </div>
@@ -309,14 +309,14 @@ export default function Explore() {
                             <div className="w-full">
                               {isVisitor ? (
                                 <Link to="/register" className="block w-full">
-                                  <button className="w-full rounded-full bg-white text-black hover:bg-gray-100 font-extrabold py-3.5 text-sm flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl">
-                                    <Lock className="w-4 h-4 text-black" />
+                                  <button className="w-full rounded-full bg-background text-foreground hover:bg-muted font-extrabold py-3.5 text-sm flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl">
+                                    <Lock className="w-4 h-4" />
                                     Regístrate para ver más
                                   </button>
                                 </Link>
                               ) : (
                                 <Link to={`/project/${project.id}`} state={{ from: 'explore' }} className="block w-full">
-                                  <button className="w-full rounded-full bg-white text-black hover:bg-gray-100 font-extrabold py-3.5 text-sm flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl">
+                                  <button className="w-full rounded-full bg-background text-foreground hover:bg-muted font-extrabold py-3.5 text-sm flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl">
                                     Ver Proyecto Completo
                                   </button>
                                 </Link>

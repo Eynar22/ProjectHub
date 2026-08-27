@@ -1,0 +1,1075 @@
+================================================================================
+   ANEXO B — ARQUITECTURA Y ORDEN DE UN PROYECTO FRONTEND
+   Estructura de carpetas, capa de API, convenciones de nombres y comentarios
+   Stack de referencia: React + Vite + TypeScript  ←→  Backend NestJS + PostgreSQL
+   (Los principios sirven igual para Vue, Angular o JS puro)
+================================================================================
+
+ÍNDICE
+   B1.  Los 5 principios que sostienen todo
+   B2.  Estructura de carpetas completa (árbol comentado)
+   B3.  Reglas de nombres: archivos, carpetas, variables, funciones
+   B4.  La capa de API: la regla más importante del anexo
+   B5.  Cliente HTTP centralizado (código completo)
+   B6.  Servicios por recurso (código completo)
+   B7.  Tipos y DTOs: cómo espejar el backend
+   B8.  Manejo de errores: una sola forma en todo el proyecto
+   B9.  Hooks de datos: dónde vive el estado del servidor
+   B10. Variables de entorno
+   B11. Reglas de comentarios (qué comentar y qué NO)
+   B12. Orden interno de un archivo de componente
+   B13. Orden de imports
+   B14. Reglas de Git: ramas y commits
+   B15. Archivos de configuración obligatorios
+   B16. Plantillas listas para copiar
+   B17. Checklist de orden del proyecto
+   B18. Errores de organización que arruinan un proyecto
+
+
+================================================================================
+B1 — LOS 5 PRINCIPIOS QUE SOSTIENEN TODO
+================================================================================
+
+PRINCIPIO 1 — ORGANIZA POR FUNCIONALIDAD, NO POR TIPO DE ARCHIVO
+    MAL:  /components (200 archivos), /hooks (80 archivos), /utils (50)
+    BIEN: /features/eventos/{components, hooks, services, types}
+
+    Por qué: cuando trabajas en "eventos", todo lo de eventos está en una sola
+    carpeta. No saltas entre 6 carpetas para tocar una funcionalidad.
+    Regla práctica: si borras una funcionalidad, deberías poder borrar UNA
+    carpeta y que el proyecto siga compilando.
+
+PRINCIPIO 2 — UN ARCHIVO, UNA RESPONSABILIDAD
+    Un componente que hace fetch, transforma datos, valida un formulario y
+    renderiza una tabla es cuatro archivos disfrazados de uno.
+    Límite práctico: si un archivo pasa de 200-250 líneas, divídelo.
+
+PRINCIPIO 3 — LAS DEPENDENCIAS FLUYEN EN UNA SOLA DIRECCIÓN
+        pages  →  features  →  shared  →  lib
+    Una página puede importar de features. Una feature puede importar de shared.
+    shared NUNCA importa de features. Una feature NUNCA importa de otra feature
+    directamente (si lo necesitas, ese código pertenece a /shared).
+
+PRINCIPIO 4 — EL COMPONENTE NUNCA HABLA CON LA API
+    Ningún componente contiene fetch() ni axios. Ni uno. El componente llama a
+    un hook, el hook llama a un servicio, el servicio llama al cliente HTTP.
+    Esta es la regla que más orden genera. Detalle completo en B4.
+
+PRINCIPIO 5 — SI HAY QUE ELEGIR, GANA LA CONSISTENCIA
+    Una convención mediocre aplicada en todo el proyecto vale más que la
+    convención perfecta aplicada a medias. Elige una forma y no la cambies
+    a mitad de proyecto.
+
+
+================================================================================
+B2 — ESTRUCTURA DE CARPETAS COMPLETA
+================================================================================
+
+proyecto/
+├── .env.example              # plantilla de variables (SÍ va al repo)
+├── .env.local                # variables reales (NUNCA va al repo)
+├── .gitignore
+├── .editorconfig             # espacios/tabs iguales para todos
+├── .prettierrc               # formato automático
+├── eslint.config.js          # reglas de linter
+├── tsconfig.json             # incluye los alias de importación
+├── vite.config.ts
+├── package.json
+├── README.md                 # cómo levantar el proyecto en 5 pasos
+├── Dockerfile
+├── nginx.conf
+│
+├── public/                   # archivos servidos tal cual (favicon, robots.txt)
+│
+└── src/
+    │
+    ├── main.tsx              # punto de entrada. Solo monta la app. Nada más.
+    ├── App.tsx               # providers globales + router. Sin lógica.
+    │
+    ├── app/                  # CONFIGURACIÓN GLOBAL DE LA APLICACIÓN
+    │   ├── router.tsx        # definición de todas las rutas
+    │   ├── providers.tsx     # QueryClient, tema, auth, i18n, toasts
+    │   └── guards/           # protección de rutas por rol
+    │       ├── RutaPrivada.tsx
+    │       └── RutaPorRol.tsx
+    │
+    ├── pages/                # UNA CARPETA POR PANTALLA/RUTA
+    │   │                     # Las páginas SOLO componen. No tienen lógica.
+    │   ├── login/
+    │   │   └── LoginPage.tsx
+    │   ├── eventos/
+    │   │   ├── EventosListaPage.tsx
+    │   │   ├── EventoDetallePage.tsx
+    │   │   └── EventoCrearPage.tsx
+    │   └── NotFoundPage.tsx
+    │
+    ├── features/             # ★ EL CORAZÓN DEL PROYECTO
+    │   │                     # Una carpeta por dominio de negocio.
+    │   │                     # Cada feature es autocontenida.
+    │   │
+    │   ├── auth/
+    │   │   ├── components/           # UI solo de esta feature
+    │   │   │   ├── LoginForm.tsx
+    │   │   │   └── CambiarPasswordForm.tsx
+    │   │   ├── hooks/                # lógica de estado de esta feature
+    │   │   │   ├── useLogin.ts
+    │   │   │   └── useSesion.ts
+    │   │   ├── services/             # llamadas a la API de esta feature
+    │   │   │   └── auth.service.ts
+    │   │   ├── types/                # tipos e interfaces de esta feature
+    │   │   │   └── auth.types.ts
+    │   │   ├── schemas/              # validaciones (zod / yup)
+    │   │   │   └── login.schema.ts
+    │   │   ├── utils/                # helpers solo de esta feature
+    │   │   │   └── token.utils.ts
+    │   │   └── index.ts              # barrel: qué exporta esta feature
+    │   │
+    │   ├── eventos/
+    │   │   ├── components/
+    │   │   │   ├── EventoCard.tsx
+    │   │   │   ├── EventoTabla.tsx
+    │   │   │   ├── EventoForm.tsx
+    │   │   │   └── EventoEstadoBadge.tsx
+    │   │   ├── hooks/
+    │   │   │   ├── useEventos.ts
+    │   │   │   ├── useEvento.ts
+    │   │   │   └── useCrearEvento.ts
+    │   │   ├── services/
+    │   │   │   └── eventos.service.ts
+    │   │   ├── types/
+    │   │   │   └── eventos.types.ts
+    │   │   ├── schemas/
+    │   │   │   └── evento.schema.ts
+    │   │   └── index.ts
+    │   │
+    │   ├── usuarios/
+    │   ├── entradas/
+    │   └── reportes/
+    │
+    ├── shared/               # ★ REUTILIZABLE POR TODAS LAS FEATURES
+    │   ├── components/
+    │   │   ├── ui/                   # componentes base sin lógica de negocio
+    │   │   │   ├── Button/
+    │   │   │   │   ├── Button.tsx
+    │   │   │   │   ├── Button.module.css
+    │   │   │   │   └── index.ts
+    │   │   │   ├── Input/
+    │   │   │   ├── Modal/
+    │   │   │   ├── Table/
+    │   │   │   ├── Badge/
+    │   │   │   ├── Spinner/
+    │   │   │   └── index.ts          # barrel de todos los ui
+    │   │   ├── layout/
+    │   │   │   ├── AppLayout.tsx
+    │   │   │   ├── Sidebar.tsx
+    │   │   │   ├── Header.tsx
+    │   │   │   └── Footer.tsx
+    │   │   └── feedback/             # estados obligatorios (ver Manual 8.9)
+    │   │       ├── EstadoCargando.tsx
+    │   │       ├── EstadoVacio.tsx
+    │   │       └── EstadoError.tsx
+    │   ├── hooks/                    # hooks genéricos, sin dominio
+    │   │   ├── useDebounce.ts
+    │   │   ├── useMediaQuery.ts
+    │   │   └── useLocalStorage.ts
+    │   ├── utils/                    # funciones puras y reutilizables
+    │   │   ├── formatearFecha.ts
+    │   │   ├── formatearMoneda.ts
+    │   │   └── validaciones.ts
+    │   ├── constants/
+    │   │   ├── rutas.ts              # todas las rutas como constantes
+    │   │   ├── roles.ts
+    │   │   └── mensajes.ts           # textos de error/éxito centralizados
+    │   └── types/                    # tipos globales
+    │       ├── api.types.ts
+    │       └── common.types.ts
+    │
+    ├── lib/                  # ★ CONFIGURACIÓN DE LIBRERÍAS EXTERNAS
+    │   ├── api/
+    │   │   ├── client.ts             # instancia de axios + interceptores
+    │   │   ├── endpoints.ts          # TODAS las rutas de la API, en un lugar
+    │   │   └── errors.ts             # normalización de errores
+    │   ├── queryClient.ts            # config de React Query
+    │   └── storage.ts                # wrapper de localStorage
+    │
+    ├── styles/
+    │   ├── tokens.css                # variables de color/espaciado (Anexo A)
+    │   ├── reset.css
+    │   └── global.css
+    │
+    └── assets/
+        ├── images/
+        ├── icons/
+        └── fonts/
+
+REGLAS DE LA ESTRUCTURA
+--------------------------------------------------------------------------------
+[REGLA] Si algo lo usa UNA sola feature → vive dentro de esa feature.
+        Si lo usan DOS o más → se mueve a /shared. No antes.
+[REGLA] No crees carpetas vacías "por si acaso". Créalas cuando las necesites.
+[REGLA] Una feature no importa de otra feature. Si dos features necesitan lo
+        mismo, ese código sube a /shared.
+[REGLA] /pages solo compone: importa componentes de features y los ordena.
+        Si una página tiene más de 60 líneas, la lógica está en el lugar
+        equivocado.
+[REGLA] Máximo 3 niveles de anidamiento dentro de src. Si necesitas un cuarto,
+        tu organización está mal.
+
+
+================================================================================
+B3 — REGLAS DE NOMBRES
+================================================================================
+
+CARPETAS
+    kebab-case, en minúsculas, en plural cuando agrupan varios elementos.
+        ✓ /features/eventos, /shared/components, /solicitudes-evento
+        ✗ /Features, /EventosFeature, /evento_components
+
+ARCHIVOS — por tipo, sin excepciones:
+    Componentes React ...... PascalCase.tsx        → EventoCard.tsx
+    Hooks .................. camelCase con "use"   → useEventos.ts
+    Servicios .............. recurso.service.ts    → eventos.service.ts
+    Tipos .................. recurso.types.ts      → eventos.types.ts
+    Schemas ................ recurso.schema.ts     → evento.schema.ts
+    Utilidades ............. camelCase.ts          → formatearFecha.ts
+    Constantes ............. camelCase.ts          → rutas.ts
+    Estilos de módulo ...... Componente.module.css → Button.module.css
+    Tests .................. archivo.test.ts       → useEventos.test.ts
+
+    [REGLA] El nombre del archivo debe coincidir con lo que exporta.
+    EventoCard.tsx exporta EventoCard. Nada de "index.tsx" con 300 líneas.
+
+VARIABLES Y FUNCIONES
+    Variables .............. camelCase              → eventoSeleccionado
+    Constantes globales .... UPPER_SNAKE_CASE       → MAX_INTENTOS_LOGIN
+    Funciones .............. camelCase, empiezan con VERBO
+                             → obtenerEventos(), calcularTotal(), validarQr()
+    Booleanos .............. es / tiene / hay / puede / debe
+                             → esAdmin, tieneStock, hayErrores, puedeEditar
+    Handlers de eventos .... handle + Qué
+                             → handleSubmit, handleEliminarEvento
+    Props de callback ...... on + Qué
+                             → onGuardar, onCerrar, onSeleccionar
+    Arrays ................. plural                → eventos, usuarios, entradas
+    Tipos e interfaces ..... PascalCase            → Evento, CrearEventoDto
+    Enums .................. PascalCase singular, valores UPPER
+                             → enum EstadoEvento { BORRADOR, ACTIVO }
+
+IDIOMA — [DECIDE UNA VEZ Y NO LA CAMBIES]
+    Recomendación para tus proyectos:
+        Dominio de negocio en ESPAÑOL (evento, entrada, recargador, puesto):
+        porque tu backend, tu base de datos y tu documentación ya están en
+        español. Mezclar Evento/Event en el mismo proyecto genera bugs reales.
+        Términos técnicos en INGLÉS (component, hook, service, props, loading).
+    Ejemplo correcto:
+        const useEventosActivos = () => { const [isLoading, setIsLoading] = ... }
+    Lo importante: que el nombre en el frontend sea IDÉNTICO al del backend.
+    Si en NestJS la propiedad es `fechaInicio`, en el frontend es `fechaInicio`.
+    Nunca traduzcas campos entre capas.
+
+
+================================================================================
+B4 — LA CAPA DE API: LA REGLA MÁS IMPORTANTE DE ESTE ANEXO
+================================================================================
+
+[REGLA ABSOLUTA] Un componente NUNCA llama a la API directamente.
+Nunca verás fetch() ni axios.get() dentro de un archivo .tsx de componente.
+
+FLUJO OBLIGATORIO, SIEMPRE EN ESTE ORDEN:
+
+    COMPONENTE  →  HOOK  →  SERVICIO  →  CLIENTE HTTP  →  BACKEND
+     (.tsx)      (use*.ts)  (*.service.ts)  (client.ts)
+
+    COMPONENTE   solo muestra datos y dispara acciones. No sabe que existe HTTP.
+    HOOK         maneja estado del servidor: carga, error, caché, reintentos.
+    SERVICIO     sabe qué endpoint llamar y con qué forma de datos.
+    CLIENTE      sabe la URL base, los headers, el token y cómo manejar errores.
+
+POR QUÉ ESTA SEPARACIÓN NO ES BUROCRACIA:
+    - Si cambia la URL del backend, tocas 1 archivo (endpoints.ts).
+    - Si cambia la forma de autenticar, tocas 1 archivo (client.ts).
+    - Si el backend renombra un campo, tocas 1 archivo (el servicio).
+    - Puedes probar la lógica sin levantar el backend.
+    - Cuando algo falla, sabes exactamente en qué capa buscar.
+
+    Sin esta separación, un cambio de endpoint significa buscar "axios" en 40
+    archivos. Eso es exactamente lo que estamos evitando.
+
+[REGLA] TODAS las rutas de la API viven en un solo archivo: lib/api/endpoints.ts
+        Ninguna URL escrita a mano dentro de un servicio.
+[REGLA] Un servicio por recurso del backend. Si NestJS tiene EventosController,
+        el frontend tiene eventos.service.ts. Correspondencia 1 a 1.
+[REGLA] El servicio devuelve DATOS, no respuestas HTTP. El componente no debe
+        saber qué es un `response.data.data`.
+[REGLA] El servicio no maneja estado ni muestra toasts. Solo pide datos.
+
+
+================================================================================
+B5 — CLIENTE HTTP CENTRALIZADO (código completo)
+================================================================================
+
+/* ============================================================================
+ * src/lib/api/endpoints.ts
+ * Todas las rutas del backend en un solo lugar.
+ * Si el backend cambia una ruta, este es el ÚNICO archivo que se toca.
+ * ========================================================================= */
+
+export const ENDPOINTS = {
+  AUTH: {
+    LOGIN:            '/auth/login',
+    LOGOUT:           '/auth/logout',
+    REFRESH:          '/auth/refresh',
+    PERFIL:           '/auth/perfil',
+  },
+  EVENTOS: {
+    LISTAR:           '/eventos',
+    CREAR:            '/eventos',
+    DETALLE:  (id: string) => `/eventos/${id}`,
+    ACTUALIZAR: (id: string) => `/eventos/${id}`,
+    ELIMINAR: (id: string) => `/eventos/${id}`,
+    CERRAR:   (id: string) => `/eventos/${id}/cerrar`,
+  },
+  ENTRADAS: {
+    LISTAR:           '/entradas',
+    POR_EVENTO: (eventoId: string) => `/eventos/${eventoId}/entradas`,
+    VALIDAR_QR:       '/entradas/validar-qr',
+  },
+} as const;
+
+
+/* ============================================================================
+ * src/lib/api/client.ts
+ * Instancia única de axios. Aquí vive TODO lo transversal:
+ * URL base, headers, token de sesión, manejo global de errores y timeouts.
+ * Ningún otro archivo del proyecto crea su propia instancia de axios.
+ * ========================================================================= */
+
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import { storage } from '@/lib/storage';
+import { normalizarError } from './errors';
+
+/** Timeout global. Si el backend no responde en 15s, se aborta. */
+const TIMEOUT_MS = 15_000;
+
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  timeout: TIMEOUT_MS,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+/* --- INTERCEPTOR DE PETICIÓN -------------------------------------------
+ * Adjunta el token de sesión a cada llamada saliente.
+ * Así ningún servicio tiene que acordarse de mandar el header. */
+apiClient.interceptors.request.use((config) => {
+  const token = storage.obtenerToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+/* --- INTERCEPTOR DE RESPUESTA ------------------------------------------
+ * 1. Desenvuelve el body: el componente recibe datos, no un objeto axios.
+ * 2. Traduce cualquier error del backend a un formato único (ApiError).
+ * 3. Si la sesión expiró (401), cierra sesión y manda al login. */
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      storage.limpiarSesion();
+      window.location.href = '/login';
+    }
+    return Promise.reject(normalizarError(error));
+  },
+);
+
+
+/* ============================================================================
+ * src/lib/api/errors.ts
+ * Convierte cualquier fallo (red, timeout, error de NestJS) en un ÚNICO
+ * formato. El resto del proyecto solo conoce ApiError, nunca AxiosError.
+ * ========================================================================= */
+
+import { AxiosError } from 'axios';
+
+export interface ApiError {
+  /** Código HTTP, o 0 si el fallo fue de red. */
+  status: number;
+  /** Mensaje ya listo para mostrar al usuario, en español. */
+  mensaje: string;
+  /** Errores por campo, para pintar en formularios. */
+  camposConError?: Record<string, string>;
+}
+
+/** Mensajes por defecto según el código HTTP. Nunca mostramos texto técnico. */
+const MENSAJES_POR_STATUS: Record<number, string> = {
+  0:   'No pudimos conectar con el servidor. Revisa tu conexión.',
+  400: 'Los datos enviados no son válidos.',
+  401: 'Tu sesión expiró. Inicia sesión de nuevo.',
+  403: 'No tienes permiso para realizar esta acción.',
+  404: 'No encontramos lo que buscabas.',
+  409: 'Esta operación entra en conflicto con datos existentes.',
+  422: 'Revisa los campos marcados.',
+  500: 'Ocurrió un error en el servidor. Intenta de nuevo en unos minutos.',
+};
+
+export function normalizarError(error: AxiosError<any>): ApiError {
+  const status = error.response?.status ?? 0;
+  const cuerpo = error.response?.data;
+
+  return {
+    status,
+    // Prioridad: mensaje del backend > mensaje por status > genérico
+    mensaje:
+      cuerpo?.message ??
+      MENSAJES_POR_STATUS[status] ??
+      'Ocurrió un error inesperado.',
+    camposConError: cuerpo?.errors,
+  };
+}
+
+
+================================================================================
+B6 — SERVICIOS POR RECURSO (código completo)
+================================================================================
+
+/* ============================================================================
+ * src/features/eventos/services/eventos.service.ts
+ *
+ * Responsabilidad: hablar con los endpoints de eventos del backend.
+ * NO maneja estado. NO muestra mensajes. NO conoce React.
+ * Devuelve datos ya tipados y listos para usar.
+ * ========================================================================= */
+
+import { apiClient } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
+import type {
+  Evento,
+  CrearEventoDto,
+  ActualizarEventoDto,
+  FiltrosEvento,
+} from '../types/eventos.types';
+
+export const eventosService = {
+  /** Lista los eventos, con filtros opcionales de estado y búsqueda. */
+  async listar(filtros?: FiltrosEvento): Promise<Evento[]> {
+    const { data } = await apiClient.get<Evento[]>(ENDPOINTS.EVENTOS.LISTAR, {
+      params: filtros,
+    });
+    return data;
+  },
+
+  /** Obtiene un evento por su id. Lanza ApiError 404 si no existe. */
+  async obtenerPorId(id: string): Promise<Evento> {
+    const { data } = await apiClient.get<Evento>(ENDPOINTS.EVENTOS.DETALLE(id));
+    return data;
+  },
+
+  /** Crea un evento nuevo y devuelve el evento ya creado con su id. */
+  async crear(dto: CrearEventoDto): Promise<Evento> {
+    const { data } = await apiClient.post<Evento>(ENDPOINTS.EVENTOS.CREAR, dto);
+    return data;
+  },
+
+  /** Actualiza campos parciales de un evento existente. */
+  async actualizar(id: string, dto: ActualizarEventoDto): Promise<Evento> {
+    const { data } = await apiClient.patch<Evento>(
+      ENDPOINTS.EVENTOS.ACTUALIZAR(id),
+      dto,
+    );
+    return data;
+  },
+
+  /** Cierra el evento. Operación irreversible del lado del backend. */
+  async cerrar(id: string): Promise<void> {
+    await apiClient.post(ENDPOINTS.EVENTOS.CERRAR(id));
+  },
+};
+
+REGLAS DE LOS SERVICIOS
+--------------------------------------------------------------------------------
+[REGLA] Un objeto exportado por recurso, no funciones sueltas. Facilita el
+        autocompletado: escribes `eventosService.` y ves todo lo disponible.
+[REGLA] Los métodos usan verbos del dominio: listar, obtenerPorId, crear,
+        actualizar, eliminar, cerrar. Consistentes en TODOS los servicios.
+[REGLA] Siempre tipa la respuesta: apiClient.get<Evento[]>(...)
+[REGLA] El servicio no atrapa errores. Deja que suban al hook. El hook decide
+        qué mostrar. Un try/catch dentro del servicio esconde problemas.
+[REGLA] Si el backend devuelve un formato envuelto ({ data, meta }), desenvuelve
+        AQUÍ. El componente jamás debe ver `.data.data`.
+
+
+================================================================================
+B7 — TIPOS Y DTOs: CÓMO ESPEJAR EL BACKEND
+================================================================================
+
+/* ============================================================================
+ * src/features/eventos/types/eventos.types.ts
+ * Espejo de las entidades y DTOs del backend NestJS.
+ * Si el backend cambia una entidad, este archivo se actualiza primero.
+ * ========================================================================= */
+
+/** Estados posibles de un evento. Debe coincidir con el enum de Prisma. */
+export enum EstadoEvento {
+  SOLICITADO = 'SOLICITADO',
+  APROBADO   = 'APROBADO',
+  ACTIVO     = 'ACTIVO',
+  FINALIZADO = 'FINALIZADO',
+  RECHAZADO  = 'RECHAZADO',
+}
+
+/** Entidad tal como la devuelve el backend. Solo lectura. */
+export interface Evento {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  lugar: string;
+  fechaInicio: string;      // ISO 8601. Se formatea al mostrar, no aquí.
+  fechaFin: string;
+  estado: EstadoEvento;
+  clienteId: string;
+  creadoEn: string;
+}
+
+/** Datos que se ENVÍAN al crear. Espejo del CreateEventoDto de NestJS. */
+export interface CrearEventoDto {
+  nombre: string;
+  descripcion: string;
+  lugar: string;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+/** Todos los campos opcionales: es un PATCH, no un PUT. */
+export type ActualizarEventoDto = Partial<CrearEventoDto>;
+
+/** Parámetros de consulta para el listado. */
+export interface FiltrosEvento {
+  estado?: EstadoEvento;
+  busqueda?: string;
+  pagina?: number;
+  limite?: number;
+}
+
+REGLAS DE TIPOS
+--------------------------------------------------------------------------------
+[REGLA] Sufijo Dto para lo que ENVÍAS. Sin sufijo para lo que RECIBES.
+        Evento (recibes) vs CrearEventoDto (envías).
+[REGLA] Las fechas viajan como string ISO. Se convierten a Date solo en el
+        momento de formatear para mostrar. Nunca guardes Date en el estado.
+[REGLA] Los enums del frontend deben tener EXACTAMENTE los mismos valores que
+        los del backend. Un typo aquí es un bug silencioso.
+[REGLA] Prohibido usar `any`. Si no sabes el tipo, usa `unknown` y estréchalo.
+[REGLA] Tipos globales (respuesta paginada, respuesta de error) van en
+        /shared/types/api.types.ts, no repetidos en cada feature:
+
+        export interface RespuestaPaginada<T> {
+          datos: T[];
+          total: number;
+          pagina: number;
+          totalPaginas: number;
+        }
+
+
+================================================================================
+B8 — MANEJO DE ERRORES: UNA SOLA FORMA EN TODO EL PROYECTO
+================================================================================
+
+CAPA POR CAPA, QUIÉN HACE QUÉ:
+
+    CLIENTE HTTP  → traduce cualquier fallo a ApiError. Maneja el 401 global.
+    SERVICIO      → no hace nada. Deja pasar el error.
+    HOOK          → captura, expone `error` al componente, dispara el toast.
+    COMPONENTE    → muestra el estado de error. No decide el mensaje.
+
+[REGLA] El mensaje de error se define en UN solo lugar: lib/api/errors.ts o
+        shared/constants/mensajes.ts. Nunca escrito a mano en un componente.
+[REGLA] Nunca muestres el error técnico al usuario. "Cannot read property
+        'id' of undefined" no es un mensaje. Registra el detalle en consola,
+        muestra el mensaje humano.
+[REGLA] Los errores de validación por campo se pintan JUNTO al campo, no en
+        un toast. Los errores de red o servidor sí van en toast o banner.
+[REGLA] Todo error debe ofrecer una salida: botón Reintentar, o instrucción
+        clara de qué hacer.
+
+
+================================================================================
+B9 — HOOKS DE DATOS: DÓNDE VIVE EL ESTADO DEL SERVIDOR
+================================================================================
+
+/* ============================================================================
+ * src/features/eventos/hooks/useEventos.ts
+ *
+ * Responsabilidad: conectar el servicio con React.
+ * Maneja carga, error, caché e invalidación. El componente solo consume.
+ * ========================================================================= */
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { eventosService } from '../services/eventos.service';
+import type { CrearEventoDto, FiltrosEvento } from '../types/eventos.types';
+
+/** Claves de caché de esta feature. Centralizadas para invalidar sin errores. */
+export const EVENTOS_KEYS = {
+  todos: ['eventos'] as const,
+  lista: (filtros?: FiltrosEvento) => ['eventos', 'lista', filtros] as const,
+  detalle: (id: string) => ['eventos', 'detalle', id] as const,
+};
+
+/** Lista de eventos con filtros. Devuelve datos, carga y error ya listos. */
+export function useEventos(filtros?: FiltrosEvento) {
+  return useQuery({
+    queryKey: EVENTOS_KEYS.lista(filtros),
+    queryFn: () => eventosService.listar(filtros),
+    staleTime: 60_000, // 1 min: evita refetch en cada render
+  });
+}
+
+/** Crea un evento e invalida la lista para que se refresque sola. */
+export function useCrearEvento() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: CrearEventoDto) => eventosService.crear(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: EVENTOS_KEYS.todos });
+    },
+  });
+}
+
+[REGLA] Usa una librería de estado de servidor (TanStack Query o SWR). Manejar
+        loading/error/caché a mano con useState + useEffect en cada componente
+        es la fuente número uno de bugs y código duplicado.
+[REGLA] Las claves de caché van centralizadas en un objeto KEYS por feature.
+        Invalidar con strings sueltos genera bugs que no se ven hasta producción.
+[REGLA] El hook es el único lugar donde conviven React y la API.
+
+
+================================================================================
+B10 — VARIABLES DE ENTORNO
+================================================================================
+
+.env.example  (SÍ va al repositorio, sin valores reales)
+--------------------------------------------------------------------------------
+    # URL base del backend NestJS. Sin barra final.
+    VITE_API_URL=http://localhost:3000
+
+    # Nombre visible de la aplicación
+    VITE_APP_NOMBRE=Qpass
+
+    # Activa logs detallados en consola (solo desarrollo)
+    VITE_DEBUG=false
+
+REGLAS
+[REGLA] En Vite, toda variable expuesta al navegador DEBE empezar con VITE_.
+[REGLA] NUNCA pongas secretos en variables VITE_. Todo lo que lleve ese prefijo
+        queda visible en el bundle que descarga el usuario. Claves de API,
+        contraseñas y tokens de servicio van en el backend, jamás aquí.
+[REGLA] .env.local va en .gitignore. .env.example va al repo con los nombres
+        de todas las variables y un valor de ejemplo.
+[REGLA] Centraliza la lectura en un solo archivo para no repetir
+        import.meta.env por todo el código:
+
+        // src/lib/config.ts
+        export const config = {
+          apiUrl: import.meta.env.VITE_API_URL,
+          appNombre: import.meta.env.VITE_APP_NOMBRE ?? 'App',
+          debug: import.meta.env.VITE_DEBUG === 'true',
+        } as const;
+
+[REGLA] Documenta en el README qué hace cada variable.
+
+
+================================================================================
+B11 — REGLAS DE COMENTARIOS
+================================================================================
+
+FILOSOFÍA: el comentario explica el POR QUÉ, no el QUÉ.
+El código ya dice qué hace. Si necesitas un comentario para explicar QUÉ hace,
+el problema es el nombre de la variable o de la función, no la falta de comentario.
+
+    ✗ // suma 1 al contador
+      contador++;
+
+    ✓ // El backend indexa las páginas desde 1, no desde 0.
+      const paginaBackend = paginaUI + 1;
+
+QUÉ SÍ COMENTAR [OBLIGATORIO]
+--------------------------------------------------------------------------------
+ 1. Cabecera de archivo en servicios, hooks complejos y utilidades:
+        /**
+         * Responsabilidad: qué hace este archivo.
+         * Qué NO hace (si hay riesgo de confusión).
+         */
+ 2. Reglas de negocio que no son obvias mirando el código:
+        // Una categoría de ticket ya no se puede modificar si tiene ventas.
+ 3. Decisiones técnicas raras y su motivo:
+        // Se usa polling en vez de websocket porque el VPS no soporta
+        // conexiones persistentes con la configuración actual de Nginx.
+ 4. Soluciones temporales, siempre con marcador y contexto:
+        // TODO: reemplazar por endpoint paginado cuando exista en el backend.
+        // FIXME: el backend devuelve la fecha sin zona horaria (ver issue #42).
+        // HACK: workaround por bug de la librería X en v2.1.
+ 5. Funciones públicas de servicios y utilidades, con JSDoc:
+        /** Formatea un monto a bolivianos. Devuelve "Bs 0,00" si es null. */
+ 6. Advertencias:
+        // OJO: este orden importa. Si se invierte, el token no se adjunta.
+
+QUÉ NO COMENTAR [PROHIBIDO]
+--------------------------------------------------------------------------------
+ ✗ Lo obvio: // constructor, // return el resultado
+ ✗ Código comentado "por si acaso". Para eso está Git. BÓRRALO.
+ ✗ Firmas repetidas en JSDoc que TypeScript ya expresa:
+       @param {string} id - el id     ← redundante, el tipo ya lo dice
+ ✗ Comentarios desactualizados. Un comentario que miente es peor que ninguno.
+   Si cambias el código, actualiza o borra el comentario en el mismo commit.
+ ✗ Firmas personales, fechas, historial de cambios. Eso lo lleva Git.
+       // Modificado por Erick 12/03 ← no
+
+FORMATO DE SEPARADORES DE SECCIÓN (úsalo para orientarte en archivos largos)
+--------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // ESTADO
+    // ---------------------------------------------------------------------
+
+IDIOMA DE COMENTARIOS
+    Todos en español, sin mezclar. Elígelo una vez y mantenlo.
+
+
+================================================================================
+B12 — ORDEN INTERNO DE UN ARCHIVO DE COMPONENTE
+================================================================================
+
+[REGLA] Todos los componentes del proyecto siguen EXACTAMENTE este orden.
+Así, al abrir cualquier archivo, sabes dónde está cada cosa sin leerlo entero.
+
+    1.  Imports (ver orden en B13)
+    2.  Tipos y props del componente
+    3.  Constantes locales del archivo
+    4.  Declaración del componente
+    5.  Hooks de React (useState, useRef)
+    6.  Hooks de datos (useEventos, useCrearEvento)
+    7.  Hooks derivados (useMemo, useCallback)
+    8.  Efectos (useEffect)
+    9.  Handlers (funciones handle*)
+   10.  Retornos tempranos (carga, error, vacío)
+   11.  Return del JSX
+   12.  Export
+
+EJEMPLO COMPLETO:
+
+/* ============================================================================
+ * EventoTabla — Tabla de eventos con acciones por fila.
+ * Solo presenta datos. La carga la hace la página que la usa.
+ * ========================================================================= */
+
+// 1. imports
+import { useMemo, useState } from 'react';
+import { Badge, Button, Table } from '@/shared/components/ui';
+import { formatearFecha } from '@/shared/utils/formatearFecha';
+import type { Evento } from '../types/eventos.types';
+
+// 2. props
+interface EventoTablaProps {
+  eventos: Evento[];
+  /** Se dispara al pulsar "Ver" en una fila. */
+  onSeleccionar: (evento: Evento) => void;
+  cargando?: boolean;
+}
+
+// 3. constantes locales
+const FILAS_POR_PAGINA = 10;
+
+// 4. componente
+export function EventoTabla({ eventos, onSeleccionar, cargando = false }: EventoTablaProps) {
+  // 5. estado local
+  const [pagina, setPagina] = useState(1);
+
+  // 7. derivados
+  const eventosVisibles = useMemo(
+    () => eventos.slice((pagina - 1) * FILAS_POR_PAGINA, pagina * FILAS_POR_PAGINA),
+    [eventos, pagina],
+  );
+
+  // 9. handlers
+  const handleVerDetalle = (evento: Evento) => {
+    onSeleccionar(evento);
+  };
+
+  // 10. retornos tempranos (los 3 estados obligatorios del Manual 8.9)
+  if (cargando) return <EstadoCargando />;
+  if (eventos.length === 0) return <EstadoVacio mensaje="Aún no hay eventos." />;
+
+  // 11. jsx
+  return (
+    <Table>
+      {/* ... */}
+    </Table>
+  );
+}
+
+REGLAS ADICIONALES
+[REGLA] Un componente exportado por archivo. Los subcomponentes privados van
+        en el mismo archivo, abajo, sin export — o en su propio archivo si
+        crecen.
+[REGLA] Las props siempre tipadas con una interface nombrada
+        `NombreComponenteProps`. Nunca inline.
+[REGLA] Documenta con JSDoc solo las props cuyo propósito no sea evidente.
+[REGLA] Si el componente pasa de 200 líneas, extrae subcomponentes o mueve
+        lógica a un hook.
+
+
+================================================================================
+B13 — ORDEN DE IMPORTS
+================================================================================
+
+Siempre este orden, con línea en blanco entre grupos:
+
+    1. Librerías externas (react, axios, react-router)
+    2. Alias absolutos de la app (@/lib, @/shared, @/app)
+    3. Imports de la misma feature (../services, ../hooks)
+    4. Imports relativos cercanos (./Componente)
+    5. Estilos
+    6. Tipos (con `import type`)
+
+Ejemplo:
+
+    import { useState } from 'react';
+    import { useNavigate } from 'react-router-dom';
+
+    import { Button } from '@/shared/components/ui';
+    import { formatearFecha } from '@/shared/utils/formatearFecha';
+
+    import { useEventos } from '../hooks/useEventos';
+    import { EventoCard } from './EventoCard';
+
+    import styles from './EventoLista.module.css';
+
+    import type { Evento } from '../types/eventos.types';
+
+[REGLA] Configura alias absolutos y NUNCA uses `../../../`. Más de dos niveles
+        de `../` significa que el archivo está en el lugar equivocado.
+
+    // vite.config.ts
+    resolve: {
+      alias: { '@': path.resolve(__dirname, './src') },
+    }
+
+    // tsconfig.json
+    "paths": { "@/*": ["./src/*"] }
+
+[REGLA] Deja que Prettier + el plugin de orden de imports lo haga automático.
+        Las convenciones que dependen de la disciplina humana se rompen.
+
+
+================================================================================
+B14 — REGLAS DE GIT
+================================================================================
+
+RAMAS
+    main            → siempre desplegable. Nadie commitea directo aquí.
+    develop         → integración (solo si trabajas en equipo)
+    feat/nombre     → funcionalidad nueva      → feat/compra-entradas
+    fix/nombre      → corrección de bug        → fix/validacion-qr
+    refactor/nombre → reorganización sin cambio funcional
+    docs/nombre     → documentación
+
+COMMITS (formato Conventional Commits)
+    tipo(alcance): descripción en imperativo, minúscula, sin punto final
+
+    feat(eventos): agregar filtro por estado en el listado
+    fix(auth): corregir redirección tras expirar el token
+    refactor(api): mover llamadas de eventos al servicio
+    style(ui): ajustar espaciado de las tarjetas
+    docs(readme): documentar variables de entorno
+    chore(deps): actualizar axios a 1.7
+
+    Tipos válidos: feat, fix, refactor, style, docs, test, chore, perf
+
+[REGLA] Un commit = un cambio lógico. Nada de "cambios varios" con 40 archivos.
+[REGLA] El mensaje describe QUÉ cambió, no "actualización" ni "arreglos".
+[REGLA] Nunca subas: .env.local, node_modules, dist, archivos de tu editor.
+[REGLA] Nunca subas código comentado ni console.log olvidados.
+
+
+================================================================================
+B15 — ARCHIVOS DE CONFIGURACIÓN OBLIGATORIOS
+================================================================================
+
+.gitignore
+    node_modules/
+    dist/
+    .env
+    .env.local
+    .env.*.local
+    *.log
+    .DS_Store
+    .vscode/*
+    !.vscode/extensions.json
+
+.editorconfig  (para que el formato no dependa del editor de cada uno)
+    root = true
+    [*]
+    indent_style = space
+    indent_size = 2
+    end_of_line = lf
+    charset = utf-8
+    trim_trailing_whitespace = true
+    insert_final_newline = true
+
+.prettierrc
+    {
+      "semi": true,
+      "singleQuote": true,
+      "trailingComma": "all",
+      "printWidth": 90,
+      "tabWidth": 2
+    }
+
+README.md — mínimo obligatorio:
+    1. Qué es el proyecto (2 líneas)
+    2. Stack usado
+    3. Requisitos (Node, versión)
+    4. Cómo levantarlo (comandos exactos, copiables)
+    5. Variables de entorno y qué hace cada una
+    6. Estructura de carpetas (resumen de 10 líneas)
+    7. Comandos disponibles (dev, build, lint, test)
+
+[REGLA] Si alguien nuevo (o tú en 6 meses) no puede levantar el proyecto
+        siguiendo el README sin preguntar nada, el README está incompleto.
+
+
+================================================================================
+B16 — PLANTILLAS LISTAS PARA COPIAR
+================================================================================
+
+PLANTILLA: nuevo servicio
+--------------------------------------------------------------------------------
+/* ============================================================================
+ * src/features/RECURSO/services/RECURSO.service.ts
+ * Responsabilidad: comunicación con los endpoints de RECURSO.
+ * No maneja estado ni interfaz.
+ * ========================================================================= */
+import { apiClient } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
+import type { Recurso, CrearRecursoDto } from '../types/RECURSO.types';
+
+export const recursoService = {
+  async listar(): Promise<Recurso[]> {
+    const { data } = await apiClient.get<Recurso[]>(ENDPOINTS.RECURSO.LISTAR);
+    return data;
+  },
+  async obtenerPorId(id: string): Promise<Recurso> {
+    const { data } = await apiClient.get<Recurso>(ENDPOINTS.RECURSO.DETALLE(id));
+    return data;
+  },
+  async crear(dto: CrearRecursoDto): Promise<Recurso> {
+    const { data } = await apiClient.post<Recurso>(ENDPOINTS.RECURSO.CREAR, dto);
+    return data;
+  },
+};
+
+PLANTILLA: index.ts de una feature (barrel)
+--------------------------------------------------------------------------------
+/* Punto de entrada público de la feature.
+ * Solo se exporta lo que otras capas pueden usar.
+ * Lo que no esté aquí, es interno de la feature. */
+export { EventoTabla } from './components/EventoTabla';
+export { EventoForm } from './components/EventoForm';
+export { useEventos, useCrearEvento } from './hooks/useEventos';
+export type { Evento, EstadoEvento } from './types/eventos.types';
+
+PASOS PARA AGREGAR UNA FUNCIONALIDAD NUEVA (sigue este orden siempre)
+--------------------------------------------------------------------------------
+ 1. Crea la carpeta en /features/nombre/
+ 2. Escribe los TIPOS primero (types/nombre.types.ts), espejando el backend
+ 3. Agrega los ENDPOINTS en lib/api/endpoints.ts
+ 4. Escribe el SERVICIO (services/nombre.service.ts)
+ 5. Escribe el HOOK (hooks/useNombre.ts)
+ 6. Escribe los COMPONENTES (components/)
+ 7. Crea la PÁGINA en /pages/ que los compone
+ 8. Registra la RUTA en app/router.tsx
+ 9. Exporta lo público en index.ts de la feature
+
+    Siempre de adentro hacia afuera: tipos → servicio → hook → UI → ruta.
+    Si empiezas por la UI, terminas metiendo lógica de API en el componente.
+
+
+================================================================================
+B17 — CHECKLIST DE ORDEN DEL PROYECTO
+================================================================================
+
+ESTRUCTURA
+[ ] Organizado por features, no por tipo de archivo
+[ ] Ninguna feature importa de otra feature
+[ ] /shared no importa de /features
+[ ] Máximo 3 niveles de anidamiento
+[ ] Cada feature tiene su index.ts con lo público
+
+API
+[ ] Cero fetch/axios dentro de componentes
+[ ] Todas las URLs en lib/api/endpoints.ts
+[ ] Una sola instancia de cliente HTTP en todo el proyecto
+[ ] Un servicio por recurso del backend
+[ ] Todas las respuestas tipadas, cero `any`
+[ ] Errores normalizados a un solo formato
+[ ] Token adjuntado por interceptor, no manualmente en cada llamada
+
+NOMBRES
+[ ] Convención de nombres aplicada sin excepciones
+[ ] Nombres de campos idénticos a los del backend
+[ ] Un solo idioma para el dominio en todo el proyecto
+[ ] Nombre de archivo = nombre de lo que exporta
+
+CÓDIGO
+[ ] Ningún archivo pasa de ~250 líneas
+[ ] Orden interno de componentes respetado
+[ ] Imports ordenados y con alias absolutos
+[ ] Cero console.log en el código subido
+[ ] Cero código comentado
+[ ] Cero TODO sin contexto de quién/qué falta
+
+CONFIGURACIÓN
+[ ] .env.example actualizado con todas las variables
+[ ] .env.local en .gitignore
+[ ] Ningún secreto en variables VITE_
+[ ] Prettier y ESLint configurados y corriendo
+[ ] README permite levantar el proyecto sin preguntar nada
+
+
+================================================================================
+B18 — ERRORES DE ORGANIZACIÓN QUE ARRUINAN UN PROYECTO
+================================================================================
+
+ ✗ Carpeta /components con 150 archivos sueltos
+ ✗ axios.get() escrito dentro de un componente
+ ✗ La misma URL del backend escrita en 12 archivos
+ ✗ useState + useEffect para cargar datos en cada componente
+ ✗ Carpeta /utils convertida en basurero de todo lo que no supiste dónde poner
+ ✗ Archivos llamados index.tsx con 400 líneas
+ ✗ Mezclar español e inglés en los nombres del dominio
+ ✗ Importar con ../../../../shared/components
+ ✗ Componentes de 600 líneas con lógica, fetch, validación y UI juntos
+ ✗ Tipos duplicados en varias features en vez de en /shared
+ ✗ `any` en las respuestas de la API "para salir del paso"
+ ✗ Manejo de errores distinto en cada pantalla
+ ✗ Traducir nombres de campos entre backend y frontend
+ ✗ Comentarios que ya no coinciden con el código
+ ✗ Secretos en variables VITE_
+ ✗ Commits llamados "cambios", "arreglos", "update"
+
+
+================================================================================
+RESUMEN EN 10 LÍNEAS
+================================================================================
+ 1. Organiza por funcionalidad, no por tipo de archivo.
+ 2. Componente → hook → servicio → cliente. Nunca te saltes un nivel.
+ 3. Cero fetch/axios dentro de componentes. Cero excepciones.
+ 4. Todas las URLs del backend en un solo archivo.
+ 5. Un cliente HTTP único, con interceptores para token y errores.
+ 6. Los tipos del frontend espejan exactamente los del backend.
+ 7. Un solo formato de error en todo el proyecto.
+ 8. Comenta el POR QUÉ, nunca el QUÉ. Borra el código comentado.
+ 9. Orden interno fijo en cada componente: imports → props → estado →
+    handlers → retornos tempranos → JSX.
+10. Nueva funcionalidad: tipos → endpoint → servicio → hook → UI → ruta.
+================================================================================

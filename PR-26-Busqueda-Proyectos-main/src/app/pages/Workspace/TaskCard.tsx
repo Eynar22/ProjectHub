@@ -26,12 +26,8 @@ export function TaskCard({
 
   // Multi-assignees: API returns task.usuarios[]
   const assignees: { id: number; nombre_completo: string }[] = task.usuarios ?? [];
-  const AVATAR_COLORS = [
-    'bg-gradient-to-br from-primary to-purple-500',
-    'bg-gradient-to-br from-accent to-success',
-    'bg-gradient-to-br from-warning to-orange-500',
-    'bg-gradient-to-br from-pink-500 to-rose-500',
-  ];
+  // Paleta categórica para distinguir responsables (Anexo A1).
+  const AVATAR_COLORS = ['bg-chart-1', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'bg-chart-5'];
 
   return (
     <div ref={drag} style={{ opacity: isDragging ? 0.4 : 1 }} className="cursor-grab active:cursor-grabbing">
@@ -58,7 +54,7 @@ export function TaskCard({
                 <div
                   key={u.id}
                   title={u.nombre_completo}
-                  className={`w-6 h-6 rounded-full ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center text-white text-[9px] font-black ring-2 ring-background`}
+                  className={`w-6 h-6 rounded-full ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center text-primary-foreground text-[9px] font-black ring-2 ring-background`}
                 >
                   {u.nombre_completo.charAt(0).toUpperCase()}
                 </div>

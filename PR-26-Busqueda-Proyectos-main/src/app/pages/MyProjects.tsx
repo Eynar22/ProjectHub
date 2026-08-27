@@ -16,9 +16,9 @@ import { motion, AnimatePresence } from 'motion/react';
 type TabKey = 'activos' | 'terminados' | 'archivados';
 
 const ESTADO_CFG: Record<string, { bg: string; text: string; label: string; icon: any }> = {
-  en_curso:  { bg: 'bg-blue-100',    text: 'text-blue-700',    label: 'En Curso',  icon: PlayCircle },
-  terminado: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Terminado', icon: CheckCircle2 },
-  archivado: { bg: 'bg-slate-100',   text: 'text-slate-500',   label: 'Archivado', icon: Archive },
+  en_curso:  { bg: 'bg-info-subtle',    text: 'text-info-strong',    label: 'En Curso',  icon: PlayCircle },
+  terminado: { bg: 'bg-success-subtle', text: 'text-success-strong', label: 'Terminado', icon: CheckCircle2 },
+  archivado: { bg: 'bg-muted',   text: 'text-muted-foreground',   label: 'Archivado', icon: Archive },
 };
 
 // ── Portal dropdown (escapes Framer Motion stacking context) ─────────────────
@@ -53,19 +53,19 @@ function EstadoDropdown({ projectId, currentEstado, anchorRef, onSelect, onClose
 
   return createPortal(
     <div style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 9999 }}
-      className="bg-white border border-gray-200 rounded-xl shadow-2xl min-w-[185px] overflow-hidden">
+      className="bg-card border border-border rounded-xl shadow-2xl min-w-[185px] overflow-hidden">
       {opts.map(o => {
         const Icon = o.icon;
         return (
           <button key={o.key}
             onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(projectId, o.key); }}
-            className={`flex items-center gap-2.5 w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm transition-colors
-              ${o.sep ? 'border-t border-gray-100 text-slate-600' : ''}
-              ${o.key === currentEstado ? 'font-semibold text-blue-600 bg-blue-50' : 'text-gray-700'}`}>
+            className={`flex items-center gap-2.5 w-full text-left px-4 py-2.5 hover:bg-muted text-sm transition-colors
+              ${o.sep ? 'border-t border-border text-muted-foreground' : ''}
+              ${o.key === currentEstado ? 'font-semibold text-info-strong bg-info-subtle' : 'text-foreground'}`}>
             <Icon className="w-3.5 h-3.5 flex-shrink-0" />
             {o.label}
             {o.key === currentEstado && (
-              <span className="ml-auto text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold">actual</span>
+              <span className="ml-auto text-[10px] bg-info-subtle text-info-strong px-1.5 py-0.5 rounded-full font-bold">actual</span>
             )}
           </button>
         );
@@ -128,14 +128,14 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
         </span>
         <div className="flex gap-2">
           {isOwner && pendingReqs.length > 0 && tab === 'activos' && (
-            <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black animate-pulse border border-amber-200">
+            <span className="px-2 py-1 bg-warning-subtle text-warning-strong rounded-lg text-[10px] font-black animate-pulse border border-warning/30">
               {pendingReqs.length} SOLICITUDES
             </span>
           )}
           <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
-            isOwner ? 'bg-violet-50 text-violet-600 border-violet-100' :
-            isCollab ? 'bg-teal-50 text-teal-600 border-teal-100' :
-            'bg-amber-50 text-amber-600 border-amber-100'
+            isOwner ? 'bg-info-subtle text-info-strong border-info/30' :
+            isCollab ? 'bg-success-subtle text-success-strong border-success/30' :
+            'bg-warning-subtle text-warning-strong border-warning/30'
           }`}>
             {isOwner ? <Crown className="w-3.5 h-3.5" /> :
              isCollab ? <UserCheck className="w-3.5 h-3.5" /> :
@@ -148,9 +148,9 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
       {/* Title Area */}
       <div className="flex gap-4 mb-5">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-110 ${
-          tab === 'archivados' ? 'bg-slate-100' : 'bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20'
+          tab === 'archivados' ? 'bg-muted' : 'bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20'
         }`}>
-          <FolderKanban className={`w-7 h-7 ${tab === 'archivados' ? 'text-slate-400' : 'text-primary'}`} />
+          <FolderKanban className={`w-7 h-7 ${tab === 'archivados' ? 'text-muted-foreground' : 'text-primary'}`} />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-black leading-tight mb-1 truncate group-hover:text-primary transition-colors">
@@ -181,7 +181,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
         {project.financiamiento && (
           <div className="col-span-2 pt-3 mt-1 border-t border-border/40 flex items-center justify-between">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Presupuesto</p>
-            <div className="flex items-center gap-1 text-sm font-black text-emerald-600">
+            <div className="flex items-center gap-1 text-sm font-black text-success-strong">
               <DollarSign className="w-3.5 h-3.5" />
               <span>{Number(project.financiamiento).toLocaleString()}</span>
             </div>
@@ -225,7 +225,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
           <div className="flex gap-2">
             {isOwner && (
               <Button variant="outline" size="sm"
-                className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-tight h-10 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all shadow-sm disabled:opacity-40"
+                className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-tight h-10 bg-success-subtle border border-success/30 text-success-strong hover:bg-success hover:text-primary-foreground transition-all shadow-sm disabled:opacity-40"
                 onClick={() => onEstado(project.id, 'en_curso')} disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -240,7 +240,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
               </Button>
             )}
             <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-10 border border-slate-300 text-slate-700 hover:bg-slate-700 hover:text-white bg-transparent transition-all shadow-sm disabled:opacity-50">
+              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-10 border border-border text-foreground hover:bg-muted hover:text-primary-foreground bg-transparent transition-all shadow-sm disabled:opacity-50">
                 <Eye className="w-4 h-4" /> Ver Detalles
               </Button>
             </Link>
@@ -263,7 +263,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
               </Button>
             </Link>
             <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`col-span-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-11 border-2 border-primary text-primary hover:bg-primary hover:text-white bg-transparent transition-all disabled:opacity-50">
+              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-11 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all disabled:opacity-50">
                 <Eye className="w-4 h-4" /> Detalles
               </Button>
             </Link>
@@ -277,7 +277,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
             {creator?.nombre_completo?.charAt(0)}
           </div>
           <p className="text-[10px] text-muted-foreground italic">
-            Liderado por <span className="font-bold text-slate-700 not-italic">{creator?.nombre_completo}</span>
+            Liderado por <span className="font-bold text-foreground not-italic">{creator?.nombre_completo}</span>
             {creatorCompany && <span> de {creatorCompany.nombre}</span>}
           </p>
         </div>
@@ -316,9 +316,9 @@ export default function MyProjects() {
   };
 
   const TABS: { key: TabKey; label: string; icon: any; count: number; color?: string }[] = [
-    { key: 'activos',    label: 'Activos',    icon: PlayCircle,  count: activos.length,    color: 'text-blue-600' },
-    { key: 'terminados', label: 'Terminados', icon: CheckCircle2, count: terminados.length, color: 'text-emerald-600' },
-    { key: 'archivados', label: 'Archivados', icon: Archive,     count: archivados.length, color: 'text-slate-500' },
+    { key: 'activos',    label: 'Activos',    icon: PlayCircle,  count: activos.length,    color: 'text-info-strong' },
+    { key: 'terminados', label: 'Terminados', icon: CheckCircle2, count: terminados.length, color: 'text-success-strong' },
+    { key: 'archivados', label: 'Archivados', icon: Archive,     count: archivados.length, color: 'text-muted-foreground' },
   ];
 
   return (
@@ -357,7 +357,7 @@ export default function MyProjects() {
                   <Icon className={`w-4 h-4 ${active ? '' : t.color}`} />
                   {t.label}
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                    active ? 'bg-white/25 text-white' : 'bg-muted text-muted-foreground'
+                    active ? 'bg-card/25 text-primary-foreground' : 'bg-muted text-muted-foreground'
                   }`}>{t.count}</span>
                 </button>
               );
@@ -369,7 +369,7 @@ export default function MyProjects() {
             {tab === 'terminados' && (
               <motion.div key="terminados-banner"
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-6 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+                className="mb-6 flex items-center gap-3 px-4 py-3 bg-success-subtle border border-success/30 rounded-xl text-sm text-success-strong">
                 <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                 <span>
                   Acá se encuentran tus proyectos terminados. Como propietario puedes <strong>reactivarlos</strong> (volver a En Curso) o <strong>archivarlos</strong>; en caso de ser colaborador, podrás seguir consultando sus detalles y acceder al grupo de trabajo.
@@ -379,7 +379,7 @@ export default function MyProjects() {
             {tab === 'archivados' && (
               <motion.div key="archivados-banner"
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-6 flex items-center gap-3 px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-600">
+                className="mb-6 flex items-center gap-3 px-4 py-3 bg-muted border border-border rounded-xl text-sm text-muted-foreground">
                 <Archive className="w-4 h-4 flex-shrink-0" />
                 <span>
                   Los proyectos archivados <strong>no son visibles al público</strong>. Solo tú como propietario puedes verlos y reactivarlos.
@@ -396,7 +396,7 @@ export default function MyProjects() {
                 {displayProjects.filter(isMine).length > 0 && (
                   <div id="owned" className="scroll-mt-24">
                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-violet-600" />
+                      <Crown className="w-5 h-5 text-info-strong" />
                       Soy Propietario
                       <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
                         {displayProjects.filter(isMine).length}
@@ -426,7 +426,7 @@ export default function MyProjects() {
                 {displayProjects.filter(isCollab).length > 0 && (
                   <div id="colab" className="scroll-mt-24">
                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2 mt-8">
-                      <UserCheck className="w-5 h-5 text-teal-600" />
+                      <UserCheck className="w-5 h-5 text-success-strong" />
                       Soy Colaborador
                       <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
                         {displayProjects.filter(isCollab).length}
@@ -458,9 +458,9 @@ export default function MyProjects() {
           {/* Empty states */}
           {displayProjects.length === 0 && (
             <Card className="p-12 text-center">
-              {tab === 'activos'    && <PlayCircle  className="w-12 h-12 text-blue-300 mx-auto mb-4" />}
-              {tab === 'terminados' && <CheckCircle2 className="w-12 h-12 text-emerald-300 mx-auto mb-4" />}
-              {tab === 'archivados' && <Archive      className="w-12 h-12 text-slate-300 mx-auto mb-4" />}
+              {tab === 'activos'    && <PlayCircle  className="w-12 h-12 text-info mx-auto mb-4" />}
+              {tab === 'terminados' && <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-4" />}
+              {tab === 'archivados' && <Archive      className="w-12 h-12 text-muted-foreground mx-auto mb-4" />}
               <h3 className="text-lg font-semibold mb-2">
                 {tab === 'activos'    ? 'No tienes proyectos activos' :
                  tab === 'terminados' ? 'No hay proyectos terminados' :

@@ -26,55 +26,55 @@ export default function Home() {
       icon: Briefcase,
       title: 'Oportunidades de Negocio',
       description: 'Encuentra proyectos y colaboraciones que se ajustan a tu experiencia',
-      glow: 'bg-purple-500/20 group-hover:bg-purple-500/40',
-      iconBg: 'bg-purple-500',
-      iconShadow: 'shadow-purple-500/40',
-      textColor: 'text-purple-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     },
     {
       icon: Users,
       title: 'Colaboración Efectiva',
       description: 'Herramientas integradas de comunicación y gestión de tareas',
-      glow: 'bg-pink-500/20 group-hover:bg-pink-500/40',
-      iconBg: 'bg-pink-500',
-      iconShadow: 'shadow-pink-500/40',
-      textColor: 'text-pink-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     },
     {
       icon: TrendingUp,
       title: 'Crecimiento Mutuo',
       description: 'Expande tu red y accede a nuevas oportunidades de negocio',
-      glow: 'bg-orange-500/20 group-hover:bg-orange-500/40',
-      iconBg: 'bg-orange-500',
-      iconShadow: 'shadow-orange-500/40',
-      textColor: 'text-orange-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     },
     {
       icon: Shield,
       title: 'Seguro y Confiable',
       description: 'Proceso de verificación de empresas para garantizar calidad',
-      glow: 'bg-blue-500/20 group-hover:bg-blue-500/40',
-      iconBg: 'bg-blue-500',
-      iconShadow: 'shadow-blue-500/40',
-      textColor: 'text-blue-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     },
     {
       icon: Zap,
       title: 'Rápido y Eficiente',
       description: 'Solicita participación y empieza a colaborar en minutos',
-      glow: 'bg-emerald-500/20 group-hover:bg-emerald-500/40',
-      iconBg: 'bg-emerald-500',
-      iconShadow: 'shadow-emerald-500/40',
-      textColor: 'text-emerald-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     },
     {
       icon: Building2,
       title: 'Visibilidad Nacional',
       description: 'Conecta con empresas y socios estratégicos en todo el país',
-      glow: 'bg-rose-500/20 group-hover:bg-rose-500/40',
-      iconBg: 'bg-rose-500',
-      iconShadow: 'shadow-rose-500/40',
-      textColor: 'text-rose-500'
+      glow: 'bg-primary/10 group-hover:bg-primary/25',
+      iconBg: 'bg-primary',
+      iconShadow: 'shadow-lg',
+      textColor: 'text-primary'
     }
   ];
 
@@ -355,7 +355,7 @@ export default function Home() {
                       Únete a cientos de empresas que ya están colaborando y escalando juntas en ProjectHub.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                      <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-full px-10 py-5 text-lg font-bold bg-white text-primary hover:bg-gray-100 shadow-2xl hover:-translate-y-1 transition-all">
+                      <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-full px-10 py-5 text-lg font-bold bg-background text-primary hover:bg-muted shadow-2xl hover:-translate-y-1 transition-all">
                         Registra tu Empresa Hoy
                         <ArrowRight className="w-5 h-5" />
                       </Link>

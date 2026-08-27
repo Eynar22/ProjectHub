@@ -26,9 +26,9 @@ import { motion, AnimatePresence } from 'motion/react';
 type EstadoFilter = 'todos' | 'en_curso' | 'terminado' | 'archivado';
 
 const ESTADO_CONFIG: Record<string, { bg: string; text: string; label: string; icon: any }> = {
-  en_curso: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'En Curso', icon: PlayCircle },
-  terminado: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Terminado', icon: CheckCircle2 },
-  archivado: { bg: 'bg-slate-100', text: 'text-slate-500', label: 'Archivado', icon: Archive },
+  en_curso: { bg: 'bg-info-subtle', text: 'text-info-strong', label: 'En Curso', icon: PlayCircle },
+  terminado: { bg: 'bg-success-subtle', text: 'text-success-strong', label: 'Terminado', icon: CheckCircle2 },
+  archivado: { bg: 'bg-muted', text: 'text-muted-foreground', label: 'Archivado', icon: Archive },
 };
 
 // ── Portal Dropdown ───────────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ function EstadoDropdown({
   return createPortal(
     <div
       style={{ position: 'absolute', top: pos.top, left: pos.left, zIndex: 9999 }}
-      className="bg-white border border-gray-200 rounded-xl shadow-2xl min-w-[160px] overflow-hidden"
+      className="bg-card border border-border rounded-xl shadow-2xl min-w-[160px] overflow-hidden"
     >
       {options.map(opt => {
         const Icon = opt.icon;
@@ -79,13 +79,13 @@ function EstadoDropdown({
           <button
             key={opt.key}
             onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(projectId, opt.key); }}
-            className={`flex items-center gap-2.5 w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm transition-colors ${opt.separator ? 'border-t border-gray-100 text-slate-600' : ''
-              } ${opt.key === currentEstado ? 'font-semibold text-blue-600 bg-blue-50' : 'text-gray-700'}`}
+            className={`flex items-center gap-2.5 w-full text-left px-4 py-2.5 hover:bg-muted text-sm transition-colors ${opt.separator ? 'border-t border-border text-muted-foreground' : ''
+              } ${opt.key === currentEstado ? 'font-semibold text-info-strong bg-info-subtle' : 'text-foreground'}`}
           >
             <Icon className="w-3.5 h-3.5 flex-shrink-0" />
             {opt.label}
             {opt.key === currentEstado && (
-              <span className="ml-auto text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold">actual</span>
+              <span className="ml-auto text-[10px] bg-info-subtle text-info-strong px-1.5 py-0.5 rounded-full font-bold">actual</span>
             )}
           </button>
         );
@@ -240,7 +240,7 @@ export default function AdminProjects() {
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${estadoFilter === tab.key ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${estadoFilter === tab.key ? 'bg-card/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
                     }`}>
                     {counts[tab.key]}
                   </span>
@@ -297,9 +297,9 @@ export default function AdminProjects() {
                         >
                           <td className="p-4">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${estado === 'archivado' ? 'bg-slate-200' : 'bg-gradient-to-br from-primary to-secondary'
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${estado === 'archivado' ? 'bg-muted' : 'bg-gradient-to-br from-primary to-secondary'
                                 }`}>
-                                <FolderKanban className={`w-5 h-5 ${estado === 'archivado' ? 'text-slate-400' : 'text-white'}`} />
+                                <FolderKanban className={`w-5 h-5 ${estado === 'archivado' ? 'text-muted-foreground' : 'text-primary-foreground'}`} />
                               </div>
                               <div>
                                 <div className="font-semibold flex items-center gap-2">
@@ -317,7 +317,7 @@ export default function AdminProjects() {
 
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                              <div className="w-7 h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
                                 {creator?.nombre_completo?.charAt(0).toUpperCase() || '?'}
                               </div>
                               <div>

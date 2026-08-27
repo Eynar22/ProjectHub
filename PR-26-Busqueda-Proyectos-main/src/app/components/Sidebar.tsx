@@ -75,7 +75,7 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
     <motion.aside
       animate={{ width: isCollapsed ? 72 : 240 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="relative bg-sidebar border-r border-sidebar-border h-[calc(100vh-4rem)] sticky top-16 flex-shrink-0 flex flex-col overflow-hidden"
+      className="relative bg-sidebar border-r border-sidebar-border h-[calc(100dvh-4rem)] sticky top-16 flex-shrink-0 flex flex-col overflow-hidden"
     >
       {/* Toggle button — full row at top, hidden on mobile */}
       {!isMobile && (
@@ -116,13 +116,13 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
               <div className={`relative flex items-center rounded-xl transition-all group cursor-pointer
                 ${isCollapsed ? 'justify-center py-3 px-2 mx-1' : 'gap-3 px-3 py-2.5'}
                 ${isActive
-                  ? 'bg-primary text-white shadow-md shadow-primary/30'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 }`}
               >
                 {/* Active indicator bar */}
                 {isActive && !isCollapsed && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/50 rounded-r-full -ml-2" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-foreground/50 rounded-r-full -ml-2" />
                 )}
 
                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -144,7 +144,7 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
                 {/* Badge */}
                 {link.badge !== undefined && link.badge > 0 && (
                   <span className={`text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0
-                    ${isActive ? 'bg-white/30 text-white' : 'bg-primary text-white'}
+                    ${isActive ? 'bg-primary-foreground/30 text-primary-foreground' : 'bg-primary text-primary-foreground'}
                     ${isCollapsed ? 'absolute -top-1 -right-1 w-4 h-4' : 'w-5 h-5'}`}>
                     {link.badge > 9 ? '9+' : link.badge}
                   </span>
@@ -152,11 +152,11 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
 
                 {/* Tooltip (collapsed only) */}
                 {isCollapsed && (
-                  <span className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg
-                    whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 shadow-xl
+                  <span className="absolute left-full ml-3 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg
+                    whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-popover shadow-xl
                     translate-x-1 group-hover:translate-x-0">
                     {link.label}
-                    <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900" />
+                    <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-foreground" />
                   </span>
                 )}
               </div>
@@ -178,9 +178,9 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
               Mis Proyectos
             </p>
             <div className="space-y-0.5">
-              <StatRow icon={PlayCircle}   label="Activos"    value={activeProjects} color="text-blue-500"    bg="bg-blue-50" />
-              <StatRow icon={CheckCircle2} label="Terminados" value={doneProjects}   color="text-emerald-500" bg="bg-emerald-50" />
-              <StatRow icon={Archive}      label="Archivados" value={archivedCount}  color="text-slate-400"   bg="bg-slate-50" />
+              <StatRow icon={PlayCircle}   label="Activos"    value={activeProjects} color="text-info-strong"    bg="bg-info-subtle" />
+              <StatRow icon={CheckCircle2} label="Terminados" value={doneProjects}   color="text-success-strong" bg="bg-success-subtle" />
+              <StatRow icon={Archive}      label="Archivados" value={archivedCount}  color="text-muted-foreground" bg="bg-muted" />
             </div>
           </motion.div>
         )}

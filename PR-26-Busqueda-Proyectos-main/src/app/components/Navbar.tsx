@@ -12,7 +12,7 @@ import {
 function UserAvatar({ name }: { name: string }) {
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white text-[11px] shadow-sm flex-shrink-0">
+    <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center font-bold text-primary-foreground text-[11px] shadow-sm flex-shrink-0">
       {initials}
     </div>
   );
@@ -55,17 +55,17 @@ export function Navbar() {
 
   return (
     // Navbar delgado (h-14 en móvil, h-16 en PC)
-    <div className="sticky top-0 z-50 w-full h-14 md:h-16 flex pointer-events-none">
+    <div className="sticky top-0 z-sticky w-full h-14 md:h-16 flex pointer-events-none">
       
       {/* ======================================= */}
       {/* 1. ISLA IZQUIERDA (Plomo + Curva S)     */}
       {/* ======================================= */}
       
       {/* Zona sólida Ploma (Más transparente) */}
-      <div className="bg-slate-400/15 backdrop-blur-md flex items-center pl-4 md:pl-6 pr-1 h-full pointer-events-auto">
+      <div className="bg-foreground/5 backdrop-blur-md flex items-center pl-4 md:pl-6 pr-1 h-full pointer-events-auto">
         <Link to="/" className="bg-card px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-2 shadow-sm border border-border/40 hover:shadow-md transition-all group">
-          <div className="w-6 h-6 md:w-7 md:h-7 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
-            <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-white" />
+          <div className="w-6 h-6 md:w-7 md:h-7 bg-primary rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+            <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-primary-foreground" />
           </div>
           <span className="text-sm md:text-base font-bold text-foreground hidden sm:block tracking-tight">
             ProjectHub
@@ -86,7 +86,7 @@ export function Navbar() {
         />
         {/* Capa Ploma (Muy transparente) */}
         <div 
-          className="absolute inset-0 bg-slate-400/15 backdrop-blur-md"
+          className="absolute inset-0 bg-foreground/5 backdrop-blur-md"
           style={{ 
             maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100H0Z' fill='black'/%3E%3C/svg%3E")`,
             WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0C50,0,50,100,100,100H0Z' fill='black'/%3E%3C/svg%3E")`,
@@ -125,7 +125,7 @@ export function Navbar() {
         />
         {/* Capa Ploma (Muy transparente) */}
         <div 
-          className="absolute inset-0 bg-slate-400/15 backdrop-blur-md"
+          className="absolute inset-0 bg-foreground/5 backdrop-blur-md"
           style={{ 
             maskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100H100Z' fill='black'/%3E%3C/svg%3E")`,
             WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' preserveAspectRatio='none' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100,0C50,0,50,100,0,100H100Z' fill='black'/%3E%3C/svg%3E")`,
@@ -135,7 +135,7 @@ export function Navbar() {
       </div>
 
       {/* Zona sólida Ploma (Más transparente) */}
-      <div className="bg-slate-400/15 backdrop-blur-md flex items-center pr-4 md:pr-6 pl-1 h-full pointer-events-auto">
+      <div className="bg-foreground/5 backdrop-blur-md flex items-center pr-4 md:pr-6 pl-1 h-full pointer-events-auto">
         <div className="bg-card rounded-full p-1 md:p-1.5 flex items-center shadow-sm border border-border/40">
 
           <button
@@ -168,7 +168,7 @@ export function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-3 w-64 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden p-2 z-50"
+                    className="absolute right-0 top-full mt-3 w-64 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden p-2 z-dropdown"
                   >
                     <div className="p-3 bg-muted/30 rounded-[1.25rem] mb-2 border-b border-border/30">
                       <div className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export function Navbar() {
                 Ingresar
               </Link>
               <Link to="/register"
-                className="px-4 py-1.5 md:px-5 md:py-1.5 text-[11px] md:text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors shadow-sm">
+                className="px-4 py-1.5 md:px-5 md:py-1.5 text-[11px] md:text-xs font-bold bg-primary text-primary-foreground hover:bg-primary-hover rounded-full transition-colors shadow-sm">
                 Registro
               </Link>
             </div>
@@ -226,7 +226,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="md:hidden absolute top-full left-4 right-4 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden z-40 p-2 mt-2 pointer-events-auto"
+            className="md:hidden absolute top-full left-4 right-4 bg-card border border-border/50 shadow-xl rounded-3xl overflow-hidden z-dropdown p-2 mt-2 pointer-events-auto"
           >
             <div className="space-y-1">
               <MobileNavLink to="/explore" label="Explorar Proyectos" />

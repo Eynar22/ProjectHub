@@ -1,131 +1,221 @@
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+ * theme.css — NIVEL 2: tokens semánticos.
+ * Cada valor apunta a un primitivo de tokens.css. Los componentes usan estos,
+ * nunca los primitivos directamente.
+ *
+ * Modo oscuro = tema aparte TRADUCIDO (Anexo A12 / Manual Parte 16), no una
+ * inversión. Nunca negro puro (#000) ni blanco puro (#fff) en texto/fondos.
+ * ========================================================================= */
+
 :root {
   --font-size: 16px;
-  --background: #fafbfc;
-  --foreground: #0f1419;
-  --card: #ffffff;
-  --card-foreground: #0f1419;
-  --popover: #ffffff;
-  --popover-foreground: #0f1419;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #8b5cf6;
-  --secondary-foreground: #ffffff;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #06b6d4;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #10b981;
-  --success-foreground: #ffffff;
-  --warning: #f97316;
-  --warning-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --input-background: #ffffff;
-  --switch-background: #cbd5e1;
-  --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #6366f1;
-  --chart-1: #6366f1;
-  --chart-2: #8b5cf6;
-  --chart-3: #06b6d4;
-  --chart-4: #10b981;
-  --chart-5: #f97316;
-  --radius: 0.75rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f1419;
-  --sidebar-primary: #6366f1;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f8fafc;
-  --sidebar-accent-foreground: #0f1419;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #6366f1;
+  --font-weight-medium: 500;
+
+  /* --- superficies y fondos --- */
+  --background: var(--gray-50);
+  --foreground: var(--gray-900);
+  --surface: var(--gray-50);
+  --surface-raised: oklch(1 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--gray-900);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--gray-900);
+  /* Superficie inversa: componentes que se mantienen oscuros en ambos temas. */
+  --surface-inverse: var(--gray-900);
+  --surface-inverse-foreground: var(--gray-50);
+
+  /* --- primario (único color de marca, Anexo A1) --- */
+  --primary: var(--indigo-600);
+  --primary-foreground: oklch(1 0 0);
+  --primary-hover: var(--indigo-700);
+  --primary-active: var(--indigo-800);
+
+  /* --- secundario / acento: NEUTRALES, no colores de marca --- */
+  --secondary: var(--gray-100);
+  --secondary-foreground: var(--gray-800);
+  --accent: var(--gray-100);
+  --accent-foreground: var(--gray-900);
+  --muted: var(--gray-100);
+  --muted-foreground: var(--gray-500);
+
+  /* --- bordes y campos --- */
+  --border: var(--gray-200);
+  --input: var(--gray-300);
+  --input-background: oklch(1 0 0);
+  --switch-background: var(--gray-300);
+  --ring: var(--indigo-600);
+
+  /* --- semánticos (Anexo A9): base + fondo suave + texto --- */
+  --success: var(--green-base);
+  --success-foreground: oklch(1 0 0);
+  --success-subtle: var(--green-subtle);
+  --success-strong: var(--green-strong);
+
+  --warning: var(--amber-base);
+  --warning-foreground: oklch(1 0 0);
+  --warning-subtle: var(--amber-subtle);
+  --warning-strong: var(--amber-strong);
+
+  --destructive: var(--red-base);
+  --destructive-foreground: oklch(1 0 0);
+  --danger: var(--red-base);
+  --danger-subtle: var(--red-subtle);
+  --danger-strong: var(--red-strong);
+
+  --info: var(--blue-base);
+  --info-subtle: var(--blue-subtle);
+  --info-strong: var(--blue-strong);
+
+  /* --- paleta categórica para gráficas (datos, no decoración) --- */
+  --chart-1: var(--indigo-500);
+  --chart-2: #0891B2;
+  --chart-3: #16A34A;
+  --chart-4: #D97706;
+  --chart-5: #DC2626;
+
+  /* --- forma --- */
+  --radius: var(--radius-lg);
+
+  /* --- barra lateral --- */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: var(--gray-700);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--gray-100);
+  --sidebar-accent-foreground: var(--gray-900);
+  --sidebar-border: var(--gray-200);
+  --sidebar-ring: var(--ring);
 }
 
 .dark {
-  /* Neutros: estos sí se invierten (fondo claro -> oscuro, texto oscuro -> claro) */
-  --background: #0b1220;
-  --foreground: #f1f5f9;
-  --card: #0f172a;
-  --card-foreground: #f1f5f9;
-  --popover: #0f172a;
-  --popover-foreground: #f1f5f9;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --border: #1e293b;
-  --input: #1e293b;
-  --input-background: #1e293b;
-  --switch-background: #334155;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: #1e293b;
+  /* Neutros traducidos: la elevación se comunica con fondos más claros. */
+  --background: var(--gray-950);
+  --foreground: var(--gray-100);
+  --surface: var(--gray-900);
+  --surface-raised: var(--gray-800);
+  --card: var(--gray-900);
+  --card-foreground: var(--gray-100);
+  --popover: var(--gray-900);
+  --popover-foreground: var(--gray-100);
+  --surface-inverse: var(--gray-800);
+  --surface-inverse-foreground: var(--gray-50);
 
-  /* Colores de marca: se mantienen igual que en claro, no se convierten a blanco/gris */
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #8b5cf6;
-  --secondary-foreground: #ffffff;
-  --accent: #06b6d4;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #10b981;
-  --success-foreground: #ffffff;
-  --warning: #f97316;
-  --warning-foreground: #ffffff;
-  --ring: #6366f1;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --chart-1: #6366f1;
-  --chart-2: #8b5cf6;
-  --chart-3: #06b6d4;
-  --chart-4: #10b981;
-  --chart-5: #f97316;
-  --sidebar-primary: #6366f1;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-ring: #6366f1;
+  --secondary: var(--gray-800);
+  --secondary-foreground: var(--gray-100);
+  --accent: var(--gray-800);
+  --accent-foreground: var(--gray-100);
+  --muted: var(--gray-800);
+  --muted-foreground: var(--gray-400);
+
+  --border: var(--gray-800);
+  --input: var(--gray-700);
+  --input-background: var(--gray-900);
+  --switch-background: var(--gray-700);
+
+  /* Marca: sube luminosidad para conservar contraste sobre fondo oscuro. */
+  --primary: var(--indigo-500);
+  --primary-foreground: oklch(1 0 0);
+  --primary-hover: var(--indigo-400);
+  --primary-active: var(--indigo-300);
+  --ring: var(--indigo-400);
+
+  /* Semánticos: variante -on-dark, menos saturada y más luminosa. */
+  --success: var(--green-on-dark);
+  --success-foreground: var(--gray-950);
+  --success-subtle: color-mix(in oklab, var(--green-on-dark) 16%, var(--gray-900));
+  --success-strong: var(--green-on-dark);
+
+  --warning: var(--amber-on-dark);
+  --warning-foreground: var(--gray-950);
+  --warning-subtle: color-mix(in oklab, var(--amber-on-dark) 16%, var(--gray-900));
+  --warning-strong: var(--amber-on-dark);
+
+  --destructive: var(--red-on-dark);
+  --destructive-foreground: var(--gray-950);
+  --danger: var(--red-on-dark);
+  --danger-subtle: color-mix(in oklab, var(--red-on-dark) 16%, var(--gray-900));
+  --danger-strong: var(--red-on-dark);
+
+  --info: var(--blue-on-dark);
+  --info-subtle: color-mix(in oklab, var(--blue-on-dark) 16%, var(--gray-900));
+  --info-strong: var(--blue-on-dark);
+
+  --chart-1: var(--indigo-400);
+  --chart-2: #22D3EE;
+  --chart-3: #4ADE80;
+  --chart-4: #FBBF24;
+  --chart-5: #F87171;
+
+  --sidebar: var(--gray-900);
+  --sidebar-foreground: var(--gray-300);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--gray-800);
+  --sidebar-accent-foreground: var(--gray-100);
+  --sidebar-border: var(--gray-800);
+  --sidebar-ring: var(--ring);
 }
 
+/* ----------------------------------------------------------------------------
+ * Mapeo a utilidades de Tailwind. `inline` = emite var(...) para que el
+ * override de .dark funcione en runtime.
+ * -------------------------------------------------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-inverse-foreground: var(--surface-inverse-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-input-background: var(--input-background);
   --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-strong: var(--success-strong);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-strong: var(--warning-strong);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-strong: var(--danger-strong);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-strong: var(--info-strong);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -134,6 +224,36 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ----------------------------------------------------------------------------
+ * Constantes (no dependen del tema): radios, sombras, z-index, movimiento.
+ * Se definen aquí como valores literales; Tailwind las expone como utilidades
+ * (rounded-md, shadow-lg, z-modal, ease-out) y como variables en :root.
+ * -------------------------------------------------------------------------- */
+@theme {
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Sombras: una sola fuente de luz (arriba), tintadas, nunca negro puro. */
+  --shadow-xs: 0 1px 2px oklch(0.208 0.012 277 / 0.05);
+  --shadow-sm: 0 1px 3px oklch(0.208 0.012 277 / 0.10), 0 1px 2px oklch(0.208 0.012 277 / 0.06);
+  --shadow-md: 0 4px 8px -2px oklch(0.208 0.012 277 / 0.10), 0 2px 4px -2px oklch(0.208 0.012 277 / 0.06);
+  --shadow-lg: 0 12px 16px -4px oklch(0.208 0.012 277 / 0.08), 0 4px 6px -2px oklch(0.208 0.012 277 / 0.03);
+  --shadow-xl: 0 20px 24px -4px oklch(0.208 0.012 277 / 0.08);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1100;
+  --z-index-overlay: 1200;
+  --z-index-modal: 1300;
+  --z-index-popover: 1400;
+  --z-index-toast: 1500;
 }
 
 @layer base {
@@ -145,54 +265,36 @@
     @apply bg-background text-foreground;
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
   html {
     font-size: var(--font-size);
   }
 
-  h1 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+  /* prefers-reduced-motion: hay personas a las que el movimiento les provoca
+   * mareo real. Manual Parte 11.6 — [OBLIGATORIO]. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
-  h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+  /* Foco visible siempre, contraste ≥3:1, nunca tapado (WCAG 2.2 - 2.4.11). */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+  a, button, input, select, textarea, [tabindex] {
+    scroll-margin-top: 6rem;
   }
 
-  h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  button {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  input {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
-  }
+  h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.2; }
+  h2 { font-size: var(--text-xl);  font-weight: var(--font-weight-medium); line-height: 1.2; }
+  h3 { font-size: var(--text-lg);  font-weight: var(--font-weight-medium); line-height: 1.3; }
+  h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.3; }
+  label  { font-size: var(--text-sm);  font-weight: var(--font-weight-medium); line-height: 1.4; }
+  button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.2; }
+  input  { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; }
 }

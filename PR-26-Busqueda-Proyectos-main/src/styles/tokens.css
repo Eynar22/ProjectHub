@@ -1,0 +1,90 @@
+/* ============================================================================
+ * tokens.css — Sistema de design tokens (Anexo A + Manual Parte 7)
+ *
+ * NIVEL 1 — PRIMITIVOS: el valor crudo, sin significado. Viven aquí.
+ * NIVEL 2 — SEMÁNTICOS: el valor con un propósito (theme.css). Apuntan al N1.
+ * NIVEL 3 — DE COMPONENTE: dentro de cada componente. Apuntan al N2.
+ *
+ * Regla: los componentes usan SOLO tokens de nivel 2 o 3. Nunca --indigo-500
+ * directamente. Cambiar toda la marca = editar este archivo.
+ *
+ * Escalas generadas en OKLCH (perceptualmente uniforme). El TONO no cambia
+ * entre peldaños; la luminosidad baja pareja y el croma sube hacia el centro.
+ *
+ * Las constantes que NO dependen del tema (radios, sombras, z-index, curvas de
+ * easing) se definen en el bloque @theme de theme.css, que también las expone
+ * como utilidades de Tailwind (rounded-md, shadow-lg, z-modal, ease-out).
+ * ========================================================================= */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * PRIMARIO — Indigo (hue 277). Rol: marca lo accionable. ~10% de pantalla.
+   * -------------------------------------------------------------------------- */
+  --indigo-50:  oklch(0.970 0.014 277);
+  --indigo-100: oklch(0.936 0.032 277);
+  --indigo-200: oklch(0.882 0.059 277);
+  --indigo-300: oklch(0.811 0.097 277);
+  --indigo-400: oklch(0.714 0.150 277);
+  --indigo-500: oklch(0.585 0.196 277); /* base de marca */
+  --indigo-600: oklch(0.511 0.219 277); /* fondo del botón primario (AA con blanco) */
+  --indigo-700: oklch(0.451 0.204 277); /* hover / activo */
+  --indigo-800: oklch(0.394 0.166 277);
+  --indigo-900: oklch(0.343 0.123 277);
+  --indigo-950: oklch(0.257 0.090 277);
+
+  /* --------------------------------------------------------------------------
+   * NEUTRALES — grises tintados con el tono del primario (croma 0.002–0.017).
+   * El croma es imperceptible como color pero cohesiona toda la interfaz.
+   * Aquí vive el ~85-90% del diseño.
+   * -------------------------------------------------------------------------- */
+  --gray-50:  oklch(0.985 0.002 277);
+  --gray-100: oklch(0.968 0.004 277);
+  --gray-200: oklch(0.925 0.006 277);
+  --gray-300: oklch(0.872 0.009 277);
+  --gray-400: oklch(0.712 0.014 277);
+  --gray-500: oklch(0.556 0.017 277); /* mínimo legible sobre blanco (~4.6:1) */
+  --gray-600: oklch(0.446 0.017 277);
+  --gray-700: oklch(0.372 0.016 277);
+  --gray-800: oklch(0.269 0.013 277);
+  --gray-900: oklch(0.208 0.012 277); /* texto principal */
+  --gray-950: oklch(0.145 0.011 277);
+
+  /* --------------------------------------------------------------------------
+   * SEMÁNTICOS — convención universal, NO se eligen por gusto (Anexo A9).
+   * Cada uno: -subtle (fondo), -base (icono/borde), -strong (texto),
+   * -on-dark (variante para modo oscuro: menos saturada, más luminosa).
+   * -------------------------------------------------------------------------- */
+  --green-subtle:  #F0FDF4;
+  --green-base:    #16A34A;
+  --green-strong:  #15803D;
+  --green-on-dark: #4ADE80;
+
+  --red-subtle:  #FEF2F2;
+  --red-base:    #DC2626;
+  --red-strong:  #B91C1C;
+  --red-on-dark: #F87171;
+
+  --amber-subtle:  #FFFBEB;
+  --amber-base:    #D97706;
+  --amber-strong:  #B45309;
+  --amber-on-dark: #FBBF24;
+
+  --blue-subtle:  #EFF6FF;
+  --blue-base:    #2563EB;
+  --blue-strong:  #1D4ED8;
+  --blue-on-dark: #60A5FA;
+
+  /* --------------------------------------------------------------------------
+   * ESPACIADO — base 4/8 (Manual Parte 4). Para CSS/estilos en línea; en JSX
+   * se usa la escala de Tailwind (p-4, gap-2…), que ya es base 4.
+   * -------------------------------------------------------------------------- */
+  --space-1:  0.25rem;  --space-2:  0.5rem;   --space-3:  0.75rem;
+  --space-4:  1rem;      --space-5:  1.25rem;  --space-6:  1.5rem;
+  --space-8:  2rem;      --space-10: 2.5rem;   --space-12: 3rem;
+  --space-16: 4rem;      --space-20: 5rem;     --space-24: 6rem;
+
+  /* Duraciones para estilos en línea / JS (Manual Parte 7.3 / 13.1). */
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-slow:   400ms;
+}

@@ -13,16 +13,16 @@ import {
 } from 'lucide-react';
 
 const ROL_CFG: Record<string, { label: string; bg: string; text: string; icon: any }> = {
-  superadmin: { label: 'Super Admin', bg: 'bg-purple-100', text: 'text-purple-700', icon: Shield },
-  admin:      { label: 'Admin',       bg: 'bg-blue-100',   text: 'text-blue-700',   icon: Crown },
-  empleado:   { label: 'Empleado',    bg: 'bg-slate-100',  text: 'text-slate-600',  icon: UserIcon },
+  superadmin: { label: 'Super Admin', bg: 'bg-muted', text: 'text-foreground', icon: Shield },
+  admin:      { label: 'Admin',       bg: 'bg-info-subtle',   text: 'text-info-strong',   icon: Crown },
+  empleado:   { label: 'Empleado',    bg: 'bg-muted',  text: 'text-muted-foreground',  icon: UserIcon },
 };
 
 const ESTADO_CFG: Record<string, { label: string; dot: string }> = {
-  activo:    { label: 'Activo',    dot: 'bg-emerald-500' },
-  pendiente: { label: 'Pendiente', dot: 'bg-amber-400'   },
-  bloqueado: { label: 'Bloqueado', dot: 'bg-red-500'     },
-  rechazado: { label: 'Rechazado', dot: 'bg-slate-400'   },
+  activo:    { label: 'Activo',    dot: 'bg-success' },
+  pendiente: { label: 'Pendiente', dot: 'bg-warning'   },
+  bloqueado: { label: 'Bloqueado', dot: 'bg-danger'     },
+  rechazado: { label: 'Rechazado', dot: 'bg-muted-foreground'   },
 };
 
 export default function AdminUsers() {
@@ -122,7 +122,7 @@ export default function AdminUsers() {
           <AnimatePresence>
             {selectedCompany && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-6 flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
+                className="mb-6 flex items-center gap-3 px-4 py-3 bg-info-subtle border border-info/30 rounded-xl text-sm text-info-strong">
                 <Building2 className="w-4 h-4 flex-shrink-0" />
                 <span>
                   <strong>{selectedCompany.nombre}</strong> · {filteredUsers.length} usuario(s) ·{' '}
@@ -151,15 +151,15 @@ export default function AdminUsers() {
                 return (
                   <motion.div key={user.id} layout
                     initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
-                    <Card className={`p-5 flex items-center justify-between transition-colors ${isBlocked ? 'opacity-70 bg-red-50/30' : ''}`}>
+                    <Card className={`p-5 flex items-center justify-between transition-colors ${isBlocked ? 'opacity-70 bg-danger-subtle/30' : ''}`}>
                       {/* Left: user info */}
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative
-                          ${isBlocked ? 'bg-red-100 text-red-400' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'}`}>
+                          ${isBlocked ? 'bg-danger-subtle text-danger' : 'bg-gradient-to-br from-primary/20 to-secondary/20 text-primary'}`}>
                           {user.nombre_completo.charAt(0).toUpperCase()}
                           {isBlocked && (
-                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                              <Lock className="w-2.5 h-2.5 text-white" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center">
+                              <Lock className="w-2.5 h-2.5 text-primary-foreground" />
                             </div>
                           )}
                         </div>
@@ -173,12 +173,12 @@ export default function AdminUsers() {
                             </span>
                             {/* Estado dot */}
                             <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-                              <span className={`w-2 h-2 rounded-full ${isCompanyBlocked ? 'bg-red-500' : estadoCfg.dot}`} />
+                              <span className={`w-2 h-2 rounded-full ${isCompanyBlocked ? 'bg-danger' : estadoCfg.dot}`} />
                               {isCompanyBlocked ? 'Bloqueado (Empresa)' : estadoCfg.label}
                             </span>
                             {/* Only-admin warning */}
                             {isOnlyAdmin && !isBlocked && (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-warning-strong bg-warning-subtle px-2 py-0.5 rounded-full border border-warning/30">
                                 <AlertTriangle className="w-2.5 h-2.5" />
                                 Único admin
                               </span>
@@ -203,7 +203,7 @@ export default function AdminUsers() {
                               {/* Block / Unblock */}
                               {isBlocked ? (
                                 <Button variant="outline" size="sm"
-                                  className="flex items-center gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50 disabled:opacity-40"
+                                  className="flex items-center gap-1.5 text-success-strong border-success/40 hover:bg-success-subtle disabled:opacity-40"
                                   disabled={isCompanyBlocked}
                                   title={isCompanyBlocked ? 'No se puede desbloquear el usuario porque la empresa está bloqueada' : ''}
                                   onClick={() => handle(() => unblockUser(user.id), user.id, `${user.nombre_completo} desbloqueado`)}>
@@ -212,7 +212,7 @@ export default function AdminUsers() {
                                 </Button>
                               ) : (
                                 <Button variant="outline" size="sm"
-                                  className="flex items-center gap-1.5 text-red-500 border-red-300 hover:bg-red-50 disabled:opacity-40"
+                                  className="flex items-center gap-1.5 text-danger border-danger/40 hover:bg-danger-subtle disabled:opacity-40"
                                   disabled={isOnlyAdmin || !isActive || isCompanyBlocked}
                                   title={isCompanyBlocked ? 'La empresa de este usuario está bloqueada' : isOnlyAdmin ? 'Asigna otro admin antes de bloquear este' : !isActive ? 'El usuario debe estar activo para poder ser bloqueado' : ''}
                                   onClick={() => setUserToBlock(user)}>
@@ -225,7 +225,7 @@ export default function AdminUsers() {
                               {!isBlocked && (
                                 user.rol === 'admin' ? (
                                   <Button variant="outline" size="sm"
-                                    className="flex items-center gap-1.5 text-slate-600 disabled:opacity-40"
+                                    className="flex items-center gap-1.5 text-muted-foreground disabled:opacity-40"
                                     disabled={isOnlyAdmin || !isActive || isCompanyBlocked}
                                     title={isCompanyBlocked ? 'La empresa de este usuario está bloqueada' : isOnlyAdmin ? 'Asigna otro admin antes de degradar' : !isActive ? 'El usuario debe estar activo para cambiar su rol' : ''}
                                     onClick={() => handle(() => demoteToUser(user.id), user.id, `${user.nombre_completo} es ahora Empleado`)}>
@@ -234,7 +234,7 @@ export default function AdminUsers() {
                                   </Button>
                                 ) : (
                                   <Button variant="outline" size="sm"
-                                    className="flex items-center gap-1.5 text-blue-600 border-blue-300 hover:bg-blue-50 disabled:opacity-40"
+                                    className="flex items-center gap-1.5 text-info-strong border-info/40 hover:bg-info-subtle disabled:opacity-40"
                                     disabled={!isActive || isCompanyBlocked}
                                     title={isCompanyBlocked ? 'La empresa de este usuario está bloqueada' : !isActive ? 'El usuario debe estar activo para cambiar su rol' : ''}
                                     onClick={() => handle(() => promoteToAdmin(user.id), user.id, `${user.nombre_completo} es ahora Admin`)}>
@@ -271,7 +271,7 @@ export default function AdminUsers() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                className="fixed inset-0 bg-foreground/60 backdrop-blur-sm flex items-center justify-center z-modal p-4"
                 onClick={() => setUserToBlock(null)}
               >
                 <motion.div
@@ -283,19 +283,19 @@ export default function AdminUsers() {
                   onClick={e => e.stopPropagation()}
                 >
                   <Card className="border-none shadow-2xl overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-orange-500" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-danger to-danger" />
                     
                     <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600 shadow-inner">
+                      <div className="w-16 h-16 bg-danger-subtle rounded-full flex items-center justify-center mx-auto mb-6 text-danger-strong shadow-inner">
                         <AlertTriangle className="w-8 h-8 animate-bounce-slow" />
                       </div>
                       
-                      <h2 className="text-2xl font-black text-slate-800 mb-3">¿Bloquear a este usuario?</h2>
+                      <h2 className="text-2xl font-black text-foreground mb-3">¿Bloquear a este usuario?</h2>
                       
-                      <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                        ¿Estás seguro de bloquear a <strong className="text-slate-700">{userToBlock.nombre_completo}</strong>?
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                        ¿Estás seguro de bloquear a <strong className="text-foreground">{userToBlock.nombre_completo}</strong>?
                         <br /><br />
-                        <span className="text-left text-xs text-amber-600 bg-amber-50 px-3 py-2.5 rounded-lg border border-amber-200 mt-2 block font-semibold leading-normal">
+                        <span className="text-left text-xs text-warning-strong bg-warning-subtle px-3 py-2.5 rounded-lg border border-warning/30 mt-2 block font-semibold leading-normal">
                           ⚠️ Los proyectos creados por este usuario se suspenderán temporalmente hasta que se asigne un nuevo propietario. Además, su acceso a la plataforma quedará inhabilitado.
                         </span>
                       </p>
@@ -303,14 +303,14 @@ export default function AdminUsers() {
                       <div className="flex gap-3">
                         <Button
                           variant="ghost"
-                          className="flex-1 py-3 text-slate-500 hover:bg-slate-100 font-bold"
+                          className="flex-1 py-3 text-muted-foreground hover:bg-muted font-bold"
                           onClick={() => setUserToBlock(null)}
                         >
                           Cancelar
                         </Button>
                         <Button
                           variant="primary"
-                          className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold shadow-lg shadow-red-500/20"
+                          className="flex-1 py-3 bg-gradient-to-r from-destructive to-destructive hover:brightness-95 text-primary-foreground font-bold shadow-lg"
                           onClick={() => {
                             const u = userToBlock;
                             setUserToBlock(null);

@@ -86,12 +86,12 @@ export default function AdminCompanies() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                 >
-                  <Card className="p-6 transition-all border-none bg-white shadow-sm hover:shadow-md">
+                  <Card className="p-6 transition-all border-none bg-card shadow-sm hover:shadow-md">
                     <div className="flex items-center gap-6">
                       {comp.logo_url ? (
                         <img src={comp.logo_url} alt={comp.nombre} className="w-20 h-20 rounded-xl object-cover shadow-sm" />
                       ) : (
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl flex items-center justify-center border border-slate-100">
+                        <div className="w-20 h-20 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl flex items-center justify-center border border-border">
                           <Building2 className="w-10 h-10 text-primary/40" />
                         </div>
                       )}
@@ -105,7 +105,7 @@ export default function AdminCompanies() {
                               : comp.estado === 'pendiente'
                               ? 'bg-warning/10 text-warning'
                               : comp.estado === 'bloqueado'
-                              ? 'bg-orange-100 text-orange-600'
+                              ? 'bg-warning-subtle text-warning-strong'
                               : 'bg-destructive/10 text-destructive'
                           }`}>
                             {comp.estado === 'aprobado'  ? 'Aprobada'  : 
@@ -116,7 +116,7 @@ export default function AdminCompanies() {
                         <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
                           {comp.descripcion}
                         </p>
-                        <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
+                        <div className="flex items-center gap-4 text-xs font-semibold text-muted-foreground">
                           <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {comp.num_empleados} empleados</div>
                           <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Solicitada el: {new Date(comp.fecha_registro || Date.now()).toLocaleDateString()}</div>
                         </div>
@@ -143,11 +143,11 @@ export default function AdminCompanies() {
 
               {filteredCompanies.length === 0 && (
                 <div className="py-20 text-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                  <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 text-muted-foreground">
                     <Building2 className="w-10 h-10" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-400 mb-2">No se encontraron empresas</h3>
-                  <p className="text-slate-400 max-w-xs mx-auto">Intenta ajustar los filtros o el término de búsqueda para ver otras empresas registradas.</p>
+                  <h3 className="text-xl font-bold text-muted-foreground mb-2">No se encontraron empresas</h3>
+                  <p className="text-muted-foreground max-w-xs mx-auto">Intenta ajustar los filtros o el término de búsqueda para ver otras empresas registradas.</p>
                 </div>
               )}
             </div>

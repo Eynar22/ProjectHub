@@ -66,7 +66,7 @@ export function SolicitudesTab({
                   <div className="p-6 pl-7">
                     <div className="flex items-start gap-5 justify-between">
                       <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
                           {req.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export function SolicitudesTab({
               <Card key={req.id} className={`p-4 border-none shadow-sm ${req.estado === 'rechazado' ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${req.estado === 'aceptado' ? 'bg-gradient-to-br from-success to-emerald-600' : 'bg-muted'
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-sm ${req.estado === 'aceptado' ? 'bg-gradient-to-br from-success to-success' : 'bg-muted'
                       }`}>
                       {req.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                     </div>
