@@ -50,6 +50,7 @@ export const ENDPOINTS = {
   USUARIOS: {
     LISTAR: '/usuarios',
     ME: '/usuarios/me',
+    CREAR_RAPIDO: '/usuarios/quick-create',
     DETALLE: (id: number | string) => `/usuarios/${id}`,
     ELIMINAR: (id: number | string) => `/usuarios/${id}`,
     PROMOVER: (id: number | string) => `/usuarios/${id}/promover`,
@@ -69,6 +70,7 @@ export const ENDPOINTS = {
     ELIMINAR: (id: number | string) => `/tareas/${id}`,
     COMENTARIOS: (id: number | string) => `/tareas/${id}/comentarios`,
     POR_PROYECTO: (proyectoId: number | string) => `/tareas/proyecto/${proyectoId}`,
+    COLUMNAS: '/tareas/columnas',
     COLUMNAS_POR_PROYECTO: (proyectoId: number | string) =>
       `/tareas/columnas/proyecto/${proyectoId}`,
   },

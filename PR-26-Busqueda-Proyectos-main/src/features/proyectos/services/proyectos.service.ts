@@ -83,4 +83,13 @@ export const proyectosService = {
   async autoTerminar(): Promise<{ actualizados: number }> {
     return apiClient.post<{ actualizados: number }>(ENDPOINTS.PROYECTOS.AUTO_TERMINAR, {});
   },
+
+  /** Cambia el rol de un participante dentro del workspace del proyecto. */
+  async cambiarRolParticipante(
+    proyectoId: number | string,
+    usuarioId: number | string,
+    rol: string,
+  ): Promise<void> {
+    await apiClient.patch(ENDPOINTS.PROYECTOS.PARTICIPANTE(proyectoId, usuarioId), { rol });
+  },
 };

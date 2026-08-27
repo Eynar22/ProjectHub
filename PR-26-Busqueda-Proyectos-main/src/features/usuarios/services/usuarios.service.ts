@@ -27,6 +27,21 @@ export const usuariosService = {
     return apiClient.patch<User>(ENDPOINTS.USUARIOS.ME, datos);
   },
 
+  /** Marca el onboarding del usuario actual como completado. */
+  async marcarOnboardingCompletado(): Promise<void> {
+    await apiClient.patch(ENDPOINTS.USUARIOS.ME, { onboarding_completado: true });
+  },
+
+  /** Alta rápida de un empleado (wizard de bienvenida): envía contraseña temporal. */
+  async crearRapido(datos: {
+    nombre_completo: string;
+    correo: string;
+    cargo?: string;
+    proyecto_id?: number | null;
+  }): Promise<User> {
+    return apiClient.post<User>(ENDPOINTS.USUARIOS.CREAR_RAPIDO, datos);
+  },
+
   /** Modera un usuario (promover / degradar / bloquear / desbloquear / eliminar). */
   async moderar(id: number | string, accion: AccionUsuario): Promise<void> {
     if (accion === 'eliminar') {

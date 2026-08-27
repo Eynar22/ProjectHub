@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import { api } from '../services/api';
+import { usuariosService } from '@/features/usuarios';
 import { useApp } from '../context/AppContext';
 import { Input, TextArea } from './Input';
 import { Button } from './Button';
@@ -36,7 +36,7 @@ export function OnboardingWizard() {
 
   const markOnboardingDone = async () => {
     try {
-      await api.patch('/usuarios/me', { onboarding_completado: true });
+      await usuariosService.marcarOnboardingCompletado();
     } catch {
       // No bloquea el cierre del wizard si esto falla; se reintentará en el próximo login.
     }
@@ -92,7 +92,7 @@ export function OnboardingWizard() {
     let success = 0;
     for (const row of validRows) {
       try {
-        await api.post('/usuarios/quick-create', {
+        await usuariosService.crearRapido({
           nombre_completo: row.nombre_completo.trim(),
           correo: row.correo.trim(),
           cargo: row.cargo.trim() || undefined,

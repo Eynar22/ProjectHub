@@ -1,8 +1,8 @@
 import { Link } from 'react-router';
 import { useApp } from '../context/AppContext';
 import { useEmpresas } from '@/features/empresas';
+import { solicitudesService } from '@/features/proyectos';
 import { useSolicitudesMembresia, useResponderSolicitudMembresia } from '@/features/usuarios';
-import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -60,11 +60,10 @@ export default function CompanyDashboard() {
     if (currentUser?.rol === 'superadmin') navigate('/admin');
   }, [currentUser, navigate]);
 
-  // Fetch pending project join requests grouped by project
-  // TODO(feature proyectos): mover a un hook useSolicitudesPendientes.
+  // Solicitudes de participación pendientes en mis proyectos, agrupadas.
   useEffect(() => {
     if (!currentUser) return;
-    api.get<ProjectPendingGroup[]>('/proyectos/usuario/solicitudes-pendientes')
+    solicitudesService.listarPendientesAgrupadas<ProjectPendingGroup>()
       .then(data => setProjectPendingGroups(Array.isArray(data) ? data : []))
       .catch(() => setProjectPendingGroups([]));
   }, [currentUser?.id]);

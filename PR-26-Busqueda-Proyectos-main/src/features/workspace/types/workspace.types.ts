@@ -33,6 +33,13 @@ export interface Task {
   comentarios?: TaskComment[];
 }
 
+/** Columna del tablero kanban de un proyecto. */
+export interface KanbanColumn {
+  id: number;
+  nombre: string;
+  orden: number;
+}
+
 /** Mensaje del chat de un proyecto. */
 export interface Message {
   id: number;

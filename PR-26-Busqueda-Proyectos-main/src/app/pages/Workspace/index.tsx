@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useApp } from '../../context/AppContext';
-import { api } from '../../services/api';
+import { proyectosService, solicitudesService, type Project } from '@/features/proyectos';
+import {
+  tareasService,
+  chatService,
+  recursosService,
+  useCrearRecurso,
+  useEliminarRecurso,
+  useSubirArchivo,
+} from '@/features/workspace';
 import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import {
@@ -18,7 +26,6 @@ import {
 } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import type { Project } from '../../context/AppContext';
 import type { ProyectoSolicitud, TabType } from './types';
 import { InfoTab } from './InfoTab';
 import { TeamTab } from './TeamTab';
@@ -31,18 +38,11 @@ import { NewFolderModal } from './NewFolderModal';
 
 export default function Workspace() {
   const { id } = useParams();
-  const {
-    projects,
-    archivedProjects,
-    companies,
-    users,
-    currentUser,
-    resources,
-    addResource,
-    deleteResource,
-    openBase64,
-    uploadFile
-  } = useApp();
+  const { projects, archivedProjects, companies, users, currentUser, openBase64 } = useApp();
+  const crearRecurso = useCrearRecurso();
+  const eliminarRecursoMut = useEliminarRecurso();
+  const subir = useSubirArchivo();
+  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).base64;
 
   // ── LOCAL CHAT STATE (loaded per project) ──────────────────────────
   const [chatMessages, setChatMessages] = useState<Array<{
@@ -163,7 +163,7 @@ export default function Workspace() {
   const fetchChatMessages = async () => {
     if (!project) return;
     try {
-      const data = await api.get<any[]>(`/chats/proyecto/${project.id}/mensajes`);
+      const data = await chatService.listarMensajes(project.id);
       setChatMessages(Array.isArray(data) ? data : []);
     } catch { /* silently ignore polling errors */ }
   };
@@ -185,8 +185,8 @@ export default function Workspace() {
   const fetchProjectTasks = async (pId: number) => {
     try {
       const [colData, taskData] = await Promise.all([
-        api.get<any[]>(`/tareas/columnas/proyecto/${pId}`),
-        api.get<any[]>(`/tareas/proyecto/${pId}`),
+        tareasService.listarColumnas(pId),
+        tareasService.listarPorProyecto(pId),
       ]);
       setKanbanColumns(Array.isArray(colData) ? colData.map((c: any) => ({ id: c.id, nombre: c.nombre, orden: c.orden })) : []);
       setLocalTasks(Array.isArray(taskData) ? taskData : []);
@@ -202,50 +202,54 @@ export default function Workspace() {
   }, [project?.id]);
 
   // ── PROJECT DETAIL: trae recursos + members completos (incl. cross-company) ──
+  const cargarProyectoDetalle = async () => {
+    if (!id) return;
+    try {
+      const data = await proyectosService.obtenerPorId(id);
+      setProjectCompleto(data);
+
+      const members: any[] = [];
+      if (data.creador) {
+        members.push(data.creador);
+      } else if (creator) {
+        members.push(creator);
+      }
+      if (Array.isArray(data.participantes)) {
+        data.participantes.forEach((p: any) => {
+          const u = p.usuario ?? p;
+          if (u?.id && !members.some(m => m.id === u.id)) {
+            members.push(u);
+          }
+        });
+      }
+      setProjectMembers(members);
+    } catch {
+      /* silently use context fallback */
+    }
+  };
+
   useEffect(() => {
     setProjectCompleto(null);
-    if (!id) return;
-    api.get<Project>(`/proyectos/${id}`)
-      .then(data => {
-        setProjectCompleto(data);
-
-        const members: any[] = [];
-        // Add creator
-        if (data.creador) {
-          members.push(data.creador);
-        } else if (creator) {
-          members.push(creator);
-        }
-        // Add accepted participants (avoid duplicate if creator is also in participantes)
-        if (Array.isArray(data.participantes)) {
-          data.participantes.forEach((p: any) => {
-            const u = p.usuario ?? p;
-            if (u?.id && !members.some(m => m.id === u.id)) {
-              members.push(u);
-            }
-          });
-        }
-        setProjectMembers(members);
-      })
-      .catch(() => { /* silently use context fallback */ });
+    cargarProyectoDetalle();
   }, [id]);
+
   useEffect(() => {
     if (!project || !currentUser) return;
     if (currentUser.id !== project.creador_id) return;
     setLoadingRequests(true);
-    api.get<any[]>(`/proyectos/${project.id}/solicitudes`)
+    solicitudesService.listarPorProyecto(project.id)
       .then(data => setProjectJoinRequests(Array.isArray(data) ? data : []))
       .catch(console.error)
       .finally(() => setLoadingRequests(false));
   }, [project?.id, currentUser?.id]);
 
   const handleAcceptJoinRequest = async (solicitudId: number) => {
-    await api.patch(`/proyectos/solicitudes/${solicitudId}/aceptar`, {});
+    await solicitudesService.aceptar(solicitudId);
     setProjectJoinRequests(prev => prev.map(r => r.id === solicitudId ? { ...r, estado: 'aceptado' } : r));
   };
 
   const handleRejectJoinRequest = async (solicitudId: number) => {
-    await api.patch(`/proyectos/solicitudes/${solicitudId}/rechazar`, {});
+    await solicitudesService.rechazar(solicitudId);
     setProjectJoinRequests(prev => prev.map(r => r.id === solicitudId ? { ...r, estado: 'rechazado' } : r));
   };
 
@@ -309,7 +313,7 @@ export default function Workspace() {
     setChatMessages(prev => [...prev, optimistic]);
 
     try {
-      const saved = await api.post<any>(`/chats/proyecto/${project.id}/mensajes`, { contenido: text });
+      const saved = await chatService.enviarMensaje(project.id, text);
       // Replace optimistic with real message
       setChatMessages(prev => prev.map(m => m.id === optimistic.id ? saved : m));
     } catch {
@@ -321,14 +325,6 @@ export default function Workspace() {
     }
   };
 
-  const apiCall = async (url: string, method = 'GET', body?: any) => {
-    if (method === 'GET') return api.get<any>(url);
-    if (method === 'POST') return api.post<any>(url, body);
-    if (method === 'PATCH') return api.patch<any>(url, body);
-    if (method === 'DELETE') return api.delete<any>(url);
-    throw new Error(`Unsupported method ${method}`);
-  };
-
   // ── Dar/quitar acceso a un colaborador para crear tareas ('miembro' ⇄ 'colaborador') ──
   const [updatingAccesoId, setUpdatingAccesoId] = useState<number | null>(null);
   const handleToggleAccesoTareas = async (usuarioId: number, rolActual: string) => {
@@ -336,7 +332,7 @@ export default function Workspace() {
     const nuevoRol = rolActual === 'miembro' ? 'colaborador' : 'miembro';
     setUpdatingAccesoId(usuarioId);
     try {
-      await api.patch(`/proyectos/${project.id}/participantes/${usuarioId}`, { rol: nuevoRol });
+      await proyectosService.cambiarRolParticipante(project.id, usuarioId, nuevoRol);
       setProjectCompleto(prev => {
         const base = prev ?? project;
         return {
@@ -386,11 +382,11 @@ export default function Workspace() {
     if (!project) return;
     setSavingProjectInfo(true);
     try {
-      const updated = await api.patch<Project>(`/proyectos/${project.id}`, {
+      const updated = await proyectosService.actualizar(project.id, {
         descripcion_completa: editDescripcion.trim(),
         fecha_fin: editFechaFin || null,
         imagenes_urls: editImagenes,
-      });
+      } as Partial<Project>);
       setProjectCompleto(updated);
       setEditingProjectInfo(false);
       toast.success('Información del proyecto actualizada');
@@ -409,7 +405,7 @@ export default function Workspace() {
       { nombre: 'En Proceso', orden: 2 },
       { nombre: 'Completado', orden: 3 },
     ];
-    const created = await Promise.all(cols.map(c => apiCall('/tareas/columnas', 'POST', { proyecto_id: pId, ...c })));
+    const created = await Promise.all(cols.map(c => tareasService.crearColumna({ proyecto_id: pId, ...c })));
     setKanbanColumns(created);
     return created;
   };
@@ -419,7 +415,7 @@ export default function Workspace() {
     try {
       const cols = await ensureColumns(project!.id);
       const firstCol = cols[0];
-      const newTask = await apiCall('/tareas', 'POST', {
+      const newTask = await tareasService.crear({
         proyecto_id: project!.id,
         titulo: newTaskTitle,
         descripcion: newTaskDesc,
@@ -442,7 +438,7 @@ export default function Workspace() {
   const handleMoveTask = async (taskId: number, newColId: number) => {
     if (isReadOnly) return;
     setLocalTasks(prev => prev.map(t => t.id === taskId ? { ...t, columna_id: newColId } : t));
-    await apiCall(`/tareas/${taskId}`, 'PATCH', { columna_id: newColId });
+    await tareasService.actualizar(taskId, { columna_id: newColId });
   };
 
   const handleOpenEditModal = (task: any) => {
@@ -457,7 +453,7 @@ export default function Workspace() {
 
   const handleSaveEditTask = async () => {
     if (!editingTask) return;
-    const updated = await apiCall(`/tareas/${editingTask.id}`, 'PATCH', {
+    const updated = await tareasService.actualizar(editingTask.id, {
       titulo: editTaskTitle,
       descripcion: editTaskDesc,
       prioridad: editTaskPriority,
@@ -470,7 +466,7 @@ export default function Workspace() {
 
   const handleAddTaskComment = async () => {
     if (!editingTask || !newTaskComment.trim()) return;
-    const newComment = await apiCall(`/tareas/${editingTask.id}/comentarios`, 'POST', { texto: newTaskComment });
+    const newComment = await tareasService.agregarComentario(editingTask.id, newTaskComment);
     setLocalTasks(prev => prev.map(t =>
       t.id === editingTask.id
         ? { ...t, comentarios: [...(t.comentarios || []), newComment] }
@@ -482,7 +478,7 @@ export default function Workspace() {
 
   const handleDeleteTask = async (taskId: number) => {
     setLocalTasks(prev => prev.filter(t => t.id !== taskId));
-    await apiCall(`/tareas/${taskId}`, 'DELETE');
+    await tareasService.eliminar(taskId);
     if (editingTask?.id === taskId) setEditingTask(null);
   };
 
@@ -502,14 +498,15 @@ export default function Workspace() {
     return path;
   })() : [];
 
-  const handleAddFolder = () => {
+  const handleAddFolder = async () => {
     if (!newFolderName.trim()) return;
-    addResource({
+    await crearRecurso.mutateAsync({
       proyecto_id: project.id,
       nombre: newFolderName,
       tipo: 'carpeta',
-      padre_id: activeFolderId
+      padre_id: activeFolderId,
     });
+    await cargarProyectoDetalle();
     setNewFolderName('');
     setShowNewFolderModal(false);
   };
@@ -526,23 +523,26 @@ export default function Workspace() {
 
     setUploadingFile(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const { base64, filename } = await api.post<any>('/recursos/upload', formData);
-
-      await addResource({
+      const { base64, filename } = await recursosService.subirArchivo(file);
+      await crearRecurso.mutateAsync({
         proyecto_id: project.id,
         nombre: filename || file.name,
         tipo: 'archivo',
         url: base64,
         padre_id: activeFolderId,
       });
+      await cargarProyectoDetalle();
     } catch (err) {
       console.error('Error uploading file:', err);
       toast.error(err instanceof Error ? err.message : 'Error al subir el archivo. Por favor intenta de nuevo.');
     } finally {
       setUploadingFile(false);
     }
+  };
+
+  const handleDeleteResource = async (resourceId: number) => {
+    await eliminarRecursoMut.mutateAsync(resourceId);
+    await cargarProyectoDetalle();
   };
 
   const tabs = [
@@ -750,7 +750,7 @@ export default function Workspace() {
                 uploadingFile={uploadingFile}
                 currentResources={currentResources}
                 openBase64={openBase64}
-                deleteResource={deleteResource}
+                deleteResource={handleDeleteResource}
               />
             )}
 

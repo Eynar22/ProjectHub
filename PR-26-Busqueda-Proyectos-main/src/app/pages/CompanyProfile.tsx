@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
 import { useCambiarPassword } from '@/features/auth';
+import { useSubirArchivo } from '@/features/workspace';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -33,7 +34,9 @@ function InfoRow({ icon: Icon, label, value, color = 'text-muted-foreground' }: 
 }
 
 export default function CompanyProfile() {
-  const { currentUser, openBase64, updateProfile, uploadFile } = useApp();
+  const { currentUser, openBase64, updateProfile } = useApp();
+  const subir = useSubirArchivo();
+  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).base64;
   // El detalle de empresa (documento_url, imagenes, enlaces) lo trae este hook;
   // el listado ligero no. Se re-descarga solo tras cada actualización.
   const { data: userCompany } = useEmpresa(currentUser?.empresa_id);

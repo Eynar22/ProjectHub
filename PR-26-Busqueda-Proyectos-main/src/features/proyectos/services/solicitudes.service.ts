@@ -15,6 +15,14 @@ export const solicitudesService = {
     return apiClient.get<Request[]>(ENDPOINTS.PROYECTOS.SOLICITUDES_ENVIADAS);
   },
 
+  /**
+   * Solicitudes pendientes recibidas en los proyectos del usuario, agrupadas
+   * por proyecto. La forma exacta la define el consumidor.
+   */
+  async listarPendientesAgrupadas<T = unknown>(): Promise<T[]> {
+    return apiClient.get<T[]>(ENDPOINTS.PROYECTOS.SOLICITUDES_PENDIENTES);
+  },
+
   /** Solicitudes recibidas en un proyecto propio. */
   async listarPorProyecto(proyectoId: number | string): Promise<Request[]> {
     return apiClient.get<Request[]>(ENDPOINTS.PROYECTOS.SOLICITUDES_POR_PROYECTO(proyectoId));

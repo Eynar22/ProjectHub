@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { useApp } from '../context/AppContext';
 import { useRegistrarEmpresa, useRegistrarEmpleado } from '@/features/auth';
-import { api } from '../services/api';
+import { useEmpresas, empresasService } from '@/features/empresas';
 import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -42,7 +41,7 @@ export default function Register() {
   const [newCompanyErrors, setNewCompanyErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { companies } = useApp();
+  const { data: companies = [] } = useEmpresas();
   const registrarEmpresa = useRegistrarEmpresa();
   const registrarEmpleado = useRegistrarEmpleado();
   const navigate = useNavigate();
@@ -61,8 +60,7 @@ export default function Register() {
   useEffect(() => {
     filteredCompanies.slice(0, 12).forEach(company => {
       if (companyPhotos[company.id] !== undefined) return;
-      // TODO(Stage C): mover a empresasService.obtenerPorId cuando exista la feature empresas.
-      api.get<{ imagenes?: { url: string }[] }>(`/empresas/${company.id}`)
+      empresasService.obtenerPorId(company.id)
         .then(data => setCompanyPhotos(prev => ({ ...prev, [company.id]: data.imagenes?.[0]?.url || null })))
         .catch(() => setCompanyPhotos(prev => ({ ...prev, [company.id]: null })));
     });

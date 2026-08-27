@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { api } from '../services/api';
 import { toast } from 'sonner';
 import { storage } from '@/lib/storage';
 import { authService } from '@/features/auth';
@@ -58,9 +57,6 @@ interface AppContextType {
   projects: Project[];
   archivedProjects: Project[];
   requests: Request[];
-  messages: Message[];
-  tasks: Task[];
-  resources: Resource[];
   loading: boolean;
   login: (correo: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
@@ -69,20 +65,12 @@ interface AppContextType {
     data: Partial<Company> & { imagenes_urls?: string[]; enlaces?: { url: string; nombre?: string }[] },
   ) => Promise<void>;
   updateProfile: (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => Promise<void>;
-  uploadFile: (file: File) => Promise<string>;
   refreshCurrentUser: () => Promise<void>;
   createProject: (project: any) => Promise<Project>;
   updateProject: (id: number, data: Partial<Project>) => Promise<void>;
   updateProjectEstado: (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => Promise<void>;
   createRequest: (request: { proyecto_id: number; mensaje: string }) => Promise<void>;
   updateRequest: (id: number, status: 'accepted' | 'rejected') => Promise<void>;
-  createMessage: (message: { proyecto_id: number; contenido: string; archivo_url?: string }) => Promise<void>;
-  createTask: (task: any) => Promise<void>;
-  updateTask: (id: number, data: Partial<Task>) => Promise<void>;
-  deleteTask: (id: number) => Promise<void>;
-  addTaskComment: (taskId: number, text: string) => Promise<void>;
-  addResource: (resource: any) => Promise<void>;
-  deleteResource: (id: number) => Promise<void>;
   approveCompany: (id: number) => Promise<void>;
   blockCompany: (id: number) => Promise<void>;
   unblockCompany: (id: number) => Promise<void>;
@@ -96,9 +84,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
 
   // ── Datos del servidor: TanStack Query. Este context solo hace de puente
@@ -190,15 +175,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast.success('Empresa actualizada');
   };
 
-  // Sube un archivo al backend, que lo redimensiona/comprime (imágenes) y lo
-  // devuelve como base64 listo para guardar (foto de perfil, logo, galería).
-  const uploadFile = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const result = await api.post<{ base64: string }>('/recursos/upload', formData);
-    return result.base64;
-  };
-
   const updateProfile = async (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => {
     const updated = await usuariosService.actualizarPerfil(data);
     setCurrentUser(updated);
@@ -256,54 +232,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     invalidarProyectos();
   };
 
-  const createMessage = async (message: { proyecto_id: number; contenido: string; archivo_url?: string }) => {
-    const newMessage = await api.post<Message>(`/chats/proyecto/${message.proyecto_id}/mensajes`, {
-      contenido: message.contenido,
-      archivo_url: message.archivo_url
-    });
-    setMessages(prev => [...prev, newMessage]);
-  };
-
-  const createTask = async (task: any) => {
-    const newTask = await api.post<Task>('/tareas', task);
-    setTasks(prev => [...prev, newTask]);
-  };
-
-  const updateTask = async (id: number, data: Partial<Task>) => {
-    const updated = await api.patch<Task>(`/tareas/${id}`, data);
-    setTasks(prev => prev.map(t => t.id === id ? updated : t));
-  };
-
-  const deleteTask = async (id: number) => {
-    await api.delete(`/tareas/${id}`);
-    setTasks(prev => prev.filter(t => t.id !== id));
-  };
-
-  const addTaskComment = async (taskId: number, text: string) => {
-    const newComment = await api.post<TaskComment>(`/tareas/${taskId}/comentarios`, { texto: text });
-    setTasks(prev => prev.map(t => {
-      if (t.id === taskId) {
-        return {
-          ...t,
-          comentarios: [...(t.comentarios || []), newComment]
-        };
-      }
-      return t;
-    }));
-  };
-
-  const addResource = async (resource: any) => {
-    const newRes = await api.post<Resource>('/recursos', resource);
-    setResources(prev => [...prev, newRes]);
-    // El proyecto (con su árbol de recursos) se re-descarga vía TanStack Query.
-    invalidarProyectos();
-  };
-
-  const deleteResource = async (id: number) => {
-    await api.delete(`/recursos/${id}`);
-    setResources(prev => prev.filter(r => r.id !== id));
-    invalidarProyectos();
-  };
+  // Chat, tareas y recursos se consumen ahora desde '@/features/workspace'
+  // (useMensajesChat, useEnviarMensaje, useTareasProyecto, useRecursos, ...).
 
   const approveCompany = async (id: number) => {
     try { await empresasService.aprobar(id); } catch { toast.error('Error al aprobar'); }
@@ -354,15 +284,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         projects,
         archivedProjects,
         requests,
-        messages,
-        tasks,
-        resources,
         loading,
         login,
         logout,
         updateCompany,
         updateProfile,
-        uploadFile,
         refreshCurrentUser,
         createProject,
         updateProject,
@@ -370,13 +296,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         refreshProjects,
         createRequest,
         updateRequest,
-        createMessage,
-        createTask,
-        updateTask,
-        deleteTask,
-        addTaskComment,
-        addResource,
-        deleteResource,
         approveCompany,
         blockCompany,
         unblockCompany,
