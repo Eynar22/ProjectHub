@@ -1,0 +1,315 @@
+===============================================================================
+ESTADO DE CUMPLIMIENTO DE LA CARPETA reglas/  —  ProjectHub (frontend)
+===============================================================================
+Última actualización: 2026-08-27
+Rama de trabajo:       test   (todos los avances están commiteados aquí)
+Último commit:         82f7332  "correcion de tipográfia"
+
+Objetivo global: aplicar los 3 documentos de reglas/ a todo el frontend
+  - Manual-Reglas-UI-UX-Web-2026.txt
+  - Anexo-A-Sistema-de-Color-UI.txt
+  - Anexo-B-Arquitectura-Frontend-y-API.txt
+
+Cómo verificar el estado en la PC nueva (desde PR-26-Busqueda-Proyectos-main/):
+  npm install
+  npx tsc --noEmit      -> debe dar 0 errores
+  npm run lint          -> 0 errores, ~90 warnings (deuda de `any`, ver B7 abajo)
+  npx vite build        -> debe compilar (queda 1 aviso de chunk >500kb, preexistente)
+  npm run dev           -> revisar visualmente
+
+NOTA: `npx vite build` NO hace typecheck. Siempre correr `npx tsc --noEmit` aparte.
+El usuario hace los commits él mismo, slice por slice.
+
+
+===============================================================================
+FASE 1 — ANEXO A (SISTEMA DE COLOR)      ESTADO: COMPLETA
+===============================================================================
+
+HECHO:
+  - src/styles/tokens.css  (NIVEL 1: primitivos)
+      * Escala primaria OKLCH indigo, hue 262 (índigo real).
+        (2026-08-27: se movió de 277° violeta -> 262°; A10 "Dashboard/Panel =
+         azul o índigo" + A4 "azul = confianza/seguridad". Se regeneró escala
+         indigo + grises tintados + sombras a 262°, mismo croma y luminosidad.)
+      * Grises tintados con el tono del primario (croma 0.002-0.017).
+      * Semánticos fijos (Anexo A9): verde/rojo/ámbar/azul con
+        -subtle / -base / -strong / -on-dark. NO se eligen por gusto.
+      * Espaciado base 4/8 y duraciones.
+  - src/styles/theme.css  (NIVEL 2: semánticos + @theme)
+      * Tokens semánticos que apuntan a los primitivos.
+      * UN SOLO color de marca (indigo). `secondary` y `accent` son NEUTRALES,
+        no colores. (decisión del usuario: "lo que dice Anexo A hazlo")
+      * Modo oscuro TRADUCIDO (no invertido): .dark con neutros y marca
+        re-mapeados; nunca #000 ni #fff puros.
+      * @theme con radios, sombras (una sola fuente de luz, tintadas),
+        z-index NOMBRADOS (--z-index-dropdown..toast, nunca 9999),
+        curvas de easing.
+      * Escala tipográfica fluida --text-xs..2xl con clamp() (ver Fase 3).
+      * @layer base: prefers-reduced-motion, :focus-visible global,
+        reglas h1-h4/label/button/input, scroll-margin-top.
+  - index.html: <html lang="es"> + script anti-parpadeo de tema.
+  - Cero HEX y cero utilidad de paleta cruda de Tailwind fuera de
+    tokens.css / theme.css.
+  - Tokens extra: surface-inverse (componentes siempre oscuros, p.ej. cards de
+    Explore); paleta chart-1..5 para datos/categorías (no decoración).
+  - Componentes propios alineados a Anexo A8 (jerarquía de botones) y 44px:
+    Button, Card, Input/TextArea, Navbar, Sidebar.
+  - SIN DEGRADADOS en todo src/ (Anexo A11 "✗ degradados"; Manual Parte 19):
+      * `bg-gradient-to-* from-primary to-secondary` y variantes -> `bg-primary`.
+      * placeholders `from-x/5 to-y/5` -> `bg-x/5` plano.
+      * barras de cabecera `from-x/8 to-transparent` -> `bg-primary/5` o `bg-muted/50`.
+      * texto con `bg-clip-text ... gradient` -> `text-primary` sólido.
+      * scrim de foto de Explore -> `bg-black/50` plano.
+      * conector del stepper de Home -> `h-px bg-border`.
+      * Verificado: 0 `bg-gradient-to`, 0 `via-`, 0 `bg-clip-text` en src/.
+
+FALTA (opcional / menor):
+  - Manual Parte 5.2: `--text-3xl`+ siguen en el default de Tailwind (a propósito;
+    solo se usan en héroes con modificadores responsivos md:/lg: explícitos).
+    Si se quiere el rango completo del Manual (44-72px) habría que auditar y bajar
+    los `text-3xl`/`text-4xl` sueltos de títulos de panel para que no se vuelvan
+    gigantes.
+
+
+===============================================================================
+FASE 2 — ANEXO B (ARQUITECTURA FRONTEND Y API)   ESTADO: ESENCIALMENTE COMPLETA
+===============================================================================
+
+Estructura final (Anexo B2):
+  src/
+    App.tsx (fino), main.tsx
+    app/         context/ (AppContext puente), guards/ (RutaPrivada, RutaPorRol),
+                 providers.tsx, router.tsx, TitleSync.tsx
+    pages/       (+ Workspace/)  <- todas las páginas
+    features/    auth/ empresas/ proyectos/ usuarios/ workspace/
+                 cada una: services/ hooks/ types/ index.ts (barrel)
+    shared/      components/{ui,layout,feedback}, types/, utils/
+    lib/         api/{client,endpoints,errors}, config.ts, storage.ts, queryClient.ts
+    styles/      tokens.css, theme.css
+
+HECHO:
+  Stage A — Infra:
+    - .editorconfig, .prettierrc, .env.example.
+    - lib/config.ts, lib/storage.ts.
+    - lib/api/client.ts: UN cliente HTTP fetch-based, timeout 15s, 401 -> /login,
+      clase ApiError. lib/api/endpoints.ts: TODAS las rutas del backend
+      centralizadas (ENDPOINTS.*). lib/api/errors.ts.
+    - tsconfig.json reparado para Vite: module ESNext, moduleResolution bundler,
+      baseUrl + paths @/*, allowImportingTsExtensions, include ["src"].
+    - Tipos sacados del god-context a shared/types/ + features/*/types/.
+
+  Stage B — Slice auth:
+    - @tanstack/react-query v5 + lib/queryClient.ts + QueryClientProvider.
+    - features/auth/: auth.service.ts (login, obtenerPerfil, registrarEmpresa/
+      Empleado con File->base64 interno, recuperación, cambiarPassword),
+      hooks/useAuth.ts (useMutation por operación), barrel.
+    - shared/utils/fileToBase64.ts.
+    - Páginas migradas a hooks: ForgotPassword, ResetPassword, ForceChangePassword,
+      Register (no importan `api`).
+
+  Stage C — Slices de dominio (proyectos, empresas, usuarios, workspace):
+    - features/proyectos/: services (proyectos + solicitudes de participación),
+      hooks (useProyectos, useProyecto, useCrearProyecto, useCambiarEstadoProyecto,
+      useAutoTerminarProyectos, useTransferirProyecto; refetchInterval 30s que se
+      salta si la pestaña está oculta), barrel.
+    - features/empresas/: services (listar, obtenerPorId, actualizar, aprobar,
+      bloquear, desbloquear, eliminar), hooks (useEmpresas, useEmpresa,
+      useActualizarEmpresa, useModerarEmpresa), barrel.
+    - features/usuarios/: services (listar, actualizarPerfil, moderar,
+      solicitudes de membresía), hooks (useUsuarios, useUsuario, useModerarUsuario,
+      useActualizarPerfil, useSolicitudesMembresia, ...), barrel.
+    - features/workspace/: services {tareas, chat, recursos} (recursos con
+      subirArchivo FormData), hooks {useTareas, useChat (refetch 3s), useRecursos,
+      useSubirArchivo}, barrel.
+    - Toasts movidos a los hooks (onSuccess/onError).
+
+  Stage D — Mover carpetas (git mv):
+    - pages -> src/pages ; componentes propios -> shared/components/{ui,layout,feedback} ;
+      fileUtils -> shared/utils ; routes.tsx -> app/router.tsx ; App.tsx fino ;
+      provider tree -> app/providers.tsx ; guards -> app/guards/.
+    - BORRADOS como código muerto (0 importadores): 48 archivos shadcn de
+      components/ui/*, components/figma/ImageWithFallback, components/ProtectedRoute.
+    - Todos los imports a alias absoluto `@/...` (cero `../../..`).
+
+  Stage E — ESLint + limpieza:
+    - eslint@9 + typescript-eslint + eslint-plugin-react-hooks + react-refresh +
+      prettier. eslint.config.mjs (flat config).
+    - Scripts en package.json: lint, lint:fix, typecheck, format, format:check, preview.
+    - README reescrito al mínimo B15 (variables de entorno front+back, estructura, comandos).
+
+  God-context (AppContext.tsx):
+    - Reducido de 771 -> ~317 líneas. Ya NO importa `api`, NO tiene estado de
+      dominio propio, NO tiene polling ni loadInitialData.
+    - Es un PUENTE: expone projects/companies/users/requests desde los hooks de
+      react-query + wrappers de mutación que delegan en los services + un useEffect
+      de persistencia de sesión (token -> authService.obtenerPerfil).
+    - `logout` hace queryClient.clear().
+    - src/app/services/api.ts ELIMINADO. Cliente único en lib/api/client.
+
+  Decisión (2026-08-27): NO se separa el repo en frontend/ + backend/. El usuario
+  eligió dejarlo así; la estructura interna del Anexo B ya está y el layout actual
+  (app en la raíz + backend/ como subcarpeta) es estándar y no rompe ninguna regla.
+
+FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
+  - Workspace/index.tsx: todavía usa estado local + polling manual de chat/tareas.
+    Pasarlo a react-query (los hooks ya existen en features/workspace/).
+  - Páginas que aún leen el PUENTE del context (useApp().projects / companies /
+    users / requests) en vez de los hooks directos — funcionan bien, migración
+    mecánica: AdminDashboard, Explore, ProjectRequests, Sidebar, ProjectDetail,
+    AdminProjects, MyProjects (subcomponente).
+  - Mover UI de features fuera de pages/:
+      Workspace/*Tab.tsx  -> features/workspace/components/
+      formularios de Login/Register -> features/auth/components/
+  - Tipos que Workspace tabs / Sidebar importan de @/app/context/AppContext
+    (Project, Company, User, Resource) -> importarlos de los barriles de feature;
+    luego borrar el bloque de re-export de tipos en AppContext.tsx.
+  - B7: bajar la regla `@typescript-eslint/no-explicit-any` de "warn" a "error"
+    cuando se limpien los ~90 `any` que quedan (todos en páginas; features/ y lib/
+    ya están sin `any`).
+  - AppContext.tsx sigue vivo; se desmonta feature por feature.
+
+
+===============================================================================
+FASE 3 — MANUAL UI/UX  +  ACCESIBILIDAD WCAG 2.2      ESTADO: EN CURSO (avanzada)
+===============================================================================
+
+HECHO (por slices, todos con tsc/eslint/build verdes):
+
+  Slice 1 — Feedback + shell:
+    - shared/components/feedback/: Skeleton, EstadoCargando (role=status +
+      aria-live), EstadoVacio (icono+título+desc+acción), EstadoError
+      (título+desc+botón Reintentar) + index.ts.  (Manual 8.9)
+    - shared/components/layout/AppLayout.tsx: shell reutilizable con skip-link +
+      Navbar + Sidebar + <main id="contenido" tabIndex={-1}>.
+    - Skip-link global "Saltar al contenido" -> #contenido en app/providers.tsx
+      (WCAG 2.4.1).
+    - <main id="contenido"> en las 14 páginas con shell.
+    - Navbar/Sidebar: aria-label + aria-expanded/aria-haspopup en botones de icono;
+      aria-hidden en iconos decorativos; aria-current en links del sidebar;
+      <nav aria-label="Navegación principal">.
+    - <div onClick> -> <button> en CompanyDashboard (stat card).
+    - Foco visible añadido a inputs/selects sin reemplazo (Explore, Home, Login,
+      ProjectDetail).
+
+  Slice 2 — Layout + breadcrumbs:
+    - shared/components/layout/Breadcrumbs.tsx: <nav aria-label> + <ol>, última
+      miga sin enlace con aria-current="page".  (Manual 3.1)
+    - 10 páginas migradas a <AppLayout> (elimina el shell repetido):
+      AdminCompanies, AdminCompanyRequest, AdminCompanyUsers, AdminDashboard,
+      AdminProjects, AdminUsers, CompanyMembers, CompanyProfile, CreateProject,
+      MyProjects.
+    - <Breadcrumbs> cableado en 9 páginas internas (todas menos AdminDashboard,
+      que es de 1er nivel).
+
+  Slice 3 — Formularios (Manual 8.3 / WCAG 2.2):
+    - autoComplete en TODOS los formularios de auth (email / current-password /
+      new-password / one-time-code / name / organization-title / organization).
+    - Login: <label htmlFor> + <input id> asociados.
+    - EstadoVacio cableado en AdminCompanies, AdminUsers, AdminProjects.
+    - EstadoError + botón reintentar en AdminCompanies (isError/refetch de useEmpresas).
+
+  Slice 4 — Footer + estados:
+    - shared/components/layout/Footer.tsx (Manual 3.4): <footer> con copyright de
+      año dinámico + contacto (mailto) + link a Explorar. Enlaces legales NO
+      puestos (las páginas no existen -> evitar 404, Manual Parte 19). Cableado en
+      AppLayout (prop `sinFooter`).
+    - EstadoVacio en ProjectRequests y MyProjects (tab-aware, con CTA).
+    - zIndex: 9999 -> var(--z-index-popover) en el portal dropdown de MyProjects.
+
+  Slice 5 — Modal accesible (Manual 8.6):
+    - shared/components/ui/Modal.tsx: portal a body, cierra con X/ESC/clic-fondo,
+      FOCUS-TRAP (Tab no sale, foco inicial al primer interactivo, devuelve el
+      foco al disparador al cerrar), role="dialog" aria-modal aria-labelledby,
+      bloqueo de scroll de fondo, ancho máx sm/md/lg, prop `acciones` para el pie.
+    - Convertidos a <Modal>: Workspace/NewFolderModal, Workspace/TaskEditModal,
+      confirm de bloqueo en AdminUsers.
+    - aria-label en inputs/selects de búsqueda sin label (AdminCompanies,
+      AdminCompanyUsers, AdminProjects, AdminUsers, Explore, Register).
+
+  Slice 6 — Resto de modales:
+    - TODOS los modales hechos a mano convertidos a <Modal>: CompanyMembers x2,
+      CompanyDashboard, ProjectDetail x2. Total 8 modales usan el <Modal> accesible.
+    - Único `fixed inset-0` restante: el click-catcher del dropdown de Explore
+      (no es modal, es correcto).
+    - <label> asociado a los <select> de prioridad (TaskEditModal) y nuevo
+      propietario (ProjectDetail).
+
+  Slice 7 — AppLayout + error states + área táctil:
+    - Home y CompanyDashboard migrados a <AppLayout>
+      (Home: sinSidebar={!currentUser}, isAdmin, sinFooter -> tiene <footer> propio,
+       mainClassName="flex-1 w-full overflow-hidden").
+    - isError + <EstadoError> (botón Reintentar con refetch()) en AdminProjects,
+      AdminUsers, MyProjects, AdminCompanyUsers (este además pasó su empty-state
+      ad-hoc a <EstadoVacio>). Ya estaba en AdminCompanies.
+    - Área táctil 44px (Manual línea 890, OBLIGATORIO):
+        Navbar toggle de tema + botón menú móvil  w-8 h-8 -> w-11 h-11
+        Navbar botón menú de cuenta               + min-h-11
+        Modal botón Cerrar                         -> min-h-11 min-w-11 (sin p-1)
+        DocumentUpload / CompanyProfile "quitar"   -> min-h-11 min-w-11 + aria-label
+        Register "<- Volver" x2                    + min-h-11 px-2 -ml-2
+        Sidebar toggle: ya cumplía (py-3 + icono 20px).
+
+  Slice 8 — Color sólido, sin degradados:
+    - (ver detalle completo en la sección FASE 1 arriba)
+
+  Slice 9 — Tipografía fluida + títulos de página:
+    - Manual 5.2: @theme en theme.css define --text-xs..2xl con clamp() (valores
+      exactos del Manual). Mínimos >= a los actuales -> nada encoge; inputs >=16px.
+    - WCAG 2.4.2 / Manual 11.2 (títulos únicos y descriptivos):
+        src/app/TitleSync.tsx  (useMatches + handle.titulo -> document.title
+                                 = "<titulo> · ProjectHub")
+        router.tsx reestructurado: ruta raíz sin path { element: <TitleSync/>,
+                                   children: [...] } y handle:{titulo} en las 20 rutas.
+        src/shared/utils/useDocumentTitle.ts: hook para override dinámico ->
+        ProjectDetail y Workspace ponen el nombre del proyecto al cargar.
+
+
+FALTA EN FASE 3 (pendiente):
+
+  1. CONTRASTE con herramienta real (axe DevTools / Lighthouse) — Manual 11.5.
+     Requiere navegador, NO se puede correr desde la terminal del agente.
+     -> Tarea manual para el usuario en la PC nueva:
+        - npm run dev
+        - Chrome DevTools > Lighthouse > Accessibility  (en varias páginas)
+        - o extensión axe DevTools > "Scan all of my page"
+        - Revisar sobre todo: badges de estado con fondos -subtle, texto
+          muted-foreground sobre card, botones ghost, y el modo oscuro.
+     El sistema de color ya fija ratios AA en los tokens semánticos, pero falta
+     la verificación empírica pantalla por pantalla.
+
+  2. AppLayout en Explore y ProjectDetail (opcional).
+     No migradas a propósito: su <div> raíz lleva clases `relative` /
+     `overflow-x-hidden` que AppLayout no reproduce -> riesgo visual no testeable
+     desde la terminal. Si se migran, hacerlo con `npm run dev` abierto y comparar.
+
+  3. Título de pestaña dinámico en AdminCompanyRequest (nombre de la empresa) —
+     usar el hook useDocumentTitle, como en ProjectDetail/Workspace. Menor.
+
+  4. Auditoría fina de Manual pendiente de repasar con checklist en mano
+     (Manual Parte 11.1-11.4), especialmente:
+     - "El texto puede ampliarse al 200% sin perder funcionalidad" (probar zoom).
+     - "Reflow a 320px sin scroll horizontal" (probar en responsive 320px).
+     - "Espaciado de texto ajustable sin romper layout".
+     - "El elemento enfocado NO queda oculto tras headers fijos" (2.4.11) —
+       revisar el Navbar sticky vs foco en la primera fila de cada página.
+     - Orden de tabulación = orden visual en páginas con layouts en grid.
+     - "Errores identificados en texto, no solo con color" — repasar validaciones
+       de formularios de Register / CompanyProfile.
+
+
+===============================================================================
+CÓMO CONTINUAR EN LA PC NUEVA
+===============================================================================
+1. git clone / pull  y  `git checkout test`.
+2. cd PR-26-Busqueda-Proyectos-main  &&  npm install.
+3. Confirmar base verde:  npx tsc --noEmit  &&  npm run lint  &&  npx vite build.
+4. Retomar por prioridad:
+   a) CONTRASTE con Lighthouse/axe (punto 1 de "FALTA EN FASE 3") — es lo único
+      que bloquea cerrar Fase 3.
+   b) Checklist Manual 11.1-11.4 (punto 4).
+   c) Follow-ups de Anexo B (migrar el puente del context, Workspace a react-query,
+      mover UI de features fuera de pages/, bajar `any` a error).
+5. Trabajar en slices pequeños y verificables; commitear cada slice.
+6. El detalle fino y el historial de decisiones está también en la memoria del
+   agente (archivo reglas-carpeta-estandar-vinculante.md del proyecto).
+===============================================================================
