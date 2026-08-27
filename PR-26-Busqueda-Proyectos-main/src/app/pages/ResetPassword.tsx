@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router';
 import { toast } from 'sonner';
-import { api } from '../services/api';
+import { useRestablecerPassword } from '@/features/auth';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -15,8 +15,8 @@ export default function ResetPassword() {
   const [codigo, setCodigo] = useState('');
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [confirmarPassword, setConfirmarPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const restablecer = useRestablecerPassword();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +34,8 @@ export default function ResetPassword() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      await api.post<{ message: string }>('/auth/reset-password', {
+      await restablecer.mutateAsync({
         correo: correo.trim(),
         codigo: codigo.trim(),
         nueva_password: nuevaPassword,
@@ -45,8 +44,6 @@ export default function ResetPassword() {
       navigate('/login');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'No se pudo restablecer la contraseña');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -108,8 +105,8 @@ export default function ResetPassword() {
                 onChange={(e) => setConfirmarPassword(e.target.value)}
               />
 
-              <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Actualizando...' : 'Restablecer Contraseña'}
+              <Button type="submit" variant="primary" className="w-full" disabled={restablecer.isPending}>
+                {restablecer.isPending ? 'Actualizando...' : 'Restablecer Contraseña'}
               </Button>
             </form>
 

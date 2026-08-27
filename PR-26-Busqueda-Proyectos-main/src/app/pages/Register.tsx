@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { useRegistrarEmpresa, useRegistrarEmpleado } from '@/features/auth';
 import { api } from '../services/api';
 import { Input, TextArea } from '../components/Input';
 import { Button } from '../components/Button';
@@ -41,7 +42,9 @@ export default function Register() {
   const [newCompanyErrors, setNewCompanyErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { companies, register, registerToCompany } = useApp();
+  const { companies } = useApp();
+  const registrarEmpresa = useRegistrarEmpresa();
+  const registrarEmpleado = useRegistrarEmpleado();
   const navigate = useNavigate();
 
   const approvedCompanies = companies.filter(c => c.estado === 'aprobado');
@@ -58,6 +61,7 @@ export default function Register() {
   useEffect(() => {
     filteredCompanies.slice(0, 12).forEach(company => {
       if (companyPhotos[company.id] !== undefined) return;
+      // TODO(Stage C): mover a empresasService.obtenerPorId cuando exista la feature empresas.
       api.get<{ imagenes?: { url: string }[] }>(`/empresas/${company.id}`)
         .then(data => setCompanyPhotos(prev => ({ ...prev, [company.id]: data.imagenes?.[0]?.url || null })))
         .catch(() => setCompanyPhotos(prev => ({ ...prev, [company.id]: null })));
@@ -87,13 +91,14 @@ export default function Register() {
     if (!validateJoin() || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await registerToCompany({
-        name: joinData.name,
-        email: joinData.email,
+      await registrarEmpleado.mutateAsync({
+        nombre_completo: joinData.name,
+        correo: joinData.email,
         password: joinData.password,
-        jobTitle: joinData.jobTitle,
-        memberDocument: joinData.memberDocument!,
-      }, Number(selectedCompanyId));
+        cargo: joinData.jobTitle,
+        empresa_id: Number(selectedCompanyId),
+        documento: joinData.memberDocument!,
+      });
       setMode('success');
     } catch (err) {
       console.error(err);
@@ -135,22 +140,22 @@ export default function Register() {
     if (!validateNew() || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await register(
-        newCompanyData.email,
-        newCompanyData.password,
-        {
+      await registrarEmpresa.mutateAsync({
+        correo: newCompanyData.email,
+        password: newCompanyData.password,
+        empresa: {
           nombre: newCompanyData.companyName,
           descripcion: newCompanyData.description,
           num_empleados: parseInt(newCompanyData.employees),
           portafolio: newCompanyData.portfolio,
         },
-        {
-          name: newCompanyData.name,
-          jobTitle: newCompanyData.jobTitle,
-          companyDocument: newCompanyData.companyDocument!,
-          personalDocument: newCompanyData.personalDocument!,
-        }
-      );
+        responsable: {
+          nombre_completo: newCompanyData.name,
+          cargo: newCompanyData.jobTitle,
+          documentoEmpresa: newCompanyData.companyDocument!,
+          documentoPersonal: newCompanyData.personalDocument!,
+        },
+      });
       setMode('success');
     } catch (err) {
       console.error(err);

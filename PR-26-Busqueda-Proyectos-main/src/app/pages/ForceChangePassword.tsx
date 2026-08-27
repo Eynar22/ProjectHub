@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { api } from '../services/api';
+import { useCambiarPassword } from '@/features/auth';
 import { useApp } from '../context/AppContext';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
@@ -14,7 +14,7 @@ export function ForceChangePassword() {
   const [passwordTemporal, setPasswordTemporal] = useState('');
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [confirmarPassword, setConfirmarPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const cambiarPassword = useCambiarPassword();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +32,8 @@ export function ForceChangePassword() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      await api.post('/auth/change-password', {
+      await cambiarPassword.mutateAsync({
         password_actual: passwordTemporal,
         password_nueva: nuevaPassword,
       });
@@ -42,8 +41,6 @@ export function ForceChangePassword() {
       await refreshCurrentUser();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'No se pudo actualizar la contraseña');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -94,8 +91,8 @@ export function ForceChangePassword() {
                 onChange={(e) => setConfirmarPassword(e.target.value)}
               />
 
-              <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Actualizando...' : 'Cambiar Contraseña y Continuar'}
+              <Button type="submit" variant="primary" className="w-full" disabled={cambiarPassword.isPending}>
+                {cambiarPassword.isPending ? 'Actualizando...' : 'Cambiar Contraseña y Continuar'}
               </Button>
             </form>
 

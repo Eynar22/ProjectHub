@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { api } from '../services/api';
 import { toast } from 'sonner';
+import { storage } from '@/lib/storage';
+import { authService } from '@/features/auth';
 
 /* Los tipos del dominio viven ahora en /shared y /features (Anexo B7).
  * Se re-exportan aquí solo por compatibilidad con imports antiguos
@@ -51,16 +53,6 @@ interface AppContextType {
   loading: boolean;
   login: (correo: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
-  register: (
-    correo: string,
-    password: string,
-    companyData: { nombre: string; descripcion: string; num_empleados: number; portafolio: string },
-    registrant: { name: string; jobTitle: string; personalDocument: File; companyDocument: File }
-  ) => Promise<void>;
-  registerToCompany: (
-    userData: { name: string; email: string; password: string; jobTitle: string; memberDocument: File },
-    companyId: number
-  ) => Promise<void>;
   updateCompany: (
     id: number,
     data: Partial<Company> & { imagenes_urls?: string[]; enlaces?: { url: string; nombre?: string }[] },
@@ -127,15 +119,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const loadInitialData = async () => {
-    const token = localStorage.getItem('token');
+    const token = storage.obtenerToken();
     try {
       if (token) {
         try {
-          const user = await api.get<User>('/auth/profile');
+          const user = await authService.obtenerPerfil();
           setCurrentUser(user);
         } catch (err) {
           console.error('Auth persistence error:', err);
-          localStorage.removeItem('token');
+          storage.limpiarSesion();
         }
       }
 
@@ -146,7 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCompanies(companiesData || []);
       setProjects(projectsData || []);
 
-      const token2 = localStorage.getItem('token');
+      const token2 = storage.obtenerToken();
       if (token2) {
         try {
           const [usersData, requestsData] = await Promise.all([
@@ -179,7 +171,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Load archived projects when user logs in (only for owners/superadmin)
   React.useEffect(() => {
     if (!currentUser) return;
-    const token = localStorage.getItem('token');
+    const token = storage.obtenerToken();
     if (!token) return;
     api.get<Project[]>('/proyectos/archivados')
       .then(data => setArchivedProjects(data || []))
@@ -210,7 +202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (companiesData) setCompanies(companiesData);
         if (projectsData) setProjects(projectsData);
 
-        const token = localStorage.getItem('token');
+        const token = storage.obtenerToken();
         if (token) {
           const usersData = await api.get<User[]>('/usuarios').catch(() => null);
           if (usersData) setUsers(usersData);
@@ -236,8 +228,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const login = async (correo: string, password: string) => {
     try {
-      const res = await api.post<{ access_token: string, user: User }>('/auth/login', { correo, password });
-      localStorage.setItem('token', res.access_token);
+      const res = await authService.login({ correo, password });
+      storage.guardarToken(res.access_token);
       setCurrentUser(res.user);
 
       // Cargar datos en segundo plano sin bloquear la redirección de login
@@ -251,17 +243,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    storage.limpiarSesion();
     setCurrentUser(null);
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const openBase64 = (base64Data: string) => {
@@ -290,44 +273,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (
-    correo: string,
-    password: string,
-    companyData: { nombre: string; descripcion: string; num_empleados: number; portafolio: string },
-    registrant: { name: string; jobTitle: string; personalDocument: File; companyDocument: File }
-  ) => {
-    const docEmpresaBase64 = await fileToBase64(registrant.companyDocument);
-    const docPersonalBase64 = await fileToBase64(registrant.personalDocument);
-
-    await api.post('/auth/register/empresa', {
-      correo,
-      password,
-      nombre_empresa: companyData.nombre,
-      descripcion: companyData.descripcion,
-      num_empleados: companyData.num_empleados,
-      portafolio: companyData.portafolio,
-      documento_empresa_url: docEmpresaBase64,
-      nombre_completo: registrant.name,
-      cargo: registrant.jobTitle,
-      documento_personal_url: docPersonalBase64,
-    });
-  };
-
-  const registerToCompany = async (
-    userData: { name: string; email: string; password: string; jobTitle: string; memberDocument: File },
-    companyId: number
-  ) => {
-    const docPersonalBase64 = await fileToBase64(userData.memberDocument);
-
-    await api.post('/auth/register/empleado', {
-      nombre_completo: userData.name,
-      correo: userData.email,
-      password: userData.password,
-      cargo: userData.jobTitle,
-      documento_url: docPersonalBase64,
-      empresa_id: companyId,
-    });
-  };
+  // El registro (empresa / empleado) vive ahora en la feature auth:
+  //   useRegistrarEmpresa() / useRegistrarEmpleado() desde '@/features/auth'.
 
   const updateCompany = async (
     id: number,
@@ -356,8 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Vuelve a pedir el usuario autenticado (ej. tras cambiar la contraseña o
   // marcar el onboarding como completado) sin pasar por login de nuevo.
   const refreshCurrentUser = async () => {
-    const user = await api.get<User>('/auth/profile');
-    setCurrentUser(user);
+    setCurrentUser(await authService.obtenerPerfil());
   };
 
   const createProject = async (project: any) => {
@@ -621,8 +567,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         logout,
-        register,
-        registerToCompany,
         updateCompany,
         updateProfile,
         uploadFile,

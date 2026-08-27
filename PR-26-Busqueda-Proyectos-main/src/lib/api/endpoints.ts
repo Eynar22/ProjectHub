@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     PERFIL: '/auth/profile',
     OLVIDE_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
+    CAMBIAR_PASSWORD: '/auth/change-password',
     REGISTRO_EMPRESA: '/auth/register/empresa',
     REGISTRO_EMPLEADO: '/auth/register/empleado',
   },

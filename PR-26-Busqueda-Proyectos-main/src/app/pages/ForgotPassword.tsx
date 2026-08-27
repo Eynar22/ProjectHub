@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { toast } from 'sonner';
-import { api } from '../services/api';
+import { useSolicitarCodigoRecuperacion } from '@/features/auth';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -11,8 +11,8 @@ import { motion } from 'motion/react';
 
 export default function ForgotPassword() {
   const [correo, setCorreo] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const solicitarCodigo = useSolicitarCodigoRecuperacion();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,15 +21,12 @@ export default function ForgotPassword() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      await api.post<{ message: string }>('/auth/forgot-password', { correo: correo.trim() });
+      await solicitarCodigo.mutateAsync(correo.trim());
       toast.success('Si el correo está registrado, recibirás un código de verificación.');
       navigate(`/reset-password?correo=${encodeURIComponent(correo.trim())}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'No se pudo enviar el código');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -64,8 +61,8 @@ export default function ForgotPassword() {
                 onChange={(e) => setCorreo(e.target.value)}
               />
 
-              <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Enviando...' : 'Enviar Código'}
+              <Button type="submit" variant="primary" className="w-full" disabled={solicitarCodigo.isPending}>
+                {solicitarCodigo.isPending ? 'Enviando...' : 'Enviar Código'}
               </Button>
             </form>
 

@@ -45,3 +45,42 @@ export interface RegistroEmpleadoDto {
   documento_url: string;
   empresa_id: number;
 }
+
+/* --- Formas que recibe el SERVICIO desde la UI (con File sin convertir) --- */
+
+export interface RegistrarEmpresaInput {
+  correo: string;
+  password: string;
+  empresa: {
+    nombre: string;
+    descripcion: string;
+    num_empleados: number;
+    portafolio: string;
+  };
+  responsable: {
+    nombre_completo: string;
+    cargo: string;
+    documentoEmpresa: File;
+    documentoPersonal: File;
+  };
+}
+
+export interface RegistrarEmpleadoInput {
+  nombre_completo: string;
+  correo: string;
+  password: string;
+  cargo: string;
+  empresa_id: number;
+  documento: File;
+}
+
+export interface RestablecerPasswordInput {
+  correo: string;
+  codigo: string;
+  nueva_password: string;
+}
+
+export interface CambiarPasswordInput {
+  password_actual: string;
+  password_nueva: string;
+}
