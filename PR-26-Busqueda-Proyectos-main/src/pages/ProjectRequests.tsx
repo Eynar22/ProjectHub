@@ -1,5 +1,8 @@
 import { useParams, Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
+import { useProyectos, useSolicitudesEnviadas, useResponderSolicitud } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
@@ -9,7 +12,12 @@ import { motion } from 'motion/react';
 
 export default function ProjectRequests() {
   const { id } = useParams();
-  const { projects, companies, users, requests, updateRequest, currentUser } = useApp();
+  const { currentUser } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: companies = [] } = useEmpresas();
+  const { data: users = [] } = useUsuarios(!!currentUser);
+  const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
+  const responder = useResponderSolicitud();
 
   const project = projects.find(p => p.id === Number(id));
   const projectRequests = requests.filter(r => r.proyecto_id === Number(id));
@@ -32,11 +40,11 @@ export default function ProjectRequests() {
   const processedRequests = projectRequests.filter(r => r.estado !== 'pendiente');
 
   const handleAccept = (requestId: number) => {
-    updateRequest(requestId, 'accepted');
+    responder.mutate({ solicitudId: requestId, accion: 'aceptar' });
   };
 
   const handleReject = (requestId: number) => {
-    updateRequest(requestId, 'rejected');
+    responder.mutate({ solicitudId: requestId, accion: 'rechazar' });
   };
 
   return (

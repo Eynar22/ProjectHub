@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 import { motion } from 'motion/react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Input } from '@/shared/components/ui/Input';
-import type { User } from '@/app/context/AppContext';
+import type { User } from '@/features/usuarios';
 import type { WorkspaceChatMessage } from './types';
 
 export function ChatTab({
@@ -123,7 +123,7 @@ export function ChatTab({
             <button
               onClick={onSend}
               disabled={!messageText.trim() || sending || isReadOnly}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${messageText.trim() && !sending && !isReadOnly
+              className={`min-h-11 min-w-11 rounded-xl flex items-center justify-center transition-all ${messageText.trim() && !sending && !isReadOnly
                 ? 'bg-primary text-primary-foreground shadow-md hover:scale-105 cursor-pointer'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'
                 }`}

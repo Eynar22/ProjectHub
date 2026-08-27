@@ -298,7 +298,7 @@ export default function CompanyProfile() {
                         type="button"
                         onClick={() => photoInputRef.current?.click()}
                         disabled={uploadingPhoto}
-                        className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60"
+                        className="absolute -bottom-1 -right-1 min-h-11 min-w-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity disabled:opacity-60"
                         title="Cambiar foto"
                       >
                         {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
@@ -349,13 +349,15 @@ export default function CompanyProfile() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => openBase64(currentUser.documento_url!)}
-                        className="w-8 h-8 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
+                        className="min-h-11 min-w-11 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
+                        aria-label="Ver documento"
                         title="Ver"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <a href={currentUser.documento_url} download="documento.pdf"
-                        className="w-8 h-8 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
+                        className="min-h-11 min-w-11 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
+                        aria-label="Descargar documento"
                         title="Descargar">
                         <Download className="w-4 h-4" />
                       </a>
@@ -737,13 +739,15 @@ export default function CompanyProfile() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => openBase64(userCompany?.documento_url ?? '')}
-                                className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                className="min-h-11 min-w-11 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                aria-label="Ver documento"
                                 title="Ver"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <a href={userCompany?.documento_url} download="documento-empresa.pdf"
-                                className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                className="min-h-11 min-w-11 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                aria-label="Descargar documento"
                                 title="Descargar">
                                 <Download className="w-4 h-4" />
                               </a>

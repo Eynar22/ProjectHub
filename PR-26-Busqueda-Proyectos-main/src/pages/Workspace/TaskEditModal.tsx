@@ -3,7 +3,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { Modal } from '@/shared/components/ui/Modal';
 import { AssigneeSelector } from './AssigneeSelector';
-import type { User } from '@/app/context/AppContext';
+import type { User } from '@/features/usuarios';
 import type { WorkspaceMember } from './types';
 
 export function TaskEditModal({

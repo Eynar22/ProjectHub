@@ -15,40 +15,14 @@ import {
 import { empresasService, EMPRESAS_KEYS, useEmpresas } from '@/features/empresas';
 import { usuariosService, USUARIOS_KEYS, useUsuarios } from '@/features/usuarios';
 
-/* Los tipos del dominio viven ahora en /shared y /features (Anexo B7).
- * Se re-exportan aquí solo por compatibilidad con imports antiguos
- * (`import type { Project } from '../context/AppContext'`). Migrar esos
- * imports a los barriles de cada feature y luego eliminar este bloque. */
-import type { User, UserRole } from '@/shared/types/user.types';
-import type {
-  Company,
-  CompanyImagen,
-  CompanyEnlace,
-  CompanyRegistrant,
-  MemberRequest,
-} from '@/features/empresas/types/empresas.types';
+/* Los tipos del dominio viven en /shared y /features (Anexo B7); se importan
+ * aquí solo para las firmas internas de AppContextType. */
+import type { User } from '@/shared/types/user.types';
+import type { Company } from '@/features/empresas/types/empresas.types';
 import type {
   Project,
   Request,
-  Resource,
 } from '@/features/proyectos/types/proyectos.types';
-import type { Task, TaskComment, Message } from '@/features/workspace/types/workspace.types';
-
-export type {
-  User,
-  UserRole,
-  Company,
-  CompanyImagen,
-  CompanyEnlace,
-  CompanyRegistrant,
-  MemberRequest,
-  Project,
-  Request,
-  Resource,
-  Task,
-  TaskComment,
-  Message,
-};
 
 interface AppContextType {
   currentUser: User | null;

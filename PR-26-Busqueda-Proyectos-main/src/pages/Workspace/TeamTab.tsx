@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
-import type { Company, Project } from '@/app/context/AppContext';
+import type { Company } from '@/features/empresas';
+import type { Project } from '@/features/proyectos';
 import type { WorkspaceMember } from './types';
 
 export function TeamTab({

@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
-import type { Company } from '@/app/context/AppContext';
+import type { Company } from '@/features/empresas';
 import type { ProyectoSolicitud } from './types';
 
 export function SolicitudesTab({

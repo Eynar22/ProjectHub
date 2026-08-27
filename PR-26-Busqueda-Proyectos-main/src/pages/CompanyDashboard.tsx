@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresas } from '@/features/empresas';
+import type { MemberRequest } from '@/features/empresas';
 import { solicitudesService } from '@/features/proyectos';
 import { useSolicitudesMembresia, useResponderSolicitudMembresia } from '@/features/usuarios';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
@@ -29,7 +30,6 @@ import {
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { MemberRequest } from '@/app/context/AppContext';
 
 interface ProjectPendingGroup {
   proyecto_id: number;

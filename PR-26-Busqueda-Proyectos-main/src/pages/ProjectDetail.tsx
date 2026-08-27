@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import {
+  useProyectos,
+  useProyectosArchivados,
   useProyecto,
+  useSolicitudesEnviadas,
   useCrearSolicitud,
   useTransferirProyecto,
 } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { Card } from '@/shared/components/ui/Card';
@@ -52,7 +57,12 @@ const formatNumber = (num) => {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const { projects, archivedProjects, companies, users, currentUser, openBase64, requests } = useApp();
+  const { currentUser, openBase64 } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: archivedProjects = [] } = useProyectosArchivados(!!currentUser);
+  const { data: companies = [] } = useEmpresas();
+  const { data: users = [] } = useUsuarios(!!currentUser);
+  const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
   const crearSolicitud = useCrearSolicitud();
   const transferir = useTransferirProyecto();
   const navigate = useNavigate();

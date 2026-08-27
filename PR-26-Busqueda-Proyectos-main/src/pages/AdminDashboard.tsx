@@ -1,4 +1,6 @@
-import { useApp } from '@/app/context/AppContext';
+import { useProyectos, useSolicitudesEnviadas } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Card } from '@/shared/components/ui/Card';
 import { Link } from 'react-router';
@@ -7,7 +9,10 @@ import { motion } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 export default function AdminDashboard() {
-  const { companies, projects, requests, users } = useApp();
+  const { data: companies = [] } = useEmpresas();
+  const { data: projects = [] } = useProyectos();
+  const { data: requests = [] } = useSolicitudesEnviadas(true);
+  const { data: users = [] } = useUsuarios(true);
 
   const approvedCompanies = companies.filter(c => c.estado === 'aprobado').length;
   const pendingCompanies = companies.filter(c => c.estado === 'pendiente').length;

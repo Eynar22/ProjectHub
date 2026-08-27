@@ -8,6 +8,8 @@ import {
   useSolicitudesEnviadas,
   useCambiarEstadoProyecto,
 } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
@@ -117,7 +119,9 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
   onEstado: (id: number, e: 'en_curso' | 'terminado' | 'archivado') => void;
   requests: any[];
 }) {
-  const { users, companies, currentUser } = useApp();
+  const { currentUser } = useApp();
+  const { data: users = [] } = useUsuarios(!!currentUser);
+  const { data: companies = [] } = useEmpresas();
   const creator = users.find((u: any) => u.id === project.creador_id);
   const creatorCompany = companies.find((c: any) => c.id === creator?.empresa_id);
   const pendingReqs = requests.filter((r: any) => r.proyecto_id === project.id && r.estado === 'pendiente');

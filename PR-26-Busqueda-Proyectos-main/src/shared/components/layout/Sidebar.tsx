@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { Link, useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/app/context/AppContext';
+import { useProyectos, useProyectosArchivados } from '@/features/proyectos';
 import type { Project } from '@/features/proyectos';
 import {
   LayoutDashboard, FolderKanban, Building2, Users,
@@ -20,7 +21,9 @@ const STORAGE_KEY = 'sidebar_collapsed';
 
 export function Sidebar({ isAdmin = false }: SidebarProps) {
   const location = useLocation();
-  const { currentUser, projects, archivedProjects } = useApp();
+  const { currentUser } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: archivedProjects = [] } = useProyectosArchivados(!!currentUser);
 
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) === 'true'; }

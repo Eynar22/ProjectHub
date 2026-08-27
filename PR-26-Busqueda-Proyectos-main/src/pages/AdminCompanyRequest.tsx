@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useModerarEmpresa } from '@/features/empresas';
 import { useUsuario } from '@/features/usuarios';
+import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
@@ -30,6 +31,7 @@ export default function AdminCompanyRequest() {
   const { users, openBase64 } = useApp();
   const { data: company } = useEmpresa(id);
   const moderar = useModerarEmpresa();
+  useDocumentTitle(company?.nombre);
 
   const registrant = users.find(u => u.empresa_id === Number(id) && u.rol === 'admin')
     || company?.usuarios?.find(u => u.rol === 'admin');

@@ -7,7 +7,7 @@ import { Calendar, DollarSign, Users, Image, Upload, Loader2, X, Pencil } from '
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
-import type { Project } from '@/app/context/AppContext';
+import type { Project } from '@/features/proyectos';
 
 const sliderSettings = {
   dots: true,

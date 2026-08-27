@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
+import { useProyectos } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { Card } from '@/shared/components/ui/Card';
@@ -36,7 +39,10 @@ const PROJECT_CATEGORIES = [
 ];
 
 export default function Explore() {
-  const { projects, companies, users, currentUser } = useApp();
+  const { currentUser } = useApp();
+  const { data: projects = [] } = useProyectos();
+  const { data: companies = [] } = useEmpresas();
+  const { data: users = [] } = useUsuarios(!!currentUser);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   

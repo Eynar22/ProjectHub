@@ -295,8 +295,8 @@ export default function CreateProject() {
                         <div key={i} className="relative group rounded-xl overflow-hidden aspect-video bg-muted">
                           <img src={URL.createObjectURL(file)} alt={`img-${i}`} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button type="button" onClick={() => removeImage(i)}
-                              className="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
+                            <button type="button" onClick={() => removeImage(i)} aria-label="Quitar imagen"
+                              className="min-h-11 min-w-11 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
                               <X className="w-4 h-4 text-primary-foreground" />
                             </button>
                           </div>
@@ -338,8 +338,8 @@ export default function CreateProject() {
                             <p className="text-sm font-medium truncate">{file.name}</p>
                             <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
                           </div>
-                          <button type="button" onClick={() => removeResource(i)}
-                            className="w-7 h-7 rounded-lg hover:bg-destructive/10 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors">
+                          <button type="button" onClick={() => removeResource(i)} aria-label="Quitar documento"
+                            className="min-h-11 min-w-11 rounded-lg hover:bg-destructive/10 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors">
                             <X className="w-4 h-4" />
                           </button>
                         </div>

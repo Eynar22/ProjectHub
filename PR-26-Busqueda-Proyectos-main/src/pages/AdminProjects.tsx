@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
-import { useApp } from '@/app/context/AppContext';
 import {
   useProyectos,
   useProyectosArchivados,
   useCambiarEstadoProyecto,
   useAutoTerminarProyectos,
 } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
@@ -145,7 +146,8 @@ function EstadoTableCell({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AdminProjects() {
-  const { companies, users } = useApp();
+  const { data: companies = [] } = useEmpresas();
+  const { data: users = [] } = useUsuarios();
   const { data: projects = [], isError, refetch } = useProyectos();
   const { data: archivedProjects = [] } = useProyectosArchivados();
   const cambiarEstado = useCambiarEstadoProyecto();

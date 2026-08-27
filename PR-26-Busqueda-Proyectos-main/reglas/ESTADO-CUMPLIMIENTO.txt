@@ -3,7 +3,15 @@ ESTADO DE CUMPLIMIENTO DE LA CARPETA reglas/  —  ProjectHub (frontend)
 ===============================================================================
 Última actualización: 2026-08-27
 Rama de trabajo:       test   (todos los avances están commiteados aquí)
-Último commit:         82f7332  "correcion de tipográfia"
+Último commit:         49b1caf  "etado"
+Cambios sin commitear:  sí — sesión 2026-08-27 (continuación, 2 rondas). tsc/lint/
+  build verdes (0 errores, 90 warnings, igual que antes). El usuario commitea él
+  mismo. Archivos tocados: app/context/AppContext.tsx, pages/AdminCompanyRequest.tsx,
+  pages/AdminDashboard.tsx, pages/AdminProjects.tsx, pages/CompanyDashboard.tsx,
+  pages/CompanyMembers.tsx, pages/CompanyProfile.tsx, pages/CreateProject.tsx,
+  pages/Explore.tsx, pages/MyProjects.tsx, pages/ProjectDetail.tsx,
+  pages/ProjectRequests.tsx, pages/Workspace/{ChatTab,InfoTab,ResourcesTab,
+  SolicitudesTab,TaskEditModal,TeamTab}.tsx, shared/components/layout/Sidebar.tsx.
 
 Objetivo global: aplicar los 3 documentos de reglas/ a todo el frontend
   - Manual-Reglas-UI-UX-Web-2026.txt
@@ -138,13 +146,19 @@ HECHO:
     - README reescrito al mínimo B15 (variables de entorno front+back, estructura, comandos).
 
   God-context (AppContext.tsx):
-    - Reducido de 771 -> ~317 líneas. Ya NO importa `api`, NO tiene estado de
+    - Reducido de 771 -> 291 líneas. Ya NO importa `api`, NO tiene estado de
       dominio propio, NO tiene polling ni loadInitialData.
     - Es un PUENTE: expone projects/companies/users/requests desde los hooks de
       react-query + wrappers de mutación que delegan en los services + un useEffect
       de persistencia de sesión (token -> authService.obtenerPerfil).
     - `logout` hace queryClient.clear().
     - src/app/services/api.ts ELIMINADO. Cliente único en lib/api/client.
+    - (2026-08-27) Bloque de re-export de tipos ELIMINADO: los 8 imports que
+      quedaban (`import type {...} from '@/app/context/AppContext'` en
+      CompanyDashboard, CompanyMembers y los Workspace/*Tab.tsx) se movieron a
+      los barriles de cada feature (@/features/empresas, /proyectos, /usuarios).
+      AppContext.tsx ahora solo importa esos tipos para sus propias firmas
+      internas, ya no los re-exporta.
 
   Decisión (2026-08-27): NO se separa el repo en frontend/ + backend/. El usuario
   eligió dejarlo así; la estructura interna del Anexo B ya está y el layout actual
@@ -153,16 +167,35 @@ HECHO:
 FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
   - Workspace/index.tsx: todavía usa estado local + polling manual de chat/tareas.
     Pasarlo a react-query (los hooks ya existen en features/workspace/).
-  - Páginas que aún leen el PUENTE del context (useApp().projects / companies /
-    users / requests) en vez de los hooks directos — funcionan bien, migración
-    mecánica: AdminDashboard, Explore, ProjectRequests, Sidebar, ProjectDetail,
-    AdminProjects, MyProjects (subcomponente).
+    NO tocado en la sesión 2026-08-27: es un componente de 800+ líneas con mucho
+    estado entrelazado (chat optimista, kanban drag&drop, carpetas de recursos);
+    migrarlo a ciegas sin poder verificar visualmente en navegador es demasiado
+    riesgo de regresión. Requiere `npm run dev` abierto en paralelo.
+  - [HECHO 2026-08-27] Páginas que leían el PUENTE del context
+    (useApp().projects / companies / users / requests) migradas a los hooks
+    directos de cada feature: AdminDashboard, Explore, ProjectRequests, Sidebar,
+    ProjectDetail, AdminProjects, MyProjects (subcomponente ProjectCard).
+    Mismo query key -> react-query comparte la caché, cero llamadas de red de
+    más. `currentUser`/`openBase64` siguen viniendo de useApp() (son estado de
+    auth, no server-state). tsc/lint/build verdes, 90 warnings (igual que antes).
+    En ProjectRequests.tsx además se cambió `updateRequest` (función del puente)
+    por el hook `useResponderSolicitud` — mismo resultado pero ahora sí muestra
+    un toast de confirmación al aceptar/rechazar (antes no mostraba ninguno).
+    OJO — bug preexistente encontrado de paso, NO corregido (fuera de alcance de
+    esta migración mecánica, requiere decidir el fix y probarlo en navegador):
+    ProjectRequests.tsx (ruta /project/:id/requests) usa `useSolicitudesEnviadas`
+    ("solicitudes que YO envié a proyectos ajenos") para listar las solicitudes
+    de un proyecto que el usuario actual es dueño — pero eso trae las
+    solicitudes que el usuario envió, no las que recibió. Lo semánticamente
+    correcto sería `useSolicitudesDeProyecto(project.id)` ("recibidas en un
+    proyecto propio"), que ya existe en features/proyectos y es lo que sí usa
+    correctamente Workspace/SolicitudesTab. No se tocó porque cambiar la fuente
+    de datos es un cambio de comportamiento, no un import — y no se pudo probar
+    en navegador si esta página siquiera se usa (no tiene ningún link visible
+    en la UI, solo es alcanzable por URL directa).
   - Mover UI de features fuera de pages/:
       Workspace/*Tab.tsx  -> features/workspace/components/
       formularios de Login/Register -> features/auth/components/
-  - Tipos que Workspace tabs / Sidebar importan de @/app/context/AppContext
-    (Project, Company, User, Resource) -> importarlos de los barriles de feature;
-    luego borrar el bloque de re-export de tipos en AppContext.tsx.
   - B7: bajar la regla `@typescript-eslint/no-explicit-any` de "warn" a "error"
     cuando se limpien los ~90 `any` que quedan (todos en páginas; features/ y lib/
     ya están sin `any`).
@@ -264,6 +297,47 @@ HECHO (por slices, todos con tsc/eslint/build verdes):
         ProjectDetail y Workspace ponen el nombre del proyecto al cargar.
 
 
+HECHO (sesión 2026-08-27, continuación):
+  - Punto 3 de "FALTA": AdminCompanyRequest ahora usa useDocumentTitle(company?.nombre)
+    (mismo patrón que ProjectDetail/Workspace). Título de pestaña ya no se queda
+    genérico al revisar una solicitud de empresa.
+  - Auditoría de área táctil 44px (Manual línea 890/973, OBLIGATORIO) sobre TODO
+    src/, buscando <button>/<a> interactivos con caja fija <44px. Corregidos
+    (min-h-11 min-w-11, o w-11 h-11 cuando el botón tenía espacio de sobra):
+      CompanyProfile: botón cámara de foto de perfil, Ver/Descargar documento
+        personal, Ver/Descargar documento de empresa (+ aria-label agregado,
+        antes solo tenían `title`).
+      CreateProject: quitar imagen (centrado sobre miniatura, con espacio),
+        quitar recurso PDF (fila con espacio) — ambos con aria-label agregado.
+      Workspace/ChatTab: botón enviar mensaje (w-9 h-9 -> min-h-11 min-w-11).
+    Excepciones dejadas igual a propósito (no se agrandaron): las insignias "x"
+    de esquina sobre miniaturas pequeñas en grillas (CompanyProfile galería de
+    fotos, Workspace/InfoTab galería de imágenes) — son overlays hover de 24px
+    en miniaturas grid-cols-3/4; agrandarlas a 44px las haría tapar la miniatura.
+    Siguen cumpliendo el mínimo LEGAL de WCAG 2.5.8 (24x24px), solo no llegan al
+    OBLIGATORIO del Manual (44px). Pendiente revisar en navegador si conviene
+    rediseñarlas (p.ej. mostrar el botón fuera de la imagen en mobile, ya que
+    group-hover no dispara con touch).
+  - Auditoría estática (sin navegador) de los demás puntos del checklist 11.1-11.4:
+      "Foco no oculto tras headers fijos" (2.4.11): YA CUMPLE — regla global en
+        theme.css (`a, button, input, select, textarea, [tabindex] { scroll-margin-top: 6rem }`)
+        cubre esto para toda la app, no solo para casos puntuales.
+      "Errores identificados en texto, no solo color": YA CUMPLE — Input/TextArea
+        (shared/components/ui/Input.tsx) siempre pintan icono+texto+role="alert"
+        cuando hay `error`, usado en Register y CompanyProfile.
+      "Orden de tabulación = orden visual en grids": revisado, no se encontró
+        ningún uso de `order-*` / `flex-row-reverse` / `flex-col-reverse` que
+        afecte elementos enfocables (el único flex-row-reverse es un bubble de
+        chat sin controles interactivos dentro).
+      "Reflow a 320px sin scroll horizontal": revisado. Los únicos elementos con
+        ancho fijo >320px son: (a) fondos decorativos blur (AnimatedBackground,
+        Home) dentro de contenedores `overflow-hidden`/`fixed` — no aportan al
+        scroll; (b) el tablero Kanban de Workspace/TasksTab, que vive dentro de
+        `overflow-x-auto` a propósito (excepción legítima de WCAG 1.4.10 para
+        layouts que necesitan 2 dimensiones, tipo kanban/tabla).
+    Sigue faltando la prueba real en navegador de zoom 200%/400% y espaciado de
+    texto (no auditable de forma estática con confianza).
+
 FALTA EN FASE 3 (pendiente):
 
   1. CONTRASTE con herramienta real (axe DevTools / Lighthouse) — Manual 11.5.
@@ -282,19 +356,16 @@ FALTA EN FASE 3 (pendiente):
      `overflow-x-hidden` que AppLayout no reproduce -> riesgo visual no testeable
      desde la terminal. Si se migran, hacerlo con `npm run dev` abierto y comparar.
 
-  3. Título de pestaña dinámico en AdminCompanyRequest (nombre de la empresa) —
-     usar el hook useDocumentTitle, como en ProjectDetail/Workspace. Menor.
+  3. [HECHO 2026-08-27] Título de pestaña dinámico en AdminCompanyRequest.
 
-  4. Auditoría fina de Manual pendiente de repasar con checklist en mano
-     (Manual Parte 11.1-11.4), especialmente:
+  4. Auditoría fina de Manual 11.1-11.4: lo auditable de forma estática (sin
+     navegador) ya se revisó y quedó documentado arriba (ver "HECHO sesión
+     2026-08-27, continuación"). Queda solo lo que requiere navegador real:
      - "El texto puede ampliarse al 200% sin perder funcionalidad" (probar zoom).
-     - "Reflow a 320px sin scroll horizontal" (probar en responsive 320px).
      - "Espaciado de texto ajustable sin romper layout".
-     - "El elemento enfocado NO queda oculto tras headers fijos" (2.4.11) —
-       revisar el Navbar sticky vs foco en la primera fila de cada página.
-     - Orden de tabulación = orden visual en páginas con layouts en grid.
-     - "Errores identificados en texto, no solo con color" — repasar validaciones
-       de formularios de Register / CompanyProfile.
+     - Confirmar visualmente las excepciones de 44px táctil que se dejaron
+       (insignias de galería en CompanyProfile / Workspace InfoTab) — decidir si
+       conviene un patrón distinto para mobile (sin hover).
 
 
 ===============================================================================
@@ -306,9 +377,15 @@ CÓMO CONTINUAR EN LA PC NUEVA
 4. Retomar por prioridad:
    a) CONTRASTE con Lighthouse/axe (punto 1 de "FALTA EN FASE 3") — es lo único
       que bloquea cerrar Fase 3.
-   b) Checklist Manual 11.1-11.4 (punto 4).
-   c) Follow-ups de Anexo B (migrar el puente del context, Workspace a react-query,
-      mover UI de features fuera de pages/, bajar `any` a error).
+   b) Lo que queda del checklist Manual 11.1-11.4 (punto 4: zoom 200%, espaciado
+      de texto, y confirmar visualmente las excepciones de 44px táctil).
+   c) Follow-ups de Anexo B que quedan: Workspace/index.tsx a react-query (grande,
+      requiere navegador — ver nota en FASE 2), mover UI de features fuera de
+      pages/, bajar `any` a error. (El re-export de tipos del context y la
+      migración del puente en las 7 páginas ya se resolvieron el 2026-08-27.)
+   d) Bug encontrado de paso, no corregido: ProjectRequests.tsx usa la fuente de
+      datos equivocada para listar solicitudes (ver detalle en FASE 2, sección
+      "Páginas que leían el PUENTE del context").
 5. Trabajar en slices pequeños y verificables; commitear cada slice.
 6. El detalle fino y el historial de decisiones está también en la memoria del
    agente (archivo reglas-carpeta-estandar-vinculante.md del proyecto).
