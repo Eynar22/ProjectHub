@@ -385,7 +385,7 @@ export default function CompanyDashboard() {
                             {mr.documento_url && (
                               <button
                                 onClick={() => openBase64(mr.documento_url!)}
-                                className="flex items-center gap-1.5 mt-2 text-xs text-secondary hover:text-primary font-medium transition-colors group"
+                                className="flex items-center gap-1.5 mt-2 text-xs text-primary hover:underline font-medium transition-colors group"
                               >
                                 <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                                 <ExternalLink className="w-3 h-3" />

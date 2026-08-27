@@ -185,9 +185,9 @@ export default function CompanyMembers() {
                                       {mr.documento_url ? (
                                         <button
                                           onClick={() => openBase64(mr.documento_url!)}
-                                          className="group flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-primary transition-colors"
+                                          className="group flex items-center gap-1.5 text-xs font-bold text-primary hover:underline transition-colors"
                                         >
-                                          <div className="p-1.5 bg-secondary/10 rounded-lg group-hover:bg-primary/10 transition-colors">
+                                          <div className="p-1.5 bg-primary/10 rounded-lg transition-colors">
                                             <FileText className="w-3.5 h-3.5" />
                                           </div>
                                           <ExternalLink className="w-3 h-3" />

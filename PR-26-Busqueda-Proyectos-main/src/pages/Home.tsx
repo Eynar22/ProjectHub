@@ -93,7 +93,7 @@ export default function Home() {
             <div className="absolute inset-0 rounded-b-[3rem] md:rounded-b-[5rem] bg-background border-b border-border/50 overflow-hidden -z-10">
               <div className="absolute inset-0 bg-primary/5" />
               <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-              <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+              <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
             </div>
 
             <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
@@ -186,8 +186,8 @@ export default function Home() {
                 </div>
 
                 <div className="flex-1 w-full flex items-center gap-3 px-4 md:px-6">
-                  <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-secondary" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex flex-col w-full">
                     <span className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-wider">Ubicación</span>

@@ -173,30 +173,10 @@ export function LoginForm() {
 
             <svg viewBox="0 0 100 100" className="w-72 h-72 xl:w-80 xl:h-80 relative z-10 overflow-visible mt-10">
               <defs>
-                <linearGradient id="bearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: 'var(--primary)' }} />
-                  <stop offset="100%" style={{ stopColor: 'var(--secondary)' }} />
-                </linearGradient>
-
-                {/* DEGRADADO PARA EL MARCO EXTERIOR */}
-                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: 'var(--destructive)' }} />
-                  <stop offset="50%" style={{ stopColor: 'var(--secondary)' }} />
-                  <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--secondary) 55%, black)' }} />
-                </linearGradient>
-
-                {/* NUEVO: DEGRADADO RADIAL PARA EL FONDO (Efecto profundidad/cápsula) */}
-                {/* Usa las variables de theme.css directamente, así sigue cualquier
-                    cambio de paleta (o de modo claro/oscuro) sin tocar este archivo. */}
-                <radialGradient id="innerWindow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" style={{ stopColor: 'var(--card)' }} />
-                  <stop offset="70%" style={{ stopColor: 'var(--muted)' }} />
-                  <stop offset="100%" style={{ stopColor: 'var(--border)' }} />
-                </radialGradient>
-
-                {/* SOMBRA DEL MARCO PARA DARLE PROFUNDIDAD */}
+                {/* SOMBRA DEL MARCO PARA DARLE PROFUNDIDAD (tintada con el color de marca,
+                    mismo criterio que las sombras de theme.css) */}
                 <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="6" stdDeviation="6" style={{ floodColor: 'var(--secondary)' }} floodOpacity="0.25" />
+                  <feDropShadow dx="0" dy="6" stdDeviation="6" style={{ floodColor: 'var(--primary)' }} floodOpacity="0.25" />
                 </filter>
 
                 {/* CLIP-PATH: La máscara circular ajustada al interior del marco (r=42) */}
@@ -206,14 +186,14 @@ export function LoginForm() {
               </defs>
 
               {/* ========================================================= */}
-              {/* 1. MARCO GRUESO CON DEGRADADO Y SOMBRA                    */}
+              {/* 1. MARCO GRUESO, COLOR SÓLIDO (Anexo A11: sin degradados)  */}
               {/* ========================================================= */}
-              <circle cx="50" cy="55" r="47" fill="url(#ringGradient)" filter="url(#dropShadow)" />
+              <circle cx="50" cy="55" r="47" className="fill-primary" filter="url(#dropShadow)" />
 
               {/* ========================================================= */}
-              {/* 2. VENTANA INTERIOR CON DEGRADADO RADIAL (Efecto túnel)   */}
+              {/* 2. VENTANA INTERIOR, COLOR SÓLIDO (Efecto túnel plano)    */}
               {/* ========================================================= */}
-              <circle cx="50" cy="55" r="45" fill="url(#innerWindow)" />
+              <circle cx="50" cy="55" r="45" className="fill-muted" />
 
               {/* ========================================================= */}
               {/* 3. SOMBRA INTERIOR SUTIL                                  */}
@@ -222,19 +202,21 @@ export function LoginForm() {
 
 
               {/* Orejas y cabeza dibujadas DESPUÉS del círculo (Efecto 3D asomándose) */}
-              <circle cx="20" cy="25" r="12" fill="url(#bearGradient)" />
-              <circle cx="80" cy="25" r="12" fill="url(#bearGradient)" />
-              <circle cx="50" cy="55" r="38" fill="url(#bearGradient)" />
+              <circle cx="20" cy="25" r="12" className="fill-primary" />
+              <circle cx="80" cy="25" r="12" className="fill-primary" />
+              <circle cx="50" cy="55" r="38" className="fill-primary" />
 
-              {/* Hocico y Nariz */}
-              <ellipse cx="50" cy="65" rx="18" ry="14" className="fill-white" />
-              <circle cx="50" cy="58" r="5" className="fill-foreground" />
+              {/* Hocico y Nariz. Blanco/negro fijos a propósito (no siguen el
+                  tema): la cara del osito se ve igual en claro y oscuro, en
+                  vez de que la nariz/boca/pupilas se aclaren en modo oscuro
+                  siguiendo `--foreground` (quedaban grisáceas/apagadas). */}
+              <ellipse cx="50" cy="65" rx="18" ry="14" fill="white" />
+              <circle cx="50" cy="58" r="5" fill="black" />
 
               {/* Boca Dinámica */}
               <motion.path
                 d={mouthPath}
-                stroke="currentColor"
-                className="text-foreground"
+                stroke="black"
                 strokeWidth="1.5"
                 fill="none"
                 strokeLinecap="round"
@@ -247,12 +229,12 @@ export function LoginForm() {
 
               {/* Pupilas Movibles */}
               <motion.circle
-                cx="34" cy="40" r="4" className="fill-foreground"
+                cx="34" cy="40" r="4" fill="black"
                 animate={{ x: lookX, y: lookY }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
               />
               <motion.circle
-                cx="66" cy="40" r="4" className="fill-foreground"
+                cx="66" cy="40" r="4" fill="black"
                 animate={{ x: lookX, y: lookY }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
               />
@@ -266,7 +248,7 @@ export function LoginForm() {
                   transition={{ type: "spring", stiffness: 120, damping: 14 }}
                   style={{ originX: "34px", originY: "100px" }}
                 >
-                  <ellipse cx="34" cy="100" rx="11" ry="35" fill="url(#bearGradient)" className="drop-shadow-md" />
+                  <ellipse cx="34" cy="100" rx="11" ry="35" className="fill-primary drop-shadow-md" />
                   <ellipse cx="34" cy="100" rx="11" ry="35" className="fill-black/10" />
                   <ellipse cx="29" cy="69" rx="1.5" ry="4" className="fill-foreground opacity-60" />
                   <ellipse cx="34" cy="67" rx="1.5" ry="4" className="fill-foreground opacity-60" />
@@ -280,7 +262,7 @@ export function LoginForm() {
                   transition={{ type: "spring", stiffness: 120, damping: 14 }}
                   style={{ originX: "66px", originY: "100px" }}
                 >
-                  <ellipse cx="66" cy="100" rx="11" ry="35" fill="url(#bearGradient)" className="drop-shadow-md" />
+                  <ellipse cx="66" cy="100" rx="11" ry="35" className="fill-primary drop-shadow-md" />
                   <ellipse cx="66" cy="100" rx="11" ry="35" className="fill-black/10" />
                   <ellipse cx="61" cy="69" rx="1.5" ry="4" className="fill-foreground opacity-60" />
                   <ellipse cx="66" cy="67" rx="1.5" ry="4" className="fill-foreground opacity-60" />

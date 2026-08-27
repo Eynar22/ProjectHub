@@ -495,8 +495,8 @@ export default function CompanyProfile() {
                     {userCompany.logo_url ? (
                       <img src={userCompany.logo_url} alt={userCompany.nombre} className="w-7 h-7 rounded-lg object-cover" />
                     ) : (
-                      <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
-                        <Building2 className="w-4 h-4 text-secondary" />
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Building2 className="w-4 h-4 text-primary" />
                       </div>
                     )}
                     <h2 className="font-bold">Datos de la Empresa</h2>
@@ -550,7 +550,7 @@ export default function CompanyProfile() {
                             type="button"
                             onClick={() => logoInputRef.current?.click()}
                             disabled={uploadingLogo}
-                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary text-primary-foreground flex items-center justify-center shadow hover:opacity-90 transition-opacity disabled:opacity-60"
+                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow hover:opacity-90 transition-opacity disabled:opacity-60"
                           >
                             {uploadingLogo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
                           </button>
@@ -729,9 +729,9 @@ export default function CompanyProfile() {
                       {userCompany?.documento_url && (
                         <div className="px-6 pb-5 border-t border-border pt-4">
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Documento de Empresa</p>
-                          <div className="flex items-center gap-3 p-3 bg-secondary/5 border border-secondary/20 rounded-xl">
-                            <div className="w-9 h-9 bg-secondary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-5 h-5 text-secondary" />
+                          <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-xl">
+                            <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="w-5 h-5 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold">Acreditación Empresarial</p>
@@ -740,14 +740,14 @@ export default function CompanyProfile() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => openBase64(userCompany?.documento_url ?? '')}
-                                className="min-h-11 min-w-11 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                className="min-h-11 min-w-11 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
                                 aria-label="Ver documento"
                                 title="Ver"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <a href={userCompany?.documento_url} download="documento-empresa.pdf"
-                                className="min-h-11 min-w-11 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
+                                className="min-h-11 min-w-11 rounded-lg hover:bg-primary/10 flex items-center justify-center text-primary transition-colors"
                                 aria-label="Descargar documento"
                                 title="Descargar">
                                 <Download className="w-4 h-4" />

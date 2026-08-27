@@ -162,32 +162,32 @@ export default function AdminCompanyRequest() {
                   transition={{ delay: 0.1 }}
                 >
                   <Card className="p-8 border-none shadow-sm overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-secondary" />
+                    <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-secondary" />
+                      <FileText className="w-5 h-5 text-primary" />
                       Documentación Legal Adjunta
                     </h2>
-                    
+
                     <div className="grid md:grid-cols-2 gap-4">
                       {[
                         { title: 'Acreditación de Empresa', hint: 'NIT, Matrícula de Comercio', file: companyDoc || '#' },
                         { title: 'Pertenencia Personal', hint: 'Verificación del responsable', file: registrantDoc || '#' },
                       ].map((doc, i) => (
-                        <div 
-                          key={i} 
+                        <div
+                          key={i}
                           onClick={() => openBase64(doc.file)}
-                          className="group p-5 bg-muted rounded-2xl border border-border hover:border-secondary/50 hover:bg-card transition-all cursor-pointer"
+                          className="group p-5 bg-muted rounded-2xl border border-border hover:border-primary/50 hover:bg-card transition-all cursor-pointer"
                         >
                           <div className="flex items-start justify-between mb-4">
-                            <div className="p-3 bg-card rounded-xl shadow-sm border border-border text-secondary group-hover:scale-110 transition-transform">
+                            <div className="p-3 bg-card rounded-xl shadow-sm border border-border text-primary group-hover:scale-110 transition-transform">
                               <FileText className="w-6 h-6" />
                             </div>
-                            <div className="text-[10px] font-bold px-2 py-1 bg-secondary/10 text-secondary rounded-lg uppercase tracking-tight">PDF</div>
+                            <div className="text-[10px] font-bold px-2 py-1 bg-primary/10 text-primary rounded-lg uppercase tracking-tight">PDF</div>
                           </div>
                           <div>
                             <h3 className="font-bold text-foreground mb-1">{doc.title}</h3>
                             <p className="text-xs text-muted-foreground mb-4">{doc.hint}</p>
-                            <div className="flex items-center gap-2 text-xs font-bold text-secondary uppercase group-hover:underline">
+                            <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase group-hover:underline">
                               <ExternalLink className="w-3 h-3" />
                               VER DOCUMENTO
                             </div>

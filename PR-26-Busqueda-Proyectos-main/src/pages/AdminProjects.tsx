@@ -344,7 +344,7 @@ export default function AdminProjects() {
 
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <Users className="w-4 h-4 text-accent" />
+                              <Users className="w-4 h-4 text-primary" />
                               <span className="font-medium">{project.participantes?.length || 0}</span>
                             </div>
                           </td>

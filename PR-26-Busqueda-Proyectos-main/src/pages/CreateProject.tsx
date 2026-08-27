@@ -252,8 +252,8 @@ export default function CreateProject() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Card className="overflow-hidden border-none shadow-md">
                 <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border">
-                  <div className="w-7 h-7 rounded-lg bg-secondary/15 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-secondary" />
+                  <div className="w-7 h-7 rounded-lg bg-success/15 flex items-center justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
                   </div>
                   <h2 className="font-bold text-base">Fechas y Financiamiento</h2>
                 </div>
@@ -282,8 +282,8 @@ export default function CreateProject() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Card className="overflow-hidden border-none shadow-md">
                 <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border">
-                  <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
-                    <Upload className="w-4 h-4 text-accent" />
+                  <div className="w-7 h-7 rounded-lg bg-info/15 flex items-center justify-center">
+                    <Upload className="w-4 h-4 text-info" />
                   </div>
                   <h2 className="font-bold text-base">Imágenes del Proyecto</h2>
                   <span className="ml-auto text-xs text-muted-foreground">{imageFiles.length} añadida(s)</span>

@@ -335,12 +335,10 @@ FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
          chat- porque un Hook no puede llamarse después de un return
          condicional (regla de los Hooks; el primer intento rompía el build).
          tsc/lint/build verdes (0 errores, 29 warnings, sin cambio).
-         PENDIENTE: el usuario confirmó que mejoró pero "aún no está del todo
-         solucionado" — no se identificó una causa adicional todavía. Cuando
-         se retome, pedir precisión: ¿es al entrar recién a la pestaña, con
-         muchos mensajes en el historial, en un momento puntual (justo cuando
-         cae un poll), o todo el tiempo por igual? Eso acota si es un tema de
-         cantidad de mensajes (sin virtualización de lista) o de otra cosa.
+         [CONFIRMADO 2026-08-27] El usuario probó de nuevo más tarde y avisó
+         que el scroll del chat "ahora está funcionando bien". Cerrado —
+         entre el memo de ChatTab (punto 6) y el throttling con
+         requestAnimationFrame (punto 5) quedó resuelto del todo.
 
     [HECHO 2026-08-27, slices 3/4 y 4/4 — RECURSOS+DETALLE DE PROYECTO y
       SOLICITUDES DE UNIÓN, hechos juntos porque están entrelazados en el
@@ -440,6 +438,104 @@ FALTA (follow-ups, funciona todo pero no es 100% Anexo B):
          No se tocó nada del frontend para esto (ChatTab.tsx/TaskEditModal.tsx
          ya estaban bien, el `new Date(...).toLocaleTimeString(...)` es
          correcto una vez que el backend manda la fecha bien).
+      3. [HECHO 2026-08-27] Reportado por el usuario en AdminCompanyRequest.tsx:
+         un ícono y el texto "Ver Documento" invisibles (mismo color que el
+         fondo). Causa raíz — bug de Anexo A/Fase 1, NO de esta sesión de
+         react-query: `secondary` y `accent` se redefinieron como NEUTRALES
+         (ambos = `gray-100`, un gris casi blanco) cuando se aplicó la regla
+         "un solo color de marca" del Anexo A (ver FASE 1 más arriba). Varios
+         archivos seguían usando `text-secondary`/`bg-secondary`/`text-accent`/
+         `bg-accent` como si fueran colores vistosos de acento (como eran
+         ANTES de esa regla) en vez de como superficies neutras — ese barrido
+         nunca se hizo completo en su momento. Resultado: texto/íconos gris
+         casi blanco sobre fondos igual de claros (`bg-card`, `bg-muted`) ->
+         invisibles o casi.
+         Se buscó en TODO src/ (no solo en el archivo reportado) y se
+         encontraron 7 archivos con el mismo defecto, corregidos todos:
+           AdminCompanyRequest.tsx — ícono+franja+badge PDF+texto "Ver
+             Documento" de la sección Documentación (6 usos) -> `primary`.
+           CompanyProfile.tsx — ícono de sección Empresa, insignia de cámara
+             de foto (fondo sólido `bg-secondary` con texto blanco encima,
+             doblemente invisible), tarjeta+botones Ver/Descargar del
+             documento de empresa (7 usos) -> `primary`.
+           CompanyDashboard.tsx / CompanyMembers.tsx — botón "Ver Documento"
+             de solicitudes de membresía, que además tenía `hover:text-primary`
+             -o sea que SOLO se veía bien al pasar el mouse-; se sacó ese
+             hover de color y se cambió por `hover:underline` (patrón ya usado
+             en otros links de la app, p. ej. Register.tsx).
+           CreateProject.tsx — dos íconos de encabezado de sección (antes
+             secondary/accent, ahora `success` para Fechas y Financiamiento,
+             `info` para Imágenes, así las 4 secciones del formulario quedan
+             con colores distintos entre sí: primary/success/info/warning).
+           AdminProjects.tsx / features/workspace/components/InfoTab.tsx —
+             ícono de "colaboradores"/participantes -> `primary` (mismo
+             color que ya usa el ícono equivalente en MyProjects.tsx).
+           features/workspace/components/ResourcesTab.tsx — insignia "IMG"
+             de miniaturas de imagen (antes `accent`) -> `info`, así queda
+             distinta de la insignia "PDF" (`destructive`) y de las carpetas
+             (`primary`).
+           Home.tsx — blob decorativo de fondo del hero e ícono de
+             "Ubicación" en el buscador -> `primary` (el blob era solo
+             estético, no un bug de legibilidad, pero se alineó de paso).
+         Ningún color nuevo inventado: solo se usaron `primary` o los
+         semánticos ya sancionados por el Anexo A9 (`success`/`info`/`warning`/
+         `destructive`), que ya se usaban en el resto de la app. Verificado
+         con una búsqueda final: 0 usos de `text-secondary`/`bg-secondary`/
+         `text-accent`/`bg-accent` (fuera de `-foreground`) en todo src/.
+         tsc/lint verdes (0 errores, 25 warnings, sin cambio), build compila
+         (CSS bajó ~1.3kB al sacar variantes de color que ya no se usaban).
+         PENDIENTE DE VERIFICAR EN NAVEGADOR: revisar visualmente los 7
+         archivos tocados (AdminCompanyRequest, CompanyProfile, CompanyDashboard,
+         CompanyMembers, CreateProject, AdminProjects, Home + InfoTab/ResourcesTab
+         de Workspace) en modo claro Y oscuro, para confirmar que los nuevos
+         colores se vean bien y no quede ningún otro lugar con el mismo patrón
+         que se haya escapado de la búsqueda por texto.
+      4. [HECHO 2026-08-27] Reportado por el usuario en Login.tsx (ahora
+         features/auth/components/LoginForm.tsx): en el osito animado, los
+         ojos y el hocico (blancos, sólidos) se perdían "en fondo blanco", y
+         el aro/marco que rodea al osito no correspondía a la paleta y
+         pidió que fuera sólido. Causa: este SVG dibujado a mano nunca se
+         tocó en el barrido de "sin degradados" del Anexo A11 (Slice 8, FASE
+         1) porque son `<linearGradient>`/`<radialGradient>` de SVG puro, no
+         clases `bg-gradient-to-*` de Tailwind -la búsqueda de texto de aquel
+         momento no los iba a encontrar-. Tenía 3 degradados:
+           `bearGradient` (pelaje): primary -> secondary. Como `secondary` es
+             gris casi blanco (mismo tema del punto 3 de más arriba), la
+             zona del degradado que cae cerca de los ojos/hocico (blancos,
+             sólidos) queda igual de clara que ellos -> blanco sobre casi-
+             blanco, invisible. Esta es la causa real de lo reportado.
+           `ringGradient` (marco exterior): destructive -> secondary ->
+             `color-mix(secondary, black)` -> mezcla roja+gris casi
+             blanco+negro puro mezclado, que no es una combinación
+             reconocible de la paleta (y usa negro puro, contra la regla de
+             Anexo A de nunca usar #000/#fff puros).
+           `innerWindow` (ventana interior, radial): card -> muted -> border,
+             un degradado neutro sutil (efecto túnel).
+         Arreglo: los 3 degradados se sacaron de `<defs>` y sus 6 usos (orejas,
+         cabeza, marco, ventana, + los 2 brazos que también usaban
+         `bearGradient`) pasaron a color sólido: pelaje/orejas/brazos/marco ->
+         `fill-primary` (mismo color de marca en todo el osito, incluido el
+         marco -antes con 3 colores ajenos entre sí-), ventana interior ->
+         `fill-muted` (plano, ya no degradado). La sombra del marco
+         (`dropShadow` filter) usaba `floodColor: var(--secondary)` -un
+         "tinte" casi invisible-, se cambió a `var(--primary)` para que la
+         sombra se note y sea del color de marca (mismo criterio que las
+         sombras tintadas de theme.css). Con el pelaje ahora sólido indigo en
+         vez de degradado hacia blanco, ojos y hocico (blancos) contrastan
+         bien contra el fondo.
+         tsc/lint/build verdes (0 errores, 25 warnings, sin cambio).
+         [CONFIRMADO 2026-08-27] El usuario probó en modo oscuro (mandó
+         captura): marco/pelaje/ojos/hocico ya se ven bien. De paso notó que
+         nariz/boca/pupilas (usaban `text-foreground`/`fill-foreground`, que
+         SÍ sigue el tema) se veían grisáceas/apagadas en modo oscuro -foreground
+         se aclara ahí para servir de texto legible-, mientras que ojos/hocico
+         (blanco fijo) se ven parejos siempre. Pidió que nariz/boca/pupilas
+         también queden fijas, iguales en ambos modos: se cambiaron de
+         `foreground` (token, sigue el tema) a `black` literal (fijo, mismo
+         criterio que ya se usa para el blanco de ojos/hocico) — la cara del
+         osito completa (blanco de ojos/hocico + negro de nariz/boca/pupilas)
+         ahora es igual en claro y en oscuro, no se mezcla con el tema.
+         tsc/lint/build verdes (0 errores, 25 warnings, sin cambio).
 
 PENDIENTE DE VERIFICAR EN NAVEGADOR (sesión 2026-08-27, slice TAREAS + 3 bugs
 corregidos — re-test después de los fixes de Modal/ChatTab/polling):

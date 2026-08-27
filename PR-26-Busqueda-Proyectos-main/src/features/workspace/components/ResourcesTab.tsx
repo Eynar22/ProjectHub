@@ -152,8 +152,8 @@ export function ResourcesTab({
                     </div>
                   ) : isImage ? (
                     <div className="relative mb-2">
-                      <Image className="w-10 h-10 text-accent" />
-                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-accent text-primary-foreground px-1 rounded">IMG</span>
+                      <Image className="w-10 h-10 text-info" />
+                      <span className="absolute -bottom-1 -right-1 text-[8px] font-black bg-info text-primary-foreground px-1 rounded">IMG</span>
                     </div>
                   ) : (
                     <FileText className="w-10 h-10 text-muted-foreground mb-2" />
