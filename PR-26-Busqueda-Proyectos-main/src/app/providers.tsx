@@ -16,6 +16,15 @@ function ConToasterYFondo({ children }: { children: ReactNode }) {
   const { theme } = useTheme();
   return (
     <AppProvider>
+      {/* Bypass blocks (WCAG 2.2 - 2.4.1): primer elemento enfocable. */}
+      <a
+        href="#contenido"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4
+          focus-visible:z-toast focus-visible:rounded-md focus-visible:bg-primary focus-visible:px-4
+          focus-visible:py-2 focus-visible:text-primary-foreground focus-visible:shadow-lg"
+      >
+        Saltar al contenido
+      </a>
       <AnimatedBackground />
       <Toaster position="top-right" offset="80px" richColors theme={theme} />
       {children}

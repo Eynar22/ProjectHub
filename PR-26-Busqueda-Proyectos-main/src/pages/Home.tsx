@@ -85,7 +85,7 @@ export default function Home() {
       <div className="flex">
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
         
-        <main className="flex-1 w-full overflow-hidden">
+        <main id="contenido" tabIndex={-1} className="flex-1 w-full overflow-hidden">
 
           {/* ======================================= */}
           {/* HERO SECTION 3D (100% PANTALLA)         */}
@@ -178,7 +178,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col w-full">
                     <span className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-wider">Sector</span>
-                    <select className="bg-transparent text-xs md:text-sm font-semibold text-foreground outline-none cursor-pointer appearance-none w-full">
+                    <select className="bg-transparent text-xs md:text-sm font-semibold text-foreground outline-none rounded focus-visible:ring-2 focus-visible:ring-ring cursor-pointer appearance-none w-full">
                       <option>Todos los sectores</option>
                       <option>Tecnología</option>
                       <option>Construcción</option>
@@ -193,7 +193,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col w-full">
                     <span className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-wider">Ubicación</span>
-                    <select className="bg-transparent text-xs md:text-sm font-semibold text-foreground outline-none cursor-pointer appearance-none w-full">
+                    <select className="bg-transparent text-xs md:text-sm font-semibold text-foreground outline-none rounded focus-visible:ring-2 focus-visible:ring-ring cursor-pointer appearance-none w-full">
                       <option>Toda Bolivia</option>
                       <option>Cochabamba</option>
                       <option>Santa Cruz</option>

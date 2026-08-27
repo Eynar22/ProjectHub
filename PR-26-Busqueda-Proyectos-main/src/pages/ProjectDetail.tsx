@@ -193,7 +193,7 @@ export default function ProjectDetail() {
       <div className="flex relative z-10">
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
 
-        <main className="flex-1 w-full pb-24">
+        <main id="contenido" tabIndex={-1} className="flex-1 w-full pb-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
             <Link to={backUrl} className="inline-block mb-8">
@@ -522,7 +522,7 @@ export default function ProjectDetail() {
                 <div>
                   <label className="block text-sm font-bold mb-2 text-foreground">Nuevo Propietario</label>
                   <select
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:border-primary outline-none transition-all cursor-pointer font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:border-primary focus-visible:ring-2 focus-visible:ring-ring outline-none transition-all cursor-pointer font-medium"
                     value={selectedNewOwner}
                     onChange={(e) => setSelectedNewOwner(Number(e.target.value))}
                   >

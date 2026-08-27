@@ -47,9 +47,6 @@ export function Navbar() {
     navigate('/');
   };
 
-  const rolLabel = currentUser?.rol === 'superadmin' ? 'Super Admin'
-    : currentUser?.rol === 'admin' ? 'Admin Empresa'
-      : 'Empleado';
 
   const dashboardPath = currentUser?.rol === 'superadmin' ? '/admin' : '/dashboard';
 
@@ -142,8 +139,11 @@ export function Navbar() {
             onClick={toggleTheme}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors flex-shrink-0"
             title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
+            {theme === 'dark'
+              ? <Sun className="w-4 h-4 text-foreground" aria-hidden="true" />
+              : <Moon className="w-4 h-4 text-foreground" aria-hidden="true" />}
           </button>
 
           {currentUser ? (
@@ -151,6 +151,9 @@ export function Navbar() {
               <button
                 onClick={() => setUserMenuOpen(v => !v)}
                 className="flex items-center gap-2 pr-2 md:pr-3 pl-0.5 md:pl-1 py-0.5 rounded-full hover:bg-muted/50 transition-colors group"
+                aria-label="Menú de cuenta"
+                aria-haspopup="menu"
+                aria-expanded={userMenuOpen}
               >
                 <UserAvatar name={currentUser.nombre_completo} />
                 <div className="hidden sm:block text-left">
@@ -213,8 +216,12 @@ export function Navbar() {
           <button
             onClick={() => setMobileMenuOpen(v => !v)}
             className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors"
+            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="w-4 h-4 text-foreground" /> : <Menu className="w-4 h-4 text-foreground" />}
+            {mobileMenuOpen
+              ? <X className="w-4 h-4 text-foreground" aria-hidden="true" />
+              : <Menu className="w-4 h-4 text-foreground" aria-hidden="true" />}
           </button>
         </div>
       </div>

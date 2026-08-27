@@ -204,7 +204,7 @@ export default function AdminProjects() {
       <Navbar />
       <div className="flex">
         <Sidebar isAdmin />
-        <main className="flex-1 p-8">
+        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-start justify-between">
               <div>

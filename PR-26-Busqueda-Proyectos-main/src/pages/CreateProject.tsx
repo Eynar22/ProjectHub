@@ -157,7 +157,7 @@ export default function CreateProject() {
         <div className="flex">
           <Sidebar />
 
-          <main className="flex-1 p-8 flex items-center justify-center">
+          <main id="contenido" tabIndex={-1} className="flex-1 p-8 flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -204,7 +204,7 @@ export default function CreateProject() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 py-10 px-6">
+        <main id="contenido" tabIndex={-1} className="flex-1 py-10 px-6">
 
           {/* Page Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}

@@ -1,0 +1,9 @@
+dist
+node_modules
+backend
+api
+data
+data_historico
+credenciales
+package-lock.json
+*.md

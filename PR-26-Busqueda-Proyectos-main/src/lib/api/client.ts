@@ -67,7 +67,7 @@ export async function apiRequest<T>(
       signal: controller.signal,
       body: esFormData ? (body as FormData) : body != null ? JSON.stringify(body) : undefined,
     });
-  } catch (err) {
+  } catch {
     clearTimeout(timeout);
     // Fallo de red o abort (timeout): status 0.
     throw normalizarError(0, null);

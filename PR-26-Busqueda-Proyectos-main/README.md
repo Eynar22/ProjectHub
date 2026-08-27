@@ -1,134 +1,117 @@
-# Plataforma de Búsqueda de Proyectos (PR-26)
+# ProjectHub — Plataforma de búsqueda y colaboración en proyectos (PR-26)
 
-Este proyecto es una plataforma SaaS diseñada para facilitar la colaboración en proyectos entre estudiantes, profesionales independientes y empresas. Permite la gestión completa del ciclo de vida de un proyecto, desde su publicación hasta su ejecución mediante herramientas ágiles.
+Plataforma SaaS para que estudiantes, profesionales y empresas publiquen proyectos,
+soliciten unirse a equipos y trabajen con tablero Kanban, chat y gestor de recursos.
 
-## 🚀 Arquitectura del Proyecto
+## Stack
 
-El proyecto está dividido en dos partes principales:
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 18 · Vite 6 · TypeScript · Tailwind CSS v4 · TanStack Query · React Router 7 |
+| Backend | NestJS 11 · TypeORM · PostgreSQL |
+| Infra | Docker Compose (Postgres) · Nginx (frontend en producción) |
 
-1. **Frontend (`/src` y raíz):** Desarrollado con **React**, **Vite** y **Tailwind CSS**. Proporciona una interfaz moderna, responsive y con estética premium.
-2. **Backend (`/backend`):** Desarrollado con **NestJS** y **TypeORM**. Maneja la lógica de negocio, autenticación JWT y la persistencia de datos en una base de datos **PostgreSQL** local dockerizada.
+## Requisitos
 
----
+- **Node.js 18+**
+- **Docker** y **Docker Compose** (para la base de datos)
+- **npm**
 
-## 🛠️ Requisitos Previos
+## Cómo levantarlo
 
-- **Node.js** (v18 o superior recomendado)
-- **Docker** y **Docker Compose** (para levantar la base de datos PostgreSQL local)
-- **npm** (Gestor de paquetes)
+### Opción A — Todo con Docker (recomendado)
 
----
-
-## ⚙️ Configuración y Ejecución
-
-Tienes **dos opciones** para iniciar el sistema: la opción 1 (completamente automatizada en Docker) o la opción 2 (ejecución manual de cada servicio por separado).
-
----
-
-### Opción 1: Levantar TODO el Sistema con Docker (Recomendado 🚀)
-
-Esta opción compila, orquesta y arranca el frontend, el backend y la base de datos de manera 100% automatizada en contenedores aislados.
-
-#### A. A partir de los archivos de código fuente (Compilación Automática)
-
-1. Asegúrate de tener Docker abierto en tu computadora.
-2. Abre una terminal en la raíz del proyecto y ejecuta:
-   ```bash
-   docker compose up --build
-   ```
-3. Docker automáticamente:
-   * Levantará la base de datos PostgreSQL en el puerto `5435`.
-   * Inicializará la base de datos con los datos de prueba (`data/buscador_proyectos.sql`).
-   * Compilará y ejecutará el Backend (NestJS) en el puerto `3000`.
-   * Compilará el Frontend (Vite) y lo servirá de forma optimizada mediante Nginx en `http://localhost:5173`.
-
-#### B. A partir de los archivos `.tar` del instalador (Modo Copia de Seguridad / Offline)
-
-Si has descargado las imágenes precompiladas desde OneDrive, puedes cargarlas directamente en tu Docker local sin necesidad de compilarlas:
-
-1. Importa las imágenes `.tar` a tu motor local de Docker:
-   ```bash
-   docker load -i postgres_image.tar
-   docker load -i backend_image.tar
-   docker load -i frontend_image.tar
-   ```
-2. Una vez importadas, levanta los servicios directamente con:
-   ```bash
-   docker compose up
-   ```
-
-Para apagar el sistema y detener todos los servicios:
 ```bash
-docker compose down
+docker compose up --build
 ```
-*Si quieres reiniciar la base de datos y limpiarla por completo para cargar de nuevo los scripts SQL originales de `/data`, usa: `docker compose down -v`.*
 
----
+Levanta Postgres (`:5435`, inicializado con `data/buscador_proyectos.sql`), el backend NestJS
+(`:3000`) y el frontend servido por Nginx (`http://localhost:5173`).
 
-### Opción 2: Ejecución Manual (Desarrollo Local)
+Apagar: `docker compose down` · Reset de datos: `docker compose down -v`
 
-Si prefieres ejecutar los servicios directamente en tu sistema operativo:
+### Opción B — Desarrollo local
 
-#### 1. Levantar la Base de Datos con Docker
-Inicia el contenedor exclusivo de PostgreSQL:
 ```bash
+# 1. Base de datos
 docker compose up -d postgres
-```
 
-#### 2. Configurar las Variables de Entorno del Backend
-Crea o verifica el archivo `.env` dentro de la carpeta `/backend` con las siguientes credenciales:
-```env
-DATABASE_URL=postgresql://postgres:12345@localhost:5435/buscador
-JWT_SECRET=super_secret_key_123
-PORT=3000
-```
+# 2. Backend (carpeta backend/, con su propio .env — ver más abajo)
+cd backend && npm install && npm run start:dev
 
-#### 3. Ejecutar el Backend (NestJS)
-```bash
-cd backend
+# 3. Frontend (raíz del repo, en otra terminal)
 npm install
-   npm run start:dev
+cp .env.example .env.local   # ajustar si el backend no está en localhost:3000
+npm run dev                  # http://localhost:5173
 ```
 
-#### 4. Ejecutar el Frontend (React + Vite)
-En otra terminal en la raíz del proyecto:
+## Variables de entorno
+
+### Frontend (`.env.local` en la raíz — plantilla en `.env.example`)
+
+| Variable | Qué hace |
+|---|---|
+| `VITE_API_URL` | URL base del backend NestJS, sin barra final ni `/api`. Si se deja vacía: `http://localhost:3000` en dev y `/api` (proxy nginx) en producción. |
+| `VITE_APP_NOMBRE` | Nombre visible de la app. |
+| `VITE_DEBUG` | `true` activa logs detallados en consola (solo desarrollo). |
+
+> Nunca pongas secretos en variables `VITE_*`: quedan visibles en el bundle.
+
+### Backend (`backend/.env`)
+
+| Variable | Qué hace |
+|---|---|
+| `DATABASE_URL` | Conexión a Postgres, p. ej. `postgresql://postgres:12345@localhost:5435/buscador`. |
+| `JWT_SECRET` | Clave de firma de los tokens JWT. |
+| `PORT` | Puerto del backend (por defecto `3000`). |
+
+## Comandos (frontend)
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo (Vite). |
+| `npm run build` | Build de producción a `dist/`. |
+| `npm run preview` | Sirve el build de producción localmente. |
+| `npm run lint` | ESLint sobre `src/`. |
+| `npm run lint:fix` | ESLint con autocorrección. |
+| `npm run typecheck` | `tsc --noEmit`. |
+| `npm run format` | Prettier (escribe). |
+| `npm run format:check` | Prettier (solo verifica). |
+
+## Estructura del frontend (`src/`)
+
+Organizado por **funcionalidad**, no por tipo de archivo (Anexo B):
+
+```
+src/
+  App.tsx · main.tsx
+  app/          router.tsx · providers.tsx · guards/ · context/   (config global)
+  pages/        una carpeta/archivo por pantalla; solo componen
+  features/     auth · empresas · proyectos · usuarios · workspace
+                cada una: { services/ · hooks/ · types/ · index.ts }
+  shared/       components/{ui,layout} · hooks · utils · types · constants
+  lib/          api/{client,endpoints,errors} · config · storage · queryClient
+  styles/       tokens.css · theme.css · index.css
+```
+
+**Regla de la capa de API:** ningún componente llama a la API directamente.
+`componente → hook → servicio → lib/api/client`. Todas las rutas del backend
+viven en `src/lib/api/endpoints.ts`.
+
+## Estructura del repositorio
+
+- `src/` — frontend (React)
+- `backend/` — API NestJS
+- `data/` — esquema SQL y dumps (montados en el contenedor para inicializar)
+- `docker-compose.yml` · `Dockerfile` · `nginx.conf` — infraestructura
+- `public/` — assets estáticos · `dist/` — build (ignorado por git)
+
+### Migraciones de base de datos
+
 ```bash
-npm install
-npm run dev
+# bash
+docker exec -i buscador_postgres psql -U postgres -d buscador < data/migrations/001_empresa_logo_imagenes_enlaces.sql
+
+# PowerShell
+Get-Content data/migrations/001_empresa_logo_imagenes_enlaces.sql | docker exec -i buscador_postgres psql -U postgres -d buscador
 ```
-
-La aplicación estará disponible de forma local en `http://localhost:5173`.
-
-
----
-
-## 📋 Características Principales
-
-- **Gestión de Empresas:** Registro y validación de organizaciones por administradores.
-- **Explorador de Proyectos:** Búsqueda avanzada de proyectos por categorías y etiquetas.
-- **Colaboración Real:** Sistema de solicitudes para unirse a equipos de trabajo.
-- **Tablero Kanban:** Gestión de tareas integrada para cada proyecto.
-- **Chat de Proyecto:** Comunicación en tiempo real entre los miembros del equipo.
-- **Gestor de Recursos:** Carga y organización de archivos y documentos del proyecto.
-
----
-
-## 📁 Estructura del Repositorio
-
-- `backend/`: Código fuente de la API NestJS.
-- `src/`: Código fuente del frontend (React).
-- `data/`: Contiene el esquema SQL y dumps de la base de datos (también montados en el contenedor Docker para la inicialización).
-- `docker-compose.yml`: Definición del servicio PostgreSQL dockerizado.
-- `public/`: Assets estáticos del frontend.
-- `dist/`: Carpeta generada tras el proceso de build (excluida por git).
-
-
- migraciones 
-docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/001_empresa_logo_imagenes_enlaces.sql"
-
-docker exec -i buscador_postgres psql -U postgres -d buscador < "/d/UMA/ProjectHub/PR-26-Busqueda-Proyectos-main/data/migrations/002_usuario_foto_perfil.sql"
-
-por porwersell
-Get-Content "C:\Users\user\Documents\UMA\ProjectHub\PR-26-Busqueda-Proyectos-main\data\migrations\001_empresa_logo_imagenes_enlaces.sql" | docker exec -i buscador_postgres psql -U postgres -d buscador
-
-Get-Content "C:\Users\user\Documents\UMA\ProjectHub\PR-26-Busqueda-Proyectos-main\data\migrations\002_usuario_foto_perfil.sql" | docker exec -i buscador_postgres psql -U postgres -d buscador

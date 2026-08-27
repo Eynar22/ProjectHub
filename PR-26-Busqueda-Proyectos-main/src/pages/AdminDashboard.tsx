@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       <div className="flex">
         <Sidebar isAdmin />
         
-        <main className="flex-1 p-8">
+        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}

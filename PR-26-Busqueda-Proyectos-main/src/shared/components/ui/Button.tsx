@@ -9,7 +9,13 @@ import { motion } from 'motion/react';
  * - destructive: variante roja, solo para acciones destructivas.
  * - success / warning: acciones semánticas puntuales (aprobar / advertir).
  */
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// Se omiten los handlers que chocan entre React DOM y motion.
+type NativeButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'onAnimationStart' | 'onDragStart' | 'onDrag' | 'onDragEnd'
+>;
+
+interface ButtonProps extends NativeButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'success' | 'warning' | 'accent';
   size?: 'sm' | 'md' | 'lg';
 }
@@ -48,7 +54,7 @@ export function Button({
     <motion.button
       whileTap={{ scale: 0.98 }}
       className={`${base} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
-      {...(props as any)}
+      {...props}
     >
       {children}
     </motion.button>

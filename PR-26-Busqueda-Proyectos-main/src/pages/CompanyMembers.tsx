@@ -77,7 +77,7 @@ export default function CompanyMembers() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-8">
+        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
           <div className="max-w-5xl mx-auto">
 
             {/* Header */}

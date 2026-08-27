@@ -60,7 +60,7 @@ export default function AdminCompanyUsers() {
       <div className="flex">
         <Sidebar isAdmin />
         
-        <main className="flex-1 p-8">
+        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
           <div className="max-w-5xl mx-auto">
             <Link to="/admin/companies">
               <Button variant="ghost" className="mb-6 flex items-center gap-2">

@@ -260,7 +260,7 @@ export default function CompanyProfile() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 py-10 px-6">
+        <main id="contenido" tabIndex={-1} className="flex-1 py-10 px-6">
 
           {/* Page header */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
@@ -739,7 +739,7 @@ export default function CompanyProfile() {
                             </div>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => openBase64(userCompany?.documento_url!)}
+                                onClick={() => openBase64(userCompany?.documento_url ?? '')}
                                 className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
                                 title="Ver"
                               >

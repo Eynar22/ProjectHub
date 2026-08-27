@@ -98,6 +98,7 @@ export default function Workspace() {
   const [newTaskComment, setNewTaskComment] = useState('');
 
   // Resources State
+  const [updatingAccesoId, setUpdatingAccesoId] = useState<number | null>(null);
   const [currentFolderId, setCurrentFolderId] = useState<number | undefined>(undefined);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -326,7 +327,6 @@ export default function Workspace() {
   };
 
   // ── Dar/quitar acceso a un colaborador para crear tareas ('miembro' ⇄ 'colaborador') ──
-  const [updatingAccesoId, setUpdatingAccesoId] = useState<number | null>(null);
   const handleToggleAccesoTareas = async (usuarioId: number, rolActual: string) => {
     if (!project) return;
     const nuevoRol = rolActual === 'miembro' ? 'colaborador' : 'miembro';

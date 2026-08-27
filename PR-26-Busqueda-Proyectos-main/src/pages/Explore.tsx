@@ -81,7 +81,7 @@ export default function Explore() {
       <div className="flex relative z-10">
         {!isVisitor && <Sidebar isAdmin={currentUser?.rol === 'superadmin'} />}
 
-        <main className="flex-1 w-full overflow-hidden">
+        <main id="contenido" tabIndex={-1} className="flex-1 w-full overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
             
             {/* ======================================= */}
@@ -119,7 +119,7 @@ export default function Explore() {
                     placeholder="Buscar por nombre de proyecto o empresa..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/70 text-sm md:text-base font-medium"
+                    className="w-full bg-transparent border-none outline-none rounded focus-visible:ring-2 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70 text-sm md:text-base font-medium"
                   />
                 </div>
                 
@@ -129,7 +129,7 @@ export default function Explore() {
                   
                   {/* Botón Trigger del Menú */}
                   <div 
-                    className="w-full bg-transparent border-none outline-none text-foreground text-sm font-semibold cursor-pointer flex justify-between items-center"
+                    className="w-full bg-transparent border-none outline-none rounded focus-visible:ring-2 focus-visible:ring-ring text-foreground text-sm font-semibold cursor-pointer flex justify-between items-center"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     <span className="truncate pr-2">

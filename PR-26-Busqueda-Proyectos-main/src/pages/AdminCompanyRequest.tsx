@@ -58,7 +58,7 @@ export default function AdminCompanyRequest() {
       <div className="flex">
         <Sidebar isAdmin />
         
-        <main className="flex-1 p-8">
+        <main id="contenido" tabIndex={-1} className="flex-1 p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header / Navigation */}
             <div className="flex items-center justify-between mb-8">

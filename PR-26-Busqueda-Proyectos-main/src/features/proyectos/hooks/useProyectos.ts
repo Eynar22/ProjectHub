@@ -29,7 +29,7 @@ export function useProyectos() {
   return useQuery({
     queryKey: PROYECTOS_KEYS.lista(),
     queryFn: () => proyectosService.listar(),
-    refetchInterval: (query) => (document.hidden ? false : REFETCH_MS),
+    refetchInterval: () => (document.hidden ? false : REFETCH_MS),
   });
 }
 
@@ -39,7 +39,7 @@ export function useProyectosArchivados(habilitado = true) {
     queryKey: PROYECTOS_KEYS.archivados(),
     queryFn: () => proyectosService.listarArchivados(),
     enabled: habilitado,
-    refetchInterval: (query) => (document.hidden ? false : REFETCH_MS),
+    refetchInterval: () => (document.hidden ? false : REFETCH_MS),
   });
 }
 

@@ -129,7 +129,7 @@ export default function CompanyDashboard() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 py-8 px-6">
+        <main id="contenido" tabIndex={-1} className="flex-1 py-8 px-6">
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -193,9 +193,17 @@ export default function CompanyDashboard() {
               return (
                 <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
                   {stat.link?.startsWith('#') ? (
-                    <div className="cursor-pointer h-full" onClick={() => document.getElementById(stat.link!.substring(1))?.scrollIntoView({ behavior: 'smooth' })}>
+                    <button
+                      type="button"
+                      className="h-full w-full text-left"
+                      onClick={() =>
+                        document
+                          .getElementById(stat.link!.substring(1))
+                          ?.scrollIntoView({ behavior: 'smooth' })
+                      }
+                    >
                       {cardContent}
-                    </div>
+                    </button>
                   ) : stat.link ? (
                     <Link to={stat.link} className="h-full block">
                       {cardContent}
