@@ -1,5 +1,7 @@
 import { Link } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { useEmpresas } from '@/features/empresas';
+import { useSolicitudesMembresia, useResponderSolicitudMembresia } from '@/features/usuarios';
 import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
@@ -43,16 +45,13 @@ interface ProjectPendingGroup {
 }
 
 export default function CompanyDashboard() {
-  const {
-    currentUser,
-    companies,
-    users,
-    projects,
-    memberRequests,
-    approveMemberRequest,
-    rejectMemberRequest,
-    openBase64,
-  } = useApp();
+  const { currentUser, users, projects, openBase64 } = useApp();
+  const { data: companies = [] } = useEmpresas();
+  const esAdmin = currentUser?.rol === 'admin';
+  const { data: memberRequests = [] } = useSolicitudesMembresia(currentUser?.empresa_id, esAdmin);
+  const responderSolicitud = useResponderSolicitudMembresia();
+  const approveMemberRequest = (id: number) => responderSolicitud.mutate({ solicitudId: id, accion: 'aprobar' });
+  const rejectMemberRequest = (id: number) => responderSolicitud.mutate({ solicitudId: id, accion: 'rechazar' });
   const navigate = useNavigate();
   const [detailRequest, setDetailRequest] = useState<MemberRequest | null>(null);
   const [projectPendingGroups, setProjectPendingGroups] = useState<ProjectPendingGroup[]>([]);
@@ -62,6 +61,7 @@ export default function CompanyDashboard() {
   }, [currentUser, navigate]);
 
   // Fetch pending project join requests grouped by project
+  // TODO(feature proyectos): mover a un hook useSolicitudesPendientes.
   useEffect(() => {
     if (!currentUser) return;
     api.get<ProjectPendingGroup[]>('/proyectos/usuario/solicitudes-pendientes')

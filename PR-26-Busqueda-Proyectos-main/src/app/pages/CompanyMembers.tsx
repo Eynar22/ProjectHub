@@ -1,4 +1,12 @@
 import { useApp } from '../context/AppContext';
+import { useEmpresas } from '@/features/empresas';
+import {
+  useUsuarios,
+  useModerarUsuario,
+  useSolicitudesMembresia,
+  useResponderSolicitudMembresia,
+  useEliminarSolicitudMembresia,
+} from '@/features/usuarios';
 import { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
@@ -24,24 +32,24 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router';
-import { toast } from 'sonner';
 import type { MemberRequest } from '../context/AppContext';
 
 
 export default function CompanyMembers() {
-  const {
-    currentUser,
-    users,
-    companies,
-    memberRequests,
-    approveMemberRequest,
-    rejectMemberRequest,
-    deleteMemberRequest,
-    promoteToAdmin,
-    demoteToUser,
-    deleteUser,
-    openBase64,
-  } = useApp();
+  const { currentUser, openBase64 } = useApp();
+  const { data: companies = [] } = useEmpresas();
+  const { data: users = [] } = useUsuarios(!!currentUser);
+  const esAdmin = currentUser?.rol === 'admin';
+  const { data: memberRequests = [] } = useSolicitudesMembresia(currentUser?.empresa_id, esAdmin);
+  const moderar = useModerarUsuario();
+  const responderSolicitud = useResponderSolicitudMembresia();
+  const eliminarSolicitud = useEliminarSolicitudMembresia();
+
+  const approveMemberRequest = (id: number) => responderSolicitud.mutate({ solicitudId: id, accion: 'aprobar' });
+  const rejectMemberRequest = (id: number) => responderSolicitud.mutate({ solicitudId: id, accion: 'rechazar' });
+  const deleteMemberRequest = (id: number) => eliminarSolicitud.mutate(id);
+  const promoteToAdmin = (id: number) => moderar.mutate({ id, accion: 'promover' });
+  const demoteToUser = (id: number) => moderar.mutate({ id, accion: 'degradar' });
 
   const navigate = useNavigate();
   const [selectedRequest, setSelectedRequest] = useState<MemberRequest | null>(null);
@@ -560,7 +568,6 @@ export default function CompanyMembers() {
                           onClick={() => {
                             deleteMemberRequest(requestToDelete.id);
                             setRequestToDelete(null);
-                            toast.success('Registro de rechazo eliminado exitosamente. El usuario ya puede volver a aplicar.');
                           }}
                         >
                           Eliminar

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useEmpresas } from '@/features/empresas';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -10,7 +10,7 @@ import { Building2, Search, Users, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function AdminCompanies() {
-  const { companies } = useApp();
+  const { data: companies = [] } = useEmpresas();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'blocked' | 'rejected'>((searchParams.get('filter') as any) || 'all');

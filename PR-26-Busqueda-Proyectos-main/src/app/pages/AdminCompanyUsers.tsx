@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useEmpresa } from '@/features/empresas';
+import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { toast } from 'sonner';
 import {
   Users, ArrowLeft, Search, UserCheck, UserMinus, Lock, Unlock,
   Building2, Crown, AlertTriangle, User as UserIcon
@@ -15,11 +15,11 @@ import { motion } from 'motion/react';
 
 export default function AdminCompanyUsers() {
   const { id } = useParams();
-  const { companies, users, promoteToAdmin, demoteToUser, blockUser, unblockUser } = useApp();
+  const { data: users = [] } = useUsuarios();
+  const { data: company } = useEmpresa(id);
+  const moderar = useModerarUsuario();
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingId, setLoadingId] = useState<number | null>(null);
-
-  const company = companies.find(c => c.id === Number(id));
   const companyUsers = users.filter(u => u.empresa_id === Number(id));
 
   const filteredUsers = companyUsers.filter(user => 
@@ -31,16 +31,12 @@ export default function AdminCompanyUsers() {
   const activeAdminsCount = () =>
     companyUsers.filter(u => u.rol === 'admin' && u.estado === 'activo').length;
 
-  const handleAction = async (action: () => Promise<void>, userId: number, successMsg: string) => {
+  // El toast (éxito y error) lo muestra useModerarUsuario.
+  const handleAction = async (accion: AccionUsuario, userId: number) => {
     setLoadingId(userId);
-    try {
-      await action();
-      toast.success(successMsg);
-    } catch (err: any) {
-      toast.error(err?.message || 'Error al realizar la acción');
-    } finally {
-      setLoadingId(null);
-    }
+    try { await moderar.mutateAsync({ id: userId, accion }); }
+    catch { /* noop */ }
+    finally { setLoadingId(null); }
   };
 
   if (!company) {
@@ -196,7 +192,7 @@ export default function AdminCompanyUsers() {
                                 variant="outline"
                                 size="sm"
                                 className="flex items-center gap-1.5 text-success-strong border-success/40 hover:bg-success-subtle"
-                                onClick={() => handleAction(() => unblockUser(member.id), member.id, `${member.nombre_completo} desbloqueado`)}
+                                onClick={() => handleAction('desbloquear', member.id)}
                               >
                                 <Unlock className="w-3.5 h-3.5" />
                                 Desbloquear
@@ -210,7 +206,7 @@ export default function AdminCompanyUsers() {
                                 title={isOnlyAdmin ? 'Asigna otro admin antes de bloquear este' : ''}
                                 onClick={() => {
                                   if (confirm(`¿Estás seguro de bloquear a ${member.nombre_completo}? Los proyectos en los que es el creador se suspenderán hasta que se asigne un nuevo propietario.`)) {
-                                    handleAction(() => blockUser(member.id), member.id, `${member.nombre_completo} bloqueado`);
+                                    handleAction('bloquear', member.id);
                                   }
                                 }}
                               >
@@ -228,7 +224,7 @@ export default function AdminCompanyUsers() {
                                   className="flex items-center gap-1.5 text-muted-foreground disabled:opacity-40"
                                   disabled={isOnlyAdmin}
                                   title={isOnlyAdmin ? 'Asigna otro admin antes de degradar' : ''}
-                                  onClick={() => handleAction(() => demoteToUser(member.id), member.id, `${member.nombre_completo} es ahora Empleado`)}
+                                  onClick={() => handleAction('degradar', member.id)}
                                 >
                                   <UserMinus className="w-3.5 h-3.5" />
                                   Quitar Admin
@@ -238,7 +234,7 @@ export default function AdminCompanyUsers() {
                                   variant="outline"
                                   size="sm"
                                   className="flex items-center gap-1.5 text-info-strong border-info/40 hover:bg-info-subtle"
-                                  onClick={() => handleAction(() => promoteToAdmin(member.id), member.id, `${member.nombre_completo} es ahora Admin`)}
+                                  onClick={() => handleAction('promover', member.id)}
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />
                                   Hacer Admin

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
+import { useEmpresas } from '@/features/empresas';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users, Search, Shield, UserCheck, Lock, Unlock, UserMinus,
@@ -26,7 +26,9 @@ const ESTADO_CFG: Record<string, { label: string; dot: string }> = {
 };
 
 export default function AdminUsers() {
-  const { users, companies, promoteToAdmin, demoteToUser, blockUser, unblockUser } = useApp();
+  const { data: users = [] } = useUsuarios();
+  const { data: companies = [] } = useEmpresas();
+  const moderar = useModerarUsuario();
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -51,16 +53,12 @@ export default function AdminUsers() {
   const activeAdminsCount = (empresaId: number) =>
     users.filter(u => u.empresa_id === empresaId && u.rol === 'admin' && u.estado === 'activo').length;
 
-  const handle = async (action: () => Promise<void>, id: number, successMsg: string) => {
+  // El toast (éxito y error) lo muestra useModerarUsuario.
+  const handle = async (accion: AccionUsuario, id: number) => {
     setLoadingId(id);
-    try {
-      await action();
-      toast.success(successMsg);
-    } catch (err: any) {
-      toast.error(err?.message || 'Error al realizar la acción');
-    } finally {
-      setLoadingId(null);
-    }
+    try { await moderar.mutateAsync({ id, accion }); }
+    catch { /* noop */ }
+    finally { setLoadingId(null); }
   };
 
   return (
@@ -206,7 +204,7 @@ export default function AdminUsers() {
                                   className="flex items-center gap-1.5 text-success-strong border-success/40 hover:bg-success-subtle disabled:opacity-40"
                                   disabled={isCompanyBlocked}
                                   title={isCompanyBlocked ? 'No se puede desbloquear el usuario porque la empresa está bloqueada' : ''}
-                                  onClick={() => handle(() => unblockUser(user.id), user.id, `${user.nombre_completo} desbloqueado`)}>
+                                  onClick={() => handle('desbloquear', user.id)}>
                                   <Unlock className="w-3.5 h-3.5" />
                                   Desbloquear
                                 </Button>
@@ -228,7 +226,7 @@ export default function AdminUsers() {
                                     className="flex items-center gap-1.5 text-muted-foreground disabled:opacity-40"
                                     disabled={isOnlyAdmin || !isActive || isCompanyBlocked}
                                     title={isCompanyBlocked ? 'La empresa de este usuario está bloqueada' : isOnlyAdmin ? 'Asigna otro admin antes de degradar' : !isActive ? 'El usuario debe estar activo para cambiar su rol' : ''}
-                                    onClick={() => handle(() => demoteToUser(user.id), user.id, `${user.nombre_completo} es ahora Empleado`)}>
+                                    onClick={() => handle('degradar', user.id)}>
                                     <UserMinus className="w-3.5 h-3.5" />
                                     Quitar Admin
                                   </Button>
@@ -237,7 +235,7 @@ export default function AdminUsers() {
                                     className="flex items-center gap-1.5 text-info-strong border-info/40 hover:bg-info-subtle disabled:opacity-40"
                                     disabled={!isActive || isCompanyBlocked}
                                     title={isCompanyBlocked ? 'La empresa de este usuario está bloqueada' : !isActive ? 'El usuario debe estar activo para cambiar su rol' : ''}
-                                    onClick={() => handle(() => promoteToAdmin(user.id), user.id, `${user.nombre_completo} es ahora Admin`)}>
+                                    onClick={() => handle('promover', user.id)}>
                                     <UserCheck className="w-3.5 h-3.5" />
                                     Hacer Admin
                                   </Button>
@@ -314,7 +312,7 @@ export default function AdminUsers() {
                           onClick={() => {
                             const u = userToBlock;
                             setUserToBlock(null);
-                            handle(() => blockUser(u.id), u.id, `${u.nombre_completo} bloqueado`);
+                            handle('bloquear', u.id);
                           }}
                         >
                           Bloquear

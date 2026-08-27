@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useApp } from '../context/AppContext';
-import { api } from '../services/api';
-import { toast } from 'sonner';
+import { useEmpresa, useModerarEmpresa } from '@/features/empresas';
+import { useUsuario } from '@/features/usuarios';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -28,30 +27,17 @@ import { motion } from 'motion/react';
 export default function AdminCompanyRequest() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { companies, users, approveCompany, blockCompany, unblockCompany, deleteCompany, openBase64 } = useApp();
+  const { users, openBase64 } = useApp();
+  const { data: company } = useEmpresa(id);
+  const moderar = useModerarEmpresa();
 
-  const company = companies.find(c => c.id === Number(id));
   const registrant = users.find(u => u.empresa_id === Number(id) && u.rol === 'admin')
     || company?.usuarios?.find(u => u.rol === 'admin');
 
-  // El listado ya no trae documento_url (para no cargar todos los documentos al abrir la app);
-  // se pide puntual aquí, solo cuando se revisa esta solicitud.
-  const [companyDoc, setCompanyDoc] = useState<string | undefined>();
-  const [registrantDoc, setRegistrantDoc] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (!company) return;
-    api.get<{ documento_url?: string }>(`/empresas/${company.id}`)
-      .then(data => setCompanyDoc(data.documento_url))
-      .catch(() => {});
-  }, [company?.id]);
-
-  useEffect(() => {
-    if (!registrant) return;
-    api.get<{ documento_url?: string }>(`/usuarios/${registrant.id}`)
-      .then(data => setRegistrantDoc(data.documento_url))
-      .catch(() => {});
-  }, [registrant?.id]);
+  // El detalle de empresa ya trae documento_url; el del registrante se pide
+  // por su id (el listado de usuarios no lo incluye).
+  const companyDoc = company?.documento_url;
+  const registrantDoc = useUsuario(registrant?.id).data?.documento_url;
 
   if (!company) {
     return (
@@ -278,8 +264,7 @@ export default function AdminCompanyRequest() {
                           variant="success" 
                           className="w-full py-6 flex items-center justify-center gap-3 text-primary-foreground font-bold text-lg shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                           onClick={async () => {
-                            await approveCompany(company.id);
-                            toast.success('Empresa aprobada exitosamente');
+                            await moderar.mutateAsync({ id: company.id, accion: 'aprobar' });
                             navigate('/admin/companies');
                           }}
                         >
@@ -294,8 +279,7 @@ export default function AdminCompanyRequest() {
                           variant="success" 
                           className="w-full py-6 flex items-center justify-center gap-3 text-primary-foreground font-bold shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                           onClick={async () => {
-                            await approveCompany(company.id);
-                            toast.success('Empresa aprobada exitosamente');
+                            await moderar.mutateAsync({ id: company.id, accion: 'aprobar' });
                             navigate('/admin/companies');
                           }}
                         >
@@ -310,8 +294,7 @@ export default function AdminCompanyRequest() {
                           variant="warning" 
                           className="w-full py-6 flex items-center justify-center gap-3"
                           onClick={async () => {
-                            await blockCompany(company.id);
-                            toast.warning('Empresa bloqueada correctamente');
+                            await moderar.mutateAsync({ id: company.id, accion: 'bloquear' });
                             navigate('/admin/companies');
                           }}
                         >
@@ -326,8 +309,7 @@ export default function AdminCompanyRequest() {
                           variant="success" 
                           className="w-full py-6 flex items-center justify-center gap-3 shadow-lg shadow-success/20"
                           onClick={async () => {
-                            await unblockCompany(company.id);
-                            toast.success('Empresa desbloqueada correctamente');
+                            await moderar.mutateAsync({ id: company.id, accion: 'desbloquear' });
                             navigate('/admin/companies');
                           }}
                         >
@@ -343,8 +325,7 @@ export default function AdminCompanyRequest() {
                           className="w-full py-4 flex items-center justify-center gap-2 border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-all"
                           onClick={async () => {
                             if (confirm('¿Rechazar esta solicitud? Se notificará al responsable por correo.')) {
-                              await deleteCompany(company.id);
-                              toast.error('Solicitud rechazada');
+                              await moderar.mutateAsync({ id: company.id, accion: 'eliminar' });
                               navigate('/admin/companies');
                             }
                           }}

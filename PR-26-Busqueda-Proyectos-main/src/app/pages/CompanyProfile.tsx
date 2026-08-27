@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { useApp, Company, CompanyEnlace, CompanyImagen } from '../context/AppContext';
-import { api } from '../services/api';
+import { useRef, useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
+import { useCambiarPassword } from '@/features/auth';
 import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 import { Card } from '../components/Card';
@@ -32,28 +33,14 @@ function InfoRow({ icon: Icon, label, value, color = 'text-muted-foreground' }: 
 }
 
 export default function CompanyProfile() {
-  const { currentUser, companies, openBase64, updateProfile, updateCompany, uploadFile } = useApp();
+  const { currentUser, openBase64, updateProfile, uploadFile } = useApp();
+  // El detalle de empresa (documento_url, imagenes, enlaces) lo trae este hook;
+  // el listado ligero no. Se re-descarga solo tras cada actualización.
+  const { data: userCompany } = useEmpresa(currentUser?.empresa_id);
+  const actualizarEmpresa = useActualizarEmpresa();
+  const cambiarPassword = useCambiarPassword();
 
-  const userCompany = companies.find(c => c.id === currentUser?.empresa_id);
   const isCompanyAdmin = currentUser?.rol === 'admin' && !!userCompany;
-
-  // El listado de empresas no trae documento_url/imagenes/enlaces (para no cargar
-  // todo eso al abrir la app); se pide puntual aquí, solo al mostrar el perfil.
-  const [companyDetail, setCompanyDetail] = useState<{
-    documento_url?: string;
-    imagenes?: CompanyImagen[];
-    enlaces?: CompanyEnlace[];
-  }>({});
-
-  const refreshCompanyDetail = async (companyId: number) => {
-    const data = await api.get<Company>(`/empresas/${companyId}`);
-    setCompanyDetail({ documento_url: data.documento_url, imagenes: data.imagenes, enlaces: data.enlaces });
-  };
-
-  useEffect(() => {
-    if (!userCompany) return;
-    refreshCompanyDetail(userCompany.id).catch(() => {});
-  }, [userCompany?.id]);
 
   const rolConfig = {
     superadmin: { label: 'Administrador del Sistema', icon: Shield, color: 'text-primary', bg: 'bg-muted' },
@@ -138,7 +125,7 @@ export default function CompanyProfile() {
 
     setSavingPassword(true);
     try {
-      await api.post('/auth/change-password', {
+      await cambiarPassword.mutateAsync({
         password_actual: passwordForm.actual,
         password_nueva: passwordForm.nueva,
       });
@@ -176,9 +163,9 @@ export default function CompanyProfile() {
       portafolio: userCompany.portafolio || '',
     });
     setLogoPreview(userCompany.logo_url);
-    setDocPreview(companyDetail.documento_url);
-    setGalleryUrls((companyDetail.imagenes || []).map(i => i.url));
-    setLinks((companyDetail.enlaces || []).map(e => ({ url: e.url, nombre: e.nombre })));
+    setDocPreview(userCompany.documento_url);
+    setGalleryUrls((userCompany.imagenes || []).map(i => i.url));
+    setLinks((userCompany.enlaces || []).map(e => ({ url: e.url, nombre: e.nombre })));
     setEditingCompany(true);
   };
 
@@ -245,19 +232,21 @@ export default function CompanyProfile() {
     if (!userCompany) return;
     setSavingCompany(true);
     try {
-      await updateCompany(userCompany.id, {
-        descripcion: companyForm.descripcion.trim(),
-        num_empleados: companyForm.num_empleados ? parseInt(companyForm.num_empleados, 10) : undefined,
-        portafolio: companyForm.portafolio.trim(),
-        documento_url: docPreview,
-        logo_url: logoPreview,
-        imagenes_urls: galleryUrls,
-        enlaces: links,
-      } as any);
-      await refreshCompanyDetail(userCompany.id);
+      await actualizarEmpresa.mutateAsync({
+        id: userCompany.id,
+        datos: {
+          descripcion: companyForm.descripcion.trim(),
+          num_empleados: companyForm.num_empleados ? parseInt(companyForm.num_empleados, 10) : undefined,
+          portafolio: companyForm.portafolio.trim(),
+          documento_url: docPreview,
+          logo_url: logoPreview,
+          imagenes_urls: galleryUrls,
+          enlaces: links,
+        },
+      });
       setEditingCompany(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al actualizar la empresa');
+    } catch {
+      /* el toast de error lo muestra el hook */
     } finally {
       setSavingCompany(false);
     }
@@ -702,22 +691,22 @@ export default function CompanyProfile() {
                         </div>
                       )}
 
-                      {companyDetail.imagenes && companyDetail.imagenes.length > 0 && (
+                      {userCompany?.imagenes && userCompany?.imagenes.length > 0 && (
                         <div className="px-6 pb-5">
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Fotos de la Empresa</p>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                            {companyDetail.imagenes.map(img => (
+                            {userCompany?.imagenes.map(img => (
                               <img key={img.id} src={img.url} alt="" className="w-full aspect-square object-cover rounded-lg border border-border" />
                             ))}
                           </div>
                         </div>
                       )}
 
-                      {companyDetail.enlaces && companyDetail.enlaces.length > 0 && (
+                      {userCompany?.enlaces && userCompany?.enlaces.length > 0 && (
                         <div className="px-6 pb-5">
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Enlaces</p>
                           <div className="flex flex-wrap gap-2">
-                            {companyDetail.enlaces.map(link => (
+                            {userCompany?.enlaces.map(link => (
                               <a
                                 key={link.id}
                                 href={link.url}
@@ -734,7 +723,7 @@ export default function CompanyProfile() {
                       )}
 
                       {/* Company document */}
-                      {companyDetail.documento_url && (
+                      {userCompany?.documento_url && (
                         <div className="px-6 pb-5 border-t border-border pt-4">
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Documento de Empresa</p>
                           <div className="flex items-center gap-3 p-3 bg-secondary/5 border border-secondary/20 rounded-xl">
@@ -747,13 +736,13 @@ export default function CompanyProfile() {
                             </div>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => openBase64(companyDetail.documento_url!)}
+                                onClick={() => openBase64(userCompany?.documento_url!)}
                                 className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
                                 title="Ver"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              <a href={companyDetail.documento_url} download="documento-empresa.pdf"
+                              <a href={userCompany?.documento_url} download="documento-empresa.pdf"
                                 className="w-8 h-8 rounded-lg hover:bg-secondary/10 flex items-center justify-center text-secondary transition-colors"
                                 title="Descargar">
                                 <Download className="w-4 h-4" />

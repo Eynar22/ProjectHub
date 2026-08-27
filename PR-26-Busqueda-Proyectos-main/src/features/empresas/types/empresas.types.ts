@@ -6,6 +6,9 @@
 
 import type { User } from '@/shared/types/user.types';
 
+/** Re-export por compatibilidad; el tipo vive en /shared. */
+export type { MemberRequest, MemberRequestEstado } from '@/shared/types/member-request.types';
+
 export interface CompanyImagen {
   id: number;
   url: string;
@@ -38,17 +41,6 @@ export interface Company {
   enlaces?: CompanyEnlace[];
 }
 
-/** Solicitud de un usuario para unirse a una empresa. */
-export interface MemberRequest {
-  id: number;
-  empresa_id: number;
-  usuario_id: number;
-  usuario?: User;
-  documento_url?: string;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
-  fecha_creacion: string;
-}
-
 /** Datos del registrante al crear una empresa (formulario de registro). */
 export interface CompanyRegistrant {
   name: string;
@@ -56,8 +48,9 @@ export interface CompanyRegistrant {
   email: string;
 }
 
-/** Campos parciales que se ENVÍAN al actualizar una empresa. */
-export type ActualizarCompanyDto = Partial<Company> & {
+/** Campos parciales que se ENVÍAN al actualizar una empresa.
+ * `imagenes`/`enlaces` de la entidad se sustituyen por las formas de envío. */
+export type ActualizarCompanyDto = Partial<Omit<Company, 'imagenes' | 'enlaces'>> & {
   imagenes_urls?: string[];
   enlaces?: { url: string; nombre?: string }[];
 };

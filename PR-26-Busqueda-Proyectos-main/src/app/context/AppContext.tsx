@@ -13,6 +13,8 @@ import {
   useProyectosArchivados,
   useSolicitudesEnviadas,
 } from '@/features/proyectos';
+import { empresasService, EMPRESAS_KEYS, useEmpresas } from '@/features/empresas';
+import { usuariosService, USUARIOS_KEYS, useUsuarios } from '@/features/usuarios';
 
 /* Los tipos del dominio viven ahora en /shared y /features (Anexo B7).
  * Se re-exportan aquí solo por compatibilidad con imports antiguos
@@ -59,7 +61,6 @@ interface AppContextType {
   messages: Message[];
   tasks: Task[];
   resources: Resource[];
-  memberRequests: MemberRequest[];
   loading: boolean;
   login: (correo: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
@@ -86,14 +87,6 @@ interface AppContextType {
   blockCompany: (id: number) => Promise<void>;
   unblockCompany: (id: number) => Promise<void>;
   deleteCompany: (id: number) => Promise<void>;
-  approveMemberRequest: (requestId: number) => Promise<void>;
-  rejectMemberRequest: (requestId: number) => Promise<void>;
-  deleteMemberRequest: (requestId: number) => Promise<void>;
-  promoteToAdmin: (userId: number) => Promise<void>;
-  demoteToUser: (userId: number) => Promise<void>;
-  blockUser: (userId: number) => Promise<void>;
-  unblockUser: (userId: number) => Promise<void>;
-  deleteUser: (userId: number) => Promise<void>;
   transferProject: (projectId: number, newOwnerId: number) => Promise<void>;
   openBase64: (dataUrl: string) => void;
   refreshProjects: () => Promise<void>;
@@ -103,128 +96,49 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [memberRequests, setMemberRequests] = useState<MemberRequest[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ── Proyectos y solicitudes: ahora vienen de TanStack Query (feature
-  //    proyectos). Este context solo hace de puente hasta que las páginas
-  //    consuman los hooks directamente. ────────────────────────────────────
+  // ── Datos del servidor: TanStack Query. Este context solo hace de puente
+  //    hasta que las páginas consuman los hooks directamente. ─────────────
   const queryClient = useQueryClient();
-  const proyectosQuery = useProyectos();
-  const archivadosQuery = useProyectosArchivados(!!currentUser);
-  const solicitudesQuery = useSolicitudesEnviadas(!!currentUser);
-  const projects = proyectosQuery.data ?? [];
-  const archivedProjects = archivadosQuery.data ?? [];
-  const requests = solicitudesQuery.data ?? [];
+
+  const projects = useProyectos().data ?? [];
+  const archivedProjects = useProyectosArchivados(!!currentUser).data ?? [];
+  const requests = useSolicitudesEnviadas(!!currentUser).data ?? [];
+  const companies = useEmpresas().data ?? [];
+  const users = useUsuarios(!!currentUser).data ?? [];
+
   const invalidarProyectos = () =>
     queryClient.invalidateQueries({ queryKey: PROYECTOS_KEYS.todos });
+  const invalidarEmpresas = () =>
+    queryClient.invalidateQueries({ queryKey: EMPRESAS_KEYS.todas });
+  const invalidarUsuarios = () =>
+    queryClient.invalidateQueries({ queryKey: USUARIOS_KEYS.todos });
 
-  // Función auxiliar para cargar datos con reintentos
-  const fetchWithRetry = async <T,>(fn: () => Promise<T>, retries = 3): Promise<T | null> => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await fn();
-      } catch (err) {
-        console.error(`Attempt ${i + 1} failed:`, err);
-        if (i === retries - 1) throw err;
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    return null;
-  };
-
-  const loadInitialData = async () => {
+  // Persistencia de sesión: si hay token al arrancar, recuperar el usuario.
+  React.useEffect(() => {
     const token = storage.obtenerToken();
-    try {
-      if (token) {
-        try {
-          const user = await authService.obtenerPerfil();
-          setCurrentUser(user);
-        } catch (err) {
-          console.error('Auth persistence error:', err);
-          storage.limpiarSesion();
-        }
-      }
-
-      // Empresas y usuarios (proyectos/solicitudes los maneja TanStack Query).
-      const companiesData = await fetchWithRetry(() => api.get<Company[]>('/empresas'));
-      setCompanies(companiesData || []);
-
-      const token2 = storage.obtenerToken();
-      if (token2) {
-        try {
-          const usersData = await fetchWithRetry(() => api.get<User[]>('/usuarios'));
-          setUsers(usersData || []);
-        } catch (err) {
-          console.error('Error loading users:', err);
-          setUsers([]);
-        }
-      }
-    } catch (err) {
-      console.error('Error loading initial data:', err);
-      setCompanies(prev => prev || []);
-      setUsers(prev => prev || []);
-    } finally {
+    if (!token) {
       setLoading(false);
+      return;
     }
-  };
-
-  // Initial data fetch and auth persistence
-  React.useEffect(() => {
-    loadInitialData();
+    authService
+      .obtenerPerfil()
+      .then(setCurrentUser)
+      .catch(() => storage.limpiarSesion())
+      .finally(() => setLoading(false));
   }, []);
-
-  // Load membership requests when admin of a company logs in
-  React.useEffect(() => {
-    if (currentUser?.rol === 'admin' && currentUser?.empresa_id) {
-      api.get<MemberRequest[]>(`/usuarios/solicitudes/empresa/${currentUser.empresa_id}`)
-        .then(data => setMemberRequests(data || []))
-        .catch(err => console.error('Error loading member requests:', err));
-    }
-  }, [currentUser]);
-
-  // Polling silencioso de empresas / usuarios / solicitudes de membresía
-  // (cada 15s, salta si la pestaña está oculta). Proyectos y solicitudes de
-  // participación ya se refrescan solos vía TanStack Query.
-  React.useEffect(() => {
-    const interval = setInterval(async () => {
-      if (document.hidden) return;
-      try {
-        const companiesData = await api.get<Company[]>('/empresas').catch(() => null);
-        if (companiesData) setCompanies(companiesData);
-
-        const token = storage.obtenerToken();
-        if (token) {
-          const usersData = await api.get<User[]>('/usuarios').catch(() => null);
-          if (usersData) setUsers(usersData);
-
-          if (currentUser?.rol === 'admin' && currentUser?.empresa_id) {
-            const memberReqs = await api.get<MemberRequest[]>(`/usuarios/solicitudes/empresa/${currentUser.empresa_id}`).catch(() => null);
-            if (memberReqs) setMemberRequests(memberReqs);
-          }
-        }
-      } catch (err) {
-        // Fallos silenciosos para no molestar al usuario si hay un microcorte de internet
-      }
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [currentUser]);
 
   const login = async (correo: string, password: string) => {
     try {
       const res = await authService.login({ correo, password });
       storage.guardarToken(res.access_token);
       setCurrentUser(res.user);
-
-      // Cargar datos en segundo plano sin bloquear la redirección de login
-      loadInitialData();
-
+      // El resto de datos los cargan los hooks de TanStack Query al activarse
+      // la sesión (enabled: !!currentUser).
       return { success: true };
     } catch (err: any) {
       console.error('Login error:', err);
@@ -235,6 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     storage.limpiarSesion();
     setCurrentUser(null);
+    queryClient.clear();
   };
 
   const openBase64 = (base64Data: string) => {
@@ -270,8 +185,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     id: number,
     data: Partial<Company> & { imagenes_urls?: string[]; enlaces?: { url: string; nombre?: string }[] },
   ) => {
-    const updated = await api.patch<Company>(`/empresas/${id}`, data);
-    setCompanies(prev => prev.map(c => c.id === id ? updated : c));
+    await empresasService.actualizar(id, data);
+    invalidarEmpresas();
     toast.success('Empresa actualizada');
   };
 
@@ -285,8 +200,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => {
-    const updated = await api.patch<User>('/usuarios/me', data);
+    const updated = await usuariosService.actualizarPerfil(data);
     setCurrentUser(updated);
+    invalidarUsuarios();
     toast.success('Perfil actualizado');
   };
 
@@ -390,66 +306,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const approveCompany = async (id: number) => {
-    setCompanies(prev => prev.map(c => c.id === id ? { ...c, estado: 'aprobado' } : c));
-    api.patch(`/empresas/${id}/aprobar`, {}).catch(() => toast.error('Error al aprobar'));
+    try { await empresasService.aprobar(id); } catch { toast.error('Error al aprobar'); }
+    invalidarEmpresas();
   };
 
   const blockCompany = async (id: number) => {
-    setCompanies(prev => prev.map(c => c.id === id ? { ...c, estado: 'bloqueado' } : c));
-    api.patch(`/empresas/${id}/bloquear`, {}).catch(() => toast.error('Error al bloquear'));
+    try { await empresasService.bloquear(id); } catch { toast.error('Error al bloquear'); }
+    invalidarEmpresas();
   };
 
   const unblockCompany = async (id: number) => {
-    setCompanies(prev => prev.map(c => c.id === id ? { ...c, estado: 'aprobado' } : c));
-    api.patch(`/empresas/${id}/desbloquear`, {}).catch(() => toast.error('Error al desbloquear'));
+    try { await empresasService.desbloquear(id); } catch { toast.error('Error al desbloquear'); }
+    invalidarEmpresas();
   };
 
   const deleteCompany = async (id: number) => {
-    setCompanies(prev => prev.filter(c => c.id !== id));
-    api.delete(`/empresas/${id}`).catch(() => toast.error('Error al eliminar'));
+    try { await empresasService.eliminar(id); } catch { toast.error('Error al eliminar'); }
+    invalidarEmpresas();
   };
 
-  const approveMemberRequest = async (requestId: number) => {
-    setMemberRequests(prev => prev.map(mr => mr.id === requestId ? { ...mr, estado: 'aprobado' } : mr));
-    api.patch(`/usuarios/solicitudes/${requestId}/aprobar`, {}).catch(() => toast.error('Error al aprobar solicitud'));
-  };
-
-  const rejectMemberRequest = async (requestId: number) => {
-    setMemberRequests(prev => prev.map(mr => mr.id === requestId ? { ...mr, estado: 'rechazado' } : mr));
-    api.patch(`/usuarios/solicitudes/${requestId}/rechazar`, {}).catch(() => toast.error('Error al rechazar solicitud'));
-  };
-
-  const deleteMemberRequest = async (requestId: number) => {
-    setMemberRequests(prev => prev.filter(mr => mr.id !== requestId));
-    api.delete(`/usuarios/solicitudes/${requestId}`).catch(() => toast.error('Error al eliminar solicitud'));
-  };
-
-  const promoteToAdmin = async (userId: number) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, rol: 'admin' } : u));
-    api.patch(`/usuarios/${userId}/promover`, {}).catch(() => toast.error('Error al promover'));
-  };
-
-  const demoteToUser = async (userId: number) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, rol: 'empleado' } : u));
-    api.patch(`/usuarios/${userId}/degradar`, {}).catch(() => toast.error('Error al degradar'));
-  };
-
-  const blockUser = async (userId: number) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, estado: 'bloqueado' } : u));
-    api.patch(`/usuarios/${userId}/bloquear`, {}).catch(() => toast.error('Error al bloquear usuario'));
-  };
-
-  const unblockUser = async (userId: number) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, estado: 'activo' } : u));
-    api.patch(`/usuarios/${userId}/desbloquear`, {}).catch(() => toast.error('Error al desbloquear usuario'));
-  };
-
-  const deleteUser = async (userId: number) => {
-    if (confirm('¿Estás seguro de eliminar este usuario?')) {
-      setUsers(prev => prev.filter(u => u.id !== userId));
-      api.delete(`/usuarios/${userId}`).catch(() => toast.error('Error al eliminar usuario'));
-    }
-  };
+  // La moderación de usuarios y las solicitudes de membresía se consumen ahora
+  // directamente desde '@/features/usuarios' (useModerarUsuario,
+  // useSolicitudesMembresia, useResponderSolicitudMembresia, ...).
 
   const transferProject = async (projectId: number, newOwnerId: number) => {
     await proyectosService.transferir(projectId, newOwnerId);
@@ -479,7 +357,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         messages,
         tasks,
         resources,
-        memberRequests,
         loading,
         login,
         logout,
@@ -504,14 +381,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         blockCompany,
         unblockCompany,
         deleteCompany,
-        approveMemberRequest,
-        rejectMemberRequest,
-        deleteMemberRequest,
-        promoteToAdmin,
-        demoteToUser,
-        blockUser,
-        unblockUser,
-        deleteUser,
         openBase64,
         transferProject,
       }}
