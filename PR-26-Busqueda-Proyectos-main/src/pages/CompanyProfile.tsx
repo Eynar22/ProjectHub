@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
 import { useCambiarPassword } from '@/features/auth';
@@ -18,7 +19,7 @@ import {
 import { motion } from 'motion/react';
 
 function InfoRow({ icon: Icon, label, value, color = 'text-muted-foreground' }: {
-  icon: any; label: string; value: string; color?: string;
+  icon: ComponentType<{ className?: string }>; label: string; value: string; color?: string;
 }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">

@@ -1,5 +1,6 @@
 import { useDrop } from 'react-dnd';
 import { TaskCard } from './TaskCard';
+import type { WorkspaceTask } from './types';
 
 export function TaskColumn({
   title,
@@ -10,9 +11,9 @@ export function TaskColumn({
 }: {
   title: string;
   columna_id: number;
-  tasks: any[];
+  tasks: WorkspaceTask[];
   onDrop: (taskId: number, newColId: number) => void;
-  onEditTask: (task: any) => void;
+  onEditTask: (task: WorkspaceTask) => void;
 }) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'TASK',
@@ -24,7 +25,7 @@ export function TaskColumn({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  })) as any;
+  }));
 
   const colColors: Record<string, string> = {
     'Por Hacer': 'border-t-slate-400',

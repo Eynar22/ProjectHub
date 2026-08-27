@@ -14,7 +14,9 @@ export default function AdminCompanies() {
   const { data: companies = [], isError, refetch } = useEmpresas();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'blocked' | 'rejected'>((searchParams.get('filter') as any) || 'all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'blocked' | 'rejected'>(
+    (searchParams.get('filter') as 'all' | 'pending' | 'approved' | 'blocked' | 'rejected') || 'all',
+  );
 
   const filteredCompanies = companies.filter(company => {
     const matchesSearch = company.nombre.toLowerCase().includes(searchTerm.toLowerCase());

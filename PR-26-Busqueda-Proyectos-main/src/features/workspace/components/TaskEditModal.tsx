@@ -4,7 +4,7 @@ import { Input, TextArea } from '@/shared/components/ui/Input';
 import { Modal } from '@/shared/components/ui/Modal';
 import { AssigneeSelector } from './AssigneeSelector';
 import type { User } from '@/features/usuarios';
-import type { WorkspaceMember } from './types';
+import type { WorkspaceMember, WorkspaceTask } from './types';
 
 export function TaskEditModal({
   task,
@@ -28,7 +28,7 @@ export function TaskEditModal({
   onDelete,
   onSave,
 }: {
-  task: any;
+  task: WorkspaceTask;
   onClose: () => void;
   editTaskTitle: string;
   setEditTaskTitle: (v: string) => void;
@@ -130,7 +130,7 @@ export function TaskEditModal({
 
           <div className="mb-4 max-h-60 space-y-4 overflow-y-auto pr-2">
             {task.comentarios && task.comentarios.length > 0 ? (
-              task.comentarios.map((comment: any) => {
+              task.comentarios.map((comment) => {
                 const commenter = users.find((u) => u.id === comment.usuario_id);
                 return (
                   <div

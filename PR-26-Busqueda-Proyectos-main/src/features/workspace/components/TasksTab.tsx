@@ -46,7 +46,7 @@ export function TasksTab({
   kanbanColumns: KanbanColumn[];
   projectTasks: WorkspaceTask[];
   onMoveTask: (taskId: number, newColId: number) => void;
-  onEditTask: (task: any) => void;
+  onEditTask: (task: WorkspaceTask) => void;
 }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -74,7 +74,7 @@ export function TasksTab({
           <div className="flex flex-wrap gap-3 items-center mb-4">
             <select
               value={newTaskPriority}
-              onChange={(e) => setNewTaskPriority(e.target.value as any)}
+              onChange={(e) => setNewTaskPriority(e.target.value as 'baja' | 'media' | 'alta')}
               className="px-3 py-2 bg-input-background border border-input rounded-lg text-sm"
             >
               <option value="baja">🟢 Prioridad Baja</option>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
+import type { ComponentType } from 'react';
+import { useUsuarios, useModerarUsuario, type AccionUsuario, type User } from '@/features/usuarios';
 import { useEmpresas } from '@/features/empresas';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
@@ -14,7 +15,7 @@ import {
   Building2, ChevronDown, Crown, User as UserIcon, AlertTriangle,
 } from 'lucide-react';
 
-const ROL_CFG: Record<string, { label: string; bg: string; text: string; icon: any }> = {
+const ROL_CFG: Record<string, { label: string; bg: string; text: string; icon: ComponentType<{ className?: string }> }> = {
   superadmin: { label: 'Super Admin', bg: 'bg-muted', text: 'text-foreground', icon: Shield },
   admin:      { label: 'Admin',       bg: 'bg-info-subtle',   text: 'text-info-strong',   icon: Crown },
   empleado:   { label: 'Empleado',    bg: 'bg-muted',  text: 'text-muted-foreground',  icon: UserIcon },
@@ -34,7 +35,7 @@ export default function AdminUsers() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [userToBlock, setUserToBlock] = useState<any | null>(null);
+  const [userToBlock, setUserToBlock] = useState<User | null>(null);
 
   // Approved companies only
   const approvedCompanies = companies.filter(c => c.estado === 'aprobado');

@@ -32,8 +32,8 @@ export default tseslint.config(
       'react-hooks/preserve-manual-memoization': 'warn',
       'react-hooks/incompatible-library': 'warn',
 
-      // Anexo B7: prohibido `any`. Como warning mientras se depura el código heredado.
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // Anexo B7: prohibido `any`. Código heredado ya depurado (2026-08-27) -> error.
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },

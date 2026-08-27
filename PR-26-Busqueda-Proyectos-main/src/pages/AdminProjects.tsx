@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import {
@@ -6,6 +7,7 @@ import {
   useProyectosArchivados,
   useCambiarEstadoProyecto,
   useAutoTerminarProyectos,
+  type Project,
 } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
 import { useUsuarios } from '@/features/usuarios';
@@ -32,7 +34,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 type EstadoFilter = 'todos' | 'en_curso' | 'terminado' | 'archivado';
 
-const ESTADO_CONFIG: Record<string, { bg: string; text: string; label: string; icon: any }> = {
+const ESTADO_CONFIG: Record<string, { bg: string; text: string; label: string; icon: ComponentType<{ className?: string }> }> = {
   en_curso: { bg: 'bg-info-subtle', text: 'text-info-strong', label: 'En Curso', icon: PlayCircle },
   terminado: { bg: 'bg-success-subtle', text: 'text-success-strong', label: 'Terminado', icon: CheckCircle2 },
   archivado: { bg: 'bg-muted', text: 'text-muted-foreground', label: 'Archivado', icon: Archive },
@@ -69,7 +71,7 @@ function EstadoDropdown({
     return () => document.removeEventListener('mousedown', handler);
   }, [onClose]);
 
-  const options: { key: 'en_curso' | 'terminado' | 'archivado'; label: string; icon: any; separator?: boolean }[] = [
+  const options: { key: 'en_curso' | 'terminado' | 'archivado'; label: string; icon: ComponentType<{ className?: string }>; separator?: boolean }[] = [
     { key: 'en_curso', label: 'En Curso', icon: PlayCircle },
     { key: 'terminado', label: 'Terminado', icon: CheckCircle2 },
     { key: 'archivado', label: 'Archivar', icon: Archive, separator: true },
@@ -108,7 +110,7 @@ function EstadoTableCell({
   isLoading,
   onSelect,
 }: {
-  project: any;
+  project: Project;
   isLoading: boolean;
   onSelect: (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => void;
 }) {
@@ -158,16 +160,16 @@ export default function AdminProjects() {
 
   const allProjects = [...projects, ...archivedProjects];
 
-  const filtered = allProjects.filter((project: any) => {
-    const creator = users.find((u: any) => u.id === project.creador_id);
-    const company = companies.find((c: any) => c.id === creator?.empresa_id);
+  const filtered = allProjects.filter((project) => {
+    const creator = users.find((u) => u.id === project.creador_id);
+    const company = companies.find((c) => c.id === creator?.empresa_id);
     const matchSearch =
       project.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       company?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       creator?.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase());
     const matchEstado = estadoFilter === 'todos' || (project.estado || 'en_curso') === estadoFilter;
     return matchSearch && matchEstado;
-  }).sort((a: any, b: any) => {
+  }).sort((a, b) => {
     const dateA = new Date(a.fecha_creacion || a.id).getTime();
     const dateB = new Date(b.fecha_creacion || b.id).getTime();
     return dateB - dateA;
@@ -175,8 +177,8 @@ export default function AdminProjects() {
 
   const counts = {
     todos: allProjects.length,
-    en_curso: allProjects.filter((p: any) => (p.estado || 'en_curso') === 'en_curso').length,
-    terminado: allProjects.filter((p: any) => p.estado === 'terminado').length,
+    en_curso: allProjects.filter((p) => (p.estado || 'en_curso') === 'en_curso').length,
+    terminado: allProjects.filter((p) => p.estado === 'terminado').length,
     archivado: archivedProjects.length,
   };
 
@@ -195,7 +197,7 @@ export default function AdminProjects() {
     autoTerminar.mutate();
   };
 
-  const FILTER_TABS: { key: EstadoFilter; label: string; icon: any }[] = [
+  const FILTER_TABS: { key: EstadoFilter; label: string; icon: ComponentType<{ className?: string }> }[] = [
     { key: 'todos', label: 'Todos', icon: FolderKanban },
     { key: 'en_curso', label: 'En Curso', icon: PlayCircle },
     { key: 'terminado', label: 'Terminados', icon: CheckCircle2 },
@@ -279,9 +281,9 @@ export default function AdminProjects() {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {filtered.map((project: any, index: number) => {
-                      const creator = users.find((u: any) => u.id === project.creador_id);
-                      const company = companies.find((c: any) => c.id === creator?.empresa_id);
+                    {filtered.map((project, index) => {
+                      const creator = users.find((u) => u.id === project.creador_id);
+                      const company = companies.find((c) => c.id === creator?.empresa_id);
                       const estado = project.estado || 'en_curso';
                       const isLoading = loadingId === project.id;
 

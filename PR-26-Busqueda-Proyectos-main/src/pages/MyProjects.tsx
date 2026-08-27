@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
@@ -7,6 +8,8 @@ import {
   useProyectosArchivados,
   useSolicitudesEnviadas,
   useCambiarEstadoProyecto,
+  type Project,
+  type Request,
 } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
 import { useUsuarios } from '@/features/usuarios';
@@ -24,7 +27,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 type TabKey = 'activos' | 'terminados' | 'archivados';
 
-const ESTADO_CFG: Record<string, { bg: string; text: string; label: string; icon: any }> = {
+const ESTADO_CFG: Record<string, { bg: string; text: string; label: string; icon: ComponentType<{ className?: string }> }> = {
   en_curso:  { bg: 'bg-info-subtle',    text: 'text-info-strong',    label: 'En Curso',  icon: PlayCircle },
   terminado: { bg: 'bg-success-subtle', text: 'text-success-strong', label: 'Terminado', icon: CheckCircle2 },
   archivado: { bg: 'bg-muted',   text: 'text-muted-foreground',   label: 'Archivado', icon: Archive },
@@ -54,7 +57,7 @@ function EstadoDropdown({ projectId, currentEstado, anchorRef, onSelect, onClose
     return () => document.removeEventListener('mousedown', h);
   }, [onClose]);
 
-  const opts: { key: 'en_curso' | 'terminado' | 'archivado'; label: string; icon: any; sep?: boolean }[] = [
+  const opts: { key: 'en_curso' | 'terminado' | 'archivado'; label: string; icon: ComponentType<{ className?: string }>; sep?: boolean }[] = [
     { key: 'en_curso',  label: 'En Curso',         icon: PlayCircle },
     { key: 'terminado', label: 'Terminado',         icon: CheckCircle2 },
     { key: 'archivado', label: 'Archivar proyecto', icon: Archive, sep: true },
@@ -85,7 +88,7 @@ function EstadoDropdown({ projectId, currentEstado, anchorRef, onSelect, onClose
 }
 
 function EstadoBadge({ project, onSelect }: {
-  project: any;
+  project: Project;
   onSelect: (id: number, e: 'en_curso' | 'terminado' | 'archivado') => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -114,20 +117,20 @@ function EstadoBadge({ project, onSelect }: {
 
 // ── Project card ─────────────────────────────────────────────────────────────
 function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
-  project: any; isOwner: boolean; tab: TabKey;
+  project: Project; isOwner: boolean; tab: TabKey;
   loadingId: number | null;
   onEstado: (id: number, e: 'en_curso' | 'terminado' | 'archivado') => void;
-  requests: any[];
+  requests: Request[];
 }) {
   const { currentUser } = useApp();
   const { data: users = [] } = useUsuarios(!!currentUser);
   const { data: companies = [] } = useEmpresas();
-  const creator = users.find((u: any) => u.id === project.creador_id);
-  const creatorCompany = companies.find((c: any) => c.id === creator?.empresa_id);
-  const pendingReqs = requests.filter((r: any) => r.proyecto_id === project.id && r.estado === 'pendiente');
+  const creator = users.find((u) => u.id === project.creador_id);
+  const creatorCompany = companies.find((c) => c.id === creator?.empresa_id);
+  const pendingReqs = requests.filter((r) => r.proyecto_id === project.id && r.estado === 'pendiente');
   const isLoading = loadingId === project.id;
-  
-  const isCollab = project.participantes?.some((pa: any) => pa.usuario_id === currentUser?.id);
+
+  const isCollab = project.participantes?.some((pa) => pa.usuario_id === currentUser?.id);
   const isSupervisor = !isOwner && !isCollab;
 
   return (
@@ -310,9 +313,9 @@ export default function MyProjects() {
   const myId = currentUser?.id;
 
   // Classify projects
-  const isMine    = (p: any) => p.creador_id === myId;
-  const isCollab  = (p: any) => !isMine(p) && p.participantes?.some((pa: any) => pa.usuario_id === myId);
-  const isInvolved = (p: any) => isMine(p) || isCollab(p);
+  const isMine    = (p: Project) => p.creador_id === myId;
+  const isCollab  = (p: Project) => !isMine(p) && p.participantes?.some((pa) => pa.usuario_id === myId);
+  const isInvolved = (p: Project) => isMine(p) || isCollab(p);
 
   const activos    = projects.filter(p => isInvolved(p) && (p.estado || 'en_curso') === 'en_curso');
   const terminados = projects.filter(p => isInvolved(p) && p.estado === 'terminado');
@@ -330,7 +333,7 @@ export default function MyProjects() {
     finally { setLoadingId(null); }
   };
 
-  const TABS: { key: TabKey; label: string; icon: any; count: number; color?: string }[] = [
+  const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }>; count: number; color?: string }[] = [
     { key: 'activos',    label: 'Activos',    icon: PlayCircle,  count: activos.length,    color: 'text-info-strong' },
     { key: 'terminados', label: 'Terminados', icon: CheckCircle2, count: terminados.length, color: 'text-success-strong' },
     { key: 'archivados', label: 'Archivados', icon: Archive,     count: archivados.length, color: 'text-muted-foreground' },

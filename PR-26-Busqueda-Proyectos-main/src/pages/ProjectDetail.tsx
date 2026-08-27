@@ -8,6 +8,7 @@ import {
   useSolicitudesEnviadas,
   useCrearSolicitud,
   useTransferirProyecto,
+  type Resource,
 } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
 import { useUsuarios } from '@/features/usuarios';
@@ -89,9 +90,9 @@ export default function ProjectDetail() {
 
   const recursosFolder = project?.recursos?.find(r => r.nombre === 'Recursos' && r.tipo === 'carpeta' && !r.padre_id);
 
-  const getAllFilesInFolder = (folderId: number | undefined): any[] => {
+  const getAllFilesInFolder = (folderId: number | undefined): Resource[] => {
     if (!folderId || !project?.recursos) return [];
-    const result: any[] = [];
+    const result: Resource[] = [];
     const children = project.recursos.filter(r => r.padre_id === folderId);
     children.forEach(child => {
       if (child.tipo === 'archivo') {

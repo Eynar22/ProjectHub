@@ -22,6 +22,7 @@ import type { Company } from '@/features/empresas/types/empresas.types';
 import type {
   Project,
   Request,
+  CrearProjectDto,
 } from '@/features/proyectos/types/proyectos.types';
 
 interface AppContextType {
@@ -40,7 +41,7 @@ interface AppContextType {
   ) => Promise<void>;
   updateProfile: (data: { nombre_completo?: string; cargo?: string; foto_url?: string }) => Promise<void>;
   refreshCurrentUser: () => Promise<void>;
-  createProject: (project: any) => Promise<Project>;
+  createProject: (project: CrearProjectDto) => Promise<Project>;
   updateProject: (id: number, data: Partial<Project>) => Promise<void>;
   updateProjectEstado: (id: number, estado: 'en_curso' | 'terminado' | 'archivado') => Promise<void>;
   createRequest: (request: { proyecto_id: number; mensaje: string }) => Promise<void>;
@@ -99,9 +100,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // El resto de datos los cargan los hooks de TanStack Query al activarse
       // la sesión (enabled: !!currentUser).
       return { success: true };
-    } catch (err: any) {
+    } catch (err) {
       console.error('Login error:', err);
-      return { success: false, message: err.message || 'Error al iniciar sesión' };
+      return { success: false, message: err instanceof Error ? err.message : 'Error al iniciar sesión' };
     }
   };
 
@@ -164,7 +165,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Puente hacia la feature proyectos. Estas funciones se conservan solo para
   // las páginas que aún consumen useApp(); la lógica real vive en el servicio.
-  const createProject = async (project: any) => {
+  const createProject = async (project: CrearProjectDto) => {
     try {
       const newProject = await proyectosService.crear(project);
       invalidarProyectos();

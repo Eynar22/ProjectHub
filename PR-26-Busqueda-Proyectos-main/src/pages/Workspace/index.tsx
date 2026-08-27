@@ -27,15 +27,15 @@ import {
 } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import type { ProyectoSolicitud, TabType } from './types';
-import { InfoTab } from './InfoTab';
-import { TeamTab } from './TeamTab';
-import { ChatTab } from './ChatTab';
-import { TasksTab } from './TasksTab';
-import { ResourcesTab } from './ResourcesTab';
-import { SolicitudesTab } from './SolicitudesTab';
-import { TaskEditModal } from './TaskEditModal';
-import { NewFolderModal } from './NewFolderModal';
+import type { ProyectoSolicitud, TabType, WorkspaceMember, WorkspaceTask } from '@/features/workspace/components/types';
+import { InfoTab } from '@/features/workspace/components/InfoTab';
+import { TeamTab } from '@/features/workspace/components/TeamTab';
+import { ChatTab } from '@/features/workspace/components/ChatTab';
+import { TasksTab } from '@/features/workspace/components/TasksTab';
+import { ResourcesTab } from '@/features/workspace/components/ResourcesTab';
+import { SolicitudesTab } from '@/features/workspace/components/SolicitudesTab';
+import { TaskEditModal } from '@/features/workspace/components/TaskEditModal';
+import { NewFolderModal } from '@/features/workspace/components/NewFolderModal';
 
 export default function Workspace() {
   const { id } = useParams();
@@ -90,7 +90,7 @@ export default function Workspace() {
   const [newTaskAssignees, setNewTaskAssignees] = useState<number[]>([]);
 
   // Task Editing Modal State
-  const [editingTask, setEditingTask] = useState<any | null>(null);
+  const [editingTask, setEditingTask] = useState<WorkspaceTask | null>(null);
   const [editTaskTitle, setEditTaskTitle] = useState('');
   const [editTaskDesc, setEditTaskDesc] = useState('');
   const [editTaskPriority, setEditTaskPriority] = useState<'baja' | 'media' | 'alta'>('media');
@@ -128,13 +128,7 @@ export default function Workspace() {
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
 
   // ── PROJECT MEMBERS — loaded directly from API (includes cross-company members) ──
-  const [projectMembers, setProjectMembers] = useState<Array<{
-    id: number;
-    nombre_completo: string;
-    correo: string;
-    cargo?: string;
-    empresa_id?: number;
-  }>>([]);
+  const [projectMembers, setProjectMembers] = useState<WorkspaceMember[]>([]);
 
   // Fallback: if API not yet loaded, derive from context
   const participatingUsers = projectMembers.length > 0
@@ -191,7 +185,7 @@ export default function Workspace() {
         tareasService.listarColumnas(pId),
         tareasService.listarPorProyecto(pId),
       ]);
-      setKanbanColumns(Array.isArray(colData) ? colData.map((c: any) => ({ id: c.id, nombre: c.nombre, orden: c.orden })) : []);
+      setKanbanColumns(Array.isArray(colData) ? colData.map((c) => ({ id: c.id, nombre: c.nombre, orden: c.orden })) : []);
       setLocalTasks(Array.isArray(taskData) ? taskData : []);
     } catch (err) {
       console.error('Error fetching tasks:', err);
@@ -211,15 +205,18 @@ export default function Workspace() {
       const data = await proyectosService.obtenerPorId(id);
       setProjectCompleto(data);
 
-      const members: any[] = [];
+      const members: WorkspaceMember[] = [];
       if (data.creador) {
         members.push(data.creador);
       } else if (creator) {
         members.push(creator);
       }
       if (Array.isArray(data.participantes)) {
-        data.participantes.forEach((p: any) => {
-          const u = p.usuario ?? p;
+        data.participantes.forEach((p) => {
+          // Defensivo: si el backend algún día devuelve el participante sin el
+          // sub-objeto `usuario`, se descarta (u.id quedará undefined) en vez
+          // de romper el render.
+          const u = (p.usuario ?? p) as WorkspaceMember;
           if (u?.id && !members.some(m => m.id === u.id)) {
             members.push(u);
           }
@@ -443,14 +440,14 @@ export default function Workspace() {
     await tareasService.actualizar(taskId, { columna_id: newColId });
   };
 
-  const handleOpenEditModal = (task: any) => {
+  const handleOpenEditModal = (task: WorkspaceTask) => {
     setEditingTask(task);
     setEditTaskTitle(task.titulo);
     setEditTaskDesc(task.descripcion || '');
     setEditTaskPriority(task.prioridad);
     setEditTaskDeadline(task.fecha_limite || '');
     // Initialize assignees from the ManyToMany relation
-    setEditTaskAssignees((task.usuarios ?? []).map((u: any) => u.id));
+    setEditTaskAssignees((task.usuarios ?? []).map((u) => u.id));
   };
 
   const handleSaveEditTask = async () => {
@@ -548,11 +545,11 @@ export default function Workspace() {
   };
 
   const tabs = [
-    { id: 'info' as TabType, label: 'Información', icon: Info },
-    { id: 'team' as TabType, label: 'Equipo', icon: Users },
-    { id: 'chat' as TabType, label: 'Chat', icon: MessageSquare },
-    { id: 'tasks' as TabType, label: 'Tareas', icon: ListTodo },
-    { id: 'resources' as TabType, label: 'Recursos', icon: Folder },
+    { id: 'info' as TabType, label: 'Información', icon: Info, badge: 0 },
+    { id: 'team' as TabType, label: 'Equipo', icon: Users, badge: 0 },
+    { id: 'chat' as TabType, label: 'Chat', icon: MessageSquare, badge: 0 },
+    { id: 'tasks' as TabType, label: 'Tareas', icon: ListTodo, badge: 0 },
+    { id: 'resources' as TabType, label: 'Recursos', icon: Folder, badge: 0 },
     ...(isOwner ? [{ id: 'solicitudes' as TabType, label: 'Solicitudes', icon: UserPlus, badge: pendingJoinRequests.length }] : []),
   ];
 
@@ -639,7 +636,7 @@ export default function Workspace() {
             <div className="flex gap-2">
               {tabs.map(tab => {
                 const Icon = tab.icon;
-                const hasBadge = 'badge' in tab && (tab as any).badge > 0;
+                const hasBadge = tab.badge > 0;
                 return (
                   <button
                     key={tab.id}
@@ -653,7 +650,7 @@ export default function Workspace() {
                     {tab.label}
                     {hasBadge && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 bg-warning/15 text-warning rounded-full border border-warning/20">
-                        {(tab as any).badge}
+                        {tab.badge}
                       </span>
                     )}
                   </button>

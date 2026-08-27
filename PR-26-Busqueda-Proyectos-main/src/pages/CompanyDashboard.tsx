@@ -88,6 +88,7 @@ export default function CompanyDashboard() {
       icon: FolderKanban,
       color: 'bg-primary',
       link: '/dashboard/projects#owned',
+      pulse: false,
     },
     {
       label: 'Colaboraciones',
@@ -96,6 +97,7 @@ export default function CompanyDashboard() {
       icon: Users,
       color: 'bg-success',
       link: '/dashboard/projects#colab',
+      pulse: false,
     },
     {
       label: 'Solicitudes de Proyectos',
@@ -163,7 +165,7 @@ export default function CompanyDashboard() {
           <div className={`grid gap-6 mb-8 ${currentUser?.rol === 'admin' ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
             {stats.map((stat, index) => {
               const Icon = stat.icon;
-              const hasPulse = (stat as any).pulse;
+              const hasPulse = stat.pulse;
 
               const cardContent = (
                 <Card hover className="p-6 transition-all border-none shadow-sm h-full flex flex-col justify-between">

@@ -1,21 +1,21 @@
 import { Calendar } from 'lucide-react';
 import { useDrag } from 'react-dnd';
 import { Card } from '@/shared/components/ui/Card';
+import type { WorkspaceTask } from './types';
 
 export function TaskCard({
   task,
-  onMove,
   onClick
 }: {
-  task: any;
+  task: WorkspaceTask;
   onMove: (taskId: number, newColId: number) => void;
-  onClick: (task: any) => void;
+  onClick: (task: WorkspaceTask) => void;
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'TASK',
     item: { id: task.id, columna_id: task.columna_id },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-  })) as any;
+  }));
 
   const priorityConfig = {
     alta: { label: 'Alta', cls: 'bg-destructive/10 text-destructive border-destructive/20' },
