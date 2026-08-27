@@ -1,13 +1,13 @@
 import { Link } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import { useEmpresas } from '@/features/empresas';
 import { solicitudesService } from '@/features/proyectos';
 import { useSolicitudesMembresia, useResponderSolicitudMembresia } from '@/features/usuarios';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { OnboardingWizard } from '../components/OnboardingWizard';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { OnboardingWizard } from '@/shared/components/OnboardingWizard';
 import {
   FolderKanban,
   Plus,
@@ -31,7 +31,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { MemberRequest } from '../context/AppContext';
+import type { MemberRequest } from '@/app/context/AppContext';
 
 interface ProjectPendingGroup {
   proyecto_id: number;

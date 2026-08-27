@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { X, MessageSquare, Trash2 } from 'lucide-react';
-import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
-import { Input, TextArea } from '../../components/Input';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { Input, TextArea } from '@/shared/components/ui/Input';
 import { AssigneeSelector } from './AssigneeSelector';
-import type { User } from '../../context/AppContext';
+import type { User } from '@/app/context/AppContext';
 import type { WorkspaceMember } from './types';
 
 export function TaskEditModal({

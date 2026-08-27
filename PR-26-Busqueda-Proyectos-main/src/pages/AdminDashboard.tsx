@@ -1,7 +1,7 @@
-import { useApp } from '../context/AppContext';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
+import { useApp } from '@/app/context/AppContext';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
 import { Link } from 'react-router';
 import { Building2, FolderKanban, Users, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
-import { useApp } from '../context/AppContext';
-import { useTheme } from '../context/ThemeContext';
+import { useApp } from '@/app/context/AppContext';
+import { useTheme } from '@/app/context/ThemeContext';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Building2, LogOut, LayoutDashboard, Compass,

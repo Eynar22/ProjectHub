@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { useEmpresas } from '@/features/empresas';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { Input } from '@/shared/components/ui/Input';
 import { Building2, Search, Users, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
 

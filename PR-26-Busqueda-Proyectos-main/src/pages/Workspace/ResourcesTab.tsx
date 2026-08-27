@@ -3,9 +3,9 @@ import { motion } from 'motion/react';
 import {
   ChevronRight, FolderPlus, Upload, Loader2, Folder, FileText, Image, Trash2,
 } from 'lucide-react';
-import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
-import type { Resource } from '../../context/AppContext';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import type { Resource } from '@/app/context/AppContext';
 
 export function ResourcesTab({
   fileInputRef,

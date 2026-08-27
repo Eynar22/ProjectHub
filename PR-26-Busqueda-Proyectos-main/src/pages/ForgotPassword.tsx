@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useSolicitarCodigoRecuperacion } from '@/features/auth';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Navbar } from '../components/Navbar';
+import { Input } from '@/shared/components/ui/Input';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Navbar } from '@/shared/components/layout/Navbar';
 import { KeyRound, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 

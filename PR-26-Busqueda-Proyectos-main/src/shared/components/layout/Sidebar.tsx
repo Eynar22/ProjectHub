@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import {
   LayoutDashboard, FolderKanban, Building2, Users,
   Plus, Search, UserCheck, PanelLeftClose, PanelLeftOpen,

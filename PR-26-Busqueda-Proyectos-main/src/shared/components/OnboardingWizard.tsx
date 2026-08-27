@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { usuariosService } from '@/features/usuarios';
-import { useApp } from '../context/AppContext';
-import { Input, TextArea } from './Input';
-import { Button } from './Button';
-import { Card } from './Card';
+import { useApp } from '@/app/context/AppContext';
+import { Input, TextArea } from '@/shared/components/ui/Input';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { X, Rocket, FolderPlus, UserPlus, PartyPopper, Loader2, Trash2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 

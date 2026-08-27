@@ -1,6 +1,6 @@
 import { Calendar } from 'lucide-react';
 import { useDrag } from 'react-dnd';
-import { Card } from '../../components/Card';
+import { Card } from '@/shared/components/ui/Card';
 
 export function TaskCard({
   task,

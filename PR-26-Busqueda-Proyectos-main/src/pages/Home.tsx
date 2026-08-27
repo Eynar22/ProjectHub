@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
 import { motion } from 'motion/react';
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { useApp } from '../context/AppContext';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { useApp } from '@/app/context/AppContext';
 import {
   Briefcase,
   Users,

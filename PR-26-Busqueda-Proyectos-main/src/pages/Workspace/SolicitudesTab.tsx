@@ -2,9 +2,9 @@ import { motion } from 'motion/react';
 import {
   Clock, Mail, Briefcase, Building2, UserCheck, UserX, CheckCircle2,
 } from 'lucide-react';
-import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
-import type { Company } from '../../context/AppContext';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import type { Company } from '@/app/context/AppContext';
 import type { ProyectoSolicitud } from './types';
 
 export function SolicitudesTab({

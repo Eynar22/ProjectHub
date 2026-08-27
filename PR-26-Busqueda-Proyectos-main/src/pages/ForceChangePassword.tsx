@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useCambiarPassword } from '@/features/auth';
-import { useApp } from '../context/AppContext';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Navbar } from '../components/Navbar';
+import { useApp } from '@/app/context/AppContext';
+import { Input } from '@/shared/components/ui/Input';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Navbar } from '@/shared/components/layout/Navbar';
 import { ShieldAlert } from 'lucide-react';
 import { motion } from 'motion/react';
 

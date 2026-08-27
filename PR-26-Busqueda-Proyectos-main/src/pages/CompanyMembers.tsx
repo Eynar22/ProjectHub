@@ -1,4 +1,4 @@
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import { useEmpresas } from '@/features/empresas';
 import {
   useUsuarios,
@@ -8,10 +8,10 @@ import {
   useEliminarSolicitudMembresia,
 } from '@/features/usuarios';
 import { useState, useEffect } from 'react';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
 import {
   UserCheck,
   UserX,
@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router';
-import type { MemberRequest } from '../context/AppContext';
+import type { MemberRequest } from '@/app/context/AppContext';
 
 
 export default function CompanyMembers() {

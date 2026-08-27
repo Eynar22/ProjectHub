@@ -4,10 +4,10 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Calendar, DollarSign, Users, Image, Upload, Loader2, X, Pencil } from 'lucide-react';
-import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
-import { Input, TextArea } from '../../components/Input';
-import type { Project } from '../../context/AppContext';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { Input, TextArea } from '@/shared/components/ui/Input';
+import type { Project } from '@/app/context/AppContext';
 
 const sliderSettings = {
   dots: true,

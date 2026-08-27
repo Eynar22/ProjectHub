@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { useEmpresa } from '@/features/empresas';
 import { useUsuarios, useModerarUsuario, type AccionUsuario } from '@/features/usuarios';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { Input } from '@/shared/components/ui/Input';
 import {
   Users, ArrowLeft, Search, UserCheck, UserMinus, Lock, Unlock,
   Building2, Crown, AlertTriangle, User as UserIcon

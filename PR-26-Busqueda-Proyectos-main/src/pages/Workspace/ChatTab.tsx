@@ -1,8 +1,8 @@
 import { RefObject } from 'react';
 import { motion } from 'motion/react';
 import { MessageSquare, Send } from 'lucide-react';
-import { Input } from '../../components/Input';
-import type { User } from '../../context/AppContext';
+import { Input } from '@/shared/components/ui/Input';
+import type { User } from '@/app/context/AppContext';
 import type { WorkspaceChatMessage } from './types';
 
 export function ChatTab({

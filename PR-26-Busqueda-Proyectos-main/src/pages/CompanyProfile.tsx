@@ -1,13 +1,13 @@
 import { useRef, useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
 import { useCambiarPassword } from '@/features/auth';
 import { useSubirArchivo } from '@/features/workspace';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input, TextArea } from '../components/Input';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { Input, TextArea } from '@/shared/components/ui/Input';
 import { toast } from 'sonner';
 import {
   Building2, User, FileText, Eye, Download,

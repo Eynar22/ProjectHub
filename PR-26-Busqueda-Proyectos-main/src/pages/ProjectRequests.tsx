@@ -1,8 +1,8 @@
 import { useParams, Link } from 'react-router';
-import { useApp } from '../context/AppContext';
-import { Navbar } from '../components/Navbar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { useApp } from '@/app/context/AppContext';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
 import { Building2, Check, X, ArrowLeft, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 

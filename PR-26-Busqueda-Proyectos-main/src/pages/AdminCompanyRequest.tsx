@@ -1,11 +1,11 @@
 import { useParams, useNavigate, Link } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useModerarEmpresa } from '@/features/empresas';
 import { useUsuario } from '@/features/usuarios';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
 import { 
   Building2, 
   User, 

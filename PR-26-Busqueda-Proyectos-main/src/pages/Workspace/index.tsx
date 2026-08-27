@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router';
 import { toast } from 'sonner';
-import { useApp } from '../../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import { proyectosService, solicitudesService, type Project } from '@/features/proyectos';
 import {
   tareasService,
@@ -11,8 +11,8 @@ import {
   useEliminarRecurso,
   useSubirArchivo,
 } from '@/features/workspace';
-import { Navbar } from '../../components/Navbar';
-import { Button } from '../../components/Button';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Button } from '@/shared/components/ui/Button';
 import {
   ArrowLeft,
   Info,

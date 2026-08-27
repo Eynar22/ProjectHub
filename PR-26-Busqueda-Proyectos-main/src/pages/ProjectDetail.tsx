@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router';
-import { useApp } from '../context/AppContext';
+import { useApp } from '@/app/context/AppContext';
 import {
   useProyecto,
   useCrearSolicitud,
   useTransferirProyecto,
 } from '@/features/proyectos';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { TextArea } from '../components/Input';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Card } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
+import { TextArea } from '@/shared/components/ui/Input';
 import {
   Building2,
   FileText,

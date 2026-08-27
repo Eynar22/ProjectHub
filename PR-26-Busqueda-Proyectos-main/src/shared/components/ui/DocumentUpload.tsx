@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { compressImage } from '../utils/fileUtils';
+import { compressImage } from '@/shared/utils/fileUtils';
 
 interface DocumentUploadProps {
   label: string;
