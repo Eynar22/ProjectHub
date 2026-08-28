@@ -52,6 +52,7 @@ export const proyectosService = {
       nombre: dto.name,
       descripcion_corta: dto.shortDescription,
       descripcion_completa: dto.description,
+      problema: dto.problema,
       categoria: dto.categoria || 'Tecnología',
       fecha_inicio: dto.startDate,
       fecha_fin: dto.endDate,

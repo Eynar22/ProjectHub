@@ -6,6 +6,7 @@ import { Proyecto } from '../entities/proyecto.entity';
 import { ProyectoImagen } from '../entities/proyecto-imagen.entity';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { SolicitudProyecto } from '../entities/solicitud-proyecto.entity';
+import { Usuario } from '../entities/usuario.entity';
 import { Chat } from '../entities/chat.entity';
 import { KanbanColumna } from '../entities/kanban-columna.entity';
 import { Recurso } from '../entities/recurso.entity';
@@ -17,6 +18,7 @@ import { Recurso } from '../entities/recurso.entity';
       ProyectoImagen,
       UsuarioProyecto,
       SolicitudProyecto,
+      Usuario,
       Chat,
       KanbanColumna,
       Recurso,

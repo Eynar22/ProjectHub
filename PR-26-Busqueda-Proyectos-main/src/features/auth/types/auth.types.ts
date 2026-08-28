@@ -46,6 +46,15 @@ export interface RegistroEmpleadoDto {
   empresa_id: number;
 }
 
+/** Registro de un usuario independiente, sin empresa. Acceso inmediato. */
+export interface RegistroIndependienteDto {
+  nombre_completo: string;
+  correo: string;
+  password: string;
+  cargo?: string;
+  documento_url?: string;
+}
+
 /* --- Formas que recibe el SERVICIO desde la UI (con File sin convertir) --- */
 
 export interface RegistrarEmpresaInput {
@@ -72,6 +81,15 @@ export interface RegistrarEmpleadoInput {
   cargo: string;
   empresa_id: number;
   documento: File;
+}
+
+export interface RegistrarIndependienteInput {
+  nombre_completo: string;
+  correo: string;
+  password: string;
+  cargo?: string;
+  /** CV en PDF; el servicio lo convierte a base64 antes de enviarlo. */
+  cv?: File | null;
 }
 
 export interface RestablecerPasswordInput {

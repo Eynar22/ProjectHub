@@ -18,6 +18,7 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import { TextArea } from '@/shared/components/ui/Input';
+import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import {
   Building2,
@@ -34,6 +35,7 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -56,6 +58,9 @@ const formatNumber = (num) => {
   return num.toString();
 };
 
+// El backend acepta hasta 20MB por request en base64; el CV se limita a 6MB.
+const MAX_CV_MB = 6;
+
 export default function ProjectDetail() {
   const { id } = useParams();
   const { currentUser, openBase64 } = useApp();
@@ -77,6 +82,8 @@ export default function ProjectDetail() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [selectedNewOwner, setSelectedNewOwner] = useState<number | ''>('');
   const [message, setMessage] = useState('');
+  const [propuesta, setPropuesta] = useState('');
+  const [cvFile, setCvFile] = useState<File | null>(null);
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
   const { data: projectCompleto } = useProyecto(id);
@@ -108,6 +115,8 @@ export default function ProjectDetail() {
 
   const isParticipant = project?.participantes?.some(p => p.usuario_id === currentUser?.id);
   const isOwner = currentUser?.id === project?.creador_id;
+  // Usuario independiente: sin empresa. Al postular debe enviar propuesta + CV.
+  const esIndependiente = currentUser?.rol === 'empleado' && !currentUser?.empresa_id;
   const hasPendingRequest = requests?.some(r => r.proyecto_id === project?.id && r.usuario_id === currentUser?.id && r.estado === 'pendiente');
 
   const canRequestParticipation =
@@ -134,10 +143,24 @@ export default function ProjectDetail() {
 
   const handleRequestParticipation = async () => {
     if (crearSolicitud.isPending || !project) return;
+
+    // Los postulantes independientes deben adjuntar propuesta de solución y CV.
+    if (esIndependiente) {
+      if (!propuesta.trim()) { toast.error('Escribe tu propuesta de solución'); return; }
+      if (!cvFile) { toast.error('Adjunta tu CV en PDF'); return; }
+    }
+
     try {
-      await crearSolicitud.mutateAsync({ proyectoId: project.id, mensaje: message });
+      await crearSolicitud.mutateAsync({
+        proyectoId: project.id,
+        mensaje: message,
+        propuesta: esIndependiente ? propuesta.trim() : undefined,
+        cv: esIndependiente ? cvFile : undefined,
+      });
       setShowRequestModal(false);
       setMessage('');
+      setPropuesta('');
+      setCvFile(null);
     } catch {
       /* el toast lo muestra el hook */
     }
@@ -263,6 +286,19 @@ export default function ProjectDetail() {
                 <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line mb-8">
                   {project.descripcion_completa}
                 </p>
+
+                {/* El problema que el proyecto busca resolver */}
+                {project.problema && (
+                  <div className="mb-8 rounded-2xl border border-warning/30 bg-warning-subtle p-5">
+                    <h2 className="text-[10px] font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
+                      <AlertOctagon className="w-3.5 h-3.5" />
+                      El problema
+                    </h2>
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                      {project.problema}
+                    </p>
+                  </div>
+                )}
 
                 {/* BLOQUE DE ESTADÍSTICAS Y CRONOGRAMA */}
                 <div className="space-y-6 pt-6 border-t border-border/50">
@@ -517,6 +553,37 @@ export default function ProjectDetail() {
           <p className="mb-1 text-xs font-bold uppercase text-muted-foreground">Solicitante</p>
           <p className="font-semibold">{currentUser?.nombre_completo}</p>
         </div>
+
+        {esIndependiente && (
+          <>
+            {project.problema && (
+              <div className="mb-4 rounded-xl border border-warning/30 bg-warning-subtle p-4">
+                <p className="mb-1 text-xs font-bold uppercase text-warning-strong">El problema a resolver</p>
+                <p className="text-sm text-foreground whitespace-pre-line">{project.problema}</p>
+              </div>
+            )}
+            <div className="mb-4">
+              <TextArea
+                label="Propuesta de solución *"
+                placeholder="Describe cómo abordarías el problema de este proyecto..."
+                rows={5}
+                value={propuesta}
+                onChange={(e) => setPropuesta(e.target.value)}
+              />
+            </div>
+            <div className="mb-4">
+              <DocumentUpload
+                label="Tu CV *"
+                hint="Adjunta tu currículum en PDF (máx. 6MB)."
+                value={cvFile}
+                onChange={setCvFile}
+                onRemove={() => setCvFile(null)}
+                maxSizeMB={MAX_CV_MB}
+              />
+            </div>
+          </>
+        )}
+
         <TextArea
           label="Mensaje (opcional)"
           placeholder="Explica por qué tu perfil sumaría valor a este proyecto..."

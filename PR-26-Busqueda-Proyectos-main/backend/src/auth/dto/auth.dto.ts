@@ -76,6 +76,28 @@ export class RegisterEmpleadoDto {
   empresa_id: number;
 }
 
+/** Registro de un usuario independiente, sin empresa. Acceso inmediato. */
+export class RegisterIndependienteDto {
+  @IsString()
+  @IsNotEmpty()
+  nombre_completo: string;
+
+  @IsOptional()
+  @IsString()
+  cargo?: string;
+
+  @IsEmail()
+  correo: string;
+
+  @IsString()
+  @MinLength(4)
+  password: string;
+
+  @IsOptional()
+  @IsString()
+  documento_url?: string;
+}
+
 export class ForgotPasswordDto {
   @IsEmail()
   correo: string;

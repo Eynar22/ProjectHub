@@ -5,6 +5,7 @@ import { Proyecto } from '../entities/proyecto.entity';
 import { ProyectoImagen } from '../entities/proyecto-imagen.entity';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { SolicitudProyecto } from '../entities/solicitud-proyecto.entity';
+import { Usuario } from '../entities/usuario.entity';
 import { Chat } from '../entities/chat.entity';
 import { KanbanColumna } from '../entities/kanban-columna.entity';
 import { Recurso } from '../entities/recurso.entity';
@@ -19,6 +20,7 @@ export class ProyectoService {
     nombre: true,
     descripcion_corta: true,
     descripcion_completa: true,
+    problema: true,
     fecha_inicio: true,
     fecha_fin: true,
     financiamiento: true,
@@ -44,6 +46,7 @@ export class ProyectoService {
     @InjectRepository(ProyectoImagen) private imagenRepo: Repository<ProyectoImagen>,
     @InjectRepository(UsuarioProyecto) private upRepo: Repository<UsuarioProyecto>,
     @InjectRepository(SolicitudProyecto) private solicitudRepo: Repository<SolicitudProyecto>,
+    @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
     @InjectRepository(Chat) private chatRepo: Repository<Chat>,
     @InjectRepository(KanbanColumna) private columnaRepo: Repository<KanbanColumna>,
     @InjectRepository(Recurso) private recursoRepo: Repository<Recurso>,
@@ -349,11 +352,17 @@ export class ProyectoService {
     });
   }
 
-  async createRequest(proyectoId: number, usuarioId: number, mensaje: string) {
+  async createRequest(
+    proyectoId: number,
+    usuarioId: number,
+    datos: { mensaje?: string; propuesta?: string; cv_url?: string },
+  ) {
     const solicitud = this.solicitudRepo.create({
       proyecto_id: proyectoId,
       usuario_id: usuarioId,
-      mensaje,
+      mensaje: datos.mensaje,
+      propuesta: datos.propuesta,
+      cv_url: datos.cv_url,
       estado: 'pendiente',
     });
     const savedSolicitud = await this.solicitudRepo.save(solicitud);
@@ -373,6 +382,22 @@ export class ProyectoService {
 
     // Add user as participant
     await this.addParticipant(solicitud.proyecto_id, solicitud.usuario_id);
+
+    // Si quien postuló es un usuario independiente (sin empresa), la empresa
+    // dueña del proyecto lo absorbe como empleado activo.
+    if (!solicitud.usuario?.empresa_id && solicitud.proyecto?.creador_id) {
+      const dueno = await this.usuarioRepo.findOne({
+        where: { id: solicitud.proyecto.creador_id },
+        select: ['id', 'empresa_id'],
+      });
+      if (dueno?.empresa_id) {
+        await this.usuarioRepo.update(solicitud.usuario_id, {
+          empresa_id: dueno.empresa_id,
+          rol: 'empleado',
+          estado: 'activo',
+        });
+      }
+    }
 
     return solicitud;
   }

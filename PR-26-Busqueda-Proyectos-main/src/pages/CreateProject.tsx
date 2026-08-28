@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useCrearProyecto } from '@/features/proyectos';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ export default function CreateProject() {
     name: '',
     description: '',
     shortDescription: '',
+    problema: '',
     categoria: 'Tecnología',
     startDate: '',
     endDate: '',
@@ -100,6 +101,7 @@ export default function CreateProject() {
     if (!formData.name) newErrors.name = 'Nombre del proyecto es requerido';
     if (!formData.description) newErrors.description = 'Descripción es requerida';
     if (!formData.shortDescription) newErrors.shortDescription = 'Descripción corta es requerida';
+    if (!formData.problema) newErrors.problema = 'El problema que resuelve el proyecto es requerido';
     if (!formData.startDate) newErrors.startDate = 'Fecha de inicio es requerida';
     if (!formData.endDate) newErrors.endDate = 'Fecha de finalización es requerida';
 
@@ -131,6 +133,7 @@ export default function CreateProject() {
         name: formData.name,
         description: formData.description,
         shortDescription: formData.shortDescription,
+        problema: formData.problema,
         categoria: formData.categoria,
         imageFiles: imageFiles,
         pdfFiles: pdfFiles,
@@ -148,6 +151,14 @@ export default function CreateProject() {
       setIsSubmitting(false);
     }
   };
+
+  // Solo el administrador de una empresa (o el superadmin) puede publicar
+  // proyectos. Guard para el acceso directo por URL; los enlaces ya se ocultan
+  // al resto de roles.
+  const puedeCrearProyecto = currentUser?.rol === 'admin' || currentUser?.rol === 'superadmin';
+  if (!puedeCrearProyecto) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (step === 'success') {
     return (
@@ -244,6 +255,11 @@ export default function CreateProject() {
                     placeholder="Describe el proyecto en detalle: objetivos, alcance, tecnologías y requerimientos..."
                     rows={5} value={formData.description}
                     onChange={handleChange} error={errors.description} />
+
+                  <TextArea label="El Problema que Resuelve" name="problema"
+                    placeholder="¿Qué problema concreto aborda este proyecto? Los postulantes usarán esto como base para su propuesta de solución."
+                    rows={3} value={formData.problema}
+                    onChange={handleChange} error={errors.problema} />
                 </div>
               </Card>
             </motion.div>

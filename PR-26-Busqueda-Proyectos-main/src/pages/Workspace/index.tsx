@@ -684,6 +684,7 @@ export default function Workspace() {
                 suspended={!!project.suspendido}
                 onAccept={handleAcceptJoinRequest}
                 onReject={handleRejectJoinRequest}
+                onVerCv={openBase64}
               />
             )}
           </div>

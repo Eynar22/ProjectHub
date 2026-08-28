@@ -25,5 +25,6 @@ export type {
   Request,
   Resource,
   CrearProjectDto,
+  CrearSolicitudInput,
   ActualizarProjectDto,
 } from './types/proyectos.types';

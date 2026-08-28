@@ -4,12 +4,13 @@ import { Link } from 'react-router';
 import { empresasService, type Company } from '@/features/empresas';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
-import { Building2, Search, UserPlus, Users } from 'lucide-react';
+import { Building2, Search, UserPlus, UserRound, Users } from 'lucide-react';
 
-export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany }: {
+export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, onIndependent }: {
   companies: Company[];
   onSelectCompany: (companyId: string) => void;
   onNewCompany: () => void;
+  onIndependent: () => void;
 }) {
   const [companySearch, setCompanySearch] = useState('');
 
@@ -119,6 +120,10 @@ export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany }:
       <Button variant="outline" className="w-full" onClick={onNewCompany}>
         <UserPlus className="w-4 h-4 mr-2" />
         Mi empresa no está — Quiero registrarla
+      </Button>
+      <Button variant="outline" className="w-full mt-3" onClick={onIndependent}>
+        <UserRound className="w-4 h-4 mr-2" />
+        No pertenezco a ninguna empresa
       </Button>
       <p className="text-center text-muted-foreground mt-6 text-sm">
         ¿Ya tienes cuenta? <Link to="/login" className="text-primary hover:underline">Inicia sesión</Link>

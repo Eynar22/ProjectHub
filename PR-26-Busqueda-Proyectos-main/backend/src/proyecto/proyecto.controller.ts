@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Request, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProyectoService } from './proyecto.service';
 
@@ -80,6 +80,11 @@ export class ProyectoController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   create(@Body() data: any, @Request() req: any) {
+    // Solo el administrador de una empresa (o el superadmin) puede publicar
+    // proyectos. Los empleados y usuarios independientes no.
+    if (req.user.rol !== 'admin' && req.user.rol !== 'superadmin') {
+      throw new ForbiddenException('Solo un administrador de empresa puede crear proyectos');
+    }
     return this.proyectoService.create({ ...data, creador_id: req.user.id });
   }
 
@@ -157,9 +162,9 @@ export class ProyectoController {
   @Post(':id/solicitudes')
   createRequest(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { mensaje: string },
+    @Body() body: { mensaje?: string; propuesta?: string; cv_url?: string },
     @Request() req: any,
   ) {
-    return this.proyectoService.createRequest(id, req.user.id, body.mensaje);
+    return this.proyectoService.createRequest(id, req.user.id, body);
   }
 }

@@ -16,6 +16,15 @@ export class SolicitudProyecto {
   @Column({ type: 'text', nullable: true })
   mensaje: string;
 
+  // Postulación de un usuario independiente (sin empresa): su propuesta de
+  // solución al problema del proyecto y su CV en base64. Nullable porque las
+  // solicitudes de usuarios con empresa solo llevan 'mensaje'.
+  @Column({ type: 'text', nullable: true })
+  propuesta: string;
+
+  @Column({ type: 'text', nullable: true })
+  cv_url: string;
+
   @Column({ type: 'varchar', length: 20, default: 'pendiente' })
   estado: string; // 'pendiente' | 'aceptado' | 'rechazado'
 

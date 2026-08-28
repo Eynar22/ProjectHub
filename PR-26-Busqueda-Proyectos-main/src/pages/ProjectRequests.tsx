@@ -6,13 +6,13 @@ import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
-import { Building2, Check, X, ArrowLeft, Mail } from 'lucide-react';
+import { Building2, Check, X, ArrowLeft, Mail, FileText, ExternalLink } from 'lucide-react';
 import { EstadoVacio } from '@/shared/components/feedback';
 import { motion } from 'motion/react';
 
 export default function ProjectRequests() {
   const { id } = useParams();
-  const { currentUser } = useApp();
+  const { currentUser, openBase64 } = useApp();
   const { data: projects = [] } = useProyectos();
   const { data: companies = [] } = useEmpresas();
   const { data: users = [] } = useUsuarios(!!currentUser);
@@ -104,6 +104,24 @@ export default function ProjectRequests() {
                               <div className="text-sm text-muted-foreground mb-1">Mensaje</div>
                               <div className="text-sm">{request.mensaje}</div>
                             </div>
+                          )}
+
+                          {request.propuesta && (
+                            <div className="mb-4 p-4 bg-info-subtle border border-info/30 rounded-lg">
+                              <div className="text-sm text-info-strong font-semibold mb-1">Propuesta de solución</div>
+                              <div className="text-sm whitespace-pre-line">{request.propuesta}</div>
+                            </div>
+                          )}
+
+                          {request.cv_url && (
+                            <button
+                              onClick={() => openBase64(request.cv_url!)}
+                              className="mb-4 flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <ExternalLink className="w-3 h-3" />
+                              Ver CV del postulante
+                            </button>
                           )}
 
                           <div className="flex gap-3">

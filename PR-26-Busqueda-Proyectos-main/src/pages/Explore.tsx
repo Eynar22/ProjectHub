@@ -9,9 +9,10 @@ import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { 
-  Search, 
-  Building2, 
-  Calendar, 
+  Search,
+  Building2,
+  Users,
+  Calendar,
   ChevronRight, 
   Lock, 
   Info, 
@@ -224,6 +225,7 @@ export default function Explore() {
               {filteredProjects.map((project, index) => {
                 const creator = users.find(u => u.id === project.creador_id);
                 const company = companies.find(c => c.id === creator?.empresa_id);
+                const participantsCount = project.participantes?.length ?? 0;
 
                 return (
                   <motion.div
@@ -269,9 +271,19 @@ export default function Explore() {
                         {/* 3. CONTENIDO PRINCIPAL DE LA TARJETA */}
                         <div className="relative z-20 flex flex-col h-full p-6 text-white">
                           
-                          {/* --- PARTE SUPERIOR: Título, Descripcion y Categoría --- */}
-                          <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1">
+                          {/* --- PARTE SUPERIOR: Categoría --- */}
+                          <div className="flex justify-end">
+                            {/* Categoría (Top Right) */}
+                            <div className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg flex-shrink-0">
+                              {project.categoria || 'Sin Categoría'}
+                            </div>
+                          </div>
+
+                          {/* --- PARTE INFERIOR: Título, Descripción, Etiquetas Glassmorphism y Botón --- */}
+                          <div className="mt-auto flex flex-col gap-4">
+
+                            {/* Título y Descripción */}
+                            <div>
                               <h3 className="text-2xl font-bold leading-tight line-clamp-2 drop-shadow-md mb-2">
                                 {project.nombre}
                               </h3>
@@ -279,27 +291,23 @@ export default function Explore() {
                                 {project.descripcion_corta}
                               </p>
                             </div>
-                            
-                            {/* Categoría (Top Right) */}
-                            <div className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg flex-shrink-0">
-                              {project.categoria || 'Sin Categoría'}
-                            </div>
-                          </div>
 
-                          {/* --- PARTE INFERIOR: Etiquetas Glassmorphism y Botón --- */}
-                          <div className="mt-auto flex flex-col gap-4">
-                            
-                            {/* Etiquetas (Empresa, Fecha, Precio) */}
+                            {/* Etiquetas (Empresa, Fecha, Participantes, Precio) */}
                             <div className={`flex flex-wrap gap-2 transition-all duration-300 ${isVisitor ? 'blur-[5px] opacity-60 select-none pointer-events-none' : ''}`}>
-                              
+
                               <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
                                 <Building2 className="w-3.5 h-3.5" />
                                 <span className="line-clamp-1 max-w-[120px]">{company?.nombre || 'Empresa Confidencial'}</span>
                               </div>
-                              
+
                               <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
                                 <Calendar className="w-3.5 h-3.5" />
                                 <span>{project.fecha_inicio} al {project.fecha_fin}</span>
+                              </div>
+
+                              <div className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+                                <Users className="w-3.5 h-3.5" />
+                                <span>{participantsCount} participante{participantsCount === 1 ? '' : 's'}</span>
                               </div>
 
                               {project.financiamiento && (

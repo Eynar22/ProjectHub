@@ -33,7 +33,7 @@ interface AppContextType {
   archivedProjects: Project[];
   requests: Request[];
   loading: boolean;
-  login: (correo: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (correo: string, password: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => void;
   updateCompany: (
     id: number,
@@ -99,7 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCurrentUser(res.user);
       // El resto de datos los cargan los hooks de TanStack Query al activarse
       // la sesión (enabled: !!currentUser).
-      return { success: true };
+      return { success: true, user: res.user };
     } catch (err) {
       console.error('Login error:', err);
       return { success: false, message: err instanceof Error ? err.message : 'Error al iniciar sesión' };
@@ -196,7 +196,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const createRequest = async (request: { proyecto_id: number; mensaje: string }) => {
-    await solicitudesService.crear(request.proyecto_id, request.mensaje);
+    await solicitudesService.crear(request.proyecto_id, { mensaje: request.mensaje });
     queryClient.invalidateQueries({ queryKey: SOLICITUDES_KEYS.enviadas() });
   };
 

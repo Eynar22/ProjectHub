@@ -7,7 +7,8 @@
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import type { Request } from '../types/proyectos.types';
+import { fileToBase64 } from '@/shared/utils/fileToBase64';
+import type { Request, CrearSolicitudInput } from '../types/proyectos.types';
 
 export const solicitudesService = {
   /** Solicitudes que el usuario actual ha enviado a proyectos ajenos. */
@@ -28,9 +29,19 @@ export const solicitudesService = {
     return apiClient.get<Request[]>(ENDPOINTS.PROYECTOS.SOLICITUDES_POR_PROYECTO(proyectoId));
   },
 
-  /** Crea una solicitud de participación en un proyecto. */
-  async crear(proyectoId: number | string, mensaje: string): Promise<Request> {
-    return apiClient.post<Request>(ENDPOINTS.PROYECTOS.CREAR_SOLICITUD(proyectoId), { mensaje });
+  /**
+   * Crea una solicitud de participación en un proyecto. Los postulantes
+   * independientes adjuntan además una propuesta de solución y su CV (el CV
+   * se convierte a base64 aquí antes de enviarlo).
+   */
+  async crear(proyectoId: number | string, datos: CrearSolicitudInput): Promise<Request> {
+    const cv_url = datos.cv ? await fileToBase64(datos.cv) : undefined;
+
+    return apiClient.post<Request>(ENDPOINTS.PROYECTOS.CREAR_SOLICITUD(proyectoId), {
+      mensaje: datos.mensaje,
+      propuesta: datos.propuesta,
+      cv_url,
+    });
   },
 
   /** Acepta una solicitud recibida. */

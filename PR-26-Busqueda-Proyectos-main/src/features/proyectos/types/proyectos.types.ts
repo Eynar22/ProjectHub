@@ -24,6 +24,8 @@ export interface Project {
   nombre: string;
   descripcion_corta?: string;
   descripcion_completa?: string;
+  /** Problema que el proyecto busca resolver. Visible en el detalle público. */
+  problema?: string;
   categoria: string;
   imagenes: { id: number; url: string }[];
   fecha_inicio: string;
@@ -45,9 +47,21 @@ export interface Request {
   proyecto_id: number;
   usuario_id: number;
   mensaje: string;
+  /** Propuesta de solución al problema del proyecto (solo postulantes independientes). */
+  propuesta?: string;
+  /** CV del postulante en base64 (solo postulantes independientes). */
+  cv_url?: string;
   estado: 'pendiente' | 'aceptado' | 'rechazado';
   fecha_creacion: string;
   usuario?: User;
+}
+
+/** Datos que se ENVÍAN al crear una solicitud de participación. */
+export interface CrearSolicitudInput {
+  mensaje?: string;
+  propuesta?: string;
+  /** Archivo de CV; el servicio lo convierte a base64 antes de enviarlo. */
+  cv?: File | null;
 }
 
 /** Datos que se ENVÍAN al crear un proyecto (antes de subir archivos). */
@@ -55,6 +69,7 @@ export interface CrearProjectDto {
   name: string;
   shortDescription?: string;
   description?: string;
+  problema?: string;
   categoria?: string;
   startDate: string;
   endDate: string;

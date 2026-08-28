@@ -21,6 +21,12 @@ export class Proyecto {
   @Column({ type: 'text', nullable: true })
   descripcion_completa: string;
 
+  // Problema que el proyecto busca resolver. Se pide obligatorio al crear
+  // (formulario completo y wizard) y se muestra en el detalle público;
+  // nullable en BD por los proyectos creados antes de este campo.
+  @Column({ type: 'text', nullable: true })
+  problema: string;
+
   @Column({ type: 'date', nullable: true })
   fecha_inicio: string;
 

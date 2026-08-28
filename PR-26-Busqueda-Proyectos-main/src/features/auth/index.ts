@@ -4,6 +4,7 @@ export { authService } from './services/auth.service';
 export {
   useRegistrarEmpresa,
   useRegistrarEmpleado,
+  useRegistrarIndependiente,
   useSolicitarCodigoRecuperacion,
   useRestablecerPassword,
   useCambiarPassword,
@@ -16,6 +17,7 @@ export type {
   RegistroEmpleadoDto,
   RegistrarEmpresaInput,
   RegistrarEmpleadoInput,
+  RegistrarIndependienteInput,
   RestablecerPasswordInput,
   CambiarPasswordInput,
 } from './types/auth.types';

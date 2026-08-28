@@ -14,6 +14,7 @@ export const ENDPOINTS = {
     CAMBIAR_PASSWORD: '/auth/change-password',
     REGISTRO_EMPRESA: '/auth/register/empresa',
     REGISTRO_EMPLEADO: '/auth/register/empleado',
+    REGISTRO_INDEPENDIENTE: '/auth/register/independiente',
   },
 
   EMPRESAS: {

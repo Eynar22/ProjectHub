@@ -37,6 +37,8 @@ interface ProjectPendingGroup {
   solicitudes: Array<{
     id: number;
     mensaje: string;
+    propuesta?: string;
+    cv_url?: string;
     fecha_creacion: string;
     usuario?: { id: number; nombre_completo: string; correo: string; cargo?: string };
   }>;
@@ -56,6 +58,8 @@ export default function CompanyDashboard() {
 
   useEffect(() => {
     if (currentUser?.rol === 'superadmin') navigate('/admin');
+    // El usuario independiente (sin empresa) no tiene panel de empresa.
+    else if (currentUser?.rol === 'empleado' && !currentUser?.empresa_id) navigate('/explore');
   }, [currentUser, navigate]);
 
   // Solicitudes de participación pendientes en mis proyectos, agrupadas.
@@ -145,12 +149,14 @@ export default function CompanyDashboard() {
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-3">
-                <Link to="/dashboard/create-project">
-                  <Button variant="primary" className="flex items-center gap-2 shadow-md shadow-primary/20">
-                    <Plus className="w-4 h-4" />
-                    Nuevo Proyecto
-                  </Button>
-                </Link>
+                {esAdmin && (
+                  <Link to="/dashboard/create-project">
+                    <Button variant="primary" className="flex items-center gap-2 shadow-md shadow-primary/20">
+                      <Plus className="w-4 h-4" />
+                      Nuevo Proyecto
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/explore">
                   <Button variant="outline" className="flex items-center gap-2">
                     <Search className="w-4 h-4" />
@@ -217,15 +223,17 @@ export default function CompanyDashboard() {
 
           {/* Quick Actions — mobile only (desktop buttons in header) */}
           <div className="md:hidden grid grid-cols-2 gap-4 mb-8">
-            <Link to="/dashboard/create-project">
-              <Card className="p-5 bg-primary/10 border-primary/20 hover:shadow-md transition-all cursor-pointer">
-                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center mb-3 shadow-md shadow-primary/20">
-                  <Plus className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <p className="font-bold text-sm">Nuevo Proyecto</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Publica y encuentra colaboradores</p>
-              </Card>
-            </Link>
+            {esAdmin && (
+              <Link to="/dashboard/create-project">
+                <Card className="p-5 bg-primary/10 border-primary/20 hover:shadow-md transition-all cursor-pointer">
+                  <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center mb-3 shadow-md shadow-primary/20">
+                    <Plus className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <p className="font-bold text-sm">Nuevo Proyecto</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Publica y encuentra colaboradores</p>
+                </Card>
+              </Link>
+            )}
             <Link to="/explore">
               <Card className="p-5 bg-muted border-border hover:shadow-md transition-all cursor-pointer">
                 <div className="w-9 h-9 bg-muted rounded-xl flex items-center justify-center mb-3 shadow-md">
@@ -292,10 +300,18 @@ export default function CompanyDashboard() {
                   <FolderKanban className="w-7 h-7 text-primary/40" />
                 </div>
                 <h3 className="font-bold mb-1">Aún no tienes proyectos</h3>
-                <p className="text-muted-foreground text-sm mb-5">Crea tu primer proyecto para empezar a colaborar</p>
-                <Link to="/dashboard/create-project">
-                  <Button variant="primary" className="shadow-md shadow-primary/20">Crear Proyecto</Button>
-                </Link>
+                <p className="text-muted-foreground text-sm mb-5">
+                  {esAdmin ? 'Crea tu primer proyecto para empezar a colaborar' : 'Únete a un proyecto desde Explorar para empezar a colaborar'}
+                </p>
+                {esAdmin ? (
+                  <Link to="/dashboard/create-project">
+                    <Button variant="primary" className="shadow-md shadow-primary/20">Crear Proyecto</Button>
+                  </Link>
+                ) : (
+                  <Link to="/explore">
+                    <Button variant="primary" className="shadow-md shadow-primary/20">Explorar Proyectos</Button>
+                  </Link>
+                )}
               </Card>
             )}
           </div>
@@ -347,7 +363,7 @@ export default function CompanyDashboard() {
                 <h2 className="text-2xl font-semibold flex items-center gap-2">
                   <Clock className="w-5 h-5 text-warning" />
                   Solicitudes de Miembros Pendientes
-                  <span className="ml-1 px-2.5 py-0.5 bg-warning/15 text-warning text-sm rounded-full font-semibold border border-warning/20 animate-pulse">
+                  <span className="ml-1 px-2.5 py-0.5 bg-warning-subtle text-warning-strong text-sm rounded-full font-semibold border border-warning/30 animate-pulse">
                     {pendingMembers.length}
                   </span>
                 </h2>
@@ -489,7 +505,7 @@ export default function CompanyDashboard() {
                       {/* Solicitudes list */}
                       <div className="divide-y divide-border/40">
                         {group.solicitudes.slice(0, 3).map((sol) => (
-                          <div key={sol.id} className="px-6 py-4 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+                          <div key={sol.id} className="px-6 py-4 flex items-start gap-4 hover:bg-muted/20 transition-colors">
                             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
                               {sol.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                             </div>
@@ -508,6 +524,19 @@ export default function CompanyDashboard() {
                               </div>
                               {sol.mensaje && (
                                 <p className="text-xs text-muted-foreground italic mt-1 truncate">"{sol.mensaje}"</p>
+                              )}
+                              {sol.propuesta && (
+                                <p className="text-xs text-info-strong mt-1 line-clamp-2">
+                                  <span className="font-semibold">Propuesta:</span> {sol.propuesta}
+                                </p>
+                              )}
+                              {sol.cv_url && (
+                                <button
+                                  onClick={() => openBase64(sol.cv_url!)}
+                                  className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                                >
+                                  <FileText className="w-3 h-3" /> Ver CV
+                                </button>
                               )}
                             </div>
                             <div className="text-xs text-muted-foreground flex-shrink-0">
@@ -570,7 +599,7 @@ export default function CompanyDashboard() {
                           </div>
                           <div>
                             <p className="font-bold text-lg leading-tight">{detailRequest.usuario?.nombre_completo}</p>
-                            <span className="text-xs px-2 py-0.5 bg-warning/10 text-warning rounded-full font-medium border border-warning/20">
+                            <span className="text-xs px-2 py-0.5 bg-warning-subtle text-warning-strong rounded-full font-medium border border-warning/30">
                               Pendiente de Aprobación
                             </span>
                           </div>

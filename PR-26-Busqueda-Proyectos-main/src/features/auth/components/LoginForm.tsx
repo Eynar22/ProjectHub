@@ -63,8 +63,11 @@ export function LoginForm() {
 
     if (res.success) {
       toast.success('¡Bienvenido de nuevo!');
-      if (email === 'admin@platform.com') {
+      if (res.user?.rol === 'superadmin') {
         navigate('/admin');
+      } else if (res.user?.rol === 'empleado' && !res.user?.empresa_id) {
+        // Usuario independiente: su inicio es Explorar, no el panel de empresa.
+        navigate('/explore');
       } else {
         navigate('/dashboard');
       }

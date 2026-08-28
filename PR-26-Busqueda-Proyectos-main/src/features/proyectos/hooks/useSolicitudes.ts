@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { solicitudesService } from '../services/solicitudes.service';
 import { PROYECTOS_KEYS } from './useProyectos';
+import type { CrearSolicitudInput } from '../types/proyectos.types';
 
 export const SOLICITUDES_KEYS = {
   todas: ['solicitudes-proyecto'] as const,
@@ -40,8 +41,8 @@ export function useSolicitudesDeProyecto(proyectoId: number | string | undefined
 export function useCrearSolicitud() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ proyectoId, mensaje }: { proyectoId: number; mensaje: string }) =>
-      solicitudesService.crear(proyectoId, mensaje),
+    mutationFn: ({ proyectoId, ...datos }: { proyectoId: number } & CrearSolicitudInput) =>
+      solicitudesService.crear(proyectoId, datos),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SOLICITUDES_KEYS.enviadas() });
       toast.success('Tu solicitud fue enviada');

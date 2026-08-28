@@ -12,6 +12,7 @@ import {
   LoginDto,
   RegisterEmpresaDto,
   RegisterEmpleadoDto,
+  RegisterIndependienteDto,
   ForgotPasswordDto,
   VerifyResetCodeDto,
   ResetPasswordDto,
@@ -166,6 +167,31 @@ export class AuthService {
     await this.solicitudRepo.save(solicitud);
 
     return { message: 'Solicitud de membresía enviada. Pendiente de aprobación por el admin de la empresa.' };
+  }
+
+  // Flujo C: Registrar usuario independiente (sin empresa). No requiere
+  // aprobación de nadie: queda 'activo' y puede iniciar sesión de inmediato.
+  // Podrá postular a proyectos y, al ser aceptado, la empresa dueña del
+  // proyecto lo absorbe como empleado.
+  async registerIndependiente(dto: RegisterIndependienteDto) {
+    const existing = await this.usuarioRepo.findOne({ where: { correo: dto.correo } });
+    if (existing) {
+      throw new ConflictException('El correo ya está registrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const usuario = this.usuarioRepo.create({
+      nombre_completo: dto.nombre_completo,
+      cargo: dto.cargo,
+      correo: dto.correo,
+      password: hashedPassword,
+      documento_url: dto.documento_url,
+      rol: 'empleado',
+      estado: 'activo',
+    });
+    await this.usuarioRepo.save(usuario);
+
+    return { message: 'Cuenta creada. Ya puedes iniciar sesión.' };
   }
 
   async getProfile(userId: number) {

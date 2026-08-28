@@ -4,17 +4,19 @@ import { useEmpresas } from '@/features/empresas';
 import { RegisterChooseStep } from '@/features/auth/components/RegisterChooseStep';
 import { JoinCompanyForm } from '@/features/auth/components/JoinCompanyForm';
 import { NewCompanyForm } from '@/features/auth/components/NewCompanyForm';
+import { IndependentRegisterForm } from '@/features/auth/components/IndependentRegisterForm';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-type RegisterMode = 'choose' | 'join_company' | 'new_company' | 'success';
+type RegisterMode = 'choose' | 'join_company' | 'new_company' | 'independent' | 'success';
 
 export default function Register() {
   const [mode, setMode] = useState<RegisterMode>('choose');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  const [independiente, setIndependiente] = useState(false);
 
   const { data: companies = [] } = useEmpresas();
   const navigate = useNavigate();
@@ -32,11 +34,15 @@ export default function Register() {
                   <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold mb-4">¡Solicitud Enviada!</h1>
+              <h1 className="text-3xl font-bold mb-4">
+                {independiente ? '¡Cuenta creada!' : '¡Solicitud Enviada!'}
+              </h1>
               <p className="text-muted-foreground mb-8">
-                {selectedCompanyId
-                  ? 'Tu solicitud fue enviada al administrador de la empresa. Te notificarán cuando sea aprobada.'
-                  : 'Tu solicitud de empresa fue enviada al Super Admin para revisión. Una vez aprobada podrás iniciar sesión.'}
+                {independiente
+                  ? 'Tu cuenta ya está activa. Inicia sesión para explorar proyectos y postular.'
+                  : selectedCompanyId
+                    ? 'Tu solicitud fue enviada al administrador de la empresa. Te notificarán cuando sea aprobada.'
+                    : 'Tu solicitud de empresa fue enviada al Super Admin para revisión. Una vez aprobada podrás iniciar sesión.'}
               </p>
               <Button variant="primary" className="w-full" onClick={() => navigate('/login')}>
                 Ir a Iniciar Sesión
@@ -59,6 +65,14 @@ export default function Register() {
               companies={companies}
               onSelectCompany={(companyId) => { setSelectedCompanyId(companyId); setMode('join_company'); }}
               onNewCompany={() => setMode('new_company')}
+              onIndependent={() => { setIndependiente(true); setMode('independent'); }}
+            />
+          )}
+
+          {mode === 'independent' && (
+            <IndependentRegisterForm
+              onBack={() => { setIndependiente(false); setMode('choose'); }}
+              onSuccess={() => setMode('success')}
             />
           )}
 

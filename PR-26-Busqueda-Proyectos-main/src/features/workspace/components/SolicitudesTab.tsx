@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import {
-  Clock, Mail, Briefcase, Building2, UserCheck, UserX, CheckCircle2,
+  Clock, Mail, Briefcase, Building2, UserCheck, UserX, CheckCircle2, FileText, ExternalLink,
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
@@ -16,6 +16,7 @@ export function SolicitudesTab({
   suspended,
   onAccept,
   onReject,
+  onVerCv,
 }: {
   projectName: string;
   pendingJoinRequests: ProyectoSolicitud[];
@@ -25,6 +26,7 @@ export function SolicitudesTab({
   suspended: boolean;
   onAccept: (id: number) => void;
   onReject: (id: number) => void;
+  onVerCv: (base64: string) => void;
 }) {
   const processedRequests = allRequests.filter(r => r.estado !== 'pendiente');
 
@@ -93,6 +95,22 @@ export function SolicitudesTab({
                             <div className="mt-3 p-3 bg-muted/60 rounded-xl border border-border/50 text-sm italic text-muted-foreground">
                               "{req.mensaje}"
                             </div>
+                          )}
+                          {req.propuesta && (
+                            <div className="mt-3 p-3 bg-info-subtle rounded-xl border border-info/30 text-sm text-foreground">
+                              <p className="text-xs font-bold text-info-strong uppercase tracking-widest mb-1">Propuesta de solución</p>
+                              <p className="whitespace-pre-line">{req.propuesta}</p>
+                            </div>
+                          )}
+                          {req.cv_url && (
+                            <button
+                              onClick={() => onVerCv(req.cv_url!)}
+                              className="mt-2 flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <ExternalLink className="w-3 h-3" />
+                              Ver CV del postulante
+                            </button>
                           )}
                           <p className="text-xs text-muted-foreground mt-2">
                             {new Date(req.fecha_creacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}

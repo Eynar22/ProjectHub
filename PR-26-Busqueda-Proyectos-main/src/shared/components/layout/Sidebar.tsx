@@ -52,12 +52,21 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
   const doneProjects    = projects.filter(p => isParticipant(p) && p.estado === 'terminado').length;
   const archivedCount   = archivedProjects.filter(p => p.creador_id === myId).length;
 
+  // Usuario independiente: sin empresa. No tiene panel ni perfil de empresa;
+  // solo explora proyectos y ve aquellos en los que participa.
+  const esIndependiente = currentUser?.rol === 'empleado' && !currentUser?.empresa_id;
+
+  // Crear proyecto es exclusivo del administrador de empresa (ver companyAdminLinks).
   const baseLinks = [
-    { to: '/dashboard',                icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/dashboard/projects',       icon: FolderKanban,    label: 'Mis Proyectos', badge: activeProjects || undefined },
-    { to: '/dashboard/create-project', icon: Plus,            label: 'Crear Proyecto' },
-    { to: '/explore',                  icon: Search,          label: 'Explorar' },
-    { to: '/dashboard/profile',        icon: Building2,       label: 'Mi Perfil' },
+    { to: '/dashboard',          icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard/projects', icon: FolderKanban,    label: 'Mis Proyectos', badge: activeProjects || undefined },
+    { to: '/explore',            icon: Search,          label: 'Explorar' },
+    { to: '/dashboard/profile',  icon: Building2,       label: 'Mi Perfil' },
+  ];
+
+  const independienteLinks = [
+    { to: '/dashboard/projects', icon: FolderKanban, label: 'Mis Proyectos', badge: activeProjects || undefined },
+    { to: '/explore',            icon: Search,       label: 'Explorar' },
   ];
 
   const adminLinks = [
@@ -68,13 +77,19 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
   ];
 
   const companyAdminLinks = [
-    ...baseLinks,
-    { to: '/dashboard/members', icon: UserCheck, label: 'Gestión de Miembros' },
+    { to: '/dashboard',                icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard/projects',       icon: FolderKanban,    label: 'Mis Proyectos', badge: activeProjects || undefined },
+    { to: '/dashboard/create-project', icon: Plus,            label: 'Crear Proyecto' },
+    { to: '/explore',                  icon: Search,          label: 'Explorar' },
+    { to: '/dashboard/profile',        icon: Building2,       label: 'Mi Perfil' },
+    { to: '/dashboard/members',        icon: UserCheck,       label: 'Gestión de Miembros' },
   ];
 
   let links: { to: string; icon: IconoLucide; label: string; badge?: number }[] = adminLinks;
   if (!isAdmin) {
-    links = currentUser?.rol === 'admin' ? companyAdminLinks : baseLinks;
+    if (currentUser?.rol === 'admin') links = companyAdminLinks;
+    else if (esIndependiente) links = independienteLinks;
+    else links = baseLinks;
   }
 
   const isCollapsed = isMobile ? true : collapsed;

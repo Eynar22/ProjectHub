@@ -5,6 +5,9 @@ export interface ProyectoSolicitud {
   proyecto_id: number;
   usuario_id: number;
   mensaje: string;
+  /** Propuesta de solución y CV en base64 (postulantes independientes). */
+  propuesta?: string;
+  cv_url?: string;
   estado: 'pendiente' | 'aceptado' | 'rechazado';
   fecha_creacion: string;
   usuario?: {

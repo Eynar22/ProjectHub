@@ -15,6 +15,7 @@ import type {
   LoginResponse,
   RegistrarEmpresaInput,
   RegistrarEmpleadoInput,
+  RegistrarIndependienteInput,
   RestablecerPasswordInput,
   CambiarPasswordInput,
 } from '../types/auth.types';
@@ -62,6 +63,19 @@ export const authService = {
       cargo: datos.cargo,
       documento_url,
       empresa_id: datos.empresa_id,
+    });
+  },
+
+  /** Registra un usuario independiente (sin empresa). Acceso inmediato. */
+  async registrarIndependiente(datos: RegistrarIndependienteInput): Promise<void> {
+    const documento_url = datos.cv ? await fileToBase64(datos.cv) : undefined;
+
+    await apiClient.post(ENDPOINTS.AUTH.REGISTRO_INDEPENDIENTE, {
+      nombre_completo: datos.nombre_completo,
+      correo: datos.correo,
+      password: datos.password,
+      cargo: datos.cargo,
+      documento_url,
     });
   },
 

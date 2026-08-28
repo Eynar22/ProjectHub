@@ -11,6 +11,7 @@ import { authService } from '../services/auth.service';
 import type {
   RegistrarEmpresaInput,
   RegistrarEmpleadoInput,
+  RegistrarIndependienteInput,
   RestablecerPasswordInput,
   CambiarPasswordInput,
 } from '../types/auth.types';
@@ -26,6 +27,13 @@ export function useRegistrarEmpresa() {
 export function useRegistrarEmpleado() {
   return useMutation({
     mutationFn: (datos: RegistrarEmpleadoInput) => authService.registrarEmpleado(datos),
+  });
+}
+
+/** Registro de un usuario independiente, sin empresa. */
+export function useRegistrarIndependiente() {
+  return useMutation({
+    mutationFn: (datos: RegistrarIndependienteInput) => authService.registrarIndependiente(datos),
   });
 }
 

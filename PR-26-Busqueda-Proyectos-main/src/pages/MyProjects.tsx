@@ -311,6 +311,8 @@ export default function MyProjects() {
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const myId = currentUser?.id;
+  // Crear proyecto es exclusivo del administrador de empresa (o superadmin).
+  const puedeCrearProyecto = currentUser?.rol === 'admin' || currentUser?.rol === 'superadmin';
 
   // Classify projects
   const isMine    = (p: Project) => p.creador_id === myId;
@@ -349,11 +351,13 @@ export default function MyProjects() {
                 <h1 className="text-4xl font-bold mb-2">Mis Proyectos</h1>
                 <p className="text-muted-foreground">Tus proyectos creados y colaboraciones</p>
               </div>
-              <Link to="/dashboard/create-project">
-                <Button variant="primary" className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />Crear Proyecto
-                </Button>
-              </Link>
+              {puedeCrearProyecto && (
+                <Link to="/dashboard/create-project">
+                  <Button variant="primary" className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />Crear Proyecto
+                  </Button>
+                </Link>
+              )}
             </div>
           </motion.div>
 
@@ -492,9 +496,11 @@ export default function MyProjects() {
               accion={
                 tab === 'activos' ? (
                   <div className="flex gap-3">
-                    <Link to="/dashboard/create-project">
-                      <Button variant="primary">Crear Proyecto</Button>
-                    </Link>
+                    {puedeCrearProyecto && (
+                      <Link to="/dashboard/create-project">
+                        <Button variant="primary">Crear Proyecto</Button>
+                      </Link>
+                    )}
                     <Link to="/explore">
                       <Button variant="outline">Explorar</Button>
                     </Link>

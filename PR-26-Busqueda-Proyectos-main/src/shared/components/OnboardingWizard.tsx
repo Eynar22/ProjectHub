@@ -11,6 +11,20 @@ import { motion, AnimatePresence } from 'motion/react';
 
 type Step = 'bienvenida' | 'proyecto' | 'equipo' | 'listo';
 
+// Mismas categorías que el formulario completo de creación de proyecto.
+const PROJECT_CATEGORIES = [
+  'Tecnología',
+  'Medio Ambiente',
+  'Salud',
+  'Educación',
+  'Finanzas',
+  'Arte y Cultura',
+  'Impacto Social',
+  'Ciencia',
+  'Deportes',
+  'Entretenimiento',
+];
+
 interface EmpleadoRow {
   nombre_completo: string;
   correo: string;
@@ -26,7 +40,13 @@ export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('bienvenida');
   const [closed, setClosed] = useState(false);
 
-  const [projectForm, setProjectForm] = useState({ nombre: '', descripcion_corta: '', fecha_fin: '' });
+  const [projectForm, setProjectForm] = useState({
+    nombre: '',
+    descripcion_corta: '',
+    problema: '',
+    categoria: 'Tecnología',
+    fecha_fin: '',
+  });
   const [creatingProject, setCreatingProject] = useState(false);
   const [createdProjectId, setCreatedProjectId] = useState<number | null>(null);
 
@@ -50,6 +70,7 @@ export function OnboardingWizard() {
 
   const handleCreateProject = async () => {
     if (!projectForm.nombre.trim()) { toast.error('Ponle un nombre a tu proyecto'); return; }
+    if (!projectForm.problema.trim()) { toast.error('Describe el problema que resuelve el proyecto'); return; }
     if (!projectForm.fecha_fin) { toast.error('Selecciona una fecha de fin'); return; }
 
     setCreatingProject(true);
@@ -59,6 +80,8 @@ export function OnboardingWizard() {
         name: projectForm.nombre.trim(),
         shortDescription: projectForm.descripcion_corta.trim() || projectForm.nombre.trim(),
         description: '',
+        problema: projectForm.problema.trim(),
+        categoria: projectForm.categoria,
         startDate: today,
         endDate: projectForm.fecha_fin,
         createdByUserId: currentUser!.id,
@@ -170,12 +193,31 @@ export function OnboardingWizard() {
                     onChange={(e) => setProjectForm(f => ({ ...f, nombre: e.target.value }))}
                   />
                   <TextArea
+                    label="El problema que resuelve"
+                    placeholder="¿Qué problema concreto aborda este proyecto?"
+                    rows={2}
+                    value={projectForm.problema}
+                    onChange={(e) => setProjectForm(f => ({ ...f, problema: e.target.value }))}
+                  />
+                  <TextArea
                     label="Descripción corta (opcional)"
                     placeholder="¿De qué trata el proyecto?"
                     rows={2}
                     value={projectForm.descripcion_corta}
                     onChange={(e) => setProjectForm(f => ({ ...f, descripcion_corta: e.target.value }))}
                   />
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-foreground">Categoría / Sector</label>
+                    <select
+                      value={projectForm.categoria}
+                      onChange={(e) => setProjectForm(f => ({ ...f, categoria: e.target.value }))}
+                      className="w-full px-4 py-2.5 bg-input-background border border-input rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground text-sm"
+                    >
+                      {PROJECT_CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
                   <Input
                     label="Fecha de fin estimada"
                     type="date"

@@ -5,6 +5,7 @@ import {
   LoginDto,
   RegisterEmpresaDto,
   RegisterEmpleadoDto,
+  RegisterIndependienteDto,
   ForgotPasswordDto,
   VerifyResetCodeDto,
   ResetPasswordDto,
@@ -28,6 +29,11 @@ export class AuthController {
   @Post('register/empleado')
   async registerEmpleado(@Body() dto: RegisterEmpleadoDto) {
     return this.authService.registerEmpleado(dto);
+  }
+
+  @Post('register/independiente')
+  async registerIndependiente(@Body() dto: RegisterIndependienteDto) {
+    return this.authService.registerIndependiente(dto);
   }
 
   @UseGuards(AuthGuard('jwt'))
