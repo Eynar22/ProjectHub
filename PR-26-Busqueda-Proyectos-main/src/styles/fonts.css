@@ -1,0 +1,12 @@
+/* ============================================================================
+ * fonts.css — tipografía de marca.
+ *
+ * Hanken Grotesk: grotesco humanista con buen render a tamaños de UI. La
+ * jerarquía se hace por PESO (400 cuerpo, 500 h3/h4/labels, 600 h1/h2), no por
+ * familia — igual que ya define el @layer base de theme.css.
+ *
+ * Se carga desde Google Fonts. `display=swap`: el texto se pinta con la pila de
+ * fallback y cambia a Hanken al cargar, sin bloquear el render.
+ * ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');

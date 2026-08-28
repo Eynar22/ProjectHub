@@ -8,21 +8,9 @@ import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
+import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 import { Upload, X, FileText, CheckCircle2, File, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
-
-const PROJECT_CATEGORIES = [
-  'Tecnología',
-  'Medio Ambiente',
-  'Salud',
-  'Educación',
-  'Finanzas',
-  'Arte y Cultura',
-  'Impacto Social',
-  'Ciencia',
-  'Deportes',
-  'Entretenimiento'
-];
 
 export default function CreateProject() {
   const { currentUser } = useApp();

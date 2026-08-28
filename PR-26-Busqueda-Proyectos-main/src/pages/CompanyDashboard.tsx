@@ -8,6 +8,8 @@ import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
+import { Badge } from '@/shared/components/ui/Badge';
+import { PROYECTO_ESTADO } from '@/shared/constants/proyecto';
 import { OnboardingWizard } from '@/shared/components/OnboardingWizard';
 import {
   FolderKanban,
@@ -261,11 +263,7 @@ export default function CompanyDashboard() {
             {myProjects.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myProjects.slice(0, 3).map((project) => {
-                  const statusCfg = {
-                    en_curso: { label: 'En Curso', cls: 'bg-info-subtle text-info-strong border-info/30' },
-                    terminado: { label: 'Terminado', cls: 'bg-success-subtle text-success-strong border-success/30' },
-                    archivado: { label: 'Archivado', cls: 'bg-muted text-muted-foreground border-border' },
-                  }[project.estado] || { label: project.estado, cls: 'bg-muted text-muted-foreground' };
+                  const estadoCfg = PROYECTO_ESTADO[project.estado] ?? { variant: 'neutral' as const, label: project.estado };
                   return (
                     <Card key={project.id} hover className="p-5 border-none shadow-sm hover:shadow-md transition-all">
                       <div className="flex items-start justify-between mb-3">
@@ -276,9 +274,7 @@ export default function CompanyDashboard() {
                           <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                             {project.categoria || 'Tecnología'}
                           </span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusCfg.cls}`}>
-                            {statusCfg.label}
-                          </span>
+                          <Badge variant={estadoCfg.variant} size="sm">{estadoCfg.label}</Badge>
                         </div>
                       </div>
                       <h3 className="font-bold mb-1.5 line-clamp-1">{project.nombre}</h3>
@@ -599,9 +595,7 @@ export default function CompanyDashboard() {
                           </div>
                           <div>
                             <p className="font-bold text-lg leading-tight">{detailRequest.usuario?.nombre_completo}</p>
-                            <span className="text-xs px-2 py-0.5 bg-warning-subtle text-warning-strong rounded-full font-medium border border-warning/30">
-                              Pendiente de Aprobación
-                            </span>
+                            <Badge variant="warning">Pendiente de Aprobación</Badge>
                           </div>
                         </div>
 

@@ -8,22 +8,9 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { X, Rocket, FolderPlus, UserPlus, PartyPopper, Loader2, Trash2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 
 type Step = 'bienvenida' | 'proyecto' | 'equipo' | 'listo';
-
-// Mismas categorías que el formulario completo de creación de proyecto.
-const PROJECT_CATEGORIES = [
-  'Tecnología',
-  'Medio Ambiente',
-  'Salud',
-  'Educación',
-  'Finanzas',
-  'Arte y Cultura',
-  'Impacto Social',
-  'Ciencia',
-  'Deportes',
-  'Entretenimiento',
-];
 
 interface EmpleadoRow {
   nombre_completo: string;

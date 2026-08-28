@@ -33,7 +33,7 @@ export default function AdminDashboard() {
       value: totalProjects,
       subtext: 'Activos en la plataforma',
       icon: FolderKanban,
-      color: 'bg-muted',
+      color: 'bg-primary',
       link: '/admin/projects'
     },
     {
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
       value: users.length,
       subtext: 'En la plataforma',
       icon: Users,
-      color: 'bg-muted',
+      color: 'bg-primary',
       link: '/admin/users'
     }
   ];
@@ -111,8 +111,8 @@ export default function AdminDashboard() {
                   <Link to={stat.link}>
                     <Card hover className="p-6 transition-all">
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
-                          <Icon className="w-6 h-6 text-primary-foreground" />
+                        <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-6 h-6 ${stat.color === 'bg-muted' ? 'text-muted-foreground' : 'text-primary-foreground'}`} />
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                     className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-muted/70 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                      <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                         <FolderKanban className="w-5 h-5 text-primary-foreground" />
                       </div>
                       <div>

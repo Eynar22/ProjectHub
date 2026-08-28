@@ -16,8 +16,7 @@ import {
   ChevronRight, 
   Lock, 
   Info, 
-  Filter, 
-  MapPin,
+  Filter,
   DollarSign,
   ChevronDown // Agregado para el nuevo Dropdown
 } from 'lucide-react';
@@ -25,19 +24,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-
-const PROJECT_CATEGORIES = [
-  'Tecnología',
-  'Medio Ambiente',
-  'Salud',
-  'Educación',
-  'Finanzas',
-  'Arte y Cultura',
-  'Impacto Social',
-  'Ciencia',
-  'Deportes',
-  'Entretenimiento'
-];
+import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 
 export default function Explore() {
   const { currentUser } = useApp();

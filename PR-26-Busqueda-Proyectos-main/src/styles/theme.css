@@ -232,6 +232,12 @@
  * (rounded-md, shadow-lg, z-modal, ease-out) y como variables en :root.
  * -------------------------------------------------------------------------- */
 @theme {
+  /* Tipografía de marca. Sobrescribe el default de Tailwind (system-ui): la
+   * cara se carga en fonts.css. El fallback mantiene métricas parecidas para
+   * que no salte al aplicar `display=swap`. */
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
   /* Escala tipográfica fluida (Manual Parte 5.2). clamp(min, preferido, max):
    * el mínimo es legible en móvil de 320px; el máximo no rompe en 2560px.
    * Cubre xs→2xl (todo el cuerpo + h1–h4/label/button/input del @layer base).
@@ -274,7 +280,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
   }
 
   html {

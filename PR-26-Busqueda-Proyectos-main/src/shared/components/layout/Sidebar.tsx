@@ -52,45 +52,20 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
   const doneProjects    = projects.filter(p => isParticipant(p) && p.estado === 'terminado').length;
   const archivedCount   = archivedProjects.filter(p => p.creador_id === myId).length;
 
-  // Usuario independiente: sin empresa. No tiene panel ni perfil de empresa;
-  // solo explora proyectos y ve aquellos en los que participa.
-  const esIndependiente = currentUser?.rol === 'empleado' && !currentUser?.empresa_id;
+  // Un solo menú, resuelto por rol (ver NAV / LINKS_BY_ROLE al pie del archivo).
+  // El único enlace con badge dinámico es 'projects' (proyectos activos).
+  const role: SidebarRole =
+    isAdmin ? 'superadmin'
+    : currentUser?.rol === 'admin' ? 'companyAdmin'
+    : (currentUser?.rol === 'empleado' && !currentUser?.empresa_id) ? 'independent'
+    : 'employee';
 
-  // Crear proyecto es exclusivo del administrador de empresa (ver companyAdminLinks).
-  const baseLinks = [
-    { to: '/dashboard',          icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/dashboard/projects', icon: FolderKanban,    label: 'Mis Proyectos', badge: activeProjects || undefined },
-    { to: '/explore',            icon: Search,          label: 'Explorar' },
-    { to: '/dashboard/profile',  icon: Building2,       label: 'Mi Perfil' },
-  ];
-
-  const independienteLinks = [
-    { to: '/dashboard/projects', icon: FolderKanban, label: 'Mis Proyectos', badge: activeProjects || undefined },
-    { to: '/explore',            icon: Search,       label: 'Explorar' },
-  ];
-
-  const adminLinks = [
-    { to: '/admin',           icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/companies', icon: Building2,       label: 'Empresas' },
-    { to: '/admin/projects',  icon: FolderKanban,    label: 'Proyectos' },
-    { to: '/admin/users',     icon: Users,           label: 'Usuarios' },
-  ];
-
-  const companyAdminLinks = [
-    { to: '/dashboard',                icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/dashboard/projects',       icon: FolderKanban,    label: 'Mis Proyectos', badge: activeProjects || undefined },
-    { to: '/dashboard/create-project', icon: Plus,            label: 'Crear Proyecto' },
-    { to: '/explore',                  icon: Search,          label: 'Explorar' },
-    { to: '/dashboard/profile',        icon: Building2,       label: 'Mi Perfil' },
-    { to: '/dashboard/members',        icon: UserCheck,       label: 'Gestión de Miembros' },
-  ];
-
-  let links: { to: string; icon: IconoLucide; label: string; badge?: number }[] = adminLinks;
-  if (!isAdmin) {
-    if (currentUser?.rol === 'admin') links = companyAdminLinks;
-    else if (esIndependiente) links = independienteLinks;
-    else links = baseLinks;
-  }
+  const links: { to: string; icon: IconoLucide; label: string; badge?: number }[] =
+    LINKS_BY_ROLE[role].map(key =>
+      key === 'projects'
+        ? { ...NAV[key], badge: activeProjects || undefined }
+        : { ...NAV[key] },
+    );
 
   const isCollapsed = isMobile ? true : collapsed;
 
@@ -219,6 +194,31 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
     </motion.aside>
   );
 }
+
+/* ── Menú lateral: catálogo de enlaces + qué ve cada rol ─────────────────────
+ * Un solo componente, un solo lugar donde se decide la navegación. Para cambiar
+ * lo que ve un rol se edita LINKS_BY_ROLE; para un enlace nuevo, NAV. */
+type SidebarRole = 'superadmin' | 'companyAdmin' | 'employee' | 'independent';
+
+const NAV: Record<string, { to: string; icon: IconoLucide; label: string }> = {
+  dashboard:      { to: '/dashboard',                icon: LayoutDashboard, label: 'Dashboard' },
+  projects:       { to: '/dashboard/projects',       icon: FolderKanban,    label: 'Mis Proyectos' },
+  create:         { to: '/dashboard/create-project', icon: Plus,            label: 'Crear Proyecto' },
+  explore:        { to: '/explore',                  icon: Search,          label: 'Explorar' },
+  profile:        { to: '/dashboard/profile',        icon: Building2,       label: 'Mi Perfil' },
+  members:        { to: '/dashboard/members',        icon: UserCheck,       label: 'Gestión de Miembros' },
+  adminHome:      { to: '/admin',                    icon: LayoutDashboard, label: 'Dashboard' },
+  adminCompanies: { to: '/admin/companies',          icon: Building2,       label: 'Empresas' },
+  adminProjects:  { to: '/admin/projects',           icon: FolderKanban,    label: 'Proyectos' },
+  adminUsers:     { to: '/admin/users',              icon: Users,           label: 'Usuarios' },
+};
+
+const LINKS_BY_ROLE: Record<SidebarRole, string[]> = {
+  superadmin:   ['adminHome', 'adminCompanies', 'adminProjects', 'adminUsers'],
+  companyAdmin: ['dashboard', 'projects', 'create', 'explore', 'profile', 'members'],
+  employee:     ['dashboard', 'projects', 'explore', 'profile'],
+  independent:  ['projects', 'explore'],
+};
 
 function StatRow({ icon: Icon, label, value, color, bg }: {
   icon: IconoLucide; label: string; value: number; color: string; bg: string;
