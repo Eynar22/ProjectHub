@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsNumber, IsString, MinLength, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class LoginDto {
@@ -32,6 +32,11 @@ export class RegisterEmpresaDto {
   @IsOptional()
   @IsString()
   logo_url?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imagenes_urls?: string[];
 
   // Datos del admin
   @IsString()

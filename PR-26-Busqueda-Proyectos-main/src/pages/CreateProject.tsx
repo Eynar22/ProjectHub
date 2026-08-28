@@ -9,7 +9,7 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
-import { Upload, X, FileText, CheckCircle2, File, Plus } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle2, File, Plus, Paperclip, ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function CreateProject() {
@@ -107,13 +107,25 @@ export default function CreateProject() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
+
+  // Orden en que aparecen los campos; para llevar el foco al primero con error.
+  const FIELD_ORDER = ['name', 'shortDescription', 'description', 'problema', 'startDate', 'endDate', 'funding'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
-    if (!validate() || isSubmitting) return;
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      const firstKey = FIELD_ORDER.find(k => newErrors[k]) ?? Object.keys(newErrors)[0];
+      const el = document.querySelector<HTMLElement>(`[name="${firstKey}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.focus({ preventScroll: true });
+      toast.error('Revisa los campos marcados en rojo');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -282,17 +294,34 @@ export default function CreateProject() {
               </Card>
             </motion.div>
 
-            {/* Section 3: Images */}
+            {/* Sección opcional: adjuntos — colapsada por defecto para acortar el formulario */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-muted/50 border-b border-border">
-                  <div className="w-7 h-7 rounded-lg bg-info/15 flex items-center justify-center">
-                    <Upload className="w-4 h-4 text-info" />
+              <details className="group bg-card border-none shadow-md rounded-xl overflow-hidden">
+                <summary className="flex items-center gap-3 px-6 py-4 bg-muted/50 cursor-pointer list-none [&::-webkit-details-marker]:hidden border-b border-transparent group-open:border-border">
+                  <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <Paperclip className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <h2 className="font-bold text-base">Imágenes del Proyecto</h2>
-                  <span className="ml-auto text-xs text-muted-foreground">{imageFiles.length} añadida(s)</span>
-                </div>
-                <div className="p-6">
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-base flex items-center gap-2">
+                      Adjuntos
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">opcional</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground">Imágenes y documentos PDF del proyecto</p>
+                  </div>
+                  <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground flex-shrink-0">
+                    {imageFiles.length + pdfFiles.length > 0 && <span>{imageFiles.length + pdfFiles.length} archivo(s)</span>}
+                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+                  </span>
+                </summary>
+
+                <div className="p-6 space-y-8">
+                  {/* Imágenes */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Upload className="w-4 h-4 text-info" />
+                      <h3 className="font-semibold text-sm">Imágenes del Proyecto</h3>
+                      <span className="ml-auto text-xs text-muted-foreground">{imageFiles.length} añadida(s)</span>
+                    </div>
                   {imageFiles.length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                       {imageFiles.map((file, i) => (
@@ -316,21 +345,15 @@ export default function CreateProject() {
                     <span className="text-sm font-medium">Haz clic para añadir imágenes</span>
                     <span className="text-xs">PNG, JPG, WEBP hasta 10MB</span>
                   </button>
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Section 4: PDFs */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card className="overflow-hidden border-none shadow-md">
-                <div className="flex items-center gap-3 px-6 py-4 bg-warning-subtle border-b border-border">
-                  <div className="w-7 h-7 rounded-lg bg-warning-subtle flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-warning-strong" />
                   </div>
-                  <h2 className="font-bold text-base">Documentos PDF</h2>
-                  <span className="ml-auto text-xs text-muted-foreground">{pdfFiles.length} añadido(s)</span>
-                </div>
-                <div className="p-6">
+
+                  {/* Documentos PDF */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="w-4 h-4 text-warning-strong" />
+                      <h3 className="font-semibold text-sm">Documentos PDF</h3>
+                      <span className="ml-auto text-xs text-muted-foreground">{pdfFiles.length} añadido(s)</span>
+                    </div>
                   {pdfFiles.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {pdfFiles.map((file, i) => (
@@ -357,21 +380,23 @@ export default function CreateProject() {
                     <span className="text-sm font-medium">Haz clic para añadir PDFs</span>
                     <span className="text-xs">Documentos de proyecto, especificaciones técnicas</span>
                   </button>
+                  </div>
                 </div>
-              </Card>
+              </details>
             </motion.div>
 
-            {/* Submit */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
-              className="flex gap-3 pb-10">
-              <Button type="button" variant="outline" onClick={() => navigate('/dashboard')} className="flex-1 py-3">
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" className="flex-1 py-3 shadow-lg shadow-primary/20" disabled={isSubmitting}>
-                <Plus className="w-4 h-4 mr-2" />
-                {isSubmitting ? 'Publicando Proyecto...' : 'Publicar Proyecto'}
-              </Button>
-            </motion.div>
+            {/* Barra de acción fija — siempre visible, no hay que scrollear al fondo */}
+            <div className="sticky bottom-0 z-10 -mx-4 mt-2 border-t border-border bg-background/90 backdrop-blur-sm px-4 py-3">
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={() => navigate('/dashboard')} className="flex-1">
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="primary" className="flex-1 shadow-lg shadow-primary/20" disabled={isSubmitting}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {isSubmitting ? 'Publicando…' : 'Publicar Proyecto'}
+                </Button>
+              </div>
+            </div>
           </form>
     </AppLayout>
   );

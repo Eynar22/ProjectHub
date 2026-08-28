@@ -150,7 +150,7 @@ export function InfoTab({
 
       {/* Description */}
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Descripción</h3>
+        <h3 className="text-xl font-bold tracking-tight mb-4">Descripción</h3>
         {editingProjectInfo ? (
           <TextArea
             value={editDescripcion}

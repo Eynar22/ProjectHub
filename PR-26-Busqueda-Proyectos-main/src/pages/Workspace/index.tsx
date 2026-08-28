@@ -27,8 +27,11 @@ import {
   TAREAS_KEYS,
 } from '@/features/workspace';
 import { useQueryClient } from '@tanstack/react-query';
-import { Navbar } from '@/shared/components/layout/Navbar';
+import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
+import { Tabs } from '@/shared/components/ui/Tabs';
+import { StatusBanner } from '@/shared/components/StatusBanner';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import {
   ArrowLeft,
@@ -221,29 +224,27 @@ export default function Workspace() {
 
   if (!project) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Proyecto no encontrado</h1>
+      <AppLayout sinSidebar contained>
+        <div className="py-16 text-center">
+          <h1 className="text-2xl font-black tracking-tight mb-4">Proyecto no encontrado</h1>
           <Link to="/dashboard">
             <Button variant="primary">Volver al Dashboard</Button>
           </Link>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (!isParticipant) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">No tienes acceso a este grupo de trabajo</h1>
+      <AppLayout sinSidebar contained>
+        <div className="py-16 text-center">
+          <h1 className="text-2xl font-black tracking-tight mb-4">No tienes acceso a este grupo de trabajo</h1>
           <Link to="/dashboard">
             <Button variant="primary">Volver al Dashboard</Button>
           </Link>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -476,10 +477,7 @@ export default function Workspace() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="min-h-screen">
-        <Navbar />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <AppLayout sinSidebar contained mainClassName="flex-1 px-4 sm:px-6 lg:px-8 py-10">
           {/* Header */}
           <div className="mb-8">
             <Link to="/dashboard">
@@ -489,96 +487,42 @@ export default function Workspace() {
               </Button>
             </Link>
 
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">{project.nombre}</h1>
-                <p className="text-muted-foreground">{ownerCompany?.nombre}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-black tracking-tight">{project.nombre}</h1>
+                {ownerCompany?.nombre && <p className="text-sm text-muted-foreground">{ownerCompany.nombre}</p>}
               </div>
-              <div className="flex items-center gap-3">
-                {isOwner && pendingJoinRequests.length > 0 && (
-                  <button
-                    onClick={() => setActiveTab('solicitudes')}
-                    className="flex items-center gap-2 px-4 py-2 bg-warning/10 text-warning border border-warning/30 rounded-lg text-sm font-semibold hover:bg-warning/20 transition-colors animate-pulse"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    {pendingJoinRequests.length} Solicitud{pendingJoinRequests.length > 1 ? 'es' : ''} Pendiente{pendingJoinRequests.length > 1 ? 's' : ''}
-                  </button>
-                )}
-                {isOwner && (
-                  <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                    Propietario
-                  </div>
-                )}
-              </div>
+              {isOwner && <Badge variant="info">Propietario</Badge>}
             </div>
           </div>
 
           {project.suspendido && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
-              <AlertOctagon className="w-6 h-6 text-destructive mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-destructive">Espacio de Trabajo Suspendido</h3>
-                <p className="text-sm text-destructive/90">
-                  Este proyecto se encuentra congelado temporalmente porque el acceso de su creador ha sido bloqueado.
-                  Actualmente puedes navegar por el contenido en modo "solo lectura".
-                </p>
-              </div>
-            </div>
+            <StatusBanner tone="danger" icon={AlertOctagon} title="Espacio de Trabajo Suspendido">
+              Este proyecto se encuentra congelado temporalmente porque el acceso de su creador ha sido bloqueado.
+              Puedes navegar por el contenido en modo &ldquo;solo lectura&rdquo;.
+            </StatusBanner>
           )}
 
           {project.estado === 'archivado' && (
-            <div className="mb-6 p-4 bg-muted border border-border rounded-lg flex items-start gap-3">
-              <AlertOctagon className="w-6 h-6 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-foreground">Espacio de Trabajo Archivado</h3>
-                <p className="text-sm text-muted-foreground">
-                  Este proyecto ha sido archivado y no está visible al público general.
-                  Actualmente puedes navegar por su contenido en modo "solo lectura".
-                </p>
-              </div>
-            </div>
+            <StatusBanner tone="neutral" icon={AlertOctagon} title="Espacio de Trabajo Archivado">
+              Este proyecto ha sido archivado y no está visible al público general.
+              Puedes navegar por su contenido en modo &ldquo;solo lectura&rdquo;.
+            </StatusBanner>
           )}
 
           {project.estado === 'terminado' && (
-            <div className="mb-6 p-4 bg-success-subtle border border-success/30 rounded-lg flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 text-success-strong mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-success-strong">Espacio de Trabajo Terminado</h3>
-                <p className="text-sm text-success-strong">
-                  Este proyecto ha sido finalizado con éxito.
-                  Puedes seguir consultando todo su historial y recursos en modo "solo lectura".
-                </p>
-              </div>
-            </div>
+            <StatusBanner tone="success" icon={CheckCircle2} title="Espacio de Trabajo Terminado">
+              Este proyecto ha sido finalizado con éxito.
+              Puedes seguir consultando su historial y recursos en modo &ldquo;solo lectura&rdquo;.
+            </StatusBanner>
           )}
 
-          {/* Tabs */}
-          <div className="mb-6 border-b border-border">
-            <div className="flex gap-2">
-              {tabs.map(tab => {
-                const Icon = tab.icon;
-                const hasBadge = tab.badge > 0;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors relative ${activeTab === tab.id
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                    {hasBadge && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 bg-warning/15 text-warning rounded-full border border-warning/20">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <Tabs
+            tabs={tabs}
+            active={activeTab}
+            onChange={(id) => setActiveTab(id as TabType)}
+            className="mb-6"
+          />
 
           {/* Tab Content */}
           <div>
@@ -688,7 +632,6 @@ export default function Workspace() {
               />
             )}
           </div>
-        </div>
 
         {/* Task Edit Modal */}
         {currentEditingTask && (
@@ -725,7 +668,7 @@ export default function Workspace() {
             onCreate={handleAddFolder}
           />
         )}
-      </div>
+      </AppLayout>
     </DndProvider>
   );
 }

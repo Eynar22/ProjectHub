@@ -65,6 +65,10 @@ export interface RegistrarEmpresaInput {
     descripcion: string;
     num_empleados: number;
     portafolio: string;
+    /** Logo (imagen). El servicio lo convierte a base64. */
+    logo?: File | null;
+    /** Fotos de la empresa (galería). El servicio las convierte a base64. */
+    fotos?: File[];
   };
   responsable: {
     nombre_completo: string;

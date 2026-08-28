@@ -33,9 +33,11 @@ export const authService = {
 
   /** Registra una empresa nueva y su primer administrador. */
   async registrarEmpresa(datos: RegistrarEmpresaInput): Promise<void> {
-    const [documento_empresa_url, documento_personal_url] = await Promise.all([
+    const [documento_empresa_url, documento_personal_url, logo_url, imagenes_urls] = await Promise.all([
       fileToBase64(datos.responsable.documentoEmpresa),
       fileToBase64(datos.responsable.documentoPersonal),
+      datos.empresa.logo ? fileToBase64(datos.empresa.logo) : Promise.resolve(undefined),
+      Promise.all((datos.empresa.fotos ?? []).map(fileToBase64)),
     ]);
 
     await apiClient.post(ENDPOINTS.AUTH.REGISTRO_EMPRESA, {
@@ -46,6 +48,8 @@ export const authService = {
       num_empleados: datos.empresa.num_empleados,
       portafolio: datos.empresa.portafolio,
       documento_empresa_url,
+      logo_url,
+      imagenes_urls,
       nombre_completo: datos.responsable.nombre_completo,
       cargo: datos.responsable.cargo,
       documento_personal_url,

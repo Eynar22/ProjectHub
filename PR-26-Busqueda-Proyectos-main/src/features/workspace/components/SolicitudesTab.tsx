@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
 import type { Company } from '@/features/empresas';
 import type { ProyectoSolicitud } from './types';
 
@@ -32,18 +33,18 @@ export function SolicitudesTab({
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Solicitudes de Participación</h2>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold tracking-tight">Solicitudes de Participación</h2>
           <p className="text-muted-foreground text-sm mt-0.5">Gestiona quién se une a <strong>{projectName}</strong></p>
         </div>
-        <div className="flex gap-3">
-          <span className="text-sm px-3 py-1.5 bg-warning/10 text-warning rounded-full border border-warning/20 font-semibold">
+        <div className="flex flex-shrink-0 gap-2">
+          <Badge variant="warning">
             {pendingJoinRequests.length} pendiente{pendingJoinRequests.length !== 1 ? 's' : ''}
-          </span>
-          <span className="text-sm px-3 py-1.5 bg-success/10 text-success rounded-full border border-success/20 font-semibold">
+          </Badge>
+          <Badge variant="success">
             {allRequests.filter(r => r.estado === 'aceptado').length} aceptadas
-          </span>
+          </Badge>
         </div>
       </div>
 
@@ -74,7 +75,7 @@ export function SolicitudesTab({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold text-lg">{req.usuario?.nombre_completo}</p>
-                            <span className="text-[10px] font-bold px-2 py-0.5 bg-warning/10 text-warning rounded-full border border-warning/20 uppercase">Pendiente</span>
+                            <Badge variant="warning" size="sm">Pendiente</Badge>
                           </div>
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
                             <Mail className="w-3.5 h-3.5" />{req.usuario?.correo}
@@ -162,22 +163,20 @@ export function SolicitudesTab({
             {processedRequests.map(req => (
               <Card key={req.id} className={`p-4 border-none shadow-sm ${req.estado === 'rechazado' ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-sm ${req.estado === 'aceptado' ? 'bg-success' : 'bg-muted'
-                      }`}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                      req.estado === 'aceptado' ? 'bg-success text-primary-foreground' : 'bg-muted text-muted-foreground'
+                    }`}>
                       {req.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
                     </div>
-                    <div>
-                      <p className="font-semibold text-sm">{req.usuario?.nombre_completo}</p>
-                      <p className="text-xs text-muted-foreground">{req.usuario?.correo}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{req.usuario?.nombre_completo}</p>
+                      <p className="text-xs text-muted-foreground truncate">{req.usuario?.correo}</p>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full border ${req.estado === 'aceptado'
-                    ? 'bg-success/10 text-success border-success/20'
-                    : 'bg-destructive/10 text-destructive border-destructive/20'
-                    }`}>
+                  <Badge variant={req.estado === 'aceptado' ? 'success' : 'danger'} className="flex-shrink-0">
                     {req.estado === 'aceptado' ? 'Aceptada' : 'Rechazada'}
-                  </span>
+                  </Badge>
                 </div>
               </Card>
             ))}

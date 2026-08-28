@@ -1,7 +1,6 @@
 import { Link } from 'react-router';
 import { motion } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { useApp } from '@/app/context/AppContext';
 import {
@@ -19,62 +18,13 @@ import {
 export default function Home() {
   const { currentUser } = useApp();
   
-  // Array de características actualizado con colores individuales y efectos Glow
   const features = [
-    {
-      icon: Briefcase,
-      title: 'Oportunidades de Negocio',
-      description: 'Encuentra proyectos y colaboraciones que se ajustan a tu experiencia',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    },
-    {
-      icon: Users,
-      title: 'Colaboración Efectiva',
-      description: 'Herramientas integradas de comunicación y gestión de tareas',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Crecimiento Mutuo',
-      description: 'Expande tu red y accede a nuevas oportunidades de negocio',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    },
-    {
-      icon: Shield,
-      title: 'Seguro y Confiable',
-      description: 'Proceso de verificación de empresas para garantizar calidad',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    },
-    {
-      icon: Zap,
-      title: 'Rápido y Eficiente',
-      description: 'Solicita participación y empieza a colaborar en minutos',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    },
-    {
-      icon: Building2,
-      title: 'Visibilidad Nacional',
-      description: 'Conecta con empresas y socios estratégicos en todo el país',
-      glow: 'bg-primary/10 group-hover:bg-primary/25',
-      iconBg: 'bg-primary',
-      iconShadow: 'shadow-lg',
-      textColor: 'text-primary'
-    }
+    { icon: Briefcase,  title: 'Oportunidades de Negocio', description: 'Encuentra proyectos y colaboraciones que se ajustan a tu experiencia' },
+    { icon: Users,      title: 'Colaboración Efectiva',    description: 'Herramientas integradas de comunicación y gestión de tareas' },
+    { icon: TrendingUp, title: 'Crecimiento Mutuo',        description: 'Expande tu red y accede a nuevas oportunidades de negocio' },
+    { icon: Shield,     title: 'Seguro y Confiable',       description: 'Proceso de verificación de empresas para garantizar calidad' },
+    { icon: Zap,        title: 'Rápido y Eficiente',       description: 'Solicita participación y empieza a colaborar en minutos' },
+    { icon: Building2,  title: 'Visibilidad Nacional',     description: 'Conecta con empresas y socios estratégicos en todo el país' },
   ];
 
   return (
@@ -84,13 +34,21 @@ export default function Home() {
       sinFooter
       mainClassName="flex-1 w-full overflow-hidden"
     >
+          {/* Fondo ambiental de toda la landing: base + gradiente + glows indigo + grid de puntos */}
+          <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+            <div className="absolute inset-0 bg-background" />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] via-transparent to-primary/[0.03]" />
+            <div className="absolute -top-40 left-1/2 h-[40rem] w-[62rem] -translate-x-1/2 rounded-full bg-primary/15 blur-[130px]" />
+            <div className="absolute -bottom-40 -right-40 h-[36rem] w-[36rem] rounded-full bg-primary/10 blur-[120px]" />
+            <div className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(circle_at_1px_1px,var(--color-border)_1px,transparent_0)] [background-size:22px_22px]" />
+          </div>
 
           {/* ======================================= */}
           {/* HERO SECTION 3D (100% PANTALLA)         */}
           {/* ======================================= */}
           <section className="relative w-full min-h-[100dvh] -mt-14 md:-mt-16 flex items-center justify-center z-10 pb-10">
             
-            <div className="absolute inset-0 rounded-b-[3rem] md:rounded-b-[5rem] bg-background border-b border-border/50 overflow-hidden -z-10">
+            <div className="absolute inset-0 rounded-b-[3rem] md:rounded-b-[5rem] bg-background/70 backdrop-blur-sm border-b border-border/50 overflow-hidden -z-10">
               <div className="absolute inset-0 bg-primary/5" />
               <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
               <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
@@ -227,7 +185,7 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              {/* GRID DE LAS NUEVAS TARJETAS GLOW */}
+              {/* GRID DE TARJETAS — glow + hover (A) + textura (B) + fondo por card (C) */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
@@ -236,33 +194,29 @@ export default function Home() {
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
+                      transition={{ delay: index * 0.08, duration: 0.5 }}
                       viewport={{ once: true }}
                     >
-                      <Card className="relative p-8 h-full bg-card border border-border/60 shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] transition-all duration-500 rounded-[2rem] group overflow-hidden flex flex-col items-center text-center">
-                        
-                        {/* Círculo de Resplandor (Glow Effect) oculto al fondo */}
-                        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 ${feature.glow} blur-[50px] rounded-full pointer-events-none transition-all duration-700`} />
-                        
-                        {/* Icono Redondo y Sólido */}
-                        <div className={`relative z-10 w-16 h-16 rounded-full ${feature.iconBg} flex items-center justify-center mb-6 shadow-lg ${feature.iconShadow} transform group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-500`}>
-                          <Icon className="w-7 h-7 text-white" />
+                      <div className="group relative flex h-full flex-col items-center overflow-hidden rounded-[2rem] border border-border/60 bg-surface-raised p-8 text-center shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_24px_48px_-12px_rgb(0_0_0/0.25)]">
+                        {/* C — wash de color y marca de agua del icono, distinta por card */}
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-primary/[0.04]" />
+                        <Icon
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -bottom-8 -right-8 h-44 w-44 rotate-[-12deg] text-primary/[0.07] transition-all duration-700 group-hover:rotate-[-6deg] group-hover:scale-110 group-hover:text-primary/[0.12]"
+                        />
+                        {/* B — textura de puntos + hairline de acento */}
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,var(--color-border)_1.2px,transparent_0)] [background-size:16px_16px]" />
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                        {/* A — resplandor detrás del icono */}
+                        <div aria-hidden="true" className="pointer-events-none absolute -top-10 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-primary/15 blur-[60px] transition-all duration-700 group-hover:h-52 group-hover:w-52 group-hover:bg-primary/30" />
+
+                        <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/20 transition-all duration-500 group-hover:-translate-y-1 group-hover:scale-110 group-hover:shadow-primary/40">
+                          <Icon className="h-7 w-7 text-primary-foreground" />
                         </div>
-                        
-                        {/* Textos */}
-                        <h3 className="relative z-10 text-xl font-bold mb-3 text-foreground transition-colors duration-300">
-                          {feature.title}
-                        </h3>
-                        <p className="relative z-10 text-muted-foreground leading-relaxed flex-1 mb-8">
-                          {feature.description}
-                        </p>
-                        
-                        {/* Botón Saber Más (Aparece y se mueve en Hover) */}
-                        <div className={`relative z-10 mt-auto text-sm font-bold ${feature.textColor} flex items-center gap-2 opacity-70 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 cursor-pointer`}>
-                          Saber más <ArrowRight className="w-4 h-4" />
-                        </div>
-                        
-                      </Card>
+
+                        <h3 className="relative z-10 mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
+                        <p className="relative z-10 flex-1 leading-relaxed text-muted-foreground">{feature.description}</p>
+                      </div>
                     </motion.div>
                   );
                 })}
@@ -273,7 +227,7 @@ export default function Home() {
           {/* ======================================= */}
           {/* HOW IT WORKS SECTION                    */}
           {/* ======================================= */}
-          <section className="py-24 md:py-32 bg-background relative overflow-hidden">
+          <section className="py-24 md:py-32 relative overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -290,7 +244,7 @@ export default function Home() {
               </motion.div>
 
               <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative">
-                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-border" />
+                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                 {[
                   {
@@ -317,13 +271,11 @@ export default function Home() {
                     viewport={{ once: true }}
                     className="relative text-center"
                   >
-                    <div className="w-24 h-24 mx-auto bg-card border-[6px] border-background shadow-xl rounded-full flex items-center justify-center relative z-10 mb-8 group hover:scale-105 transition-transform duration-300">
-                      <div className="absolute inset-0 rounded-full bg-primary opacity-0 group-hover:opacity-10 transition-opacity" />
-                      <span className="text-2xl font-extrabold text-primary">
-                        {step.step}
-                      </span>
+                    <div className="group relative z-10 mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full border border-primary/25 bg-surface-raised shadow-lg shadow-primary/10 transition-transform duration-300 hover:scale-105">
+                      <div aria-hidden="true" className="pointer-events-none absolute -inset-3 rounded-full bg-primary/15 blur-2xl transition-all duration-300 group-hover:bg-primary/25" />
+                      <span className="relative text-2xl font-black text-primary">{step.step}</span>
                     </div>
-                    <h3 className="text-xl font-bold mb-4">{step.title}</h3>
+                    <h3 className="text-xl font-bold tracking-tight mb-4">{step.title}</h3>
                     <p className="text-muted-foreground leading-relaxed px-4">{step.description}</p>
                   </motion.div>
                 ))}
@@ -341,23 +293,23 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
               >
-                <div className="relative overflow-hidden rounded-[3rem] p-12 md:p-20 text-center shadow-2xl">
-                  <div className="absolute inset-0 bg-primary" />
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-                  
+                <div className="relative overflow-hidden rounded-[3rem] border border-primary/25 bg-surface-raised p-12 md:p-20 text-center shadow-xl">
+                  {/* Textura de puntos + resplandor indigo (sin fill saturado) */}
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_1px_1px,var(--color-border)_1.2px,transparent_0)] [background-size:18px_18px]" />
+                  <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[38rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[90px]" />
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/[0.08] to-transparent" />
+
                   <div className="relative z-10">
-                    <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white drop-shadow-md">
+                    <h2 className="text-3xl md:text-4xl font-extrabold mb-5 text-foreground text-balance">
                       ¿Listo para llevar tu empresa al siguiente nivel?
                     </h2>
-                    <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto font-medium">
+                    <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
                       Únete a cientos de empresas que ya están colaborando y escalando juntas en ProjectHub.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                      <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-full px-10 py-5 text-lg font-bold bg-background text-primary hover:bg-muted shadow-2xl hover:-translate-y-1 transition-all">
-                        Registra tu Empresa Hoy
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                    </div>
+                    <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-10 py-5 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary-hover hover:-translate-y-1 transition-all">
+                      Registra tu Empresa Hoy
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
                   </div>
                 </div>
               </motion.div>

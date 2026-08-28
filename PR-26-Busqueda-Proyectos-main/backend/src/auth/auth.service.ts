@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Usuario } from '../entities/usuario.entity';
 import { Empresa } from '../entities/empresa.entity';
+import { EmpresaImagen } from '../entities/empresa-imagen.entity';
 import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
 import { CodigoRecuperacion } from '../entities/codigo-recuperacion.entity';
 import { MailService } from '../mail/mail.service';
@@ -26,6 +27,7 @@ export class AuthService {
   constructor(
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
     @InjectRepository(Empresa) private empresaRepo: Repository<Empresa>,
+    @InjectRepository(EmpresaImagen) private empresaImagenRepo: Repository<EmpresaImagen>,
     @InjectRepository(SolicitudMembresia) private solicitudRepo: Repository<SolicitudMembresia>,
     @InjectRepository(CodigoRecuperacion) private codigoRepo: Repository<CodigoRecuperacion>,
     private jwtService: JwtService,
@@ -114,6 +116,15 @@ export class AuthService {
       estado: 'pendiente',
     });
     const savedEmpresa = await this.empresaRepo.save(empresa);
+
+    // Fotos de la empresa (galería), opcionales
+    if (dto.imagenes_urls?.length) {
+      await this.empresaImagenRepo.save(
+        dto.imagenes_urls.map((url) =>
+          this.empresaImagenRepo.create({ empresa_id: savedEmpresa.id, url }),
+        ),
+      );
+    }
 
     // Create admin user
     const hashedPassword = await bcrypt.hash(dto.password, 10);

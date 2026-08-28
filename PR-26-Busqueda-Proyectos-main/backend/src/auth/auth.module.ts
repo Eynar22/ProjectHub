@@ -8,13 +8,14 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { Usuario } from '../entities/usuario.entity';
 import { Empresa } from '../entities/empresa.entity';
+import { EmpresaImagen } from '../entities/empresa-imagen.entity';
 import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
 import { CodigoRecuperacion } from '../entities/codigo-recuperacion.entity';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario, Empresa, SolicitudMembresia, CodigoRecuperacion]),
+    TypeOrmModule.forFeature([Usuario, Empresa, EmpresaImagen, SolicitudMembresia, CodigoRecuperacion]),
     MailModule,
     PassportModule,
     JwtModule.registerAsync({
