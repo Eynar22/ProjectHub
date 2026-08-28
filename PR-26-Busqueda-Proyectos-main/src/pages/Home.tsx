@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { motion } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
+import { Reveal } from '@/shared/components/Reveal';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { useApp } from '@/app/context/AppContext';
 import {
@@ -120,12 +121,7 @@ export default function Home() {
           <section className="pt-12 pb-24 md:pt-16 md:pb-32 bg-muted/20 relative">
             
             {/* Barra Flotante de Búsqueda */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 relative z-30"
-            >
+            <Reveal className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 relative z-30">
               <div className="bg-card/95 backdrop-blur-2xl p-3 md:p-4 rounded-[2rem] md:rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-border/50 flex flex-col md:flex-row items-center gap-4 md:gap-0">
                 
                 <div className="flex-1 w-full flex items-center gap-3 px-4 md:px-6 md:border-r border-border/50">
@@ -168,35 +164,24 @@ export default function Home() {
                 </div>
 
               </div>
-            </motion.div>
+            </Reveal>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="text-center mb-16 md:mb-24"
-              >
+              <Reveal className="text-center mb-16 md:mb-24">
                 <h2 className="text-3xl md:text-5xl font-extrabold mb-6">
                   Nuestros <span className="text-primary">Servicios</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                   Soluciones diseñadas para impulsar tu negocio en cada etapa del camino.
                 </p>
-              </motion.div>
+              </Reveal>
 
               {/* GRID DE TARJETAS — glow + hover (A) + textura (B) + fondo por card (C) */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
                   return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.08, duration: 0.5 }}
-                      viewport={{ once: true }}
-                    >
+                    <Reveal key={index} delay={index * 0.08} className="h-full">
                       <div className="group relative flex h-full flex-col items-center overflow-hidden rounded-[2rem] border border-border/60 bg-surface-raised p-8 text-center shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_24px_48px_-12px_rgb(0_0_0/0.25)]">
                         {/* C — wash de color y marca de agua del icono, distinta por card */}
                         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-primary/[0.04]" />
@@ -217,7 +202,7 @@ export default function Home() {
                         <h3 className="relative z-10 mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
                         <p className="relative z-10 flex-1 leading-relaxed text-muted-foreground">{feature.description}</p>
                       </div>
-                    </motion.div>
+                    </Reveal>
                   );
                 })}
               </div>
@@ -231,17 +216,12 @@ export default function Home() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="text-center mb-20"
-              >
-                <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-3">Proceso Simple</h2>
+              <Reveal className="text-center mb-20">
+                <p className="text-sm font-bold text-primary uppercase tracking-widest mb-3">Proceso Simple</p>
                 <h2 className="text-3xl md:text-5xl font-extrabold mb-6">
                   ¿Cómo funciona?
                 </h2>
-              </motion.div>
+              </Reveal>
 
               <div className="grid md:grid-cols-3 gap-12 md:gap-8 relative">
                 <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -263,21 +243,14 @@ export default function Home() {
                     description: 'Conecta, comunícate y gestiona tus alianzas directamente en la plataforma.'
                   }
                 ].map((step, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.2 }}
-                    viewport={{ once: true }}
-                    className="relative text-center"
-                  >
+                  <Reveal key={index} delay={index * 0.12} className="relative text-center">
                     <div className="group relative z-10 mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full border border-primary/25 bg-surface-raised shadow-lg shadow-primary/10 transition-transform duration-300 hover:scale-105">
                       <div aria-hidden="true" className="pointer-events-none absolute -inset-3 rounded-full bg-primary/15 blur-2xl transition-all duration-300 group-hover:bg-primary/25" />
                       <span className="relative text-2xl font-black text-primary">{step.step}</span>
                     </div>
                     <h3 className="text-xl font-bold tracking-tight mb-4">{step.title}</h3>
                     <p className="text-muted-foreground leading-relaxed px-4">{step.description}</p>
-                  </motion.div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -288,11 +261,7 @@ export default function Home() {
           {/* ======================================= */}
           <section className="py-24">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-              >
+              <Reveal>
                 <div className="relative overflow-hidden rounded-[3rem] border border-primary/25 bg-surface-raised p-12 md:p-20 text-center shadow-xl">
                   {/* Textura de puntos + resplandor indigo (sin fill saturado) */}
                   <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_1px_1px,var(--color-border)_1.2px,transparent_0)] [background-size:18px_18px]" />
@@ -312,7 +281,7 @@ export default function Home() {
                     </Link>
                   </div>
                 </div>
-              </motion.div>
+              </Reveal>
             </div>
           </section>
 
