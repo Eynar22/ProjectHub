@@ -257,26 +257,26 @@ export default function CompanyProfile() {
   };
 
   return (
-    <AppLayout mainClassName="flex-1 py-10 px-6">
+    <AppLayout contained mainClassName="flex-1 py-10 px-6">
       <Breadcrumbs items={[{ label: "Dashboard", to: "/dashboard" }, { label: "Mi perfil" }]} />
 
           {/* Page header */}
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto mb-8 flex items-center gap-4">
+            className="mb-8 flex items-center gap-4">
             <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
               <User className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Mi Perfil</h1>
+              <h1 className="text-2xl font-black tracking-tight">Mi Perfil</h1>
               <p className="text-muted-foreground text-sm">Tu información personal y datos de empresa</p>
             </div>
           </motion.div>
 
-          <div className="max-w-4xl mx-auto grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6 items-start">
 
-            {/* LEFT: User card */}
+            {/* LEFT: User card — se mantiene a la vista mientras el detalle scrollea */}
             <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 }}
-              className="lg:col-span-1 space-y-4">
+              className="lg:col-span-1 space-y-4 lg:sticky lg:top-24">
 
               {/* Avatar + Name */}
               <Card className="p-6 border-none shadow-md text-center overflow-hidden relative">
@@ -324,15 +324,14 @@ export default function CompanyProfile() {
                     <RolIcon className="w-3.5 h-3.5" />
                     {rol.label}
                   </div>
-                </div>
 
-                {/* Company status badge */}
-                {userCompany && (
-                  <div className={`mt-4 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border ${companyEstado.bg} ${companyEstado.color} ${companyEstado.border}`}>
-                    <EstadoIcon className="w-3.5 h-3.5" />
-                    {companyEstado.label}
-                  </div>
-                )}
+                  {userCompany && (
+                    <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                      <Building2 className="w-3.5 h-3.5" />
+                      {userCompany.nombre}
+                    </p>
+                  )}
+                </div>
               </Card>
 
               {/* Personal Document */}
@@ -378,7 +377,7 @@ export default function CompanyProfile() {
                   <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
                     <User className="w-4 h-4 text-primary" />
                   </div>
-                  <h2 className="font-bold">Datos Personales</h2>
+                  <h2 className="font-bold text-base">Datos Personales</h2>
                   {!editingProfile ? (
                     <button
                       type="button"
@@ -432,7 +431,7 @@ export default function CompanyProfile() {
                   <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Lock className="w-4 h-4 text-primary" />
                   </div>
-                  <h2 className="font-bold">Seguridad</h2>
+                  <h2 className="font-bold text-base">Seguridad</h2>
                   {!editingPassword ? (
                     <button
                       type="button"
@@ -499,8 +498,12 @@ export default function CompanyProfile() {
                         <Building2 className="w-4 h-4 text-primary" />
                       </div>
                     )}
-                    <h2 className="font-bold">Datos de la Empresa</h2>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${companyEstado.bg} ${companyEstado.color} ${companyEstado.border}`}>
+                    <h2 className="font-bold text-base">Datos de la Empresa</h2>
+                    {!isCompanyAdmin && (
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Solo lectura</span>
+                    )}
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border ${companyEstado.bg} ${companyEstado.color} ${companyEstado.border}`}>
+                      <EstadoIcon className="w-3 h-3" />
                       {userCompany.estado?.toUpperCase()}
                     </span>
                     {isCompanyAdmin && !editingCompany && (

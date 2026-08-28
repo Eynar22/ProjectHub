@@ -65,15 +65,15 @@ export default function AdminUsers() {
   };
 
   return (
-    <AppLayout isAdmin mainClassName="flex-1 p-8">
+    <AppLayout isAdmin contained mainClassName="flex-1 p-8">
       <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Usuarios" }]} />
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-4xl font-bold flex items-center gap-3">
-                  <Users className="w-10 h-10 text-primary" /> Gestión de Usuarios
+                <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
+                  <Users className="w-6 h-6 text-primary" /> Gestión de Usuarios
                 </h1>
-                <p className="text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Selecciona una empresa para gestionar sus usuarios
                 </p>
               </div>

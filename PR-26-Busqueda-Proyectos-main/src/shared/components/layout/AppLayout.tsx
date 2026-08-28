@@ -13,12 +13,17 @@ export function AppLayout({
   sinFooter = false,
   /** clases extra para el <main> (padding, ancho máx, etc.). */
   mainClassName = 'flex-1 p-8',
+  /** Centra el contenido en una columna de ~1280px. Evita que listas y tablas
+   *  se estiren a todo el ancho del monitor (o queden en una columna angosta
+   *  con márgenes enormes). Actívalo en paneles y listados. */
+  contained = false,
 }: {
   children: ReactNode;
   isAdmin?: boolean;
   sinSidebar?: boolean;
   sinFooter?: boolean;
   mainClassName?: string;
+  contained?: boolean;
 }) {
   return (
     <div className="flex min-h-screen flex-col">
@@ -33,7 +38,7 @@ export function AppLayout({
       <div className="flex flex-1">
         {!sinSidebar && <Sidebar isAdmin={isAdmin} />}
         <main id="contenido" tabIndex={-1} className={mainClassName}>
-          {children}
+          {contained ? <div className="mx-auto w-full max-w-7xl">{children}</div> : children}
         </main>
       </div>
       {!sinFooter && <Footer />}

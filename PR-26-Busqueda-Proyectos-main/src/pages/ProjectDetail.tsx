@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link, useNavigate, useLocation } from 'react-router';
+import { useParams, Link, useLocation } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import {
   useProyectos,
@@ -32,11 +32,10 @@ import {
   FolderOpen,
   Users,
   DollarSign,
-  Calendar,
-  Clock
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -71,7 +70,6 @@ export default function ProjectDetail() {
   const { data: requests = [] } = useSolicitudesEnviadas(!!currentUser);
   const crearSolicitud = useCrearSolicitud();
   const transferir = useTransferirProyecto();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const fromPage = location.state?.from;
@@ -93,7 +91,6 @@ export default function ProjectDetail() {
   const creator = project ? users.find(u => u.id === project.creador_id) : null;
   const ownerCompany = creator ? companies.find(c => c.id === creator.empresa_id) : null;
   const participatingUsers = project?.participantes?.map(p => p.usuario) || [];
-  const currentUserCompany = currentUser ? companies.find(c => c.id === currentUser.empresa_id) : null;
 
   const recursosFolder = project?.recursos?.find(r => r.nombre === 'Recursos' && r.tipo === 'carpeta' && !r.padre_id);
 
@@ -176,14 +173,12 @@ export default function ProjectDetail() {
     }
   };
 
+  const tieneVariasImagenes = (project.imagenes?.length ?? 0) > 1;
   const sliderSettings = {
-    className: "side-cover-flow",
-    centerMode: true,
-    infinite: project.imagenes?.length > 1,
-    centerPadding: "60px",
+    infinite: tieneVariasImagenes,
     slidesToShow: 1,
-    speed: 700,
-    autoplay: true,
+    speed: 500,
+    autoplay: tieneVariasImagenes,
     autoplaySpeed: 4000,
     arrows: false,
     dots: true,
@@ -194,33 +189,6 @@ export default function ProjectDetail() {
 
   return (
     <div className="min-h-screen text-foreground font-sans relative overflow-x-hidden selection:bg-primary/30">
-      
-      {/* Estilos para el Carrusel con efecto Desvanecimiento y Desenfoque */}
-      <style>{`
-        .mask-edges {
-          -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-          mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-        .side-cover-flow .slick-slide {
-          transition: all 0.6s ease-in-out;
-          transform: scale(0.75);
-          opacity: 0.2;
-          filter: blur(4px);
-          padding: 15px 0;
-        }
-        .side-cover-flow .slick-center {
-          transform: scale(1.05);
-          opacity: 1;
-          filter: blur(0);
-          z-index: 10;
-        }
-        .side-cover-flow .slick-dots {
-          bottom: -35px;
-        }
-        .side-cover-flow .slick-dots li button:before {
-          color: var(--color-primary);
-        }
-      `}</style>
 
       {/* Decoración de fondo muy sutil */}
       <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
@@ -231,8 +199,8 @@ export default function ProjectDetail() {
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
 
         <main id="contenido" tabIndex={-1} className="flex-1 w-full pb-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
             <Link to={backUrl} className="inline-block mb-8">
               <Button variant="outline" className="flex items-center gap-2 rounded-full border-border/60 hover:bg-muted/50 transition-all shadow-sm">
                 <ArrowLeft className="w-4 h-4" />
@@ -253,206 +221,134 @@ export default function ProjectDetail() {
               </motion.div>
             )}
 
-            {/* ==================================================== */}
-            {/* SECCIÓN SUPERIOR: Info (Izquierda) | Carrusel (Derecha) */}
-            {/* ==================================================== */}
-            <div className="grid lg:grid-cols-12 gap-12 items-center mb-16">
-              
-              {/* IZQUIERDA: Textos, Descripción y Estadísticas */}
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                className="lg:col-span-7 flex flex-col"
-              >
-                {/* Etiquetas */}
-                <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <span className="bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">
+            {/* ── 1. CABECERA: identidad + acción | imagen ── */}
+            <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-10">
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-7 flex flex-col">
+                <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-3">
+                  {project.nombre}
+                </h1>
+
+                {project.descripcion_corta && (
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-5">
+                    {project.descripcion_corta}
+                  </p>
+                )}
+
+                {/* Categoría + empresa */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider">
                     {project.categoria || 'Categoría General'}
                   </span>
                   {ownerCompany && (
-                    <span className="bg-card border border-border text-foreground text-xs font-bold px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm uppercase tracking-wider">
-                      <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="bg-card border border-border text-foreground text-xs font-bold py-1 pl-1 pr-3.5 rounded-full flex items-center gap-2 shadow-sm uppercase tracking-wider">
+                      {ownerCompany.logo_url ? (
+                        <img src={ownerCompany.logo_url} alt="" className="w-5 h-5 rounded-full object-cover border border-border/60" />
+                      ) : (
+                        <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+                          <Building2 className="w-3 h-3 text-muted-foreground" />
+                        </span>
+                      )}
                       {ownerCompany.nombre}
                     </span>
                   )}
                 </div>
-                
-                {/* Título */}
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight mb-6">
-                  {project.nombre}
-                </h1>
 
-                {/* Descripción movida aquí bajo el título */}
-                <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line mb-8">
-                  {project.descripcion_completa}
-                </p>
-
-                {/* El problema que el proyecto busca resolver */}
-                {project.problema && (
-                  <div className="mb-8 rounded-2xl border border-warning/30 bg-warning-subtle p-5">
-                    <h2 className="text-[10px] font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <AlertOctagon className="w-3.5 h-3.5" />
-                      El problema
-                    </h2>
-                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                      {project.problema}
-                    </p>
-                  </div>
-                )}
-
-                {/* BLOQUE DE ESTADÍSTICAS Y CRONOGRAMA */}
-                <div className="space-y-6 pt-6 border-t border-border/50">
-                  
-                  {/* Cronograma (Línea de tiempo) */}
-                  <div className="flex items-center justify-between relative">
-                    {/* Fecha Inicio */}
-                    <div className="flex flex-col items-center bg-card border border-border/50 rounded-2xl p-4 w-[38%] shadow-sm z-10">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-2">Inicio</span>
-                      <span className="text-3xl lg:text-4xl font-black text-foreground">{dateInicio.day}</span>
-                      <span className="text-xs font-bold text-foreground mt-1">{dateInicio.month} {dateInicio.year}</span>
-                    </div>
-
-                    {/* Línea Conectora con Flecha */}
-                    <div className="flex-1 flex items-center justify-center relative z-0 px-2">
-                      <div className="w-full h-[2px] bg-border/60 relative">
-                        <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-background px-3 py-1 rounded-full border border-border/50 shadow-sm text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> Duración
-                        </div>
-                        <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </div>
-
-                    {/* Fecha Fin */}
-                    <div className="flex flex-col items-center bg-card border border-border/50 rounded-2xl p-4 w-[38%] shadow-sm z-10">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-2">Finalización</span>
-                      <span className="text-3xl lg:text-4xl font-black text-primary">{dateFin.day}</span>
-                      <span className="text-xs font-bold text-foreground mt-1">{dateFin.month} {dateFin.year}</span>
-                    </div>
-                  </div>
-
-                  {/* Presupuesto y Participantes */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Presupuesto */}
-                    <div className="flex items-center gap-4 bg-success/5 border border-success/30 rounded-2xl p-4">
-                      <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-                        <DollarSign className="w-6 h-6 text-success-strong" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Presupuesto</div>
-                        <div className="text-2xl font-black text-success-strong">
-                          {project.financiamiento ? formatNumber(project.financiamiento) : '--'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Participantes */}
-                    <div className="flex items-center gap-4 bg-info-subtle border border-info/30 rounded-2xl p-4">
-                      <div className="w-12 h-12 rounded-full bg-info-subtle flex items-center justify-center flex-shrink-0">
-                        <Users className="w-6 h-6 text-info-strong" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Usuarios</div>
-                        <div className="text-2xl font-black text-info-strong">
-                          {participatingUsers.length}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Acciones (Botones) */}
-                <div className="space-y-4 pt-2">
+                {/* Acción principal en la cabecera */}
+                <div className="mt-6 flex flex-wrap gap-3">
                   {canRequestParticipation && (
-                    <button 
-                      onClick={() => setShowRequestModal(true)}
-                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
-                    >
+                    <Button variant="primary" className="flex items-center gap-2 shadow-lg shadow-primary/20" onClick={() => setShowRequestModal(true)}>
                       Solicitar Participación <Send className="w-4 h-4" />
-                    </button>
+                    </Button>
                   )}
-
-                  {canTransfer && project.suspendido && (
-                    <button 
-                      onClick={() => setShowTransferModal(true)}
-                      className="w-full bg-warning/10 hover:bg-warning/20 text-warning rounded-2xl py-4 text-sm font-bold transition-all flex items-center justify-center gap-2 border border-warning/30"
-                    >
-                      <RefreshCcw className="w-4 h-4" /> Transferir Proyecto
-                    </button>
-                  )}
-
-                  {hasPendingRequest && (
-                    <div className="p-4 rounded-2xl bg-warning-subtle border border-warning/30 text-warning-strong text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                      <RefreshCcw className="w-4 h-4 animate-spin-slow" />
-                      Solicitud en Revisión
-                    </div>
-                  )}
-
                   {(isOwner || isParticipant) && !project.suspendido && (
-                    <Link to={`/grupo-trabajo/${project.id}`} className="block">
-                      <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl py-4 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                    <Link to={`/grupo-trabajo/${project.id}`}>
+                      <Button variant="primary" className="flex items-center gap-2 shadow-lg shadow-primary/20">
                         Ir al Espacio de Trabajo <ArrowRight className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </Link>
                   )}
-                </div>
-                  </div>
-
+                  {canTransfer && project.suspendido && (
+                    <Button variant="warning" className="flex items-center gap-2" onClick={() => setShowTransferModal(true)}>
+                      <RefreshCcw className="w-4 h-4" /> Transferir Proyecto
+                    </Button>
+                  )}
+                  {hasPendingRequest && (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-warning-subtle border border-warning/30 text-warning-strong px-4 py-2 text-xs font-bold uppercase tracking-widest">
+                      <RefreshCcw className="w-4 h-4 animate-spin-slow" /> Solicitud en revisión
+                    </span>
+                  )}
                 </div>
               </motion.div>
 
-              {/* DERECHA: Carrusel de Imágenes */}
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                className="lg:col-span-5 relative"
-              >
-                <div className="mask-edges pb-8">
-                  {project.imagenes && project.imagenes.length > 0 ? (
-                    <Slider {...sliderSettings}>
-                      {project.imagenes.map((img, idx) => (
-                        <div key={idx} className="outline-none px-2">
-                          <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] aspect-[4/5] md:aspect-[3/4] bg-muted border border-border/50">
-                            <img 
-                              src={img.url} 
-                              alt={`${project.nombre} ${idx + 1}`} 
-                              className="w-full h-full object-cover" 
-                            />
-                          </div>
+              {/* Imagen — formato horizontal, no domina la vista */}
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-5 relative">
+                {project.imagenes && project.imagenes.length > 0 ? (
+                  <Slider {...sliderSettings}>
+                    {project.imagenes.map((img, idx) => (
+                      <div key={idx} className="outline-none px-1">
+                        <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] aspect-[4/3] bg-muted border border-border/50">
+                          <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-cover" />
                         </div>
-                      ))}
-                    </Slider>
-                  ) : (
-                    <div className="w-full aspect-[4/5] md:aspect-[3/4] rounded-2xl bg-primary/5 border border-border/50 flex flex-col items-center justify-center shadow-lg">
-                      <Building2 className="w-20 h-20 text-muted-foreground/30 mb-4" />
-                      <p className="text-sm font-semibold text-muted-foreground">Sin imágenes</p>
-                    </div>
-                  )}
-                </div>
+                      </div>
+                    ))}
+                  </Slider>
+                ) : (
+                  <div className="w-full aspect-[4/3] rounded-2xl bg-primary/5 border border-border/50 flex flex-col items-center justify-center">
+                    <Building2 className="w-16 h-16 text-muted-foreground/30 mb-3" />
+                    <p className="text-sm font-semibold text-muted-foreground">Sin imágenes</p>
+                  </div>
+                )}
               </motion.div>
             </div>
 
-            {/* ==================================================== */}
-            {/* SECCIÓN INFERIOR: Documentos y Administración        */}
-            {/* ==================================================== */}
+            {/* ── 2. EL PROBLEMA — ancho completo, justo debajo de la cabecera ── */}
+            {project.problema ? (
+              <div className="mb-10 rounded-2xl border border-warning/30 bg-warning-subtle p-6">
+                <h2 className="text-[10px] font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <AlertOctagon className="w-3.5 h-3.5" />
+                  El problema que resuelve
+                </h2>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                  {project.problema}
+                </p>
+              </div>
+            ) : isOwner ? (
+              <div className="mb-10 rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground flex items-center gap-3">
+                <AlertOctagon className="w-4 h-4 flex-shrink-0" />
+                Aún no describiste el problema que resuelve este proyecto. Los postulantes lo usan como base para su propuesta.
+              </div>
+            ) : null}
+
+            {/* ── 3. SOBRE EL PROYECTO — contenido | ficha ── */}
             <div className="grid lg:grid-cols-12 gap-8">
-              
-              {/* COLUMNA IZQUIERDA INFERIOR (Recursos) */}
-              <div className="lg:col-span-8">
-                {archivos && archivos.length > 0 ? (
-                  <Card className="bg-card border border-border/50 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-bold flex items-center gap-2 text-foreground">
-                        <FolderOpen className="w-5 h-5 text-primary" />
-                        Documentos y Recursos
-                      </h2>
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4">
+
+              {/* MAIN */}
+              <div className="lg:col-span-8 space-y-8">
+                {project.descripcion_completa && (
+                  <section>
+                    <h2 className="text-xl font-bold tracking-tight mb-3">Descripción</h2>
+                    <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
+                      {project.descripcion_completa}
+                    </p>
+                  </section>
+                )}
+
+                <section>
+                  <h2 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
+                    <FolderOpen className="w-5 h-5 text-primary" />
+                    Documentos y Recursos
+                  </h2>
+                  {archivos && archivos.length > 0 ? (
+                    <div className="grid sm:grid-cols-2 gap-3">
                       {archivos.map((archivo, idx: number) => (
-                        <div
+                        <button
                           key={idx}
-                          className="flex items-center justify-between p-4 bg-muted/30 border border-border/50 rounded-2xl hover:bg-muted hover:border-primary/30 transition-all cursor-pointer group shadow-sm"
+                          type="button"
+                          className="flex items-center justify-between gap-3 p-4 bg-card border border-border/50 rounded-xl hover:border-primary/40 hover:shadow-md transition-all text-left group"
                           onClick={() => archivo.url && openBase64(archivo.url)}
                         >
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                               <FileText className="w-5 h-5 text-primary" />
                             </div>
                             <span className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">
@@ -460,58 +356,82 @@ export default function ProjectDetail() {
                             </span>
                           </div>
                           <Download className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                        </div>
+                        </button>
                       ))}
                     </div>
-                  </Card>
-                ) : (
-                  <Card className="bg-card/50 border border-border/50 p-8 rounded-3xl flex flex-col items-center justify-center text-center h-full min-h-[200px] border-dashed">
-                    <FolderOpen className="w-10 h-10 text-muted-foreground/30 mb-3" />
-                    <p className="text-muted-foreground font-medium">No hay documentos adjuntos a este proyecto.</p>
-                  </Card>
-                )}
+                  ) : (
+                    <Card className="p-8 rounded-2xl flex flex-col items-center justify-center text-center border-dashed border-none shadow-sm">
+                      <FolderOpen className="w-9 h-9 text-muted-foreground/30 mb-3" />
+                      <p className="text-sm text-muted-foreground">No hay documentos adjuntos a este proyecto.</p>
+                    </Card>
+                  )}
+                </section>
               </div>
 
-              {/* COLUMNA DERECHA INFERIOR (Administración, Participantes & Botones) */}
-              <div className="lg:col-span-4 space-y-6">
-                
-                {/* Administración */}
-                <Card className="bg-card border border-border/50 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
-                  <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Administración</h3>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg border border-primary/20">
-                      {creator?.nombre_completo.charAt(0).toUpperCase() || '?'}
+              {/* RAIL */}
+              <aside className="lg:col-span-4 space-y-6">
+                {/* Ficha del proyecto: cronograma + presupuesto + participantes + creador */}
+                <Card className="p-6 border-none shadow-sm">
+                  <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Ficha del proyecto</h3>
+                  <dl className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4" /> Inicio</dt>
+                      <dd className="font-semibold">{dateInicio.day} {dateInicio.month} {dateInicio.year}</dd>
                     </div>
-                    <div>
-                      <div className="font-bold text-foreground text-sm leading-tight">{creator?.nombre_completo || 'Cargando...'}</div>
-                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">Creador</div>
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4" /> Finalización</dt>
+                      <dd className="font-semibold text-primary">{dateFin.day} {dateFin.month} {dateFin.year}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
+                      <dt className="flex items-center gap-2 text-muted-foreground"><DollarSign className="w-4 h-4" /> Presupuesto</dt>
+                      <dd className="font-semibold text-success-strong">{project.financiamiento ? formatNumber(project.financiamiento) : 'Sin definir'}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="flex items-center gap-2 text-muted-foreground"><Users className="w-4 h-4" /> Participantes</dt>
+                      <dd className="font-semibold">{participatingUsers.length}</dd>
+                    </div>
+                    {ownerCompany && (
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="flex items-center gap-2 text-muted-foreground"><Building2 className="w-4 h-4" /> Empresa</dt>
+                        <dd className="flex items-center gap-2 font-semibold min-w-0">
+                          {ownerCompany.logo_url && <img src={ownerCompany.logo_url} alt="" className="w-5 h-5 rounded object-cover border border-border/60 flex-shrink-0" />}
+                          <span className="truncate">{ownerCompany.nombre}</span>
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                  <div className="mt-4 pt-4 border-t border-border/60 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                      {creator?.nombre_completo?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-sm truncate">{creator?.nombre_completo || 'Cargando…'}</div>
+                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Creador</div>
                     </div>
                   </div>
                 </Card>
 
-                {/* Lista de Participantes */}
+                {/* Equipo */}
                 {participatingUsers.length > 0 && (
-                  <Card className="bg-card border border-border/50 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                  <Card className="p-6 border-none shadow-sm">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Participantes</h3>
-                      <div className="flex items-center justify-center bg-info-subtle text-info-strong text-xs font-bold px-2 py-0.5 rounded-full">
+                      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Equipo</h3>
+                      <span className="inline-flex items-center bg-info-subtle text-info-strong text-xs font-bold px-2 py-0.5 rounded-full">
                         <Users className="w-3 h-3 mr-1" /> {participatingUsers.length}
-                      </div>
+                      </span>
                     </div>
-                    
-                    <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                    <div className="space-y-4 max-h-[260px] overflow-y-auto pr-2">
                       {participatingUsers.map((user, idx) => {
                         if (!user) return null;
                         const userComp = companies.find(c => c.id === user.empresa_id);
                         return (
                           <div key={user.id || idx} className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
                               {user.nombre_completo.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-bold text-foreground text-sm truncate">{user.nombre_completo}</div>
-                              <div className="text-[10px] font-semibold text-muted-foreground truncate mt-0.5">
+                              <div className="font-bold text-sm truncate">{user.nombre_completo}</div>
+                              <div className="text-[10px] font-semibold text-muted-foreground truncate">
                                 {userComp?.nombre || user.cargo || 'Miembro'}
                               </div>
                             </div>
@@ -521,10 +441,7 @@ export default function ProjectDetail() {
                     </div>
                   </Card>
                 )}
-
-                
-
-              </div>
+              </aside>
             </div>
           </div>
         </main>

@@ -205,13 +205,13 @@ export default function AdminProjects() {
   ];
 
   return (
-    <AppLayout isAdmin mainClassName="flex-1 p-8">
+    <AppLayout isAdmin contained mainClassName="flex-1 p-8">
       <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Proyectos" }]} />
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-4xl font-bold mb-2">Gestión de Proyectos</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl font-black tracking-tight mb-1">Gestión de Proyectos</h1>
+                <p className="text-sm text-muted-foreground">
                   Administra todos los proyectos — cambia estado, archiva o reactiva
                 </p>
               </div>

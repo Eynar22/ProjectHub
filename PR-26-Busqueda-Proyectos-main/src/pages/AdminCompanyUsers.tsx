@@ -54,9 +54,9 @@ export default function AdminCompanyUsers() {
   }
 
   return (
-    <AppLayout isAdmin mainClassName="flex-1 p-8">
+    <AppLayout isAdmin contained mainClassName="flex-1 p-8">
       <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Empresas", to: "/admin/companies" }, { label: company.nombre + " · Usuarios" }]} />
-          <div className="max-w-5xl mx-auto">
+          <div>
             <Link to="/admin/companies">
               <Button variant="ghost" className="mb-6 flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4" />
@@ -74,7 +74,7 @@ export default function AdminCompanyUsers() {
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <Building2 className="w-6 h-6 text-primary" />
                   </div>
-                  <h1 className="text-4xl font-bold">{company.nombre}</h1>
+                  <h1 className="text-2xl font-black tracking-tight">{company.nombre}</h1>
                 </div>
                 <p className="text-muted-foreground">
                   Gestión de usuarios y permisos administrativos

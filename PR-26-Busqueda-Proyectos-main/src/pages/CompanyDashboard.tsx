@@ -10,6 +10,8 @@ import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Badge } from '@/shared/components/ui/Badge';
 import { PROYECTO_ESTADO } from '@/shared/constants/proyecto';
+import { StatCard } from '@/shared/components/dashboard/StatCard';
+import { DashboardSection } from '@/shared/components/dashboard/DashboardSection';
 import { OnboardingWizard } from '@/shared/components/OnboardingWizard';
 import {
   FolderKanban,
@@ -86,53 +88,70 @@ export default function CompanyDashboard() {
     mr => mr.empresa_id === currentUser?.empresa_id && mr.estado === 'pendiente'
   );
 
-  const stats = [
-    {
-      label: 'Mis Proyectos',
-      value: myProjects.length,
-      subtext: 'Proyectos creados por ti',
-      icon: FolderKanban,
-      color: 'bg-primary',
-      link: '/dashboard/projects#owned',
-      pulse: false,
-    },
-    {
-      label: 'Colaboraciones',
-      value: collaboratingProjects.length,
-      subtext: 'Proyectos en los que participas',
-      icon: Users,
-      color: 'bg-success',
-      link: '/dashboard/projects#colab',
-      pulse: false,
-    },
-    {
-      label: 'Solicitudes de Proyectos',
-      value: totalProjectPending,
-      subtext: totalProjectPending > 0 ? 'Nuevas solicitudes pendientes' : 'Sin solicitudes pendientes',
-      icon: UserPlus,
-      color: totalProjectPending > 0 ? 'bg-primary' : 'bg-muted',
-      link: '#project-requests-section',
-      pulse: totalProjectPending > 0,
-    },
-    ...(currentUser?.rol === 'admin'
-      ? [{
-        label: 'Solicitudes Miembros',
-        value: pendingMembers.length,
-        subtext: pendingMembers.length > 0 ? 'Nuevos miembros esperando' : 'No hay solicitudes nuevas',
-        icon: Clock,
-        color: pendingMembers.length > 0 ? 'bg-warning' : 'bg-muted',
-        link: '/dashboard/members',
-        pulse: pendingMembers.length > 0,
-      }]
-      : []),
-  ];
+  // El empleado no crea proyectos ni recibe solicitudes: su única métrica real
+  // es en cuántos colabora. El admin ve el panel completo.
+  const stats: {
+    label: string;
+    value: number;
+    subtext: string;
+    icon: typeof FolderKanban;
+    tone: 'primary' | 'success' | 'warning' | 'muted';
+    attention?: boolean;
+    to: string;
+  }[] = esAdmin
+    ? [
+        {
+          label: 'Mis Proyectos',
+          value: myProjects.length,
+          subtext: 'Proyectos creados por ti',
+          icon: FolderKanban,
+          tone: 'primary',
+          to: '/dashboard/projects#owned',
+        },
+        {
+          label: 'Colaboraciones',
+          value: collaboratingProjects.length,
+          subtext: 'Proyectos en los que participas',
+          icon: Users,
+          tone: 'success',
+          to: '/dashboard/projects#colab',
+        },
+        {
+          label: 'Solicitudes de Proyectos',
+          value: totalProjectPending,
+          subtext: totalProjectPending > 0 ? 'Nuevas solicitudes pendientes' : 'Sin solicitudes pendientes',
+          icon: UserPlus,
+          tone: totalProjectPending > 0 ? 'primary' : 'muted',
+          attention: true,
+          to: '#project-requests-section',
+        },
+        {
+          label: 'Solicitudes Miembros',
+          value: pendingMembers.length,
+          subtext: pendingMembers.length > 0 ? 'Nuevos miembros esperando' : 'No hay solicitudes nuevas',
+          icon: Clock,
+          tone: pendingMembers.length > 0 ? 'warning' : 'muted',
+          attention: true,
+          to: '#member-requests-section',
+        },
+      ]
+    : [
+        {
+          label: 'Colaboraciones',
+          value: collaboratingProjects.length,
+          subtext: 'Proyectos en los que participas',
+          icon: Users,
+          tone: 'success',
+          to: '/dashboard/projects#colab',
+        },
+      ];
 
   const isCompanyAdmin = currentUser?.rol === 'admin' && !!userCompany;
 
   return (
     <>
       {isCompanyAdmin && currentUser && !currentUser.onboarding_completado && <OnboardingWizard />}
-      <AppLayout mainClassName="flex-1 py-8 px-6">
+      <AppLayout contained mainClassName="flex-1 py-8 px-6">
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -169,58 +188,21 @@ export default function CompanyDashboard() {
             </div>
           </motion.div>
 
-          {/* Stats */}
-          <div className={`grid gap-6 mb-8 ${currentUser?.rol === 'admin' ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              const hasPulse = stat.pulse;
-
-              const cardContent = (
-                <Card hover className="p-6 transition-all border-none shadow-sm h-full flex flex-col justify-between">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center shadow-md relative`}>
-                      <Icon className="w-6 h-6 text-primary-foreground" />
-                      {hasPulse && stat.value > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background animate-bounce shadow-lg">
-                          {stat.value}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-3xl font-black tracking-tight mb-1 tabular-nums">{stat.value}</p>
-                    <p className="text-[11px] text-muted-foreground font-medium">{stat.subtext}</p>
-                  </div>
-                </Card>
-              );
-
-              return (
-                <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
-                  {stat.link?.startsWith('#') ? (
-                    <button
-                      type="button"
-                      className="h-full w-full text-left"
-                      onClick={() =>
-                        document
-                          .getElementById(stat.link!.substring(1))
-                          ?.scrollIntoView({ behavior: 'smooth' })
-                      }
-                    >
-                      {cardContent}
-                    </button>
-                  ) : stat.link ? (
-                    <Link to={stat.link} className="h-full block">
-                      {cardContent}
-                    </Link>
-                  ) : (
-                    <div className="h-full block">
-                      {cardContent}
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
+          {/* Métricas */}
+          <div className={`grid gap-6 mb-8 ${stats.length === 1 ? 'max-w-xs' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
+            {stats.map((stat, index) => (
+              <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
+                <StatCard
+                  label={stat.label}
+                  value={stat.value}
+                  subtext={stat.subtext}
+                  icon={stat.icon}
+                  tone={stat.tone}
+                  attention={stat.attention}
+                  to={stat.to}
+                />
+              </motion.div>
+            ))}
           </div>
 
           {/* Quick Actions — mobile only (desktop buttons in header) */}
@@ -247,19 +229,19 @@ export default function CompanyDashboard() {
             </Link>
           </div>
 
-          {/* My Projects */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-bold">Mis Proyectos</h2>
-                <p className="text-xs text-muted-foreground">{myProjects.length} proyecto(s) creado(s)</p>
-              </div>
+          {/* Mis Proyectos — solo el admin de empresa crea proyectos */}
+          {esAdmin && (
+          <DashboardSection
+            title="Mis Proyectos"
+            subtitle={`${myProjects.length} proyecto(s) creado(s)`}
+            action={
               <Link to="/dashboard/projects">
                 <Button variant="ghost" className="flex items-center gap-1.5 text-sm">
                   Ver todos <ChevronRight className="w-4 h-4" />
                 </Button>
               </Link>
-            </div>
+            }
+          >
             {myProjects.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myProjects.slice(0, 3).map((project) => {
@@ -296,26 +278,22 @@ export default function CompanyDashboard() {
                   <FolderKanban className="w-7 h-7 text-primary/40" />
                 </div>
                 <h3 className="font-bold mb-1">Aún no tienes proyectos</h3>
-                <p className="text-muted-foreground text-sm mb-5">
-                  {esAdmin ? 'Crea tu primer proyecto para empezar a colaborar' : 'Únete a un proyecto desde Explorar para empezar a colaborar'}
-                </p>
-                {esAdmin ? (
-                  <Link to="/dashboard/create-project">
-                    <Button variant="primary" className="shadow-md shadow-primary/20">Crear Proyecto</Button>
-                  </Link>
-                ) : (
-                  <Link to="/explore">
-                    <Button variant="primary" className="shadow-md shadow-primary/20">Explorar Proyectos</Button>
-                  </Link>
-                )}
+                <p className="text-muted-foreground text-sm mb-5">Crea tu primer proyecto para empezar a colaborar</p>
+                <Link to="/dashboard/create-project">
+                  <Button variant="primary" className="shadow-md shadow-primary/20">Crear Proyecto</Button>
+                </Link>
               </Card>
             )}
-          </div>
+          </DashboardSection>
+          )}
 
-          {/* Collaborating Projects */}
-          {collaboratingProjects.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Proyectos en Colaboración</h2>
+          {/* Proyectos en Colaboración — contenido principal del empleado */}
+          {(!esAdmin || collaboratingProjects.length > 0) && (
+            <DashboardSection
+              title="Proyectos en Colaboración"
+              subtitle={`${collaboratingProjects.length} proyecto(s)`}
+            >
+              {collaboratingProjects.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {collaboratingProjects.slice(0, 3).map((project) => {
                   const creator = users.find(u => u.id === project.creador_id);
@@ -326,7 +304,7 @@ export default function CompanyDashboard() {
                         {creatorCompany?.logo_url ? (
                           <img src={creatorCompany.logo_url} alt={creatorCompany.nombre} className="w-10 h-10 rounded-lg object-cover" />
                         ) : (
-                          <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                             <Building2 className="w-5 h-5 text-primary-foreground" />
                           </div>
                         )}
@@ -349,27 +327,38 @@ export default function CompanyDashboard() {
                   );
                 })}
               </div>
-            </div>
+              ) : (
+                <Card className="p-10 text-center border-none shadow-sm border-dashed">
+                  <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-7 h-7 text-primary/40" />
+                  </div>
+                  <h3 className="font-bold mb-1">Aún no colaboras en ningún proyecto</h3>
+                  <p className="text-muted-foreground text-sm mb-5">Explora proyectos abiertos y postula al que encaje contigo.</p>
+                  <Link to="/explore">
+                    <Button variant="primary" className="shadow-md shadow-primary/20">Explorar Proyectos</Button>
+                  </Link>
+                </Card>
+              )}
+            </DashboardSection>
           )}
 
-          {/* ── Pending Member Requests — only for company admin ── */}
-          {currentUser?.rol === 'admin' && pendingMembers.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-warning" />
-                  Solicitudes de Miembros Pendientes
-                  <span className="ml-1 px-2.5 py-0.5 bg-warning-subtle text-warning-strong text-sm rounded-full font-semibold border border-warning/30 animate-pulse">
-                    {pendingMembers.length}
-                  </span>
-                </h2>
+          {/* ── Solicitudes de Miembros Pendientes — solo admin de empresa ── */}
+          {esAdmin && pendingMembers.length > 0 && (
+            <motion.div id="member-requests-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <DashboardSection
+              title="Solicitudes de Miembros"
+              icon={Clock}
+              iconClassName="text-warning"
+              count={pendingMembers.length}
+              countTone="warning"
+              action={
                 <Link to="/dashboard/members">
                   <Button variant="ghost" size="sm" className="flex items-center gap-1">
                     Ver todo <ChevronRight className="w-4 h-4" />
                   </Button>
                 </Link>
-              </div>
-
+              }
+            >
               <div className="space-y-3">
                 {pendingMembers.slice(0, 3).map(mr => (
                   <motion.div key={mr.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
@@ -452,27 +441,21 @@ export default function CompanyDashboard() {
                   </Link>
                 )}
               </div>
+            </DashboardSection>
             </motion.div>
           )}
 
-          {/* ── Project Join Requests Section ── */}
+          {/* ── Solicitudes de Participación en mis proyectos ── */}
           {projectPendingGroups.length > 0 && (
-            <motion.div
-              id="project-requests-section"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+            <motion.div id="project-requests-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <DashboardSection
+              title="Solicitudes de Participación"
+              subtitle="En los proyectos que gestionas"
+              icon={UserPlus}
+              iconClassName="text-info-strong"
+              count={totalProjectPending}
+              countTone="info"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-info-strong" />
-                  Solicitudes de Participación — Mis Proyectos
-                  <span className="ml-1 px-2.5 py-0.5 bg-info-subtle text-info-strong text-sm rounded-full font-semibold border border-info/30">
-                    {totalProjectPending}
-                  </span>
-                </h2>
-              </div>
-
               <div className="space-y-4">
                 {projectPendingGroups.map((group, gi) => (
                   <motion.div key={group.proyecto_id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: gi * 0.07 }}>
@@ -555,6 +538,7 @@ export default function CompanyDashboard() {
                   </motion.div>
                 ))}
               </div>
+            </DashboardSection>
             </motion.div>
           )}
 

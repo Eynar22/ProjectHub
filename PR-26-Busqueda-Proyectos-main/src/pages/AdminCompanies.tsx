@@ -33,19 +33,19 @@ export default function AdminCompanies() {
   });
 
   return (
-    <AppLayout isAdmin mainClassName="flex-1 p-8">
+    <AppLayout isAdmin contained mainClassName="flex-1 p-8">
       <Breadcrumbs items={[{ label: "Panel", to: "/admin" }, { label: "Empresas" }]} />
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold mb-2">Gestión de Empresas</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-black tracking-tight mb-1">Gestión de Empresas</h1>
+            <p className="text-sm text-muted-foreground">
               Aprobar, bloquear o eliminar empresas registradas
             </p>
           </motion.div>
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="space-y-6">
             {/* Filters */}
             <Card className="p-4">
               <div className="flex flex-col sm:flex-row gap-4">

@@ -64,7 +64,7 @@ export default function Explore() {
   };
 
   return (
-    <div className="min-h-screen text-foreground font-sans relative overflow-hidden">
+    <div className="min-h-screen text-foreground font-sans relative overflow-x-clip">
       
       {/* Luces de fondo estilo Home */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-primary/5 pointer-events-none -z-10" />
@@ -75,7 +75,7 @@ export default function Explore() {
       <div className="flex relative z-10">
         {!isVisitor && <Sidebar isAdmin={currentUser?.rol === 'superadmin'} />}
 
-        <main id="contenido" tabIndex={-1} className="flex-1 w-full overflow-hidden">
+        <main id="contenido" tabIndex={-1} className="flex-1 w-full min-w-0 overflow-x-clip">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
             
             {/* ======================================= */}

@@ -342,7 +342,7 @@ export default function MyProjects() {
   ];
 
   return (
-    <AppLayout mainClassName="flex-1 p-8">
+    <AppLayout contained mainClassName="flex-1 p-8">
       <Breadcrumbs items={[{ label: "Dashboard", to: "/dashboard" }, { label: "Mis proyectos" }]} />
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
