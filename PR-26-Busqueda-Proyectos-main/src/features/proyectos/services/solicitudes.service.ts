@@ -35,11 +35,15 @@ export const solicitudesService = {
    * se convierte a base64 aquí antes de enviarlo).
    */
   async crear(proyectoId: number | string, datos: CrearSolicitudInput): Promise<Request> {
-    const cv_url = datos.cv ? await fileToBase64(datos.cv) : undefined;
+    const [cv_url, propuesta_url] = await Promise.all([
+      datos.cv ? fileToBase64(datos.cv) : undefined,
+      datos.propuestaArchivo ? fileToBase64(datos.propuestaArchivo) : undefined,
+    ]);
 
     return apiClient.post<Request>(ENDPOINTS.PROYECTOS.CREAR_SOLICITUD(proyectoId), {
       mensaje: datos.mensaje,
       propuesta: datos.propuesta,
+      propuesta_url,
       cv_url,
     });
   },

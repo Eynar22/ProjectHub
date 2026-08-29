@@ -112,6 +112,16 @@ export default function ProjectRequests() {
                             <div className="mb-4 p-4 bg-info-subtle border border-info/30 rounded-lg">
                               <div className="text-sm text-info-strong font-semibold mb-1">Propuesta de solución</div>
                               <div className="text-sm whitespace-pre-line">{request.propuesta}</div>
+                              {request.propuesta_url && (
+                                <button
+                                  onClick={() => openBase64(request.propuesta_url!)}
+                                  className="mt-2 flex items-center gap-1.5 text-sm text-info-strong hover:underline font-medium"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  <ExternalLink className="w-3 h-3" />
+                                  Ver documento de la propuesta
+                                </button>
+                              )}
                             </div>
                           )}
 

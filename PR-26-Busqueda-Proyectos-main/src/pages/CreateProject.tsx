@@ -9,6 +9,7 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
+import { ODS_LIST } from '@/shared/constants/ods';
 import { Upload, X, FileText, CheckCircle2, File, Plus, Paperclip, ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -31,8 +32,12 @@ export default function CreateProject() {
     funding: '',
   });
 
+  const [ods, setOds] = useState<number[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+
+  const toggleOds = (id: number) =>
+    setOds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -135,6 +140,7 @@ export default function CreateProject() {
         shortDescription: formData.shortDescription,
         problema: formData.problema,
         categoria: formData.categoria,
+        ods: ods,
         imageFiles: imageFiles,
         pdfFiles: pdfFiles,
         startDate: formData.startDate,
@@ -249,6 +255,43 @@ export default function CreateProject() {
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 text-foreground">
+                      Objetivos de Desarrollo Sostenible (ODS)
+                      <span className="text-muted-foreground font-normal"> (opcional · elige uno o varios)</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {ODS_LIST.map(o => {
+                        const activo = ods.includes(o.id);
+                        return (
+                          <button
+                            key={o.id}
+                            type="button"
+                            onClick={() => toggleOds(o.id)}
+                            aria-pressed={activo}
+                            title={o.nombre}
+                            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                              activo
+                                ? 'text-white border-transparent shadow-sm'
+                                : 'bg-input-background text-foreground border-input hover:border-primary/40'
+                            }`}
+                            style={activo ? { backgroundColor: o.color } : undefined}
+                          >
+                            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
+                              activo ? 'bg-white/25' : 'bg-muted'
+                            }`}>
+                              {o.id}
+                            </span>
+                            <span className="max-w-[10rem] truncate">{o.nombre}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {ods.length > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">{ods.length} ODS seleccionado{ods.length === 1 ? '' : 's'}</p>
+                    )}
                   </div>
 
                   <TextArea label="Descripción Completa" name="description"

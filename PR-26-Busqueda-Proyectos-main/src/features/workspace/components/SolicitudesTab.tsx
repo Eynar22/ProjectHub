@@ -103,6 +103,16 @@ export function SolicitudesTab({
                             <div className="mt-3 p-3 bg-info-subtle rounded-xl border border-info/30 text-sm text-foreground">
                               <p className="text-xs font-bold text-info-strong uppercase tracking-widest mb-1">Propuesta de solución</p>
                               <p className="whitespace-pre-line">{req.propuesta}</p>
+                              {req.propuesta_url && (
+                                <button
+                                  onClick={() => onVerCv(req.propuesta_url!)}
+                                  className="mt-2 flex items-center gap-1.5 text-xs text-info-strong hover:underline font-medium"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  <ExternalLink className="w-3 h-3" />
+                                  Ver documento de la propuesta
+                                </button>
+                              )}
                             </div>
                           )}
                           {req.cv_url && (

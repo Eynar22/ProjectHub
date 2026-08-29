@@ -218,7 +218,7 @@ const LINKS_BY_ROLE: Record<SidebarRole, string[]> = {
   superadmin:   ['adminHome', 'adminCompanies', 'adminProjects', 'adminUsers'],
   companyAdmin: ['dashboard', 'projects', 'create', 'explore', 'profile', 'members'],
   employee:     ['dashboard', 'projects', 'explore', 'profile'],
-  independent:  ['projects', 'explore'],
+  independent:  ['dashboard', 'projects', 'explore', 'profile'],
 };
 
 function StatRow({ icon: Icon, label, value, color, bg }: {

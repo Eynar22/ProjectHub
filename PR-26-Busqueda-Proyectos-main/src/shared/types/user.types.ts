@@ -22,6 +22,8 @@ export interface User {
   rol: UserRole;
   empresa_id?: number | null;
   estado?: string;
+  /** Fecha de alta (YYYY-MM-DD). La usa el panel de administración para métricas. */
+  fecha_registro?: string;
   documento_url?: string;
   foto_url?: string;
   empresa?: { id: number; nombre: string };

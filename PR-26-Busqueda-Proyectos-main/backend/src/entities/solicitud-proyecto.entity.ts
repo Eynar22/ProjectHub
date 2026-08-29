@@ -22,6 +22,10 @@ export class SolicitudProyecto {
   @Column({ type: 'text', nullable: true })
   propuesta: string;
 
+  // Documento de respaldo de la propuesta (PDF/imagen en base64). Opcional.
+  @Column({ type: 'text', nullable: true })
+  propuesta_url: string;
+
   @Column({ type: 'text', nullable: true })
   cv_url: string;
 

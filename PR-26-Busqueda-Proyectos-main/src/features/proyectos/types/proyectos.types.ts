@@ -27,6 +27,8 @@ export interface Project {
   /** Problema que el proyecto busca resolver. Visible en el detalle público. */
   problema?: string;
   categoria: string;
+  /** Ids (1..17) de los ODS de la ONU a los que aporta el proyecto. */
+  ods?: number[];
   imagenes: { id: number; url: string }[];
   fecha_inicio: string;
   fecha_fin: string;
@@ -49,6 +51,8 @@ export interface Request {
   mensaje: string;
   /** Propuesta de solución al problema del proyecto (solo postulantes independientes). */
   propuesta?: string;
+  /** Documento de respaldo de la propuesta en base64 (opcional). */
+  propuesta_url?: string;
   /** CV del postulante en base64 (solo postulantes independientes). */
   cv_url?: string;
   estado: 'pendiente' | 'aceptado' | 'rechazado';
@@ -60,6 +64,8 @@ export interface Request {
 export interface CrearSolicitudInput {
   mensaje?: string;
   propuesta?: string;
+  /** Documento de respaldo de la propuesta; el servicio lo pasa a base64. */
+  propuestaArchivo?: File | null;
   /** Archivo de CV; el servicio lo convierte a base64 antes de enviarlo. */
   cv?: File | null;
 }
@@ -71,6 +77,8 @@ export interface CrearProjectDto {
   description?: string;
   problema?: string;
   categoria?: string;
+  /** Ids (1..17) de los ODS a los que aporta el proyecto. */
+  ods?: number[];
   startDate: string;
   endDate: string;
   funding?: string | number;

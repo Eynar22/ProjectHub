@@ -4,6 +4,8 @@ import { Button } from '@/shared/components/ui/Button';
 import { Reveal } from '@/shared/components/Reveal';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { useApp } from '@/app/context/AppContext';
+import { useProyectos } from '@/features/proyectos';
+import { ODS_LIST } from '@/shared/constants/ods';
 import {
   Briefcase,
   Users,
@@ -13,11 +15,21 @@ import {
   Building2,
   ArrowRight,
   MapPin,
-  Search
+  Search,
+  Globe
 } from 'lucide-react';
 
 export default function Home() {
   const { currentUser } = useApp();
+  const { data: projects = [] } = useProyectos();
+
+  // Cuántos proyectos aportan a cada ODS (uno puede aportar a varios).
+  const odsConteo = ODS_LIST.map(o => ({
+    ...o,
+    total: projects.filter(p => Array.isArray(p.ods) && p.ods.includes(o.id)).length,
+  })).sort((a, b) => b.total - a.total);
+  const totalAportes = odsConteo.reduce((s, o) => s + o.total, 0);
+  const proyectosConOds = projects.filter(p => Array.isArray(p.ods) && p.ods.length > 0).length;
   
   const features = [
     { icon: Briefcase,  title: 'Oportunidades de Negocio', description: 'Encuentra proyectos y colaboraciones que se ajustan a tu experiencia' },
@@ -205,6 +217,54 @@ export default function Home() {
                     </Reveal>
                   );
                 })}
+              </div>
+            </div>
+          </section>
+
+          {/* ======================================= */}
+          {/* IMPACTO EN LOS ODS                      */}
+          {/* ======================================= */}
+          <section className="py-24 md:py-32 relative overflow-hidden">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+              <Reveal className="text-center mb-14 md:mb-20">
+                <p className="inline-flex items-center gap-2 text-sm font-bold text-primary uppercase tracking-widest mb-3">
+                  <Globe className="w-4 h-4" /> Impacto Sostenible
+                </p>
+                <h2 className="text-3xl md:text-5xl font-extrabold mb-6">
+                  Aportando a los <span className="text-primary">Objetivos de Desarrollo Sostenible</span>
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {proyectosConOds > 0
+                    ? <>Ya son <strong className="text-foreground">{proyectosConOds}</strong> proyecto{proyectosConOds === 1 ? '' : 's'} con <strong className="text-foreground">{totalAportes}</strong> aporte{totalAportes === 1 ? '' : 's'} repartidos entre los 17 ODS de la ONU.</>
+                    : <>Cada proyecto publicado en ProjectHub declara a qué ODS de la ONU contribuye.</>}
+                </p>
+              </Reveal>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {odsConteo.map((o, index) => (
+                  <Reveal key={o.id} delay={index * 0.03} className="h-full">
+                    <div className="group relative flex h-full items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-surface-raised p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                      <div
+                        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-inner"
+                        style={{ backgroundColor: o.color }}
+                      >
+                        {o.id}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold leading-tight text-foreground line-clamp-2">{o.nombre}</p>
+                        <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                          {o.total} proyecto{o.total === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full opacity-10 transition-opacity duration-300 group-hover:opacity-20"
+                        style={{ backgroundColor: o.color }}
+                      />
+                    </div>
+                  </Reveal>
+                ))}
               </div>
             </div>
           </section>

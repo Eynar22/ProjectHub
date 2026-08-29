@@ -25,8 +25,10 @@ export class ProyectoService {
     fecha_fin: true,
     financiamiento: true,
     categoria: true,
+    ods: true,
     estado: true,
     suspendido: true,
+    fecha_creacion: true,
     creador_id: true,
   } as const;
 
@@ -232,10 +234,16 @@ export class ProyectoService {
   }
 
   async update(id: number, data: Partial<Proyecto> & { imagenes_urls?: string[] }) {
-    const { imagenes_urls, ...proyectoData } = data;
+    const { imagenes_urls, ods, ...proyectoData } = data;
 
     if (Object.keys(proyectoData).length > 0) {
       await this.proyectoRepo.update(id, proyectoData);
+    }
+
+    // 'ods' es una columna simple-json: se escribe con save() para asegurar que
+    // el transformador serialice el arreglo (repository.update no siempre lo hace).
+    if (ods !== undefined) {
+      await this.proyectoRepo.save({ id, ods: Array.isArray(ods) ? ods : [] });
     }
 
     if (imagenes_urls) {
@@ -377,13 +385,14 @@ export class ProyectoService {
   async createRequest(
     proyectoId: number,
     usuarioId: number,
-    datos: { mensaje?: string; propuesta?: string; cv_url?: string },
+    datos: { mensaje?: string; propuesta?: string; propuesta_url?: string; cv_url?: string },
   ) {
     const solicitud = this.solicitudRepo.create({
       proyecto_id: proyectoId,
       usuario_id: usuarioId,
       mensaje: datos.mensaje,
       propuesta: datos.propuesta,
+      propuesta_url: datos.propuesta_url,
       cv_url: datos.cv_url,
       estado: 'pendiente',
     });

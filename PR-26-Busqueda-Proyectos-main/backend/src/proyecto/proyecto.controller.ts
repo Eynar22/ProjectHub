@@ -163,7 +163,7 @@ export class ProyectoController {
   @Post(':id/solicitudes')
   createRequest(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { mensaje?: string; propuesta?: string; cv_url?: string },
+    @Body() body: { mensaje?: string; propuesta?: string; propuesta_url?: string; cv_url?: string },
     @Request() req: any,
   ) {
     return this.proyectoService.createRequest(id, req.user.id, body);

@@ -7,6 +7,7 @@ export interface ProyectoSolicitud {
   mensaje: string;
   /** Propuesta de solución y CV en base64 (postulantes independientes). */
   propuesta?: string;
+  propuesta_url?: string;
   cv_url?: string;
   estado: 'pendiente' | 'aceptado' | 'rechazado';
   fecha_creacion: string;

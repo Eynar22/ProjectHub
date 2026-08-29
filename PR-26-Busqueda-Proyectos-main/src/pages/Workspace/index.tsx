@@ -91,13 +91,19 @@ export default function Workspace() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Project Info Editing State (Administrador de Empresa: foto, descripción, fecha fin)
+  // Project Info Editing State (Administrador de Empresa)
   const [editingProjectInfo, setEditingProjectInfo] = useState(false);
+  const [editNombre, setEditNombre] = useState('');
+  const [editDescCorta, setEditDescCorta] = useState('');
   const [editDescripcion, setEditDescripcion] = useState('');
+  const [editProblema, setEditProblema] = useState('');
   const [editFechaFin, setEditFechaFin] = useState('');
+  const [editOds, setEditOds] = useState<number[]>([]);
   const [editImagenes, setEditImagenes] = useState<string[]>([]);
   const [uploadingProjectImage, setUploadingProjectImage] = useState(false);
   const [savingProjectInfo, setSavingProjectInfo] = useState(false);
+  const toggleEditOds = (id: number) =>
+    setEditOds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
   const projectImageInputRef = useRef<HTMLInputElement>(null);
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
@@ -298,8 +304,12 @@ export default function Workspace() {
   // ── Edición de info del proyecto (Administrador de Empresa): foto, descripción, fecha fin ──
   const startEditingProjectInfo = () => {
     if (!project) return;
+    setEditNombre(project.nombre || '');
+    setEditDescCorta(project.descripcion_corta || '');
     setEditDescripcion(project.descripcion_completa || '');
+    setEditProblema(project.problema || '');
     setEditFechaFin(project.fecha_fin ? project.fecha_fin.slice(0, 10) : '');
+    setEditOds(Array.isArray(project.ods) ? project.ods : []);
     setEditImagenes((project.imagenes || []).map(img => img.url));
     setEditingProjectInfo(true);
   };
@@ -327,9 +337,19 @@ export default function Workspace() {
     if (!project) return;
     setSavingProjectInfo(true);
     try {
+      const nombreLimpio = editNombre.trim();
+      if (!nombreLimpio) {
+        toast.error('El nombre del proyecto no puede quedar vacío');
+        setSavingProjectInfo(false);
+        return;
+      }
       const updated = await proyectosService.actualizar(project.id, {
+        nombre: nombreLimpio,
+        descripcion_corta: editDescCorta.trim(),
         descripcion_completa: editDescripcion.trim(),
+        problema: editProblema.trim(),
         fecha_fin: editFechaFin || null,
+        ods: editOds,
         imagenes_urls: editImagenes,
       } as Partial<Project>);
       queryClient.setQueryData(PROYECTOS_KEYS.detalle(project.id), updated);
@@ -558,10 +578,18 @@ export default function Workspace() {
                 startEditingProjectInfo={startEditingProjectInfo}
                 savingProjectInfo={savingProjectInfo}
                 handleSaveProjectInfo={handleSaveProjectInfo}
+                editNombre={editNombre}
+                setEditNombre={setEditNombre}
+                editDescCorta={editDescCorta}
+                setEditDescCorta={setEditDescCorta}
                 editDescripcion={editDescripcion}
                 setEditDescripcion={setEditDescripcion}
+                editProblema={editProblema}
+                setEditProblema={setEditProblema}
                 editFechaFin={editFechaFin}
                 setEditFechaFin={setEditFechaFin}
+                editOds={editOds}
+                toggleEditOds={toggleEditOds}
                 editImagenes={editImagenes}
                 removeEditImage={removeEditImage}
                 uploadingProjectImage={uploadingProjectImage}

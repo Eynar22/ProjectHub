@@ -22,6 +22,7 @@ import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import { esIndependiente } from '@/shared/utils/roles';
 import { Avatar } from '@/shared/components/ui/Avatar';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 import {
   Building2,
   FileText,
@@ -83,6 +84,7 @@ export default function ProjectDetail() {
   const [selectedNewOwner, setSelectedNewOwner] = useState<number | ''>('');
   const [message, setMessage] = useState('');
   const [propuesta, setPropuesta] = useState('');
+  const [propuestaFile, setPropuestaFile] = useState<File | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
@@ -154,11 +156,13 @@ export default function ProjectDetail() {
         proyectoId: project.id,
         mensaje: message,
         propuesta: usuarioIndependiente ? propuesta.trim() : undefined,
+        propuestaArchivo: usuarioIndependiente ? propuestaFile : undefined,
         cv: usuarioIndependiente ? cvFile : undefined,
       });
       setShowRequestModal(false);
       setMessage('');
       setPropuesta('');
+      setPropuestaFile(null);
       setCvFile(null);
     } catch {
       /* el toast lo muestra el hook */
@@ -254,6 +258,28 @@ export default function ProjectDetail() {
                     </span>
                   )}
                 </div>
+
+                {/* ODS a los que aporta el proyecto */}
+                {Array.isArray(project.ods) && project.ods.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Aporta a los ODS</span>
+                    {project.ods.map(id => {
+                      const o = ODS_POR_ID[id];
+                      if (!o) return null;
+                      return (
+                        <span
+                          key={id}
+                          title={o.nombre}
+                          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white shadow-sm"
+                          style={{ backgroundColor: o.color }}
+                        >
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px]">{o.id}</span>
+                          <span className="max-w-[9rem] truncate">{o.nombre}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Acción principal en la cabecera */}
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -500,6 +526,16 @@ export default function ProjectDetail() {
                 rows={5}
                 value={propuesta}
                 onChange={(e) => setPropuesta(e.target.value)}
+              />
+            </div>
+            <div className="mb-4">
+              <DocumentUpload
+                label="Documento de la propuesta (opcional)"
+                hint="Adjunta un PDF o imagen que respalde tu propuesta (máx. 6MB)."
+                value={propuestaFile}
+                onChange={setPropuestaFile}
+                onRemove={() => setPropuestaFile(null)}
+                maxSizeMB={MAX_CV_MB}
               />
             </div>
             <div className="mb-4">

@@ -54,6 +54,7 @@ export const proyectosService = {
       descripcion_completa: dto.description,
       problema: dto.problema,
       categoria: dto.categoria || 'Tecnología',
+      ods: dto.ods ?? [],
       fecha_inicio: dto.startDate,
       fecha_fin: dto.endDate,
       financiamiento: dto.funding != null && dto.funding !== '' ? parseFloat(String(dto.funding)) : null,

@@ -3,10 +3,11 @@ import { motion } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { Calendar, DollarSign, Users, Image, Upload, Loader2, X, Pencil } from 'lucide-react';
+import { Calendar, DollarSign, Users, Image, Upload, Loader2, X, Pencil, AlertOctagon, Target } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
+import { ODS_LIST, ODS_POR_ID } from '@/shared/constants/ods';
 import type { Project } from '@/features/proyectos';
 
 const sliderSettings = {
@@ -25,10 +26,18 @@ export function InfoTab({
   startEditingProjectInfo,
   savingProjectInfo,
   handleSaveProjectInfo,
+  editNombre,
+  setEditNombre,
+  editDescCorta,
+  setEditDescCorta,
   editDescripcion,
   setEditDescripcion,
+  editProblema,
+  setEditProblema,
   editFechaFin,
   setEditFechaFin,
+  editOds,
+  toggleEditOds,
   editImagenes,
   removeEditImage,
   uploadingProjectImage,
@@ -43,10 +52,18 @@ export function InfoTab({
   startEditingProjectInfo: () => void;
   savingProjectInfo: boolean;
   handleSaveProjectInfo: () => void;
+  editNombre: string;
+  setEditNombre: (v: string) => void;
+  editDescCorta: string;
+  setEditDescCorta: (v: string) => void;
   editDescripcion: string;
   setEditDescripcion: (v: string) => void;
+  editProblema: string;
+  setEditProblema: (v: string) => void;
   editFechaFin: string;
   setEditFechaFin: (v: string) => void;
+  editOds: number[];
+  toggleEditOds: (id: number) => void;
   editImagenes: string[];
   removeEditImage: (index: number) => void;
   uploadingProjectImage: boolean;
@@ -54,6 +71,8 @@ export function InfoTab({
   handleProjectImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   participantsCount: number;
 }) {
+  const odsDelProyecto = Array.isArray(project.ods) ? project.ods : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -84,6 +103,26 @@ export function InfoTab({
             </div>
           )}
         </div>
+      )}
+
+      {/* Datos generales — solo visible en edición (nombre + descripción corta) */}
+      {editingProjectInfo && (
+        <Card className="p-6 space-y-4">
+          <h3 className="text-xl font-bold tracking-tight">Datos generales</h3>
+          <Input
+            label="Nombre del proyecto"
+            value={editNombre}
+            onChange={(e) => setEditNombre(e.target.value)}
+            placeholder="Nombre del proyecto"
+          />
+          <TextArea
+            label="Descripción corta"
+            value={editDescCorta}
+            onChange={(e) => setEditDescCorta(e.target.value)}
+            placeholder="Resumen para las tarjetas (máx. ~120 caracteres)"
+            rows={2}
+          />
+        </Card>
       )}
 
       {/* Images */}
@@ -162,6 +201,77 @@ export function InfoTab({
           <p className="text-muted-foreground whitespace-pre-line">
             {project.descripcion_completa}
           </p>
+        )}
+      </Card>
+
+      {/* Problema que resuelve */}
+      <Card className="p-6">
+        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
+          <AlertOctagon className="w-5 h-5 text-warning-strong" /> El problema que resuelve
+        </h3>
+        {editingProjectInfo ? (
+          <TextArea
+            value={editProblema}
+            onChange={(e) => setEditProblema(e.target.value)}
+            placeholder="¿Qué problema concreto aborda este proyecto?"
+            rows={3}
+          />
+        ) : (
+          <p className="text-muted-foreground whitespace-pre-line">
+            {project.problema || 'No especificado.'}
+          </p>
+        )}
+      </Card>
+
+      {/* ODS */}
+      <Card className="p-6">
+        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary" /> Objetivos de Desarrollo Sostenible
+        </h3>
+        {editingProjectInfo ? (
+          <div className="flex flex-wrap gap-2">
+            {ODS_LIST.map((o) => {
+              const activo = editOds.includes(o.id);
+              return (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => toggleEditOds(o.id)}
+                  aria-pressed={activo}
+                  title={o.nombre}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                    activo ? 'text-white border-transparent shadow-sm' : 'bg-input-background text-foreground border-input hover:border-primary/40'
+                  }`}
+                  style={activo ? { backgroundColor: o.color } : undefined}
+                >
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${activo ? 'bg-white/25' : 'bg-muted'}`}>
+                    {o.id}
+                  </span>
+                  <span className="max-w-[10rem] truncate">{o.nombre}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : odsDelProyecto.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {odsDelProyecto.map((id) => {
+              const o = ODS_POR_ID[id];
+              if (!o) return null;
+              return (
+                <span
+                  key={id}
+                  title={o.nombre}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-white shadow-sm"
+                  style={{ backgroundColor: o.color }}
+                >
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px]">{o.id}</span>
+                  {o.nombre}
+                </span>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">Este proyecto no declaró ningún ODS.</p>
         )}
       </Card>
 

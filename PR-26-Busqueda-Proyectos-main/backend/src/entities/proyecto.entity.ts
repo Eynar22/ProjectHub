@@ -42,11 +42,22 @@ export class Proyecto {
   @Column({ type: 'varchar', length: 100, default: 'Tecnología' })
   categoria: string;
 
+  // Objetivos de Desarrollo Sostenible (ODS) de la ONU a los que aporta el
+  // proyecto. Se elige al crear (varios posibles). Guardado como JSON de ids
+  // 1..17 en una columna text; nullable por los proyectos previos a este campo.
+  @Column({ type: 'simple-json', nullable: true })
+  ods: number[];
+
   @Column({ type: 'varchar', length: 20, default: 'en_curso' })
   estado: 'en_curso' | 'terminado' | 'archivado';
 
   @Column({ type: 'boolean', default: false })
   suspendido: boolean;
+
+  // Sello inmutable de alta del proyecto (para métricas de crecimiento). Distinto
+  // de fecha_inicio, que es la fecha planificada y editable.
+  @Column({ type: 'timestamp', default: () => 'now()' })
+  fecha_creacion: Date;
 
   @Column({ type: 'int', nullable: false })
   creador_id: number;

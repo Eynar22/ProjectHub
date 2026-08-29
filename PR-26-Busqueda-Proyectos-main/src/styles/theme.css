@@ -69,12 +69,17 @@
   --info-subtle: var(--blue-subtle);
   --info-strong: var(--blue-strong);
 
-  /* --- paleta categórica para gráficas (datos, no decoración) --- */
-  --chart-1: var(--indigo-500);
-  --chart-2: #0891B2;
-  --chart-3: #16A34A;
-  --chart-4: #D97706;
-  --chart-5: #DC2626;
+  /* --- paleta categórica para gráficas (datos, no decoración) ---
+   * 5 primeros slots de la paleta por defecto validada de la guía de dataviz:
+   * pasa banda de luminosidad, piso de croma, separación CVD (protan/deutan) y
+   * el piso de visión normal en modo claro y oscuro. El WARN de contraste en
+   * claro (aqua/amarillo/magenta < 3:1 sobre superficie casi blanca) se cubre
+   * con la regla de relieve: las barras llevan su valor como etiqueta directa. */
+  --chart-1: #2A78D6; /* azul */
+  --chart-2: #EB6834; /* naranja */
+  --chart-3: #1BAF7A; /* aqua */
+  --chart-4: #EDA100; /* amarillo */
+  --chart-5: #E87BA4; /* magenta */
 
   /* --- forma --- */
   --radius: var(--radius-lg);
@@ -143,11 +148,13 @@
   --info-subtle: color-mix(in oklab, var(--blue-on-dark) 16%, var(--gray-900));
   --info-strong: var(--blue-on-dark);
 
-  --chart-1: var(--indigo-400);
-  --chart-2: #22D3EE;
-  --chart-3: #4ADE80;
-  --chart-4: #FBBF24;
-  --chart-5: #F87171;
+  /* Mismos 5 hues, re-escalados para superficie oscura (misma guía de dataviz).
+   * Todos pasan (banda de luminosidad, croma, CVD y contraste >= 3:1). */
+  --chart-1: #3987E5; /* azul */
+  --chart-2: #D95926; /* naranja */
+  --chart-3: #199E70; /* aqua */
+  --chart-4: #C98500; /* amarillo */
+  --chart-5: #D55181; /* magenta */
 
   --sidebar: var(--gray-900);
   --sidebar-foreground: var(--gray-300);

@@ -6,9 +6,10 @@ import { useApp } from '@/app/context/AppContext';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
-import { X, Rocket, FolderPlus, UserPlus, PartyPopper, Loader2, Trash2, Plus } from 'lucide-react';
+import { X, Rocket, FolderPlus, UserPlus, PartyPopper, Loader2, Trash2, Plus, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
+import { ODS_LIST } from '@/shared/constants/ods';
 
 type Step = 'bienvenida' | 'proyecto' | 'equipo' | 'listo';
 
@@ -20,6 +21,8 @@ interface EmpleadoRow {
 
 const emptyRow = (): EmpleadoRow => ({ nombre_completo: '', correo: '', cargo: '' });
 
+const TOTAL_SUBPASOS = 3;
+
 export function OnboardingWizard() {
   const { currentUser, refreshCurrentUser, createProject } = useApp();
   const navigate = useNavigate();
@@ -27,12 +30,19 @@ export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('bienvenida');
   const [closed, setClosed] = useState(false);
 
+  // Sub-paso del formulario de proyecto (1..3): el formulario completo se
+  // reparte para que ninguna pantalla sea larga.
+  const [subPaso, setSubPaso] = useState(1);
+
   const [projectForm, setProjectForm] = useState({
     nombre: '',
     descripcion_corta: '',
+    descripcion: '',
     problema: '',
     categoria: 'Tecnología',
     fecha_fin: '',
+    financiamiento: '',
+    ods: [] as number[],
   });
   const [creatingProject, setCreatingProject] = useState(false);
   const [createdProjectId, setCreatedProjectId] = useState<number | null>(null);
@@ -40,6 +50,15 @@ export function OnboardingWizard() {
   const [empleados, setEmpleados] = useState<EmpleadoRow[]>([emptyRow()]);
   const [addingTeam, setAddingTeam] = useState(false);
   const [teamAdded, setTeamAdded] = useState(0);
+
+  const setField = <K extends keyof typeof projectForm>(field: K, value: (typeof projectForm)[K]) =>
+    setProjectForm(f => ({ ...f, [field]: value }));
+
+  const toggleOds = (id: number) =>
+    setProjectForm(f => ({
+      ...f,
+      ods: f.ods.includes(id) ? f.ods.filter(x => x !== id) : [...f.ods, id],
+    }));
 
   const markOnboardingDone = async () => {
     try {
@@ -55,22 +74,53 @@ export function OnboardingWizard() {
     await markOnboardingDone();
   };
 
-  const handleCreateProject = async () => {
-    if (!projectForm.nombre.trim()) { toast.error('Ponle un nombre a tu proyecto'); return; }
-    if (!projectForm.problema.trim()) { toast.error('Describe el problema que resuelve el proyecto'); return; }
-    if (!projectForm.fecha_fin) { toast.error('Selecciona una fecha de fin'); return; }
+  /** Valida solo los campos del sub-paso actual. Devuelve true si puede avanzar. */
+  const validarSubPaso = (n: number): boolean => {
+    if (n === 1) {
+      if (!projectForm.nombre.trim()) { toast.error('Ponle un nombre a tu proyecto'); return false; }
+      if (!projectForm.descripcion_corta.trim()) { toast.error('Escribe una descripción corta'); return false; }
+      return true;
+    }
+    if (n === 2) {
+      if (!projectForm.descripcion.trim()) { toast.error('Describe el proyecto en detalle'); return false; }
+      if (!projectForm.problema.trim()) { toast.error('Describe el problema que resuelve el proyecto'); return false; }
+      return true;
+    }
+    if (n === 3) {
+      if (!projectForm.fecha_fin) { toast.error('Selecciona una fecha de fin'); return false; }
+      if (projectForm.financiamiento && parseFloat(projectForm.financiamiento) < 0) {
+        toast.error('El financiamiento no puede ser negativo'); return false;
+      }
+      return true;
+    }
+    return true;
+  };
 
+  const avanzarSubPaso = () => {
+    if (!validarSubPaso(subPaso)) return;
+    if (subPaso < TOTAL_SUBPASOS) setSubPaso(subPaso + 1);
+    else handleCreateProject();
+  };
+
+  const retrocederSubPaso = () => {
+    if (subPaso > 1) setSubPaso(subPaso - 1);
+    else setStep('bienvenida');
+  };
+
+  const handleCreateProject = async () => {
     setCreatingProject(true);
     try {
       const today = new Date().toISOString().split('T')[0];
       const nuevo = await createProject({
         name: projectForm.nombre.trim(),
-        shortDescription: projectForm.descripcion_corta.trim() || projectForm.nombre.trim(),
-        description: '',
+        shortDescription: projectForm.descripcion_corta.trim(),
+        description: projectForm.descripcion.trim(),
         problema: projectForm.problema.trim(),
         categoria: projectForm.categoria,
+        ods: projectForm.ods,
         startDate: today,
         endDate: projectForm.fecha_fin,
+        funding: projectForm.financiamiento || undefined,
         createdByUserId: currentUser!.id,
       });
       setCreatedProjectId(nuevo.id);
@@ -157,7 +207,7 @@ export function OnboardingWizard() {
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Button variant="ghost" onClick={handleSkipAll}>Omitir por ahora</Button>
-                  <Button variant="primary" onClick={() => setStep('proyecto')} className="flex items-center gap-2">
+                  <Button variant="primary" onClick={() => { setSubPaso(1); setStep('proyecto'); }} className="flex items-center gap-2">
                     <FolderPlus className="w-4 h-4" /> Crear mi primer proyecto
                   </Button>
                 </div>
@@ -170,57 +220,139 @@ export function OnboardingWizard() {
                   <FolderPlus className="w-5 h-5 text-primary" />
                   <h2 className="text-xl font-bold">Crea tu primer proyecto</h2>
                 </div>
-                <p className="text-sm text-muted-foreground mb-6">Puedes completar el resto de los detalles después, desde el proyecto.</p>
-
-                <div className="space-y-4">
-                  <Input
-                    label="Nombre del proyecto"
-                    placeholder="Ej. Sistema de Inventario"
-                    value={projectForm.nombre}
-                    onChange={(e) => setProjectForm(f => ({ ...f, nombre: e.target.value }))}
-                  />
-                  <TextArea
-                    label="El problema que resuelve"
-                    placeholder="¿Qué problema concreto aborda este proyecto?"
-                    rows={2}
-                    value={projectForm.problema}
-                    onChange={(e) => setProjectForm(f => ({ ...f, problema: e.target.value }))}
-                  />
-                  <TextArea
-                    label="Descripción corta (opcional)"
-                    placeholder="¿De qué trata el proyecto?"
-                    rows={2}
-                    value={projectForm.descripcion_corta}
-                    onChange={(e) => setProjectForm(f => ({ ...f, descripcion_corta: e.target.value }))}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5 text-foreground">Categoría / Sector</label>
-                    <select
-                      value={projectForm.categoria}
-                      onChange={(e) => setProjectForm(f => ({ ...f, categoria: e.target.value }))}
-                      className="w-full px-4 py-2.5 bg-input-background border border-input rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground text-sm"
-                    >
-                      {PROJECT_CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
+                <div className="flex items-center gap-2 mb-6">
+                  <p className="text-sm text-muted-foreground">Paso {subPaso} de {TOTAL_SUBPASOS}</p>
+                  <div className="flex gap-1.5">
+                    {Array.from({ length: TOTAL_SUBPASOS }, (_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 w-6 rounded-full transition-colors ${i < subPaso ? 'bg-primary' : 'bg-muted'}`}
+                      />
+                    ))}
                   </div>
-                  <Input
-                    label="Fecha de fin estimada"
-                    type="date"
-                    value={projectForm.fecha_fin}
-                    onChange={(e) => setProjectForm(f => ({ ...f, fecha_fin: e.target.value }))}
-                  />
                 </div>
 
+                <AnimatePresence mode="wait">
+                  {subPaso === 1 && (
+                    <motion.div key="s1" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+                      <Input
+                        label="Nombre del proyecto"
+                        placeholder="Ej. Sistema de Inventario"
+                        value={projectForm.nombre}
+                        onChange={(e) => setField('nombre', e.target.value)}
+                      />
+                      <TextArea
+                        label="Descripción corta"
+                        placeholder="Resumen para las tarjetas (máx. ~120 caracteres)"
+                        rows={2}
+                        value={projectForm.descripcion_corta}
+                        onChange={(e) => setField('descripcion_corta', e.target.value)}
+                      />
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5 text-foreground">Categoría / Sector</label>
+                        <select
+                          value={projectForm.categoria}
+                          onChange={(e) => setField('categoria', e.target.value)}
+                          className="w-full px-4 py-2.5 bg-input-background border border-input rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground text-sm"
+                        >
+                          {PROJECT_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {subPaso === 2 && (
+                    <motion.div key="s2" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+                      <TextArea
+                        label="Descripción completa"
+                        placeholder="Objetivos, alcance, tecnologías y requerimientos..."
+                        rows={4}
+                        value={projectForm.descripcion}
+                        onChange={(e) => setField('descripcion', e.target.value)}
+                      />
+                      <TextArea
+                        label="El problema que resuelve"
+                        placeholder="¿Qué problema concreto aborda este proyecto? Los postulantes lo usan como base para su propuesta."
+                        rows={3}
+                        value={projectForm.problema}
+                        onChange={(e) => setField('problema', e.target.value)}
+                      />
+                    </motion.div>
+                  )}
+
+                  {subPaso === 3 && (
+                    <motion.div key="s3" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <Input
+                          label="Fecha de fin estimada"
+                          type="date"
+                          value={projectForm.fecha_fin}
+                          onChange={(e) => setField('fecha_fin', e.target.value)}
+                        />
+                        <div>
+                          <label className="block text-sm font-medium mb-1.5 text-foreground">
+                            Financiamiento <span className="text-muted-foreground font-normal">(opcional)</span>
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-sm">$</span>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="0.00"
+                              value={projectForm.financiamiento}
+                              onChange={(e) => setField('financiamiento', e.target.value)}
+                              className="w-full pl-7 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5 text-foreground">
+                          Objetivos de Desarrollo Sostenible <span className="text-muted-foreground font-normal">(opcional)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {ODS_LIST.map(o => {
+                            const activo = projectForm.ods.includes(o.id);
+                            return (
+                              <button
+                                key={o.id}
+                                type="button"
+                                onClick={() => toggleOds(o.id)}
+                                aria-pressed={activo}
+                                title={o.nombre}
+                                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-all ${
+                                  activo ? 'text-white border-transparent' : 'bg-input-background text-foreground border-input hover:border-primary/40'
+                                }`}
+                                style={activo ? { backgroundColor: o.color } : undefined}
+                              >
+                                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${activo ? 'bg-white/25' : 'bg-muted'}`}>
+                                  {o.id}
+                                </span>
+                                <span className="max-w-[8rem] truncate">{o.nombre}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="flex justify-between items-center mt-8">
-                  <button type="button" onClick={handleSkipAll} className="text-sm text-muted-foreground hover:text-foreground">
-                    Omitir todo
+                  <button type="button" onClick={retrocederSubPaso} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="w-3.5 h-3.5" /> Atrás
                   </button>
-                  <Button variant="primary" onClick={handleCreateProject} disabled={creatingProject} className="flex items-center gap-2">
-                    {creatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    Crear y continuar
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <button type="button" onClick={handleSkipAll} className="text-sm text-muted-foreground hover:text-foreground">
+                      Omitir todo
+                    </button>
+                    <Button variant="primary" onClick={avanzarSubPaso} disabled={creatingProject} className="flex items-center gap-2">
+                      {creatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      {subPaso < TOTAL_SUBPASOS ? 'Siguiente' : 'Crear y continuar'}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}
