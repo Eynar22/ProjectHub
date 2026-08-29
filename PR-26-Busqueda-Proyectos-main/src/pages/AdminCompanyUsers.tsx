@@ -7,6 +7,7 @@ import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import {
   Users, ArrowLeft, Search, UserCheck, UserMinus, Lock, Unlock,
   Building2, Crown, AlertTriangle, User as UserIcon
@@ -125,10 +126,13 @@ export default function AdminCompanyUsers() {
                       isBlocked ? 'opacity-70 bg-danger-subtle/30' : ''
                     }`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative ${
-                          isBlocked ? 'bg-danger-subtle text-danger' : 'bg-primary/15 text-primary'
-                        }`}>
-                          {member.nombre_completo.charAt(0).toUpperCase()}
+                        <div className="relative flex-shrink-0">
+                          <Avatar
+                            name={member.nombre_completo}
+                            src={member.foto_url}
+                            className="w-12 h-12 rounded-full text-lg"
+                            fallbackClassName={isBlocked ? 'bg-danger-subtle text-danger font-bold' : 'bg-primary/15 text-primary font-bold'}
+                          />
                           {isBlocked && (
                             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center">
                               <Lock className="w-2.5 h-2.5 text-primary-foreground" />

@@ -136,8 +136,9 @@ export class ProyectoController {
   removeParticipant(
     @Param('id', ParseIntPipe) id: number,
     @Param('usuarioId', ParseIntPipe) usuarioId: number,
+    @Request() req: any,
   ) {
-    return this.proyectoService.removeParticipant(id, usuarioId);
+    return this.proyectoService.removeParticipant(id, usuarioId, req.user);
   }
 
   @UseGuards(AuthGuard('jwt'))

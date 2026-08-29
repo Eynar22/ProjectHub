@@ -9,6 +9,7 @@ import { Modal } from '@/shared/components/ui/Modal';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Input } from '@/shared/components/ui/Input';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users, Search, Shield, UserCheck, Lock, Unlock, UserMinus,
@@ -19,6 +20,7 @@ const ROL_CFG: Record<string, { label: string; bg: string; text: string; icon: C
   superadmin: { label: 'Super Admin', bg: 'bg-muted', text: 'text-foreground', icon: Shield },
   admin:      { label: 'Admin',       bg: 'bg-info-subtle',   text: 'text-info-strong',   icon: Crown },
   empleado:   { label: 'Empleado',    bg: 'bg-muted',  text: 'text-muted-foreground',  icon: UserIcon },
+  colaborador:{ label: 'Colaborador', bg: 'bg-muted',  text: 'text-muted-foreground',  icon: UserIcon },
 };
 
 const ESTADO_CFG: Record<string, { label: string; dot: string }> = {
@@ -152,9 +154,13 @@ export default function AdminUsers() {
                     <Card className={`p-5 flex items-center justify-between transition-colors ${isBlocked ? 'opacity-70 bg-danger-subtle/30' : ''}`}>
                       {/* Left: user info */}
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold relative
-                          ${isBlocked ? 'bg-danger-subtle text-danger' : 'bg-primary/15 text-primary'}`}>
-                          {user.nombre_completo.charAt(0).toUpperCase()}
+                        <div className="relative flex-shrink-0">
+                          <Avatar
+                            name={user.nombre_completo}
+                            src={user.foto_url}
+                            className="w-12 h-12 rounded-full text-lg"
+                            fallbackClassName={`font-bold ${isBlocked ? 'bg-danger-subtle text-danger' : 'bg-primary/15 text-primary'}`}
+                          />
                           {isBlocked && (
                             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center">
                               <Lock className="w-2.5 h-2.5 text-primary-foreground" />

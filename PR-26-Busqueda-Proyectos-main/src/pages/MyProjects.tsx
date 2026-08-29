@@ -18,8 +18,10 @@ import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Avatar } from '@/shared/components/ui/Avatar';
+import { ProjectImage } from '@/shared/components/ui/ProjectImage';
 import {
-  FolderKanban, Calendar, Users, DollarSign, Plus, Eye,
+  Calendar, Users, DollarSign, Plus, Eye,
   MessageSquare, ChevronDown, Archive, PlayCircle,
   CheckCircle2, RefreshCw, ArchiveRestore, Crown, UserCheck, Building2,
 } from 'lucide-react';
@@ -131,171 +133,145 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
   const isLoading = loadingId === project.id;
 
   const isCollab = project.participantes?.some((pa) => pa.usuario_id === currentUser?.id);
-  const isSupervisor = !isOwner && !isCollab;
+  const estado = project.estado || 'en_curso';
+  const estadoCfg = ESTADO_CFG[estado] || ESTADO_CFG.en_curso;
+  const EstadoIcon = estadoCfg.icon;
+  const teamCount = project.participantes?.length || 0;
 
   return (
-    <Card hover className={`group p-6 h-full flex flex-col transition-all border-none shadow-sm hover:shadow-xl hover:-translate-y-1 ${tab === 'archivados' ? 'opacity-70 grayscale-[0.3]' : ''}`}>
-      {/* Header / Badges */}
-      <div className="flex items-center justify-between mb-5">
-        <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-lg">
-          {project.categoria || 'Tecnología'}
-        </span>
-        <div className="flex gap-2">
-          {isOwner && pendingReqs.length > 0 && tab === 'activos' && (
-            <span className="px-2 py-1 bg-warning-subtle text-warning-strong rounded-lg text-[10px] font-black animate-pulse border border-warning/30">
-              {pendingReqs.length} SOLICITUDES
-            </span>
-          )}
-          <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
-            isOwner ? 'bg-info-subtle text-info-strong border-info/30' :
-            isCollab ? 'bg-success-subtle text-success-strong border-success/30' :
-            'bg-warning-subtle text-warning-strong border-warning/30'
-          }`}>
+    <Card className={`group relative overflow-hidden h-full min-h-[360px] flex flex-col rounded-2xl border border-white/10 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 ${tab === 'archivados' ? 'grayscale-[0.35]' : ''}`}>
+      {/* Fondo: imagen del proyecto a sangre (o relleno oscuro) */}
+      <ProjectImage
+        imagenes={project.imagenes}
+        alt={project.nombre}
+        fallback="dark"
+        className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105"
+      />
+      {/* Velo oscuro para legibilidad del texto */}
+      <div className="absolute inset-0 z-10 bg-black/55 pointer-events-none" />
+
+      {/* Contenido */}
+      <div className="relative z-20 flex flex-col h-full p-5 text-white">
+        {/* Superior: rol + categoría / solicitudes */}
+        <div className="flex items-start justify-between gap-2">
+          <span className="bg-white/15 backdrop-blur-md border border-white/15 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
             {isOwner ? <Crown className="w-3.5 h-3.5" /> :
              isCollab ? <UserCheck className="w-3.5 h-3.5" /> :
              <Building2 className="w-3.5 h-3.5" />}
             {isOwner ? 'Propietario' : isCollab ? 'Colaborador' : 'Supervisión'}
           </span>
-        </div>
-      </div>
-
-      {/* Title Area */}
-      <div className="flex gap-4 mb-5">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform group-hover:scale-110 ${
-          tab === 'archivados' ? 'bg-muted' : 'bg-primary/10 border border-primary/20'
-        }`}>
-          <FolderKanban className={`w-7 h-7 ${tab === 'archivados' ? 'text-muted-foreground' : 'text-primary'}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-black leading-tight mb-1 truncate group-hover:text-primary transition-colors">
-            {project.nombre}
-          </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed italic">
-            {project.descripcion_corta || 'Sin descripción corta disponible.'}
-          </p>
-        </div>
-      </div>
-
-      {/* Info Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-6 p-4 bg-muted/30 rounded-2xl border border-border/50">
-        <div className="space-y-0.5">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Duración</p>
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold">
-            <Calendar className="w-3 h-3 text-primary" />
-            <span className="truncate">{project.fecha_inicio}</span>
-          </div>
-        </div>
-        <div className="space-y-0.5 text-right">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Equipo</p>
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold justify-end">
-            <Users className="w-3 h-3 text-primary" />
-            <span>{project.participantes?.length || 0} integrantes</span>
-          </div>
-        </div>
-        {project.financiamiento && (
-          <div className="col-span-2 pt-3 mt-1 border-t border-border/40 flex items-center justify-between">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Presupuesto</p>
-            <div className="flex items-center gap-1 text-sm font-black text-success-strong">
-              <DollarSign className="w-3.5 h-3.5" />
-              <span>{Number(project.financiamiento).toLocaleString()}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Status & Control */}
-      <div className="mb-6 px-1">
-        {isOwner && tab !== 'archivados' ? (
-          <div className="flex items-center justify-between">
-             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Gestión Estado</p>
-             {isLoading ? (
-               <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground animate-pulse uppercase">
-                 <RefreshCw className="w-3 h-3 animate-spin" /> Actualizando...
-               </div>
-             ) : (
-               <EstadoBadge project={project} onSelect={onEstado} />
-             )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-between">
-             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Estado Actual</p>
-             {(() => {
-                const cfg = ESTADO_CFG[project.estado || 'en_curso'];
-                const Icon = cfg.icon;
-                return (
-                  <span className={`${cfg.bg} ${cfg.text} px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide inline-flex items-center gap-1.5 border border-current/10 shadow-sm`}>
-                    <Icon className="w-3 h-3" />
-                    {cfg.label}
-                  </span>
-                );
-              })()}
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="mt-auto pt-4 border-t border-border/40">
-        {tab === 'archivados' ? (
-          <div className="flex gap-2">
-            {isOwner && (
-              <Button variant="outline" size="sm"
-                className="flex-1 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-tight h-10 bg-success-subtle border border-success/30 text-success-strong hover:bg-success hover:text-primary-foreground transition-all shadow-sm disabled:opacity-40"
-                onClick={() => onEstado(project.id, 'en_curso')} disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <ArchiveRestore className="w-4 h-4" /> Reactivar
-                  </>
-                )}
-              </Button>
+          <div className="flex flex-col items-end gap-2">
+            <span className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+              {project.categoria || 'Tecnología'}
+            </span>
+            {isOwner && pendingReqs.length > 0 && tab === 'activos' && (
+              <span className="bg-warning/30 backdrop-blur-md border border-warning/40 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+                {pendingReqs.length} SOLICITUDES
+              </span>
             )}
-            <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-10 border border-border text-foreground hover:bg-muted hover:text-primary-foreground bg-transparent transition-all shadow-sm disabled:opacity-50">
-                <Eye className="w-4 h-4" /> Ver Detalles
-              </Button>
-            </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={isLoading ? '#' : `/grupo-trabajo/${project.id}`} className={`col-span-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-              <Button variant="primary" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-tight h-11 shadow-lg shadow-primary/20 disabled:opacity-50">
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="w-4 h-4" />
-                    Grupo de Trabajo
-                  </>
-                )}
-              </Button>
-            </Link>
-            <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`col-span-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-              <Button variant="outline" size="sm" disabled={isLoading} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider h-11 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent transition-all disabled:opacity-50">
-                <Eye className="w-4 h-4" /> Detalles
-              </Button>
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {!isOwner && (
-        <div className="mt-4 pt-3 flex items-center gap-2 border-t border-border/30">
-          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-            {creator?.nombre_completo?.charAt(0)}
-          </div>
-          <p className="text-[10px] text-muted-foreground italic">
-            Liderado por <span className="font-bold text-foreground not-italic">{creator?.nombre_completo}</span>
-            {creatorCompany && <span> de {creatorCompany.nombre}</span>}
-          </p>
         </div>
-      )}
+
+        {/* Inferior: título, descripción, chips y botones */}
+        <div className="mt-auto flex flex-col gap-3">
+          <div>
+            <h3 className="text-lg font-black leading-tight line-clamp-2 drop-shadow-md mb-1">
+              {project.nombre}
+            </h3>
+            <p className="text-white/80 text-xs line-clamp-2 leading-relaxed drop-shadow-sm">
+              {project.descripcion_corta || 'Sin descripción corta disponible.'}
+            </p>
+          </div>
+
+          {/* Etiquetas glassmorphism: fecha, equipo, presupuesto, estado */}
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{project.fecha_inicio}{project.fecha_fin ? ` al ${project.fecha_fin}` : ''}</span>
+            </span>
+            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+              <Users className="w-3.5 h-3.5" />
+              <span>{teamCount} integrante{teamCount === 1 ? '' : 's'}</span>
+            </span>
+            {project.financiamiento && (
+              <span className="bg-success/25 backdrop-blur-md border border-success/40 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-semibold text-[color:var(--green-on-dark)] shadow-sm">
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>{Number(project.financiamiento).toLocaleString()}</span>
+              </span>
+            )}
+            {isOwner && tab !== 'archivados' ? (
+              isLoading ? (
+                <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Actualizando…
+                </span>
+              ) : (
+                <EstadoBadge project={project} onSelect={onEstado} />
+              )
+            ) : (
+              <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-semibold text-white/90 shadow-sm">
+                <EstadoIcon className="w-3.5 h-3.5" />
+                {estadoCfg.label}
+              </span>
+            )}
+          </div>
+
+          {/* Liderado por (proyectos que no son míos) */}
+          {!isOwner && (
+            <div className="flex items-center gap-2">
+              <Avatar
+                name={creator?.nombre_completo ?? '?'}
+                src={creator?.foto_url}
+                className="w-6 h-6 rounded-full text-[10px] border border-white/20"
+                fallbackClassName="bg-white/15 text-white font-bold"
+              />
+              <p className="text-[11px] text-white/70 line-clamp-1">
+                Liderado por <span className="font-bold text-white">{creator?.nombre_completo}</span>
+                {creatorCompany && <span> · {creatorCompany.nombre}</span>}
+              </p>
+            </div>
+          )}
+
+          {/* Botones */}
+          {tab === 'archivados' ? (
+            <div className="flex gap-2">
+              {isOwner && (
+                <button
+                  onClick={() => onEstado(project.id, 'en_curso')}
+                  disabled={isLoading}
+                  className="flex-1 rounded-full bg-success/90 text-white hover:bg-success font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl disabled:opacity-50"
+                >
+                  {isLoading
+                    ? <><RefreshCw className="w-4 h-4 animate-spin" /> Procesando…</>
+                    : <><ArchiveRestore className="w-4 h-4" /> Reactivar</>}
+                </button>
+              )}
+              <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
+                <button className="w-full rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
+                  <Eye className="w-4 h-4" /> Ver Detalles
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Link to={isLoading ? '#' : `/grupo-trabajo/${project.id}`} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
+                <button
+                  disabled={isLoading}
+                  className="w-full rounded-full bg-background text-foreground hover:bg-muted font-extrabold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl disabled:opacity-50"
+                >
+                  {isLoading
+                    ? <><RefreshCw className="w-4 h-4 animate-spin" /> Procesando…</>
+                    : <><MessageSquare className="w-4 h-4" /> Grupo de Trabajo</>}
+                </button>
+              </Link>
+              <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
+                <button className="w-full rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
+                  <Eye className="w-4 h-4" /> Detalles
+                </button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 }

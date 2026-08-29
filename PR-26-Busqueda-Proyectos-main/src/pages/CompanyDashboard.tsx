@@ -9,7 +9,10 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Badge } from '@/shared/components/ui/Badge';
+import { Avatar } from '@/shared/components/ui/Avatar';
+import { ProjectImage } from '@/shared/components/ui/ProjectImage';
 import { PROYECTO_ESTADO } from '@/shared/constants/proyecto';
+import { esIndependiente } from '@/shared/utils/roles';
 import { StatCard } from '@/shared/components/dashboard/StatCard';
 import { DashboardSection } from '@/shared/components/dashboard/DashboardSection';
 import { OnboardingWizard } from '@/shared/components/OnboardingWizard';
@@ -63,7 +66,7 @@ export default function CompanyDashboard() {
   useEffect(() => {
     if (currentUser?.rol === 'superadmin') navigate('/admin');
     // El usuario independiente (sin empresa) no tiene panel de empresa.
-    else if (currentUser?.rol === 'empleado' && !currentUser?.empresa_id) navigate('/explore');
+    else if (esIndependiente(currentUser)) navigate('/explore');
   }, [currentUser, navigate]);
 
   // Solicitudes de participación pendientes en mis proyectos, agrupadas.
@@ -157,9 +160,12 @@ export default function CompanyDashboard() {
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 text-primary-foreground text-xl font-black flex-shrink-0">
-                  {currentUser?.nombre_completo?.charAt(0).toUpperCase()}
-                </div>
+                <Avatar
+                  name={currentUser?.nombre_completo ?? '?'}
+                  src={currentUser?.foto_url}
+                  className="w-14 h-14 rounded-2xl text-xl shadow-lg shadow-primary/20"
+                  fallbackClassName="bg-primary text-primary-foreground font-black"
+                />
                 <div>
                   <p className="text-sm text-muted-foreground font-medium">Bienvenido de vuelta</p>
                   <h1 className="text-2xl font-black tracking-tight">{currentUser?.nombre_completo}</h1>
@@ -247,27 +253,41 @@ export default function CompanyDashboard() {
                 {myProjects.slice(0, 3).map((project) => {
                   const estadoCfg = PROYECTO_ESTADO[project.estado] ?? { variant: 'neutral' as const, label: project.estado };
                   return (
-                    <Card key={project.id} hover className="p-5 border-none shadow-sm hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-primary/20">
-                          <FolderKanban className="w-5 h-5 text-primary-foreground" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    <Card key={project.id} className="group relative overflow-hidden h-full min-h-[240px] flex flex-col rounded-2xl border border-white/10 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                      <ProjectImage
+                        imagenes={project.imagenes}
+                        alt={project.nombre}
+                        fallback="dark"
+                        className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 z-10 bg-black/55 pointer-events-none" />
+                      <div className="relative z-20 flex flex-col h-full p-4 text-white">
+                        <div className="flex justify-end">
+                          <span className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
                             {project.categoria || 'Tecnología'}
                           </span>
-                          <Badge variant={estadoCfg.variant} size="sm">{estadoCfg.label}</Badge>
+                        </div>
+                        <div className="mt-auto flex flex-col gap-2.5">
+                          <div>
+                            <h3 className="text-lg font-black leading-tight line-clamp-1 drop-shadow-md mb-0.5">{project.nombre}</h3>
+                            <p className="text-xs text-white/80 line-clamp-2 drop-shadow-sm">{project.descripcion_corta}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 text-[10px] font-medium text-white/90 shadow-sm">
+                              <Calendar className="w-3 h-3" />
+                              <span>{project.fecha_inicio}</span>
+                            </span>
+                            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full text-[10px] font-semibold text-white/90 shadow-sm">
+                              {estadoCfg.label}
+                            </span>
+                          </div>
+                          <Link to={`/grupo-trabajo/${project.id}`} className="block w-full">
+                            <button className="w-full rounded-full bg-background text-foreground hover:bg-muted font-extrabold py-2.5 text-xs transition-transform hover:scale-[1.02] shadow-lg">
+                              Ver Grupo de Trabajo
+                            </button>
+                          </Link>
                         </div>
                       </div>
-                      <h3 className="font-bold mb-1.5 line-clamp-1">{project.nombre}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.descripcion_corta}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{project.fecha_inicio}</span>
-                      </div>
-                      <Link to={`/grupo-trabajo/${project.id}`}>
-                        <Button variant="outline" size="sm" className="w-full text-xs">Ver Grupo de Trabajo</Button>
-                      </Link>
                     </Card>
                   );
                 })}

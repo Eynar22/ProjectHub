@@ -258,8 +258,20 @@ export default function Explore() {
                         {/* 3. CONTENIDO PRINCIPAL DE LA TARJETA */}
                         <div className="relative z-20 flex flex-col h-full p-6 text-white">
                           
-                          {/* --- PARTE SUPERIOR: Categoría --- */}
-                          <div className="flex justify-end">
+                          {/* --- PARTE SUPERIOR: Logo de la empresa + Categoría --- */}
+                          <div className="flex items-start justify-between gap-2">
+                            {/* Logo de la empresa (Top Left) */}
+                            <div className={`transition-all duration-300 ${isVisitor ? 'blur-[5px] opacity-60 select-none' : ''}`}>
+                              {company?.logo_url ? (
+                                <div className="w-14 h-14 rounded-2xl bg-white/95 border border-white/30 shadow-xl overflow-hidden flex items-center justify-center flex-shrink-0">
+                                  <img src={company.logo_url} alt={company.nombre} className="w-full h-full object-contain p-1.5" />
+                                </div>
+                              ) : (
+                                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="w-7 h-7 text-white" />
+                                </div>
+                              )}
+                            </div>
                             {/* Categoría (Top Right) */}
                             <div className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg flex-shrink-0">
                               {project.categoria || 'Sin Categoría'}

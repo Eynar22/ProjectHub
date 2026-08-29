@@ -20,6 +20,8 @@ import { Modal } from '@/shared/components/ui/Modal';
 import { TextArea } from '@/shared/components/ui/Input';
 import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
+import { esIndependiente } from '@/shared/utils/roles';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import {
   Building2,
   FileText,
@@ -113,12 +115,12 @@ export default function ProjectDetail() {
   const isParticipant = project?.participantes?.some(p => p.usuario_id === currentUser?.id);
   const isOwner = currentUser?.id === project?.creador_id;
   // Usuario independiente: sin empresa. Al postular debe enviar propuesta + CV.
-  const esIndependiente = currentUser?.rol === 'empleado' && !currentUser?.empresa_id;
+  const usuarioIndependiente = esIndependiente(currentUser);
   const hasPendingRequest = requests?.some(r => r.proyecto_id === project?.id && r.usuario_id === currentUser?.id && r.estado === 'pendiente');
 
   const canRequestParticipation =
     !project?.suspendido &&
-    (currentUser?.rol === 'admin' || currentUser?.rol === 'empleado') &&
+    (currentUser?.rol === 'admin' || currentUser?.rol === 'empleado' || currentUser?.rol === 'colaborador') &&
     project &&
     !isOwner &&
     !isParticipant &&
@@ -142,7 +144,7 @@ export default function ProjectDetail() {
     if (crearSolicitud.isPending || !project) return;
 
     // Los postulantes independientes deben adjuntar propuesta de solución y CV.
-    if (esIndependiente) {
+    if (usuarioIndependiente) {
       if (!propuesta.trim()) { toast.error('Escribe tu propuesta de solución'); return; }
       if (!cvFile) { toast.error('Adjunta tu CV en PDF'); return; }
     }
@@ -151,8 +153,8 @@ export default function ProjectDetail() {
       await crearSolicitud.mutateAsync({
         proyectoId: project.id,
         mensaje: message,
-        propuesta: esIndependiente ? propuesta.trim() : undefined,
-        cv: esIndependiente ? cvFile : undefined,
+        propuesta: usuarioIndependiente ? propuesta.trim() : undefined,
+        cv: usuarioIndependiente ? cvFile : undefined,
       });
       setShowRequestModal(false);
       setMessage('');
@@ -240,12 +242,12 @@ export default function ProjectDetail() {
                     {project.categoria || 'Categoría General'}
                   </span>
                   {ownerCompany && (
-                    <span className="bg-card border border-border text-foreground text-xs font-bold py-1 pl-1 pr-3.5 rounded-full flex items-center gap-2 shadow-sm uppercase tracking-wider">
+                    <span className="bg-card border border-border text-foreground text-xs font-bold py-1 pl-1 pr-4 rounded-full flex items-center gap-2.5 shadow-sm uppercase tracking-wider">
                       {ownerCompany.logo_url ? (
-                        <img src={ownerCompany.logo_url} alt="" className="w-5 h-5 rounded-full object-cover border border-border/60" />
+                        <img src={ownerCompany.logo_url} alt={ownerCompany.nombre} className="w-9 h-9 rounded-full object-contain bg-white border border-border/60" />
                       ) : (
-                        <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-                          <Building2 className="w-3 h-3 text-muted-foreground" />
+                        <span className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
                         </span>
                       )}
                       {ownerCompany.nombre}
@@ -391,19 +393,28 @@ export default function ProjectDetail() {
                       <dd className="font-semibold">{participatingUsers.length}</dd>
                     </div>
                     {ownerCompany && (
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
                         <dt className="flex items-center gap-2 text-muted-foreground"><Building2 className="w-4 h-4" /> Empresa</dt>
-                        <dd className="flex items-center gap-2 font-semibold min-w-0">
-                          {ownerCompany.logo_url && <img src={ownerCompany.logo_url} alt="" className="w-5 h-5 rounded object-cover border border-border/60 flex-shrink-0" />}
+                        <dd className="flex items-center gap-2.5 font-semibold min-w-0">
+                          {ownerCompany.logo_url ? (
+                            <img src={ownerCompany.logo_url} alt={ownerCompany.nombre} className="w-10 h-10 rounded-lg object-contain bg-white border border-border/60 flex-shrink-0" />
+                          ) : (
+                            <span className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                              <Building2 className="w-4 h-4 text-muted-foreground" />
+                            </span>
+                          )}
                           <span className="truncate">{ownerCompany.nombre}</span>
                         </dd>
                       </div>
                     )}
                   </dl>
                   <div className="mt-4 pt-4 border-t border-border/60 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
-                      {creator?.nombre_completo?.charAt(0).toUpperCase() || '?'}
-                    </div>
+                    <Avatar
+                      name={creator?.nombre_completo || '?'}
+                      src={creator?.foto_url}
+                      className="w-10 h-10 rounded-full text-sm border border-primary/20"
+                      fallbackClassName="bg-primary/10 text-primary font-bold"
+                    />
                     <div className="min-w-0">
                       <div className="font-bold text-sm truncate">{creator?.nombre_completo || 'Cargando…'}</div>
                       <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Creador</div>
@@ -426,13 +437,16 @@ export default function ProjectDetail() {
                         const userComp = companies.find(c => c.id === user.empresa_id);
                         return (
                           <div key={user.id || idx} className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
-                              {user.nombre_completo.charAt(0).toUpperCase()}
-                            </div>
+                            <Avatar
+                              name={user.nombre_completo}
+                              src={user.foto_url}
+                              className="w-9 h-9 rounded-full text-xs"
+                              fallbackClassName="bg-primary text-primary-foreground font-bold"
+                            />
                             <div className="min-w-0">
                               <div className="font-bold text-sm truncate">{user.nombre_completo}</div>
                               <div className="text-[10px] font-semibold text-muted-foreground truncate">
-                                {userComp?.nombre || user.cargo || 'Miembro'}
+                                {userComp?.nombre || (esIndependiente(user) ? 'Independiente' : user.cargo) || 'Miembro'}
                               </div>
                             </div>
                           </div>
@@ -471,7 +485,7 @@ export default function ProjectDetail() {
           <p className="font-semibold">{currentUser?.nombre_completo}</p>
         </div>
 
-        {esIndependiente && (
+        {usuarioIndependiente && (
           <>
             {project.problema && (
               <div className="mb-4 rounded-xl border border-warning/30 bg-warning-subtle p-4">

@@ -6,6 +6,7 @@ import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import { Building2, Check, X, ArrowLeft, Mail, FileText, ExternalLink } from 'lucide-react';
 import { EstadoVacio } from '@/shared/components/feedback';
 import { motion } from 'motion/react';
@@ -87,16 +88,17 @@ export default function ProjectRequests() {
                   >
                     <Card className="p-6">
                       <div className="flex items-start gap-6">
-                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-xl flex-shrink-0">
-                          {requester.nombre_completo.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar
+                          name={requester.nombre_completo}
+                          src={requester.foto_url}
+                          className="w-16 h-16 rounded-full text-xl"
+                          fallbackClassName="bg-primary text-primary-foreground font-bold"
+                        />
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold mb-1">{requester.nombre_completo}</h3>
-                          {requesterCompany && (
-                            <p className="text-sm font-medium text-foreground mb-1 flex items-center gap-1">
-                              <Building2 className="w-4 h-4 text-primary" /> {requesterCompany.nombre}
-                            </p>
-                          )}
+                          <p className="text-sm font-medium text-foreground mb-1 flex items-center gap-1">
+                            <Building2 className="w-4 h-4 text-primary" /> {requesterCompany?.nombre ?? 'Independiente'}
+                          </p>
                           {requester.cargo && <p className="text-sm text-muted-foreground mb-3">{requester.cargo}</p>}
 
                           {request.mensaje && (
@@ -165,13 +167,16 @@ export default function ProjectRequests() {
                   <Card key={request.id} className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold">
-                          {requester.nombre_completo.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar
+                          name={requester.nombre_completo}
+                          src={requester.foto_url}
+                          className="w-10 h-10 rounded-full"
+                          fallbackClassName="bg-primary text-primary-foreground font-bold"
+                        />
                         <div>
                           <div className="font-semibold">{requester.nombre_completo}</div>
                           <div className="text-xs text-muted-foreground">
-                            {requesterCompany?.nombre} · {new Date(request.fecha_creacion).toLocaleDateString()}
+                            {requesterCompany?.nombre ?? 'Independiente'} · {new Date(request.fecha_creacion).toLocaleDateString()}
                           </div>
                         </div>
                       </div>

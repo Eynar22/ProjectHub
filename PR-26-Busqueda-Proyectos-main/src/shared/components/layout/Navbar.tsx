@@ -7,14 +7,17 @@ import {
   Building2, LogOut, LayoutDashboard, Compass,
   ChevronDown, User as UserIcon, Menu, X, Sun, Moon,
 } from 'lucide-react';
+import { Avatar } from '@/shared/components/ui/Avatar';
 
 // Avatar encajado perfectamente
-function UserAvatar({ name }: { name: string }) {
-  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+function UserAvatar({ name, src }: { name: string; src?: string | null }) {
   return (
-    <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center font-bold text-primary-foreground text-[11px] shadow-sm flex-shrink-0">
-      {initials}
-    </div>
+    <Avatar
+      name={name}
+      src={src}
+      className="w-7 h-7 rounded-full shadow-sm"
+      fallbackClassName="bg-primary text-primary-foreground font-bold text-[11px]"
+    />
   );
 }
 
@@ -155,7 +158,7 @@ export function Navbar() {
                 aria-haspopup="menu"
                 aria-expanded={userMenuOpen}
               >
-                <UserAvatar name={currentUser.nombre_completo} />
+                <UserAvatar name={currentUser.nombre_completo} src={currentUser.foto_url} />
                 <div className="hidden sm:block text-left">
                   <div className="text-[11px] md:text-xs font-semibold leading-tight max-w-[80px] md:max-w-[90px] truncate text-foreground">
                     {currentUser.nombre_completo.split(' ')[0]}
@@ -175,7 +178,7 @@ export function Navbar() {
                   >
                     <div className="p-3 bg-muted/30 rounded-[1.25rem] mb-2 border-b border-border/30">
                       <div className="flex items-center gap-3">
-                        <UserAvatar name={currentUser.nombre_completo} />
+                        <UserAvatar name={currentUser.nombre_completo} src={currentUser.foto_url} />
                         <div className="min-w-0">
                           <div className="font-bold text-sm truncate text-foreground">{currentUser.nombre_completo}</div>
                           <div className="text-[11px] text-muted-foreground truncate">{currentUser.correo}</div>

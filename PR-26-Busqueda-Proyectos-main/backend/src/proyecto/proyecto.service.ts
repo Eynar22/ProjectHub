@@ -38,6 +38,7 @@ export class ProyectoService {
     nombre_completo: true,
     correo: true,
     cargo: true,
+    foto_url: true,
     empresa_id: true,
   } as const;
 
@@ -270,9 +271,30 @@ export class ProyectoService {
     return this.upRepo.save(participante);
   }
 
-  async removeParticipant(proyectoId: number, usuarioId: number) {
+  async removeParticipant(proyectoId: number, usuarioId: number, user?: any) {
+    const proyecto = await this.proyectoRepo.findOne({ where: { id: proyectoId } });
+    if (!proyecto) throw new NotFoundException('Proyecto no encontrado');
+
+    // Solo el creador del proyecto (admin de la empresa dueña) o el superadmin
+    // pueden expulsar a un participante.
+    if (user && user.rol !== 'superadmin' && proyecto.creador_id !== user.id) {
+      throw new ForbiddenException('Solo el propietario del proyecto puede expulsar participantes');
+    }
+
+    if (usuarioId === proyecto.creador_id) {
+      throw new BadRequestException('No se puede expulsar al propietario del proyecto');
+    }
+
     await this.upRepo.delete({ proyecto_id: proyectoId, usuario_id: usuarioId });
-    return { message: 'Participante eliminado' };
+
+    // La solicitud aceptada queda como 'rechazado': el historial es coherente y
+    // el usuario expulsado puede volver a postular con una solicitud nueva.
+    await this.solicitudRepo.update(
+      { proyecto_id: proyectoId, usuario_id: usuarioId, estado: 'aceptado' },
+      { estado: 'rechazado' },
+    );
+
+    return { message: 'Participante expulsado del proyecto' };
   }
 
   /**
@@ -383,20 +405,20 @@ export class ProyectoService {
     // Add user as participant
     await this.addParticipant(solicitud.proyecto_id, solicitud.usuario_id);
 
-    // Si quien postuló es un usuario independiente (sin empresa), la empresa
-    // dueña del proyecto lo absorbe como empleado activo.
-    if (!solicitud.usuario?.empresa_id && solicitud.proyecto?.creador_id) {
-      const dueno = await this.usuarioRepo.findOne({
-        where: { id: solicitud.proyecto.creador_id },
-        select: ['id', 'empresa_id'],
+    // Si quien postuló es un usuario independiente (sin empresa), al ser
+    // aceptado pasa a rol 'colaborador' y queda activo, pero NO se une a la
+    // empresa dueña del proyecto: sigue siendo externo y puede colaborar en
+    // proyectos de cualquier empresa. Los usuarios que ya pertenecen a una
+    // empresa (tienen empresa_id) no se tocan: siguen en su empresa de origen.
+    if (
+      solicitud.usuario &&
+      !solicitud.usuario.empresa_id &&
+      solicitud.usuario.rol === 'empleado'
+    ) {
+      await this.usuarioRepo.update(solicitud.usuario_id, {
+        rol: 'colaborador',
+        estado: 'activo',
       });
-      if (dueno?.empresa_id) {
-        await this.usuarioRepo.update(solicitud.usuario_id, {
-          empresa_id: dueno.empresa_id,
-          rol: 'empleado',
-          estado: 'activo',
-        });
-      }
     }
 
     return solicitud;

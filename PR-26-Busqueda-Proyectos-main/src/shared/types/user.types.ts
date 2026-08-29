@@ -4,7 +4,13 @@
  * (auth, usuarios, empresas, proyectos, workspace). Espejo del backend.
  * ========================================================================= */
 
-export type UserRole = 'superadmin' | 'admin' | 'empleado';
+/**
+ * 'colaborador': usuario sin empresa que fue aceptado en al menos un proyecto.
+ * Colabora en proyectos de cualquier empresa sin llegar a pertenecer a ninguna.
+ * Un 'empleado' sin empresa_id es un independiente que todavía no fue aceptado
+ * en ningún proyecto. Ver esIndependiente() en @/shared/utils/roles.
+ */
+export type UserRole = 'superadmin' | 'admin' | 'empleado' | 'colaborador';
 
 /** Usuario tal como lo devuelve el backend. */
 export interface User {

@@ -5,6 +5,7 @@ import {
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import type { Company } from '@/features/empresas';
 import type { ProyectoSolicitud } from './types';
 
@@ -69,9 +70,12 @@ export function SolicitudesTab({
                   <div className="p-6 pl-7">
                     <div className="flex items-start gap-5 justify-between">
                       <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
-                          {req.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
-                        </div>
+                        <Avatar
+                          name={req.usuario?.nombre_completo ?? '?'}
+                          src={req.usuario?.foto_url}
+                          className="w-14 h-14 rounded-2xl text-xl shadow-md"
+                          fallbackClassName="bg-primary text-primary-foreground font-black"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold text-lg">{req.usuario?.nombre_completo}</p>
@@ -86,12 +90,10 @@ export function SolicitudesTab({
                               <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">{req.usuario.cargo}</span>
                             </div>
                           )}
-                          {reqCompany && (
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">{reqCompany.nombre}</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">{reqCompany?.nombre ?? 'Independiente'}</span>
+                          </div>
                           {req.mensaje && (
                             <div className="mt-3 p-3 bg-muted/60 rounded-xl border border-border/50 text-sm italic text-muted-foreground">
                               "{req.mensaje}"
@@ -164,11 +166,12 @@ export function SolicitudesTab({
               <Card key={req.id} className={`p-4 border-none shadow-sm ${req.estado === 'rechazado' ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                      req.estado === 'aceptado' ? 'bg-success text-primary-foreground' : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {req.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
-                    </div>
+                    <Avatar
+                      name={req.usuario?.nombre_completo ?? '?'}
+                      src={req.usuario?.foto_url}
+                      className="w-10 h-10 rounded-xl text-sm"
+                      fallbackClassName={`font-bold ${req.estado === 'aceptado' ? 'bg-success text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+                    />
                     <div className="min-w-0">
                       <p className="font-semibold text-sm truncate">{req.usuario?.nombre_completo}</p>
                       <p className="text-xs text-muted-foreground truncate">{req.usuario?.correo}</p>

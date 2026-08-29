@@ -93,4 +93,15 @@ export const proyectosService = {
   ): Promise<void> {
     await apiClient.patch(ENDPOINTS.PROYECTOS.PARTICIPANTE(proyectoId, usuarioId), { rol });
   },
+
+  /**
+   * Expulsa a un participante del proyecto. Solo el propietario (o superadmin).
+   * El usuario expulsado puede volver a postular al proyecto.
+   */
+  async expulsarParticipante(
+    proyectoId: number | string,
+    usuarioId: number | string,
+  ): Promise<void> {
+    await apiClient.delete(ENDPOINTS.PROYECTOS.PARTICIPANTE(proyectoId, usuarioId));
+  },
 };

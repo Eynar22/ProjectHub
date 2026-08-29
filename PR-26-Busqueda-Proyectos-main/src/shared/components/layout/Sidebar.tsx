@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/app/context/AppContext';
 import { useProyectos, useProyectosArchivados } from '@/features/proyectos';
 import type { Project } from '@/features/proyectos';
+import { esIndependiente } from '@/shared/utils/roles';
 import {
   LayoutDashboard, FolderKanban, Building2, Users,
   Plus, Search, UserCheck, PanelLeftClose, PanelLeftOpen,
@@ -57,7 +58,7 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
   const role: SidebarRole =
     isAdmin ? 'superadmin'
     : currentUser?.rol === 'admin' ? 'companyAdmin'
-    : (currentUser?.rol === 'empleado' && !currentUser?.empresa_id) ? 'independent'
+    : esIndependiente(currentUser) ? 'independent'
     : 'employee';
 
   const links: { to: string; icon: IconoLucide; label: string; badge?: number }[] =

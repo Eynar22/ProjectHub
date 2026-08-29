@@ -50,6 +50,7 @@ export default function CompanyProfile() {
     superadmin: { label: 'Administrador del Sistema', icon: Shield, color: 'text-primary', bg: 'bg-muted' },
     admin:      { label: 'Administrador de Empresa',  icon: Crown,  color: 'text-info-strong',   bg: 'bg-info-subtle'   },
     empleado:   { label: 'Empleado',                  icon: Users,  color: 'text-muted-foreground',  bg: 'bg-muted'  },
+    colaborador:{ label: 'Colaborador independiente', icon: Users,  color: 'text-muted-foreground',  bg: 'bg-muted'  },
   };
   const rol = rolConfig[currentUser?.rol || 'empleado'];
   const RolIcon = rol.icon;

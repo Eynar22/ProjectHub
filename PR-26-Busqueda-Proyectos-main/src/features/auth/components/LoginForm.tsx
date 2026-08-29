@@ -7,6 +7,7 @@ import { Navbar } from '@/shared/components/layout/Navbar';
 import { AlertCircle, Clock, Info, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { esIndependiente } from '@/shared/utils/roles';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -65,7 +66,7 @@ export function LoginForm() {
       toast.success('¡Bienvenido de nuevo!');
       if (res.user?.rol === 'superadmin') {
         navigate('/admin');
-      } else if (res.user?.rol === 'empleado' && !res.user?.empresa_id) {
+      } else if (esIndependiente(res.user)) {
         // Usuario independiente: su inicio es Explorar, no el panel de empresa.
         navigate('/explore');
       } else {

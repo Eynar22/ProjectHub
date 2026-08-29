@@ -37,7 +37,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const usuario = await this.usuarioRepo.findOne({
       where: { correo: dto.correo },
-      select: ['id', 'nombre_completo', 'correo', 'password', 'rol', 'empresa_id', 'cargo', 'estado', 'onboarding_completado', 'debe_cambiar_password'],
+      select: ['id', 'nombre_completo', 'correo', 'password', 'rol', 'empresa_id', 'cargo', 'estado', 'foto_url', 'onboarding_completado', 'debe_cambiar_password'],
       relations: ['empresa'],
     });
 
@@ -90,6 +90,7 @@ export class AuthService {
         correo: usuario.correo,
         rol: usuario.rol,
         cargo: usuario.cargo,
+        foto_url: usuario.foto_url,
         empresa_id: usuario.empresa_id,
         empresa: usuario.empresa ? { id: usuario.empresa.id, nombre: usuario.empresa.nombre } : null,
         onboarding_completado: usuario.onboarding_completado,

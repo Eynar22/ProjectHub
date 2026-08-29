@@ -15,6 +15,7 @@ export interface ProyectoSolicitud {
     nombre_completo: string;
     correo: string;
     cargo?: string;
+    foto_url?: string;
     empresa_id?: number;
   };
 }
@@ -24,7 +25,9 @@ export interface WorkspaceMember {
   nombre_completo: string;
   correo: string;
   cargo?: string;
+  foto_url?: string;
   empresa_id?: number;
+  rol?: string;
 }
 
 export interface WorkspaceChatMessage {

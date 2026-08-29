@@ -84,6 +84,7 @@ export default function Workspace() {
 
   // Resources State
   const [updatingAccesoId, setUpdatingAccesoId] = useState<number | null>(null);
+  const [expulsandoId, setExpulsandoId] = useState<number | null>(null);
   const [currentFolderId, setCurrentFolderId] = useState<number | undefined>(undefined);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -269,6 +270,28 @@ export default function Workspace() {
       toast.error(err instanceof Error ? err.message : 'No se pudo actualizar el acceso');
     } finally {
       setUpdatingAccesoId(null);
+    }
+  };
+
+  // ── Expulsar a un participante del proyecto (solo el propietario) ──
+  // El usuario expulsado deja de participar pero puede volver a postular.
+  const handleExpulsarParticipante = async (usuarioId: number) => {
+    if (!project) return;
+    setExpulsandoId(usuarioId);
+    try {
+      await proyectosService.expulsarParticipante(project.id, usuarioId);
+      queryClient.setQueryData(PROYECTOS_KEYS.detalle(project.id), (base: Project | undefined) => {
+        if (!base) return base;
+        return {
+          ...base,
+          participantes: base.participantes?.filter(p => p.usuario_id !== usuarioId),
+        };
+      });
+      toast.success('Participante expulsado del proyecto');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo expulsar al participante');
+    } finally {
+      setExpulsandoId(null);
     }
   };
 
@@ -556,6 +579,8 @@ export default function Workspace() {
                 isOwner={isOwner}
                 updatingAccesoId={updatingAccesoId}
                 onToggleAcceso={handleToggleAccesoTareas}
+                expulsandoId={expulsandoId}
+                onExpulsar={handleExpulsarParticipante}
               />
             )}
 

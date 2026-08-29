@@ -14,6 +14,7 @@ import { Breadcrumbs } from '@/shared/components/layout/Breadcrumbs';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
+import { Avatar } from '@/shared/components/ui/Avatar';
 import {
   UserCheck,
   UserX,
@@ -157,9 +158,12 @@ export default function CompanyMembers() {
                               <div className="flex items-start gap-5 justify-between">
                                 {/* Left: avatar + info */}
                                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                                  <div className="w-14 h-14 bg-warning rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0">
-                                    {mr.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
-                                  </div>
+                                  <Avatar
+                                    name={mr.usuario?.nombre_completo ?? '?'}
+                                    src={mr.usuario?.foto_url}
+                                    className="w-14 h-14 rounded-2xl text-xl shadow-md"
+                                    fallbackClassName="bg-warning text-primary-foreground font-black"
+                                  />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <p className="font-bold text-lg">{mr.usuario?.nombre_completo}</p>
@@ -263,9 +267,12 @@ export default function CompanyMembers() {
                               <div className="p-6 pl-7">
                                 <div className="flex items-center justify-between gap-4">
                                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-primary-foreground font-black text-xl shadow-md flex-shrink-0 ${isAdmin ? 'bg-primary' : 'bg-success'}`}>
-                                      {member.nombre_completo.charAt(0).toUpperCase()}
-                                    </div>
+                                    <Avatar
+                                      name={member.nombre_completo}
+                                      src={member.foto_url}
+                                      className="w-14 h-14 rounded-2xl text-xl shadow-md"
+                                      fallbackClassName={`text-primary-foreground font-black ${isAdmin ? 'bg-primary' : 'bg-success'}`}
+                                    />
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap">
                                         <p className="font-bold text-lg">{member.nombre_completo}</p>
@@ -345,9 +352,12 @@ export default function CompanyMembers() {
                             <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
                             <div className="p-5 pl-7 flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 bg-muted rounded-full flex items-center justify-center font-bold text-muted-foreground text-sm">
-                                  {mr.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
-                                </div>
+                                <Avatar
+                                  name={mr.usuario?.nombre_completo ?? '?'}
+                                  src={mr.usuario?.foto_url}
+                                  className="w-11 h-11 rounded-full text-sm"
+                                  fallbackClassName="bg-muted text-muted-foreground font-bold"
+                                />
                                 <div>
                                   <p className="font-semibold">{mr.usuario?.nombre_completo}</p>
                                   <p className="text-sm text-muted-foreground">{mr.usuario?.correo}</p>
@@ -411,9 +421,12 @@ export default function CompanyMembers() {
                         <div>
                           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Datos Personales</h3>
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-16 h-16 bg-warning rounded-2xl flex items-center justify-center text-primary-foreground text-2xl font-black shadow-lg">
-                              {selectedRequest.usuario?.nombre_completo?.charAt(0).toUpperCase() ?? '?'}
-                            </div>
+                            <Avatar
+                              name={selectedRequest.usuario?.nombre_completo ?? '?'}
+                              src={selectedRequest.usuario?.foto_url}
+                              className="w-16 h-16 rounded-2xl text-2xl shadow-lg"
+                              fallbackClassName="bg-warning text-primary-foreground font-black"
+                            />
                             <div>
                               <p className="font-bold text-lg">{selectedRequest.usuario?.nombre_completo}</p>
                               <span className="text-[10px] font-bold px-2 py-0.5 bg-warning/10 text-warning rounded-full border border-warning/20 uppercase">
