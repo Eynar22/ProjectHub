@@ -22,7 +22,7 @@ import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import { esIndependiente } from '@/shared/utils/roles';
 import { Avatar } from '@/shared/components/ui/Avatar';
-import { ODS_POR_ID } from '@/shared/constants/ods';
+import { ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
 import {
   Building2,
   FileText,
@@ -194,7 +194,7 @@ export default function ProjectDetail() {
   const dateFin = parseDate(project.fecha_fin);
 
   return (
-    <div className="min-h-screen text-foreground font-sans relative overflow-x-hidden selection:bg-primary/30">
+    <div className="min-h-screen text-foreground font-sans relative overflow-x-clip selection:bg-primary/30">
 
       {/* Decoración de fondo muy sutil */}
       <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
@@ -204,14 +204,15 @@ export default function ProjectDetail() {
       <div className="flex relative z-10">
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
 
-        <main id="contenido" tabIndex={-1} className="flex-1 w-full pb-24">
+        <main id="contenido" tabIndex={-1} className="flex-1 w-full min-w-0 overflow-x-clip pb-24">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <Link to={backUrl} className="inline-block mb-8">
-              <Button variant="outline" className="flex items-center gap-2 rounded-full border-border/60 hover:bg-muted/50 transition-all shadow-sm">
-                <ArrowLeft className="w-4 h-4" />
-                {backLabel}
-              </Button>
+            <Link
+              to={backUrl}
+              className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {backLabel}
             </Link>
 
             {project.suspendido && (
@@ -227,134 +228,127 @@ export default function ProjectDetail() {
               </motion.div>
             )}
 
-            {/* ── 1. CABECERA: identidad + acción | imagen ── */}
-            <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-10">
-              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-7 flex flex-col">
-                <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight mb-3">
+            {/* ── CABECERA ── */}
+            <header className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-8">
+              {/* Identidad pura: categoría · título · subtítulo */}
+              <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-8 flex flex-col justify-center">
+                <span className="text-xs font-bold text-primary uppercase tracking-widest">
+                  {project.categoria || 'Proyecto'}
+                </span>
+
+                <h1 className="mt-3 text-3xl md:text-4xl font-bold text-foreground tracking-tight leading-tight">
                   {project.nombre}
                 </h1>
 
                 {project.descripcion_corta && (
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-5">
+                  <p className="mt-3 text-lg text-muted-foreground leading-relaxed">
                     {project.descripcion_corta}
                   </p>
                 )}
-
-                {/* Categoría + empresa */}
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="bg-primary/10 text-primary border border-primary/20 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider">
-                    {project.categoria || 'Categoría General'}
-                  </span>
-                  {ownerCompany && (
-                    <span className="bg-card border border-border text-foreground text-xs font-bold py-1 pl-1 pr-4 rounded-full flex items-center gap-2.5 shadow-sm uppercase tracking-wider">
-                      {ownerCompany.logo_url ? (
-                        <img src={ownerCompany.logo_url} alt={ownerCompany.nombre} className="w-9 h-9 rounded-full object-contain bg-white border border-border/60" />
-                      ) : (
-                        <span className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
-                        </span>
-                      )}
-                      {ownerCompany.nombre}
-                    </span>
-                  )}
-                </div>
-
-                {/* ODS a los que aporta el proyecto */}
-                {Array.isArray(project.ods) && project.ods.length > 0 && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Aporta a los ODS</span>
-                    {project.ods.map(id => {
-                      const o = ODS_POR_ID[id];
-                      if (!o) return null;
-                      return (
-                        <span
-                          key={id}
-                          title={o.nombre}
-                          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white shadow-sm"
-                          style={{ backgroundColor: o.color }}
-                        >
-                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px]">{o.id}</span>
-                          <span className="max-w-[9rem] truncate">{o.nombre}</span>
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Acción principal en la cabecera */}
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {canRequestParticipation && (
-                    <Button variant="primary" className="flex items-center gap-2 shadow-lg shadow-primary/20" onClick={() => setShowRequestModal(true)}>
-                      Solicitar Participación <Send className="w-4 h-4" />
-                    </Button>
-                  )}
-                  {(isOwner || isParticipant) && !project.suspendido && (
-                    <Link to={`/grupo-trabajo/${project.id}`}>
-                      <Button variant="primary" className="flex items-center gap-2 shadow-lg shadow-primary/20">
-                        Ir al Espacio de Trabajo <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  )}
-                  {canTransfer && project.suspendido && (
-                    <Button variant="warning" className="flex items-center gap-2" onClick={() => setShowTransferModal(true)}>
-                      <RefreshCcw className="w-4 h-4" /> Transferir Proyecto
-                    </Button>
-                  )}
-                  {hasPendingRequest && (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-warning-subtle border border-warning/30 text-warning-strong px-4 py-2 text-xs font-bold uppercase tracking-widest">
-                      <RefreshCcw className="w-4 h-4 animate-spin-slow" /> Solicitud en revisión
-                    </span>
-                  )}
-                </div>
               </motion.div>
 
-              {/* Imagen — formato horizontal, no domina la vista */}
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-5 relative">
+              {/* Riel derecho: imagen + acción principal (alineado con la ficha) */}
+              <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-4 flex flex-col gap-4">
                 {project.imagenes && project.imagenes.length > 0 ? (
-                  <Slider {...sliderSettings}>
-                    {project.imagenes.map((img, idx) => (
-                      <div key={idx} className="outline-none px-1">
-                        <div className="relative rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.1)] aspect-[4/3] bg-muted border border-border/50">
-                          <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted shadow-sm">
+                    <Slider {...sliderSettings}>
+                      {project.imagenes.map((img, idx) => (
+                        <div key={idx} className="outline-none">
+                          <div className="relative aspect-[4/3] bg-muted">
+                            <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </Slider>
+                      ))}
+                    </Slider>
+                  </div>
                 ) : (
-                  <div className="w-full aspect-[4/3] rounded-2xl bg-primary/5 border border-border/50 flex flex-col items-center justify-center">
-                    <Building2 className="w-16 h-16 text-muted-foreground/30 mb-3" />
+                  <div className="w-full aspect-[4/3] rounded-2xl bg-primary/5 border border-border/60 flex flex-col items-center justify-center">
+                    <Building2 className="w-14 h-14 text-muted-foreground/30 mb-3" />
                     <p className="text-sm font-semibold text-muted-foreground">Sin imágenes</p>
                   </div>
                 )}
+
+                {(canRequestParticipation ||
+                  ((isOwner || isParticipant) && !project.suspendido) ||
+                  (canTransfer && project.suspendido) ||
+                  hasPendingRequest) && (
+                  <div className="flex flex-col gap-2">
+                    {canRequestParticipation && (
+                      <Button variant="primary" className="w-full flex items-center justify-center gap-2 shadow-lg shadow-primary/20" onClick={() => setShowRequestModal(true)}>
+                        Solicitar Participación <Send className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {(isOwner || isParticipant) && !project.suspendido && (
+                      <Link to={`/grupo-trabajo/${project.id}`} className="w-full">
+                        <Button variant="primary" className="w-full flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                          Ir al Espacio de Trabajo <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    )}
+                    {canTransfer && project.suspendido && (
+                      <Button variant="warning" className="w-full flex items-center justify-center gap-2" onClick={() => setShowTransferModal(true)}>
+                        <RefreshCcw className="w-4 h-4" /> Transferir Proyecto
+                      </Button>
+                    )}
+                    {hasPendingRequest && (
+                      <span className="inline-flex items-center justify-center gap-2 rounded-full bg-warning-subtle border border-warning/30 text-warning-strong px-4 py-2 text-xs font-bold uppercase tracking-widest">
+                        <RefreshCcw className="w-4 h-4 animate-spin-slow" /> Solicitud en revisión
+                      </span>
+                    )}
+                  </div>
+                )}
               </motion.div>
-            </div>
+            </header>
 
-            {/* ── 2. EL PROBLEMA — ancho completo, justo debajo de la cabecera ── */}
-            {project.problema ? (
-              <div className="mb-10 rounded-2xl border border-warning/30 bg-warning-subtle p-6">
-                <h2 className="text-[10px] font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <AlertOctagon className="w-3.5 h-3.5" />
-                  El problema que resuelve
-                </h2>
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                  {project.problema}
-                </p>
+            {/* ── APORTA A LOS ODS — franja separadora entre identidad y detalle ── */}
+            {Array.isArray(project.ods) && project.ods.length > 0 && (
+              <div className="mb-10 flex flex-wrap items-center gap-x-3 gap-y-2 border-y border-border/60 py-4">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Aporta a los ODS</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {project.ods.map(odsId => {
+                    const o = ODS_POR_ID[odsId];
+                    if (!o) return null;
+                    return (
+                      <span
+                        key={odsId}
+                        title={etiquetaOds(o.id)}
+                        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold text-white"
+                        style={{ backgroundColor: o.color }}
+                      >
+                        <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/25 text-[10px] font-bold">{o.id}</span>
+                        <span className="max-w-[10rem] truncate">{o.nombre}</span>
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
-            ) : isOwner ? (
-              <div className="mb-10 rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground flex items-center gap-3">
-                <AlertOctagon className="w-4 h-4 flex-shrink-0" />
-                Aún no describiste el problema que resuelve este proyecto. Los postulantes lo usan como base para su propuesta.
-              </div>
-            ) : null}
+            )}
 
-            {/* ── 3. SOBRE EL PROYECTO — contenido | ficha ── */}
-            <div className="grid lg:grid-cols-12 gap-8">
+            {/* ── DETALLE — contenido | ficha ── */}
+            <div className="grid lg:grid-cols-12 gap-8 lg:gap-10">
 
               {/* MAIN */}
-              <div className="lg:col-span-8 space-y-8">
+              <div className="lg:col-span-8 space-y-10">
+                {project.problema ? (
+                  <section className="rounded-xl border border-border border-l-4 border-l-warning bg-card p-5 sm:p-6">
+                    <h2 className="text-xs font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
+                      <AlertOctagon className="w-4 h-4" />
+                      El problema que resuelve
+                    </h2>
+                    <p className="text-base text-foreground/90 leading-relaxed whitespace-pre-line">
+                      {project.problema}
+                    </p>
+                  </section>
+                ) : isOwner ? (
+                  <section className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground flex items-center gap-3">
+                    <AlertOctagon className="w-4 h-4 flex-shrink-0" />
+                    Aún no describiste el problema que resuelve este proyecto. Los postulantes lo usan como base para su propuesta.
+                  </section>
+                ) : null}
+
                 {project.descripcion_completa && (
                   <section>
-                    <h2 className="text-xl font-bold tracking-tight mb-3">Descripción</h2>
+                    <h2 className="text-lg font-semibold tracking-tight mb-3">Descripción</h2>
                     <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
                       {project.descripcion_completa}
                     </p>
@@ -362,9 +356,9 @@ export default function ProjectDetail() {
                 )}
 
                 <section>
-                  <h2 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
                     <FolderOpen className="w-5 h-5 text-primary" />
-                    Documentos y Recursos
+                    Documentos y recursos
                   </h2>
                   {archivos && archivos.length > 0 ? (
                     <div className="grid sm:grid-cols-2 gap-3">
@@ -388,18 +382,19 @@ export default function ProjectDetail() {
                       ))}
                     </div>
                   ) : (
-                    <Card className="p-8 rounded-2xl flex flex-col items-center justify-center text-center border-dashed border-none shadow-sm">
+                    <div className="rounded-xl border border-dashed border-border p-8 flex flex-col items-center justify-center text-center">
                       <FolderOpen className="w-9 h-9 text-muted-foreground/30 mb-3" />
                       <p className="text-sm text-muted-foreground">No hay documentos adjuntos a este proyecto.</p>
-                    </Card>
+                    </div>
                   )}
                 </section>
               </div>
 
               {/* RAIL */}
-              <aside className="lg:col-span-4 space-y-6">
+              <aside className="lg:col-span-4">
+                <div className="lg:sticky lg:top-24 space-y-6">
                 {/* Ficha del proyecto: cronograma + presupuesto + participantes + creador */}
-                <Card className="p-6 border-none shadow-sm">
+                <Card className="p-6">
                   <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Ficha del proyecto</h3>
                   <dl className="space-y-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
@@ -450,7 +445,7 @@ export default function ProjectDetail() {
 
                 {/* Equipo */}
                 {participatingUsers.length > 0 && (
-                  <Card className="p-6 border-none shadow-sm">
+                  <Card className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Equipo</h3>
                       <span className="inline-flex items-center bg-info-subtle text-info-strong text-xs font-bold px-2 py-0.5 rounded-full">
@@ -461,6 +456,7 @@ export default function ProjectDetail() {
                       {participatingUsers.map((user, idx) => {
                         if (!user) return null;
                         const userComp = companies.find(c => c.id === user.empresa_id);
+                        const esCreador = user.id === project.creador_id;
                         return (
                           <div key={user.id || idx} className="flex items-center gap-3">
                             <Avatar
@@ -470,7 +466,14 @@ export default function ProjectDetail() {
                               fallbackClassName="bg-primary text-primary-foreground font-bold"
                             />
                             <div className="min-w-0">
-                              <div className="font-bold text-sm truncate">{user.nombre_completo}</div>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="font-bold text-sm truncate">{user.nombre_completo}</span>
+                                {esCreador && (
+                                  <span className="flex-shrink-0 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5">
+                                    Creador
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-[10px] font-semibold text-muted-foreground truncate">
                                 {userComp?.nombre || (esIndependiente(user) ? 'Independiente' : user.cargo) || 'Miembro'}
                               </div>
@@ -481,6 +484,7 @@ export default function ProjectDetail() {
                     </div>
                   </Card>
                 )}
+                </div>
               </aside>
             </div>
           </div>
