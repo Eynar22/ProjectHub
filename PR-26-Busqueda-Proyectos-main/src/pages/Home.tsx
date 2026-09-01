@@ -605,79 +605,45 @@ export default function Home() {
         </section>
 
         {/* ======================================= */}
-        {/* SECCIÓN 3: INNOVACIÓN */}
+        {/* SECCIÓN 3: INNOVACIÓN Y ECOSISTEMA     */}
         {/* ======================================= */}
-        <section ref={section3Ref} className="relative h-[130vh] w-full z-0 bg-[#05050A]">
-          <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-center">
+        <section className="relative w-full z-20 bg-[#05050A]">
+          <div className="relative w-full py-24 flex flex-col justify-center overflow-hidden">
 
-            <motion.div
-              animate={{
-                scale: [1.1, 1.25, 1.1],
-                x: ["-3%", "3%", "-3%"]
-              }}
-              transition={{
-                duration: 40,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute inset-0 w-full h-full bg-cover bg-center"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }}
+            {/* El fondo espacial ahora es totalmente ESTÁTICO */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }} 
             />
 
-            <div className="absolute inset-0 bg-[#05050A]/80" />
+            {/* Overlay Oscuro para Contraste (85% de opacidad) */}
+            <div className="absolute inset-0 bg-[#05050A]/35" />
 
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
-                    "0px 0px 150px 20px rgba(79, 70, 229, 0.4)",
-                    "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
-                  ]
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[45%] md:top-[50%] left-1/2 -translate-x-1/2 w-[200%] md:w-[150%] h-[800px] rounded-[100%] border-t-[2px] border-primary/60 bg-gradient-to-b from-primary/10 to-transparent"
-              />
-
-              {SECTION3_STARS.map((s, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ y: [0, -250], opacity: [0, 0.8, 0] }}
-                  transition={{ duration: s.duration, repeat: Infinity, ease: "linear", delay: s.delay }}
-                  className="absolute bg-primary rounded-full blur-[1px]"
-                  style={{
-                    width: s.size + "px",
-                    height: s.size + "px",
-                    left: s.left + "%",
-                    top: s.top + "%",
-                  }}
-                />
-              ))}
-            </div>
-
-            <motion.div
-              style={{ opacity: sec3Opacity, scale: sec3Scale, y: sec3Y }}
-              className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center -mt-[10%]"
-            >
+            {/* Contenido Principal */}
+            {/* Se quitaron 'opacity', 'scale' y 'y' para que no responda al scroll elásticamente */}
+            <div className="max-w-5xl mx-auto px-6 lg:px-10 relative z-10 text-center">
               <Reveal>
 
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-primary/30 bg-[#05050A]/50 backdrop-blur-md shadow-sm">
+                {/* Badge "El Ecosistema" */}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-primary/30 bg-[#05050A]/60 backdrop-blur-md shadow-inner">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">
                     El Ecosistema
                   </p>
                 </div>
 
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 text-white tracking-tight leading-[1.1] drop-shadow-xl">
-                  Innovación <span className="text-primary italic font-normal">empresarial</span>
+                {/* Título de la Sección */}
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-10 text-white tracking-tighter leading-[1.05] drop-shadow-2xl">
+                  Innovación <span className="bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent font-serif italic font-normal">empresarial</span>
                 </h2>
 
-                <p className="text-lg md:text-xl text-slate-300 leading-relaxed font-medium drop-shadow-md max-w-3xl mx-auto">
+                {/* Descripción de la Sección */}
+                <p className="text-xl md:text-2xl text-slate-200 leading-relaxed font-normal drop-shadow-md max-w-3xl mx-auto">
                   Creemos en el poder de la colaboración para impulsar la economía. ProjectHub centraliza la oferta y demanda del sector corporativo, brindando un entorno seguro donde las empresas bolivianas pueden encontrar aliados estratégicos, gestionar proyectos y escalar a nivel nacional.
                 </p>
 
               </Reveal>
-            </motion.div>
+            </div>
 
           </div>
         </section>
