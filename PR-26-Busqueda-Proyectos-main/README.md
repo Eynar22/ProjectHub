@@ -2,7 +2,7 @@
 
 Plataforma SaaS para que estudiantes, profesionales y empresas publiquen proyectos,
 soliciten unirse a equipos y trabajen con tablero Kanban, chat y gestor de recursos.
-
+esta listo ?
 ## Stack
 
 | Capa | Tecnología |
