@@ -30,8 +30,6 @@ export class TareaService {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  private tareaRelations = ['usuarios', 'columna', 'comentarios', 'comentarios.usuario'];
-
   private async loadUsuarios(ids: number[]): Promise<Usuario[]> {
     if (!ids || ids.length === 0) return [];
     return this.usuarioRepo.findBy({ id: In(ids) });
@@ -69,19 +67,34 @@ export class TareaService {
     // asignados). Los comentarios NO se cargan acá — se piden por tarea al abrir
     // el detalle (findOne). Join explícito para no arrastrar `columna` ni el
     // árbol de comentarios y evitar la explosión de filas del LEFT JOIN anidado.
+    //
+    // Del asignado solo se selecciona id + nombre_completo: `Usuario` tiene dos
+    // columnas `text` con base64 (foto_url, documento_url) que si no, viajarían
+    // por cada asignado de cada tarjeta. La tarjeta solo usa la inicial.
     return this.tareaRepo
       .createQueryBuilder('tarea')
-      .leftJoinAndSelect('tarea.usuarios', 'usuarios')
+      .leftJoin('tarea.usuarios', 'usuarios')
+      .addSelect(['usuarios.id', 'usuarios.nombre_completo'])
       .where('tarea.proyecto_id = :proyectoId', { proyectoId })
       .orderBy('tarea.orden', 'ASC')
       .getMany();
   }
 
   async findOne(id: number) {
-    const tarea = await this.tareaRepo.findOne({
-      where: { id },
-      relations: this.tareaRelations,
-    });
+    // Detalle de una tarea (lo devuelven create/update y lo consume el modal).
+    // De los usuarios (asignados) solo id + nombre_completo: `Usuario` tiene
+    // foto_url y documento_url en base64 que si no, engordan cada respuesta.
+    // Los comentarios se traen sin su autor: el front resuelve el nombre contra
+    // la lista global de usuarios.
+    const tarea = await this.tareaRepo
+      .createQueryBuilder('tarea')
+      .leftJoin('tarea.usuarios', 'usuarios')
+      .addSelect(['usuarios.id', 'usuarios.nombre_completo'])
+      .leftJoinAndSelect('tarea.columna', 'columna')
+      .leftJoinAndSelect('tarea.comentarios', 'comentarios')
+      .where('tarea.id = :id', { id })
+      .orderBy('comentarios.fecha_creacion', 'ASC')
+      .getOne();
     if (!tarea) throw new NotFoundException('Tarea no encontrada');
     return tarea;
   }
@@ -130,8 +143,10 @@ export class TareaService {
   // ── Comments ────────────────────────────────────────────────────────────────
   async addComment(tareaId: number, usuarioId: number, texto: string) {
     const comentario = this.comentarioRepo.create({ tarea_id: tareaId, usuario_id: usuarioId, texto });
-    const saved = await this.comentarioRepo.save(comentario);
-    return this.comentarioRepo.findOne({ where: { id: saved.id }, relations: ['usuario'] });
+    // Se devuelve el comentario tal cual (sin cargar la relación `usuario`, que
+    // arrastraría el base64 del perfil): el front resuelve el nombre del autor
+    // contra la lista global de usuarios por usuario_id.
+    return this.comentarioRepo.save(comentario);
   }
 
   async deleteComment(id: number) {
