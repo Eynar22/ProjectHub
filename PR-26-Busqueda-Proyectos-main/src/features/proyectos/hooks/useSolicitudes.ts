@@ -16,7 +16,7 @@ export const SOLICITUDES_KEYS = {
     [...SOLICITUDES_KEYS.todas, 'proyecto', String(id)] as const,
 };
 
-const REFETCH_MS = 30_000;
+const REFETCH_MS = 60_000;
 
 /** Solicitudes que el usuario actual envió. Solo si hay sesión. */
 export function useSolicitudesEnviadas(habilitado = true) {

@@ -6,6 +6,7 @@ export {
   TAREAS_KEYS,
   useColumnasProyecto,
   useTareasProyecto,
+  useTareaDetalle,
   useCrearTarea,
   useActualizarTarea,
   useEliminarTarea,

@@ -20,6 +20,7 @@ import {
   useEnviarMensaje,
   useColumnasProyecto,
   useTareasProyecto,
+  useTareaDetalle,
   useCrearTarea,
   useActualizarTarea,
   useEliminarTarea,
@@ -215,9 +216,14 @@ export default function Workspace() {
 
   const pendingJoinRequests = projectJoinRequests.filter(r => r.estado === 'pendiente');
 
-  // Sync editingTask with projectsTasks to show new comments immediately
+  // El tablero (projectTasks) ya no trae comentarios: el detalle con comentarios
+  // y asignados completos se pide aparte al abrir el modal. Se combina la tarea
+  // del tablero (base, disponible al instante) con el detalle cuando llega.
+  const { data: tareaDetalle } = useTareaDetalle(editingTask?.id);
   const latestEditingTask = editingTask ? projectTasks.find(t => t.id === editingTask.id) : null;
-  const currentEditingTask = latestEditingTask || editingTask;
+  const currentEditingTask = editingTask
+    ? { ...(latestEditingTask ?? editingTask), ...(tareaDetalle ?? {}) }
+    : null;
 
   const isOwner = currentUser?.id === project?.creador_id;
   const isParticipant = project?.participantes?.some(p => p.usuario_id === currentUser?.id) || isOwner;
@@ -394,6 +400,7 @@ export default function Workspace() {
       setNewTaskDesc('');
       setNewTaskDeadline('');
       setNewTaskAssignees([]);
+      toast.success('Tarea creada');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'No se pudo crear la tarea');
     }
@@ -422,31 +429,46 @@ export default function Workspace() {
 
   const handleSaveEditTask = async () => {
     if (!editingTask) return;
-    await actualizarTarea.mutateAsync({
-      id: editingTask.id,
-      datos: {
-        titulo: editTaskTitle,
-        descripcion: editTaskDesc,
-        prioridad: editTaskPriority,
-        fecha_limite: editTaskDeadline || null,
-        usuario_ids: editTaskAssignees,
-      },
-    });
-    setEditingTask(null);
+    try {
+      await actualizarTarea.mutateAsync({
+        id: editingTask.id,
+        datos: {
+          titulo: editTaskTitle,
+          descripcion: editTaskDesc,
+          prioridad: editTaskPriority,
+          fecha_limite: editTaskDeadline || null,
+          usuario_ids: editTaskAssignees,
+        },
+      });
+      setEditingTask(null);
+      toast.success('Cambios guardados');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudieron guardar los cambios');
+    }
   };
 
   const handleAddTaskComment = async () => {
     if (!editingTask || !newTaskComment.trim()) return;
-    const newComment = await agregarComentario.mutateAsync({ tareaId: editingTask.id, texto: newTaskComment });
-    // Patch local del modal para que el comentario se vea al instante, sin
-    // esperar a que la invalidación de la query traiga la lista de nuevo.
-    setEditingTask(prev => prev ? { ...prev, comentarios: [...(prev.comentarios || []), newComment] } : null);
+    const tareaId = editingTask.id;
+    const newComment = await agregarComentario.mutateAsync({ tareaId, texto: newTaskComment });
+    // Patch del cache de detalle para que el comentario se vea al instante, sin
+    // esperar a que la invalidación traiga la tarea de nuevo.
+    queryClient.setQueryData<WorkspaceTask>(
+      TAREAS_KEYS.detalle(tareaId),
+      (prev) =>
+        prev ? { ...prev, comentarios: [...(prev.comentarios || []), newComment] } : prev,
+    );
     setNewTaskComment('');
   };
 
   const handleDeleteTask = async (taskId: number) => {
-    await eliminarTarea.mutateAsync(taskId);
-    if (editingTask?.id === taskId) setEditingTask(null);
+    try {
+      await eliminarTarea.mutateAsync(taskId);
+      if (editingTask?.id === taskId) setEditingTask(null);
+      toast.success('Tarea eliminada');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo eliminar la tarea');
+    }
   };
 
   const currentResources = projectResources

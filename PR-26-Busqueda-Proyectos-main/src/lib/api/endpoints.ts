@@ -71,6 +71,7 @@ export const ENDPOINTS = {
     ELIMINAR: (id: number | string) => `/tareas/${id}`,
     COMENTARIOS: (id: number | string) => `/tareas/${id}/comentarios`,
     POR_PROYECTO: (proyectoId: number | string) => `/tareas/proyecto/${proyectoId}`,
+    DETALLE: (id: number | string) => `/tareas/${id}`,
     COLUMNAS: '/tareas/columnas',
     COLUMNAS_POR_PROYECTO: (proyectoId: number | string) =>
       `/tareas/columnas/proyecto/${proyectoId}`,

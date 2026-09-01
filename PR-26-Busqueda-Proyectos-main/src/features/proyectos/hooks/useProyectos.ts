@@ -21,8 +21,8 @@ export const PROYECTOS_KEYS = {
   detalle: (id: number | string) => [...PROYECTOS_KEYS.todos, 'detalle', String(id)] as const,
 };
 
-/** Re-descarga cada 30 s si la pestaña está visible (sustituye al polling manual). */
-const REFETCH_MS = 30_000;
+/** Re-descarga cada 60 s si la pestaña está visible (sustituye al polling manual). */
+const REFETCH_MS = 60_000;
 
 /** Lista de proyectos activos. */
 export function useProyectos() {

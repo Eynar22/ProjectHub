@@ -14,7 +14,7 @@ export const SOLICITUDES_MEMBRESIA_KEYS = {
     [...SOLICITUDES_MEMBRESIA_KEYS.todas, 'empresa', String(empresaId)] as const,
 };
 
-const REFETCH_MS = 30_000;
+const REFETCH_MS = 60_000;
 
 /** Solicitudes de membresía recibidas por una empresa. `enabled` para admins. */
 export function useSolicitudesMembresia(empresaId: number | string | undefined, habilitado = true) {

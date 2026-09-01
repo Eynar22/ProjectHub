@@ -39,9 +39,11 @@ export class TareaService {
 
   // ── Kanban columns ──────────────────────────────────────────────────────────
   async findColumnas(proyectoId: number) {
+    // Solo metadata de la columna (id, nombre, orden). Las tarjetas se piden
+    // aparte con findByProyecto y el tablero las agrupa por columna_id; cargar
+    // aquí el árbol de tareas + comentarios era traer todo dos veces.
     return this.columnaRepo.find({
       where: { proyecto_id: proyectoId },
-      relations: ['tareas', 'tareas.usuarios', 'tareas.comentarios', 'tareas.comentarios.usuario'],
       order: { orden: 'ASC' },
     });
   }
@@ -63,11 +65,16 @@ export class TareaService {
 
   // ── Tasks ───────────────────────────────────────────────────────────────────
   async findByProyecto(proyectoId: number) {
-    return this.tareaRepo.find({
-      where: { proyecto_id: proyectoId },
-      relations: this.tareaRelations,
-      order: { orden: 'ASC' },
-    });
+    // Tablero kanban: solo lo que pinta cada tarjeta (datos de la tarea + sus
+    // asignados). Los comentarios NO se cargan acá — se piden por tarea al abrir
+    // el detalle (findOne). Join explícito para no arrastrar `columna` ni el
+    // árbol de comentarios y evitar la explosión de filas del LEFT JOIN anidado.
+    return this.tareaRepo
+      .createQueryBuilder('tarea')
+      .leftJoinAndSelect('tarea.usuarios', 'usuarios')
+      .where('tarea.proyecto_id = :proyectoId', { proyectoId })
+      .orderBy('tarea.orden', 'ASC')
+      .getMany();
   }
 
   async findOne(id: number) {

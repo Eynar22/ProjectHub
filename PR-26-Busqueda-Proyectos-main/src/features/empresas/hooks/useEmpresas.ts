@@ -14,7 +14,7 @@ export const EMPRESAS_KEYS = {
   detalle: (id: number | string) => [...EMPRESAS_KEYS.todas, 'detalle', String(id)] as const,
 };
 
-const REFETCH_MS = 30_000;
+const REFETCH_MS = 60_000;
 
 /** Lista de empresas. */
 export function useEmpresas() {

@@ -27,6 +27,12 @@ export const tareasService = {
     return apiClient.get<Task[]>(ENDPOINTS.TAREAS.POR_PROYECTO(proyectoId));
   },
 
+  /** Una tarea con sus relaciones completas (asignados + comentarios). Se pide
+   * al abrir el detalle: el listado del tablero ya no trae comentarios. */
+  async obtener(id: number | string): Promise<Task> {
+    return apiClient.get<Task>(ENDPOINTS.TAREAS.DETALLE(id));
+  },
+
   /** Crea una tarea. */
   async crear(datos: Record<string, unknown>): Promise<Task> {
     return apiClient.post<Task>(ENDPOINTS.TAREAS.CREAR, datos);

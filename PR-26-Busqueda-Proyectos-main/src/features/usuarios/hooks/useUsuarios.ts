@@ -14,7 +14,7 @@ export const USUARIOS_KEYS = {
   detalle: (id: number | string) => [...USUARIOS_KEYS.todos, 'detalle', String(id)] as const,
 };
 
-const REFETCH_MS = 30_000;
+const REFETCH_MS = 60_000;
 
 /** Lista de usuarios. Solo se pide si `habilitado` (hay sesión). */
 export function useUsuarios(habilitado = true) {

@@ -1,4 +1,6 @@
-import { ChevronDown, Users, X } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronDown, Plus, Users, X } from 'lucide-react';
 
 /* Paleta categórica para distinguir responsables (Anexo A1: categorías por
  * color permitidas). Usa los tokens de la paleta de gráficas. */
@@ -22,12 +24,22 @@ export function AssigneeSelector({
   onChange: (ids: number[]) => void;
   compact?: boolean;
 }) {
+  // Combo box propio (no <select> nativo): el desplegable nativo no se puede
+  // estilar y en modo oscuro se ve mal. Mismo patrón que el filtro de
+  // categorías de Explorar: trigger + panel con tokens de tema.
+  const [abierto, setAbierto] = useState(false);
+
   const unselected = participants.filter(u => !selected.includes(u.id));
   const selectedUsers = participants.filter(u => selected.includes(u.id));
 
   const getColor = (userId: number) => {
     const idx = participants.findIndex(p => p.id === userId);
     return AVATAR_COLORS[Math.abs(idx) % AVATAR_COLORS.length];
+  };
+
+  const agregar = (id: number) => {
+    onChange([...selected, id]);
+    setAbierto(false);
   };
 
   return (
@@ -70,22 +82,53 @@ export function AssigneeSelector({
       {/* Combobox — only shows unassigned members */}
       {unselected.length > 0 ? (
         <div className="relative">
-          <select
-            value=""
-            onChange={e => {
-              if (e.target.value) {
-                onChange([...selected, Number(e.target.value)]);
-                e.target.value = '';
-              }
-            }}
-            className="w-full appearance-none pl-3 pr-8 py-2 bg-muted/50 border border-input rounded-xl text-sm text-muted-foreground cursor-pointer hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          <button
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded={abierto}
+            onClick={() => setAbierto(o => !o)}
+            className="w-full flex items-center justify-between gap-2 pl-3 pr-2.5 py-2 bg-input-background border border-input rounded-xl text-sm text-muted-foreground cursor-pointer hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
           >
-            <option value="">＋ Agregar persona...</option>
-            {unselected.map(u => (
-              <option key={u.id} value={u.id}>{u.nombre_completo}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <span className="flex items-center gap-1.5">
+              <Plus className="w-4 h-4" />
+              Agregar persona…
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Overlay invisible para cerrar al hacer clic afuera */}
+          {abierto && (
+            <div className="fixed inset-0 z-40" onClick={() => setAbierto(false)} />
+          )}
+
+          <AnimatePresence>
+            {abierto && (
+              <motion.div
+                role="listbox"
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                transition={{ duration: 0.14, ease: 'easeOut' }}
+                className="absolute top-full left-0 right-0 mt-2 z-50 max-h-52 overflow-y-auto rounded-2xl border border-border bg-card p-1.5 shadow-xl"
+              >
+                {unselected.map(u => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    role="option"
+                    aria-selected={false}
+                    onClick={() => agregar(u.id)}
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-foreground text-left transition-colors hover:bg-muted/60 hover:text-primary"
+                  >
+                    <span className={`w-6 h-6 rounded-full ${getColor(u.id)} flex items-center justify-center text-primary-foreground text-[10px] font-black flex-shrink-0`}>
+                      {u.nombre_completo.charAt(0).toUpperCase()}
+                    </span>
+                    <span className="truncate">{compact ? u.nombre_completo.split(' ')[0] : u.nombre_completo}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ) : participants.length > 0 ? (
         <p className="text-xs text-muted-foreground/60 italic">Todos los miembros ya están asignados</p>
