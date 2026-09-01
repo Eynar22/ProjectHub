@@ -3,7 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+# .npmrc trae legacy-peer-deps=true; sin él, npm install falla con ERESOLVE
+# por el conflicto @eslint/js@10 vs eslint@9 (dev-only, no afecta al build).
+COPY package*.json .npmrc ./
 RUN npm install
 
 COPY . .
