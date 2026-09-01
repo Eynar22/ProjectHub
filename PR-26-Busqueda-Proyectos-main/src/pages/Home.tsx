@@ -19,22 +19,6 @@ import {
   Search,
   MapPin,
   Network,
-  HeartHandshake,
-  Wheat,
-  HeartPulse,
-  BookOpen,
-  Scale,
-  Droplet,
-  Sun,
-  Factory,
-  Equal,
-  Building,
-  Recycle,
-  Leaf,
-  Fish,
-  TreePine,
-  ShieldCheck,
-  Handshake,
   UserPlus,
   FolderUp,
   Rocket
@@ -61,29 +45,10 @@ const SECTION3_STARS = Array.from({ length: 25 }, () => ({
   delay: Math.random() * 5,
 }));
 
-const getOdsIcon = (id: number | string) => {
-  const num = Number(id);
-  switch(num) {
-    case 1: return <HeartHandshake className="w-8 h-8" />;
-    case 2: return <Wheat className="w-8 h-8" />;
-    case 3: return <HeartPulse className="w-8 h-8" />;
-    case 4: return <BookOpen className="w-8 h-8" />;
-    case 5: return <Scale className="w-8 h-8" />;
-    case 6: return <Droplet className="w-8 h-8" />;
-    case 7: return <Sun className="w-8 h-8" />;
-    case 8: return <Briefcase className="w-8 h-8" />;
-    case 9: return <Factory className="w-8 h-8" />;
-    case 10: return <Equal className="w-8 h-8" />;
-    case 11: return <Building className="w-8 h-8" />;
-    case 12: return <Recycle className="w-8 h-8" />;
-    case 13: return <Leaf className="w-8 h-8" />;
-    case 14: return <Fish className="w-8 h-8" />;
-    case 15: return <TreePine className="w-8 h-8" />;
-    case 16: return <ShieldCheck className="w-8 h-8" />;
-    case 17: return <Handshake className="w-8 h-8" />;
-    default: return <Globe className="w-8 h-8" />;
-  }
-};
+// Imagen de fondo de la sección "Impacto Sostenible". TEMPORAL: es de prueba,
+// reemplazar luego por la definitiva (idealmente subida a public/images/).
+const IMPACTO_BG_URL =
+  'https://www.cidob.org/sites/default/files/2024-12/El%20m%C3%B3n%20el%202025_web.jpg';
 
 // ==========================================
 // COMPONENTE: COHETE HOLOGRÁFICO PREMIUM (DISPERSIÓN A PANTALLA COMPLETA)
@@ -778,7 +743,16 @@ export default function Home() {
         {/* ======================================= */}
         {/* SECCIÓN 5: ALINEACIÓN CON LOS ODS (RUEDA INTERACTIVA) */}
         {/* ======================================= */}
-        <section className="relative z-20 py-24 bg-background border-t border-border/50 overflow-hidden">
+        <section className="relative z-20 py-24 border-t border-border/50 overflow-hidden">
+
+          {/* Imagen de fondo (temporal — ver IMPACTO_BG_URL) */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url('${IMPACTO_BG_URL}')` }}
+          />
+          {/* Velo: más denso arriba (títulos) y suave sobre la rueda, para que
+              la imagen se vea pero el texto siga legible. Ajustar los /NN. */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/40 to-background/65" />
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
 
@@ -797,25 +771,22 @@ export default function Home() {
               </p>
             </Reveal>
 
-            <div className="relative w-full max-w-[320px] sm:max-w-[450px] md:max-w-[550px] aspect-square mx-auto mt-12 md:mt-20">
+            <div className="relative w-full max-w-[320px] sm:max-w-[480px] md:max-w-[620px] aspect-square mx-auto mt-12 md:mt-24">
 
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] md:w-[50%] md:h-[50%] rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center p-4 md:p-8 text-center text-white transition-colors duration-500 z-20 border border-white/20"
-                style={{ backgroundColor: activeOds?.color || 'var(--primary)' }}
-              >
-                <div className="flex items-center justify-center gap-2 md:gap-4 mb-2 md:mb-4 w-full">
-                  <span className="text-5xl md:text-7xl font-black opacity-90 drop-shadow-md">{activeOds?.id}</span>
-                  <div className="w-12 h-12 md:w-20 md:h-20 drop-shadow-lg">
-                    {activeOds ? getOdsIcon(activeOds.id) : null}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] md:w-[50%] md:h-[50%] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] transition-all duration-500 z-20 border border-white/20">
+                {activeOds && (
+                  <img
+                    src={`/images/ods/${activeOds.id}.png`}
+                    alt={activeOds.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                <div className="absolute inset-x-0 bottom-0 flex justify-center p-3 md:p-4 bg-gradient-to-t from-black/60 to-transparent">
+                  <div className="bg-black/40 px-4 md:px-6 py-1.5 md:py-2 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
+                    <span className="text-[10px] md:text-sm font-bold tracking-widest text-white whitespace-nowrap">
+                      {activeOds?.total || 0} PROYECTOS
+                    </span>
                   </div>
-                </div>
-                <h3 className="text-[11px] sm:text-sm md:text-xl font-bold uppercase tracking-wide leading-tight mb-4 drop-shadow-md line-clamp-3">
-                  {activeOds?.nombre}
-                </h3>
-                <div className="mt-auto bg-black/25 px-4 md:px-6 py-1.5 md:py-2 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
-                  <span className="text-[10px] md:text-sm font-bold tracking-widest whitespace-nowrap">
-                    {activeOds?.total || 0} PROYECTOS
-                  </span>
                 </div>
               </div>
 
@@ -831,20 +802,19 @@ export default function Home() {
                   <button
                     key={o.id}
                     onClick={() => setActiveOdsId(o.id)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 focus:outline-none border-2 border-transparent ${
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-[4.5rem] sm:h-[4.5rem] md:w-24 md:h-24 rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 focus:outline-none ${
                       isActive
-                        ? 'scale-125 z-30 ring-4 ring-offset-4 ring-offset-background border-white'
-                        : 'opacity-70 hover:opacity-100 hover:scale-110 hover:z-30 hover:border-white/50 cursor-pointer'
+                        ? 'scale-125 z-30 border-white shadow-xl'
+                        : 'border-transparent opacity-95 hover:opacity-100 hover:scale-110 hover:z-30 hover:border-white/60 cursor-pointer'
                     }`}
-                    style={{ backgroundColor: o.color, left, top }}
+                    style={{ left, top }}
                     title={o.nombre}
                   >
-                    <span className="absolute top-1.5 left-2 md:top-2 md:left-2.5 text-[9px] md:text-xs font-black opacity-80 leading-none">
-                      {o.id}
-                    </span>
-                    <div className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 mt-1.5 drop-shadow-sm">
-                      {getOdsIcon(o.id)}
-                    </div>
+                    <img
+                      src={`/images/ods/${o.id}.png`}
+                      alt={o.nombre}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 )
               })}
