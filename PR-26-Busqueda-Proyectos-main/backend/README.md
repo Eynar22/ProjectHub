@@ -36,7 +36,18 @@ Este es el servidor de API para la plataforma, construido con el framework [Nest
     DB_DATABASE=buscador
     JWT_SECRET=tu_secreto_super_seguro
     ```
-
+ ''''
+ DATABASE_URL=postgresql://postgres:12345@localhost:5435/buscador
+JWT_SECRET=super_secret_key_123
+PORT=3000
+# Postgres corre en UTC (contenedor Docker). Las columnas de fecha son
+# `timestamp without time zone`, así que el driver `pg` interpreta esos
+# valores usando la zona horaria del proceso de Node -si corría en la hora
+# local de la máquina, las fechas quedaban corridas por el offset local
+# (ej. +4h en Bolivia). Fijar UTC acá hace que Node lea/escriba en la misma
+# zona que ya usa la base, sin desfase.
+TZ=UTC
+ ''''
 ---
 
 ## 🏃 Ejecución
