@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
@@ -49,6 +50,17 @@ const textItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
+// Estrellas de la sección 3: se calculan una sola vez al cargar el módulo, no en
+// cada render (así el campo de estrellas no se re-baraja si el componente
+// vuelve a renderizar).
+const SECTION3_STARS = Array.from({ length: 25 }, () => ({
+  size: Math.random() * 3 + 1,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+  duration: Math.random() * 5 + 5,
+  delay: Math.random() * 5,
+}));
+
 const getOdsIcon = (id: number | string) => {
   const num = Number(id);
   switch(num) {
@@ -73,6 +85,338 @@ const getOdsIcon = (id: number | string) => {
   }
 };
 
+// ==========================================
+// COMPONENTE: COHETE HOLOGRÁFICO PREMIUM (DISPERSIÓN A PANTALLA COMPLETA)
+// ==========================================
+interface Particle {
+  x3d: number; y3d: number; z3d: number;
+  sx: number; sy: number; sz: number;
+  nx: number; ny: number; nz: number;
+  color: string; type: string; ty: number;
+  x: number; y: number;
+  vx: number; vy: number;
+  baseZ: number;
+  edgeFactor: number;
+}
+
+const ParticleRocket = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    // Aumentamos masivamente el lienzo a 1400px para que las partículas vuelen por todos lados
+    const width = 1400;
+    const height = 1400;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const particles: Particle[] = [];
+    const mouse = { x: -1000, y: -1000, radius: 100 };
+
+    const addP = (x: number, y: number, z: number, nx: number, ny: number, nz: number, color: string, type: string, ty = 0) => {
+      // Vector explosivo mucho más grande para abarcar toda la pantalla
+      const sTheta = Math.random() * Math.PI * 2;
+      const sPhi = Math.acos(2 * Math.random() - 1);
+      const sDist = 400 + Math.random() * 1800;
+
+      particles.push({
+        x3d: x, y3d: y, z3d: z,
+        sx: sDist * Math.sin(sPhi) * Math.cos(sTheta),
+        sy: sDist * Math.sin(sPhi) * Math.sin(sTheta),
+        sz: sDist * Math.cos(sPhi),
+        nx, ny, nz,
+        color, type, ty,
+        x: width/2, y: height/2,
+        vx: 0, vy: 0, baseZ: 0,
+        edgeFactor: 0
+      });
+    };
+
+    const getRadius = (y: number) => {
+      if (y < -130) return 0;
+      if (y < -90) {
+        const t = (y + 130) / 40;
+        return 35 * Math.pow(t, 0.6);
+      }
+      if (y <= 80) {
+        const t = (y + 90) / 170;
+        return 35 + Math.sin(t * Math.PI) * 12 - (t * 5);
+      }
+      if (y <= 100) {
+        const t = (y - 80) / 20;
+        return 30 + Math.sin(t * Math.PI) * 4;
+      }
+      return 0;
+    };
+
+    const generateModel = () => {
+      const winCenterY = -55;
+      const winAngle = (Math.PI / 2) - 0.55;
+
+      for(let i=0; i<4200; i++) {
+        const y = -130 + Math.random() * 230;
+        const rBase = getRadius(y);
+        const theta = Math.random() * 2 * Math.PI;
+
+        const x = rBase * Math.cos(theta);
+        const z = rBase * Math.sin(theta);
+        const nx = Math.cos(theta);
+        const nz = Math.sin(theta);
+
+        let angleDiff = Math.abs(theta - winAngle);
+        if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+        const arcLength = angleDiff * rBase;
+        const distToWin = Math.sqrt(arcLength * arcLength + Math.pow(y - winCenterY, 2));
+        if (distToWin < 25) continue;
+
+        let type = 'body';
+        let color;
+
+        if (y < -110 || (y < -90 && nx > -0.3) || nx > 0.15) {
+          color = ['#fef08a', '#fde047', '#fbbf24'][Math.floor(Math.random()*3)];
+        } else {
+          color = ['#38bdf8', '#60a5fa', '#3b82f6'][Math.floor(Math.random()*3)];
+        }
+
+        if (y > 80) {
+          type = 'nozzle';
+          color = ['#e2e8f0', '#cbd5e1', '#94a3b8'][Math.floor(Math.random()*3)];
+        }
+
+        const isFinArea = y > 10 && y < 85 && Math.abs(nz) < 0.35;
+        if (isFinArea) continue;
+
+        addP(x, y, z, nx, 0, nz, color, type);
+      }
+
+      for(let i=0; i<450; i++) {
+        const r = Math.random() > 0.3 ? 18 + Math.random() * 6 : Math.random() * 24;
+        const localTheta = Math.random() * Math.PI * 2;
+        const localX = r * Math.cos(localTheta);
+        const localY = r * Math.sin(localTheta);
+
+        const y = winCenterY + localY;
+        const rBody = getRadius(y);
+        const angle = winAngle + (localX / rBody);
+
+        const x = rBody * Math.cos(angle);
+        const z = rBody * Math.sin(angle);
+
+        let color = Math.random() > 0.4 ? '#ffffff' : '#bae6fd';
+
+        if (localY < 0 && localX < 0) {
+          color = ['#fef08a', '#fde047', '#fbbf24'][Math.floor(Math.random()*3)];
+        }
+
+        addP(x, y, z, Math.cos(angle), 0, Math.sin(angle), color, 'window');
+      }
+
+      for(let i=0; i<150; i++) {
+        const y = -70 + Math.random() * 140;
+        const maxR = getRadius(y) * 0.7;
+        const r = Math.random() * maxR;
+        const theta = Math.random() * 2 * Math.PI;
+        addP(r * Math.cos(theta), y, r * Math.sin(theta), 0, 1, 0, '#38bdf8', 'inner');
+      }
+
+      for (let leg = 0; leg < 2; leg++) {
+        const angle = leg === 0 ? 0 : Math.PI;
+
+        for(let i=0; i<1500; i++) {
+          const u = Math.random();
+          const v = Math.random();
+
+          let yTop = 15 + Math.pow(u, 1.8) * 110;
+          let yBottom = 75 + Math.pow(u, 3) * 55;
+
+          if (u > 0.85) {
+            const blunt = (u - 0.85) / 0.15;
+            yTop += Math.pow(blunt, 2) * 15;
+            yBottom -= Math.pow(blunt, 2) * 10;
+          }
+
+          if (yTop >= yBottom) continue;
+
+          const y = yTop + v * (yBottom - yTop);
+          const rBase = getRadius(Math.min(y, 85)) - 3;
+
+          const rFin = rBase + (u * 65);
+          const thickness = (Math.random() - 0.5) * 8 * (1 - u * 0.2);
+
+          const x = rFin * Math.cos(angle) - Math.sin(angle) * thickness;
+          const z = rFin * Math.sin(angle) + Math.cos(angle) * thickness;
+
+          const color = ['#f43f5e', '#e11d48', '#be123c'][Math.floor(Math.random()*3)];
+
+          addP(x, y, z, 0, 0, 1, color, 'fin');
+        }
+      }
+
+      for(let i=0; i<900; i++) {
+        const ty = Math.random();
+        const y = 100 + ty * 20;
+        const maxR = 24 * (1 - Math.pow(ty, 1.5));
+        const r = Math.random() * maxR;
+
+        const theta = Math.random() * Math.PI * 2;
+        const x = r * Math.cos(theta);
+        const z = r * Math.sin(theta);
+
+        const color = ty < 0.3 ? '#fef08a' : (ty < 0.6 ? '#f97316' : '#ef4444');
+        addP(x, y, z, 0, 1, 0, color, 'fire', ty);
+      }
+    };
+
+    generateModel();
+
+    let animationFrameId: number;
+    let time = 0;
+    let currentScatter = 0;
+    const cx = width / 2;
+    const cy = height / 2;
+
+    const baseRotX = -0.3;
+    const baseRotY = -0.55;
+    const rotZ = 0.65;
+
+    let currentRotX = baseRotX;
+    let currentRotY = baseRotY;
+
+    const animate = () => {
+      time += 0.03;
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'screen';
+
+      // MAGIA DEL SCROLL DE DESTRUCCIÓN
+      const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+      const targetScatter = Math.max(0, Math.min(1, (scrollY - 50) / 450));
+      currentScatter += (targetScatter - currentScatter) * 0.08;
+
+      const targetRotX = baseRotX + (mouse.y > 0 ? (mouse.y - cy) * 0.00015 : 0);
+      const targetRotY = baseRotY + (mouse.x > 0 ? (mouse.x - cx) * 0.00015 : 0);
+      currentRotX += (targetRotX - currentRotX) * 0.1;
+      currentRotY += (targetRotY - currentRotY) * 0.1;
+
+      const floatY = Math.sin(time * 0.8) * 6;
+
+      particles.forEach(p => {
+        let px = p.x3d + (p.sx * currentScatter);
+        let py = p.y3d + (p.sy * currentScatter);
+        let pz = p.z3d + (p.sz * currentScatter);
+        const nz = p.nz;
+
+        if (p.type === 'fire') {
+          const drop = ((time * 0.8 + p.ty) % 1) * 45;
+          py += drop;
+          const shrink = Math.max(0.1, 1 - drop / 45);
+          px = (px * shrink) + Math.sin(time * 10 + p.ty * 20) * 2;
+          pz = (pz * shrink) + Math.cos(time * 10 + p.ty * 20) * 2;
+        }
+
+        const y1 = py * Math.cos(currentRotX) - pz * Math.sin(currentRotX);
+        const z1 = py * Math.sin(currentRotX) + pz * Math.cos(currentRotX);
+        const x2 = px * Math.cos(currentRotY) + z1 * Math.sin(currentRotY);
+        const z2 = -px * Math.sin(currentRotY) + z1 * Math.cos(currentRotY);
+        const x3 = x2 * Math.cos(rotZ) - y1 * Math.sin(rotZ);
+        const y3 = x2 * Math.sin(rotZ) + y1 * Math.cos(rotZ);
+
+        const nz1 = 0 * Math.sin(currentRotX) + nz * Math.cos(currentRotX);
+        const nz2 = -p.nx * Math.sin(currentRotY) + nz1 * Math.cos(currentRotY);
+
+        // Escalamos a 2.6 para compensar el lienzo gigante y que el cohete se vea grande
+        const targetX = cx + x3 * 2.6;
+        const targetY = cy + y3 * 2.6 + floatY;
+        p.baseZ = z2;
+
+        p.edgeFactor = 1 - Math.abs(nz2);
+
+        const dx = mouse.x - targetX;
+        const dy = mouse.y - targetY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < mouse.radius && mouse.x > 0) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          p.vx -= (dx / dist) * force * 3.5;
+          p.vy -= (dy / dist) * force * 3.5;
+        }
+
+        p.vx += (targetX - p.x) * 0.15;
+        p.vy += (targetY - p.y) * 0.15;
+        p.vx *= 0.8;
+        p.vy *= 0.8;
+        p.x += p.vx;
+        p.y += p.vy;
+      });
+
+      particles.sort((a, b) => a.baseZ - b.baseZ);
+
+      particles.forEach(p => {
+        let size = 2.5;
+        let alpha: number;
+
+        if (p.type === 'fire') {
+          alpha = 0.9 * (1 - p.ty);
+          size = 3 + Math.random() * 2;
+        } else if (p.type === 'window') {
+          alpha = 0.4 + Math.random() * 0.5;
+          size = 1.5 + Math.random() * 1.5;
+        } else if (p.type === 'fin' || p.type === 'nozzle') {
+          alpha = 0.85 + 0.15 * p.edgeFactor;
+        } else if (p.type === 'inner') {
+          alpha = 0.2 + (Math.sin(time * 5 + p.x3d) * 0.15);
+          size = 2;
+        } else {
+          alpha = 0.1 + Math.pow(p.edgeFactor, 3) * 0.9;
+        }
+
+        ctx.globalAlpha = Math.min(1, alpha + currentScatter * 0.6);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, size, size);
+      });
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = (e.clientX - rect.left) * (width / rect.width);
+      mouse.y = (e.clientY - rect.top) * (height / rect.height);
+    };
+    const handleMouseLeave = () => {
+      mouse.x = -1000; mouse.y = -1000;
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    // Se elimina el encierro de aspecto cuadrado y se hace gigante y absoluto.
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1400px] flex items-center justify-center pointer-events-auto z-0">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 blur-[140px] rounded-full pointer-events-none" />
+      <canvas
+        ref={canvasRef}
+        style={{ width: '100%', height: '100%' }}
+        className="object-contain z-10 cursor-crosshair"
+      />
+    </div>
+  );
+};
+
+
 export default function Home() {
   const { currentUser } = useApp();
   const { data: projects = [] } = useProyectos();
@@ -80,8 +424,18 @@ export default function Home() {
   // Hooks para el efecto de "Zoom Out"
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const heroScale = useTransform(scrollY, [0, 500], [1, 0.85]); // Se encoge ligeramente
-  const heroY = useTransform(scrollY, [0, 500], [0, 60]); // Se hunde un poco hacia abajo
+  const heroScale = useTransform(scrollY, [0, 500], [1, 0.85]);
+  const heroY = useTransform(scrollY, [0, 500], [0, 60]);
+
+  // Referencia y Hooks para la Sección 3
+  const section3Ref = useRef<HTMLElement>(null);
+  const { scrollYProgress: scrollYProgress3 } = useScroll({
+    target: section3Ref,
+    offset: ["start start", "end start"]
+  });
+  const sec3Opacity = useTransform(scrollYProgress3, [0, 1], [1, 0]);
+  const sec3Scale = useTransform(scrollYProgress3, [0, 1], [1, 0.85]);
+  const sec3Y = useTransform(scrollYProgress3, [0, 1], [0, 100]);
 
   // Cálculos ODS
   const odsConteo = ODS_LIST.map(o => ({
@@ -91,12 +445,16 @@ export default function Home() {
   const totalAportes = odsConteo.reduce((s, o) => s + o.total, 0);
   const proyectosConOds = projects.filter(p => Array.isArray(p.ods) && p.ods.length > 0).length;
 
+  const [activeOdsId, setActiveOdsId] = useState<number | string>(1);
+  const sortedOds = [...odsConteo].sort((a, b) => Number(a.id) - Number(b.id));
+  const activeOds = sortedOds.find(o => o.id === activeOdsId) || sortedOds[0];
+
   return (
     <AppLayout
       sinSidebar={!currentUser}
       isAdmin={currentUser?.rol === 'superadmin'}
       sinFooter
-      mainClassName="flex-1 w-full" 
+      mainClassName="flex-1 w-full"
     >
       <div className="relative w-full -mt-20 md:-mt-24">
 
@@ -105,24 +463,37 @@ export default function Home() {
         {/* ======================================= */}
         <section className="relative h-[130vh] w-full z-0">
           <div className="sticky top-0 h-[100dvh] w-full bg-[#05050A] overflow-hidden">
-            
+
             {/* 1. FONDO ESTÁTICO (Queda fuera de la animación) */}
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center bg-fixed"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }} 
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#05050A] via-[#05050A]/90 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-transparent to-transparent opacity-90" />
 
-            {/* 2. CONTENIDO ANIMADO (Solo el texto y cohete hacen Zoom Out) */}
-            <motion.div 
+            {/* 2. CONTENIDO ANIMADO */}
+            <motion.div
               style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
               className="absolute inset-0 w-full h-full flex flex-col justify-center overflow-hidden"
             >
-              <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-24">
-                <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
-                  
-                  <motion.div variants={textContainer} initial="hidden" animate="show" className="max-w-xl">
+              <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-24">
+
+                {/* 🚀 EL COHETE EN EL FONDO (z-0) PARA QUE SE ESPARZA LIBREMENTE */}
+                <div className="absolute inset-0 hidden lg:block z-0 pointer-events-none">
+                  {/* Lo alineamos a la cuadrícula de la derecha donde estaba antes */}
+                  <div className="w-full h-full grid grid-cols-2">
+                    <div></div>
+                    <div className="relative w-full h-full flex justify-center items-center">
+                       <ParticleRocket />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 📝 EL TEXTO AL FRENTE (z-20) PROTEGIDO */}
+                <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center relative z-20 pointer-events-none">
+
+                  <motion.div variants={textContainer} initial="hidden" animate="show" className="max-w-xl pointer-events-auto">
                     <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary/20 border border-primary/30 text-blue-400 text-xs font-bold tracking-wide backdrop-blur-sm uppercase">
                       <Network className="w-4 h-4" /> Red B2B Oficial
                     </div>
@@ -132,11 +503,11 @@ export default function Home() {
                       <span className="text-primary italic font-serif">Mejores negocios</span><br/>
                       en Bolivia.
                     </h1>
-                    
+
                     <motion.p variants={textItem} className="text-base text-slate-300 mb-8 leading-relaxed max-w-md font-medium">
                       Gestiona proyectos corporativos, conecta con aliados estratégicos y escala tu empresa en un entorno seguro y verificado.
                     </motion.p>
-                    
+
                     <motion.div variants={textItem}>
                       <Link to="/register" className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white bg-primary hover:bg-indigo-600 shadow-[0_0_40px_rgba(37,99,235,0.4)] transition-all">
                         Comenzar ahora
@@ -145,15 +516,7 @@ export default function Home() {
                     </motion.div>
                   </motion.div>
 
-                  <div className="hidden lg:flex justify-center items-center relative h-full">
-                    <motion.img 
-                      animate={{ y: [-10, 10, -10], rotate: [-1, 1, -1] }}
-                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                      src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" 
-                      alt="3D Rocket Growth" 
-                      className="w-full max-w-[22rem] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10"
-                    />
-                  </div>
+                  <div className="hidden lg:block"></div>
 
                 </div>
               </div>
@@ -164,28 +527,25 @@ export default function Home() {
         {/* ======================================= */}
         {/* SECCIÓN 2: ¿QUÉ ES PROJECTHUB?          */}
         {/* ======================================= */}
-        {/* Se añadió un degradado sutil (from-primary/5 via-muted/30) para generar contraste con las tarjetas blancas en el día */}
         <section className="relative z-20 bg-gradient-to-b from-primary/5 via-muted/30 to-background border-t border-border pt-24 pb-24 shadow-[0_-20px_60px_rgba(0,0,0,0.5)]">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.15] [background-image:radial-gradient(circle_at_1px_1px,var(--color-border)_1px,transparent_0)] [background-size:24px_24px]" />
 
-          {/* Burbujas de fondo */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <motion.div 
+            <motion.div
               animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-[10%] -left-[10%] w-[45rem] h-[45rem] bg-primary/10 rounded-full blur-[130px]" 
+              className="absolute -top-[10%] -left-[10%] w-[45rem] h-[45rem] bg-primary/10 rounded-full blur-[130px]"
             />
-            <motion.div 
+            <motion.div
               animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-              className="absolute bottom-[-10%] -right-[5%] w-[35rem] h-[35rem] bg-indigo-500/10 rounded-full blur-[120px]" 
+              className="absolute bottom-[-10%] -right-[5%] w-[35rem] h-[35rem] bg-indigo-500/10 rounded-full blur-[120px]"
             />
           </div>
 
-          {/* Barra de búsqueda (Estilo Píldora Redonda) */}
           <Reveal className="absolute -top-10 md:-top-14 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 sm:px-6 lg:px-8 z-30">
             <div className="bg-card/95 backdrop-blur-2xl p-2 rounded-[2rem] md:rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-border/50 flex flex-col md:flex-row items-center gap-2 md:gap-0">
-              
+
               <div className="flex-1 w-full flex items-center gap-3 px-4 md:px-6 py-2 md:py-0 md:border-r border-border/50">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Briefcase className="w-5 h-5 text-primary" />
@@ -240,40 +600,38 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
               {[
-                { 
-                  icon: Users, 
-                  title: "Alianzas Estratégicas", 
+                {
+                  icon: Users,
+                  title: "Alianzas Estratégicas",
                   desc: "Encuentra socios comerciales verificados y expande tu red de contactos a nivel nacional en un solo dashboard.",
-                  color: "var(--blue-base)" 
+                  color: "var(--blue-base)"
                 },
-                { 
-                  icon: Shield, 
-                  title: "Entorno Seguro B2B", 
+                {
+                  icon: Shield,
+                  title: "Entorno Seguro B2B",
                   desc: "Validación rigurosa de empresas e instituciones para garantizar que trabajes solo con profesionales.",
-                  color: "var(--indigo-500)" 
+                  color: "var(--indigo-500)"
                 },
-                { 
-                  icon: TrendingUp, 
-                  title: "Gestión Centralizada", 
+                {
+                  icon: TrendingUp,
+                  title: "Gestión Centralizada",
                   desc: "Monitorea proyectos, hitos y presupuestos con herramientas integradas de comunicación directa.",
-                  color: "var(--amber-base)" 
+                  color: "var(--amber-base)"
                 }
               ].map((item, i) => (
                 <Reveal key={i} delay={i * 0.1} className="h-full">
-                  {/* bg-card asegura que la tarjeta sea blanca en el día y contraste contra el nuevo fondo */}
-                  <div 
+                  <div
                     className="group relative h-full flex flex-col items-center text-center p-8 md:p-10 bg-card shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border-l-[6px] border-b-[6px] border-t border-r border-t-border/50 border-r-border/50 rounded-tl-[4rem] rounded-br-[4rem] rounded-tr-xl rounded-bl-xl"
                     style={{ borderLeftColor: item.color, borderBottomColor: item.color }}
                   >
-                    
-                    {/* Icono encapsulado con el color del tema */}
+
                     <div className="relative z-10 w-20 h-20 bg-background border border-border/60 rounded-full flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform duration-500">
                       <item.icon className="w-10 h-10 transition-colors" style={{ color: item.color }} />
                     </div>
-                    
+
                     <h3 className="text-xl font-bold mb-4 font-serif text-foreground">{item.title}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed flex-1">{item.desc}</p>
-                    
+
                   </div>
                 </Reveal>
               ))}
@@ -281,82 +639,81 @@ export default function Home() {
           </div>
         </section>
 
-       {/* ======================================= */}
-        {/* SECCIÓN 3: INNOVACIÓN (EFECTO KEN BURNS) */}
         {/* ======================================= */}
-        <section className="relative py-32 md:py-48 overflow-hidden border-t border-b border-border bg-[#05050A]">
-          
-          {/* Fondo Animado: Efecto "Ken Burns" simulando video */}
-          <motion.div 
-            animate={{ 
-              scale: [1.1, 1.25, 1.1],
-              x: ["-3%", "3%", "-3%"],
-              y: ["0%", "-2%", "0%"]
-            }}
-            transition={{ 
-              duration: 30,
-              repeat: Infinity, 
-              ease: "easeInOut" 
-            }}
-            className="absolute inset-0 w-full h-full bg-cover bg-center"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }} 
-          />
-          
-          {/* Overlay oscuro */}
-          <div className="absolute inset-0 bg-[#05050A]/80" />
+        {/* SECCIÓN 3: INNOVACIÓN */}
+        {/* ======================================= */}
+        <section ref={section3Ref} className="relative h-[130vh] w-full z-0 bg-[#05050A]">
+          <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-center">
 
-          {/* Arco de Luz Planetario animado */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <motion.div
               animate={{
-                boxShadow: [
-                  "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
-                  "0px 0px 150px 20px rgba(79, 70, 229, 0.4)",
-                  "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
-                ]
+                scale: [1.1, 1.25, 1.1],
+                x: ["-3%", "3%", "-3%"]
               }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[30%] md:top-[40%] left-1/2 -translate-x-1/2 w-[200%] md:w-[120%] h-[600px] md:h-[800px] rounded-[100%] border-t-[2px] border-primary/60 bg-gradient-to-b from-primary/10 to-transparent"
+              transition={{
+                duration: 40,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="absolute inset-0 w-full h-full bg-cover bg-center"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }}
             />
-            
-            {/* Partículas de estrellas */}
-            {Array.from({ length: 25 }).map((_, i) => (
+
+            <div className="absolute inset-0 bg-[#05050A]/80" />
+
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <motion.div
-                key={i}
-                animate={{ y: [0, -250], opacity: [0, 0.8, 0] }}
-                transition={{ duration: Math.random() * 5 + 5, repeat: Infinity, ease: "linear", delay: Math.random() * 5 }}
-                className="absolute bg-primary rounded-full blur-[1px]"
-                style={{
-                  width: Math.random() * 3 + 1 + "px",
-                  height: Math.random() * 3 + 1 + "px",
-                  left: Math.random() * 100 + "%",
-                  top: Math.random() * 100 + "%",
+                animate={{
+                  boxShadow: [
+                    "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
+                    "0px 0px 150px 20px rgba(79, 70, 229, 0.4)",
+                    "0px 0px 80px 0px rgba(79, 70, 229, 0.2)",
+                  ]
                 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-[45%] md:top-[50%] left-1/2 -translate-x-1/2 w-[200%] md:w-[150%] h-[800px] rounded-[100%] border-t-[2px] border-primary/60 bg-gradient-to-b from-primary/10 to-transparent"
               />
-            ))}
-          </div>
-          
-          {/* Contenido de Texto (CORREGIDO) */}
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <Reveal>
-              
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-primary/30 bg-[#05050A]/50 backdrop-blur-md shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">
-                  El Ecosistema
+
+              {SECTION3_STARS.map((s, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ y: [0, -250], opacity: [0, 0.8, 0] }}
+                  transition={{ duration: s.duration, repeat: Infinity, ease: "linear", delay: s.delay }}
+                  className="absolute bg-primary rounded-full blur-[1px]"
+                  style={{
+                    width: s.size + "px",
+                    height: s.size + "px",
+                    left: s.left + "%",
+                    top: s.top + "%",
+                  }}
+                />
+              ))}
+            </div>
+
+            <motion.div
+              style={{ opacity: sec3Opacity, scale: sec3Scale, y: sec3Y }}
+              className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center -mt-[10%]"
+            >
+              <Reveal>
+
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-primary/30 bg-[#05050A]/50 backdrop-blur-md shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">
+                    El Ecosistema
+                  </p>
+                </div>
+
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 text-white tracking-tight leading-[1.1] drop-shadow-xl">
+                  Innovación <span className="text-primary italic font-normal">empresarial</span>
+                </h2>
+
+                <p className="text-lg md:text-xl text-slate-300 leading-relaxed font-medium drop-shadow-md max-w-3xl mx-auto">
+                  Creemos en el poder de la colaboración para impulsar la economía. ProjectHub centraliza la oferta y demanda del sector corporativo, brindando un entorno seguro donde las empresas bolivianas pueden encontrar aliados estratégicos, gestionar proyectos y escalar a nivel nacional.
                 </p>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 text-white tracking-tight leading-[1.1] drop-shadow-xl">
-                Innovación <span className="text-primary italic font-normal">empresarial</span>
-              </h2>
-              
-              {/* Texto nuevo enfocado 100% en la misión de ProjectHub */}
-              <p className="text-lg md:text-xl text-slate-300 leading-relaxed font-medium drop-shadow-md max-w-3xl mx-auto">
-                Creemos en el poder de la colaboración para impulsar la economía. ProjectHub centraliza la oferta y demanda del sector corporativo, brindando un entorno seguro donde las empresas bolivianas pueden encontrar aliados estratégicos, gestionar proyectos y escalar a nivel nacional.
-              </p>
-              
-            </Reveal>
+
+              </Reveal>
+            </motion.div>
+
           </div>
         </section>
 
@@ -364,7 +721,7 @@ export default function Home() {
         {/* SECCIÓN 4: OBJETIVOS / LÍNEA DE TIEMPO  */}
         {/* ======================================= */}
         <section className="relative z-20 py-24 bg-muted/30 overflow-hidden border-b border-border/50">
-          
+
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <motion.div
               animate={{ x: [0, 60, 0], y: [0, 40, 0] }}
@@ -395,7 +752,7 @@ export default function Home() {
                   { icon: Rocket, title: 'Forma Alianzas', desc: 'Colabora, ejecuta y documenta el impacto real en la economía del país.' }
                 ].map((item, index) => (
                   <Reveal key={index} delay={index * 0.2} className="relative flex flex-col items-center text-center group">
-                    
+
                     <div className="relative z-10 w-24 h-24 bg-card border-2 border-primary/30 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(var(--indigo-500),0.15)] group-hover:border-primary group-hover:shadow-[0_0_40px_rgba(var(--indigo-500),0.4)] transition-all duration-500">
                       <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <item.icon className="w-7 h-7 text-primary" />
@@ -419,15 +776,14 @@ export default function Home() {
         </section>
 
         {/* ======================================= */}
-        {/* SECCIÓN 5: ALINEACIÓN CON LOS ODS       */}
+        {/* SECCIÓN 5: ALINEACIÓN CON LOS ODS (RUEDA INTERACTIVA) */}
         {/* ======================================= */}
         <section className="relative z-20 py-24 bg-background border-t border-border/50 overflow-hidden">
-          
-          {/* Fondo oscuro con resplandor sutil (como en tu referencia) */}
+
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <Reveal className="text-center mb-16">
+            <Reveal className="text-center mb-10 md:mb-16">
               <p className="inline-flex items-center justify-center gap-2 text-sm font-bold text-primary uppercase tracking-widest mb-3">
                 <Globe className="w-4 h-4" /> Impacto Sostenible
               </p>
@@ -436,77 +792,88 @@ export default function Home() {
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 {proyectosConOds > 0
-                  ? <>Ya son <strong className="text-foreground">{proyectosConOds}</strong> proyectos impactando positivamente con <strong className="text-foreground">{totalAportes}</strong> aportes declarados.</>
-                  : <>Cada proyecto publicado en ProjectHub declara su impacto positivo en la sociedad y el medio ambiente.</>}
+                  ? <>Ya son <strong className="text-foreground">{proyectosConOds}</strong> proyectos con <strong className="text-foreground">{totalAportes}</strong> aportes declarados. Haz clic en cada objetivo para ver el detalle.</>
+                  : <>Haz clic en cada objetivo para ver nuestro impacto directo y la cantidad de proyectos activos.</>}
               </p>
             </Reveal>
 
-            {/* Grid compacto de 4 columnas para mostrar los 17 ODS */}
-            {/* Nota: Se eliminó el .slice() para que mapee los 17 completos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {odsConteo.map((o, index) => (
-                <Reveal key={o.id} delay={index * 0.02} className="h-full">
-                  <div className="group relative flex h-full items-center gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
-                    
-                    {/* Resplandor decorativo suave dentro de la tarjeta usando el color del ODS */}
-                    <div 
-                      className="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-5 transition-opacity duration-300 group-hover:opacity-15 blur-xl"
-                      style={{ backgroundColor: o.color }}
-                    />
+            <div className="relative w-full max-w-[320px] sm:max-w-[450px] md:max-w-[550px] aspect-square mx-auto mt-12 md:mt-20">
 
-                    {/* Cuadro de Color con el Número (Idéntico a la referencia) */}
-                    <div 
-                      className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-xl font-black text-white shadow-inner relative z-10 transition-transform group-hover:scale-105"
-                      style={{ backgroundColor: o.color }}
-                    >
-                      {o.id}
-                      {/* NOTA: Si prefieres los iconos en vez del número, cambia '{o.id}' por '{getOdsIcon(o.id)}' */}
-                    </div>
-                    
-                    {/* Textos alineados a la izquierda */}
-                    <div className="flex flex-col text-left relative z-10 pr-2 flex-1">
-                      <h3 className="text-xs md:text-sm font-bold leading-snug text-foreground line-clamp-2">
-                        {o.nombre}
-                      </h3>
-                      <p className="mt-1 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        {o.total} Proyecto{o.total !== 1 && 's'}
-                      </p>
-                    </div>
-
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] md:w-[50%] md:h-[50%] rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center p-4 md:p-8 text-center text-white transition-colors duration-500 z-20 border border-white/20"
+                style={{ backgroundColor: activeOds?.color || 'var(--primary)' }}
+              >
+                <div className="flex items-center justify-center gap-2 md:gap-4 mb-2 md:mb-4 w-full">
+                  <span className="text-5xl md:text-7xl font-black opacity-90 drop-shadow-md">{activeOds?.id}</span>
+                  <div className="w-12 h-12 md:w-20 md:h-20 drop-shadow-lg">
+                    {activeOds ? getOdsIcon(activeOds.id) : null}
                   </div>
-                </Reveal>
-              ))}
+                </div>
+                <h3 className="text-[11px] sm:text-sm md:text-xl font-bold uppercase tracking-wide leading-tight mb-4 drop-shadow-md line-clamp-3">
+                  {activeOds?.nombre}
+                </h3>
+                <div className="mt-auto bg-black/25 px-4 md:px-6 py-1.5 md:py-2 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
+                  <span className="text-[10px] md:text-sm font-bold tracking-widest whitespace-nowrap">
+                    {activeOds?.total || 0} PROYECTOS
+                  </span>
+                </div>
+              </div>
+
+              {sortedOds.map((o, index) => {
+                const angle = (index * (360 / 17)) - 90;
+                const radians = angle * (Math.PI / 180);
+                const radius = 48;
+                const left = `calc(50% + ${Math.cos(radians) * radius}%)`;
+                const top = `calc(50% + ${Math.sin(radians) * radius}%)`;
+                const isActive = activeOdsId === o.id;
+
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => setActiveOdsId(o.id)}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 focus:outline-none border-2 border-transparent ${
+                      isActive
+                        ? 'scale-125 z-30 ring-4 ring-offset-4 ring-offset-background border-white'
+                        : 'opacity-70 hover:opacity-100 hover:scale-110 hover:z-30 hover:border-white/50 cursor-pointer'
+                    }`}
+                    style={{ backgroundColor: o.color, left, top }}
+                    title={o.nombre}
+                  >
+                    <span className="absolute top-1.5 left-2 md:top-2 md:left-2.5 text-[9px] md:text-xs font-black opacity-80 leading-none">
+                      {o.id}
+                    </span>
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 md:w-9 md:h-9 mt-1.5 drop-shadow-sm">
+                      {getOdsIcon(o.id)}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
-            
+
           </div>
         </section>
 
-{/* ======================================= */}
+        {/* ======================================= */}
         {/* CTA FINAL - IMAGEN CORPORATIVA Y DEGRADADO LATERAL */}
         {/* ======================================= */}
         <section className="relative z-20 bg-[#05050A] border-t border-border overflow-hidden">
-          
-          {/* 1. Imagen de fondo relacionada a la plataforma (Tecnología, B2B, Ecosistema) */}
-          <div 
+
+          <div
             className="absolute inset-0 w-full md:w-[70%] h-full bg-cover bg-center"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop')" }}
           />
-          
-          {/* 2. Degradado para fundir la imagen con el fondo oscuro */}
-          {/* En móviles cambia la dirección de Arriba -> Abajo para que el texto se lea bien */}
+
           <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#05050A]/40 via-[#05050A]/90 to-[#05050A] md:from-transparent md:via-[#05050A]/95 md:to-[#05050A]" />
-          
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-24 md:py-32 flex flex-col md:flex-row md:justify-end">
-            
-            {/* 3. Contenedor de texto alineado a la derecha sobre la parte oscura */}
+
             <Reveal className="w-full md:w-[60%] lg:w-[50%] text-left mt-40 md:mt-0">
-              
+
               <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-primary/20 border border-primary/30 text-blue-400 text-xs font-bold tracking-widest uppercase backdrop-blur-sm shadow-sm">
                 <Zap className="w-4 h-4" />
                 El futuro es colaborativo
               </div>
 
-              {/* Tipografía estrictamente apegada a Hanken Grotesk (Jerarquía por peso) sin serif */}
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 text-white tracking-tight leading-[1.1]">
                 ¿Listo para escalar en <br />
                 <span className="text-primary italic">Bolivia?</span>
@@ -516,8 +883,8 @@ export default function Home() {
                 Únete a ProjectHub hoy mismo y pon tu empresa en el mapa del ecosistema empresarial más grande del país. Centraliza tus alianzas y potencia tu impacto.
               </p>
 
-              <Link 
-                to="/register" 
+              <Link
+                to="/register"
                 className="group/btn inline-flex items-center justify-center gap-3 rounded-full bg-primary px-10 py-5 text-lg font-bold text-primary-foreground transition-all hover:scale-105 hover:bg-primary-hover shadow-[0_0_40px_rgba(var(--indigo-500),0.4)] hover:shadow-[0_0_60px_rgba(var(--indigo-500),0.6)]"
               >
                 Registrar mi Empresa
@@ -527,11 +894,11 @@ export default function Home() {
             </Reveal>
           </div>
         </section>
+
         {/* ======================================= */}
-        {/* CTA FINAL - DISEÑO "NÚCLEO DE ENERGÍA"  */}
+        {/* FOOTER                                  */}
         {/* ======================================= */}
         <section className="relative z-20 pt-16 bg-background border-t border-border">
-
           <footer className="border-t border-border py-12 bg-card">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="md:col-span-2">
