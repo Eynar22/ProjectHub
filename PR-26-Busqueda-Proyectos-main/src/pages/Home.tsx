@@ -34,17 +34,6 @@ const textItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
-// Estrellas de la sección 3: se calculan una sola vez al cargar el módulo, no en
-// cada render (así el campo de estrellas no se re-baraja si el componente
-// vuelve a renderizar).
-const SECTION3_STARS = Array.from({ length: 25 }, () => ({
-  size: Math.random() * 3 + 1,
-  left: Math.random() * 100,
-  top: Math.random() * 100,
-  duration: Math.random() * 5 + 5,
-  delay: Math.random() * 5,
-}));
-
 // Imagen de fondo de la sección "Impacto Sostenible". TEMPORAL: es de prueba,
 // reemplazar luego por la definitiva (idealmente subida a public/images/).
 const IMPACTO_BG_URL =
@@ -386,21 +375,11 @@ export default function Home() {
   const { currentUser } = useApp();
   const { data: projects = [] } = useProyectos();
 
-  // Hooks para el efecto de "Zoom Out"
+  // Hooks para el efecto de "Zoom Out" del hero
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 500], [1, 0.85]);
   const heroY = useTransform(scrollY, [0, 500], [0, 60]);
-
-  // Referencia y Hooks para la Sección 3
-  const section3Ref = useRef<HTMLElement>(null);
-  const { scrollYProgress: scrollYProgress3 } = useScroll({
-    target: section3Ref,
-    offset: ["start start", "end start"]
-  });
-  const sec3Opacity = useTransform(scrollYProgress3, [0, 1], [1, 0]);
-  const sec3Scale = useTransform(scrollYProgress3, [0, 1], [1, 0.85]);
-  const sec3Y = useTransform(scrollYProgress3, [0, 1], [0, 100]);
 
   // Cálculos ODS
   const odsConteo = ODS_LIST.map(o => ({
@@ -607,45 +586,39 @@ export default function Home() {
         {/* ======================================= */}
         {/* SECCIÓN 3: INNOVACIÓN Y ECOSISTEMA     */}
         {/* ======================================= */}
-        <section className="relative w-full z-20 bg-[#05050A]">
-          <div className="relative w-full py-24 flex flex-col justify-center overflow-hidden">
+        <section className="relative z-20 overflow-hidden border-y border-border bg-[#05050A] py-28 md:py-40">
 
-            {/* El fondo espacial ahora es totalmente ESTÁTICO */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }} 
-            />
+          {/* Fondo espacial estático */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }}
+          />
+          {/* Velo: sólido en los bordes (funde con las secciones claras de arriba
+              y abajo) y translúcido al medio, para que la foto se vea sin comerse
+              el texto. Ajustar los /NN. */}
+          <div className="absolute inset-0 bg-[#05050A]/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#05050A] via-[#05050A]/20 to-[#05050A]" />
 
-            {/* Overlay Oscuro para Contraste (85% de opacidad) */}
-            <div className="absolute inset-0 bg-[#05050A]/35" />
+          {/* Resplandor sutil detrás del texto */}
+          <div className="absolute left-1/2 top-1/2 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-[140px] pointer-events-none" />
 
-            {/* Contenido Principal */}
-            {/* Se quitaron 'opacity', 'scale' y 'y' para que no responda al scroll elásticamente */}
-            <div className="max-w-5xl mx-auto px-6 lg:px-10 relative z-10 text-center">
-              <Reveal>
-
-                {/* Badge "El Ecosistema" */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-primary/30 bg-[#05050A]/60 backdrop-blur-md shadow-inner">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">
-                    El Ecosistema
-                  </p>
-                </div>
-
-                {/* Título de la Sección */}
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-10 text-white tracking-tighter leading-[1.05] drop-shadow-2xl">
-                  Innovación <span className="bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent font-serif italic font-normal">empresarial</span>
-                </h2>
-
-                {/* Descripción de la Sección */}
-                <p className="text-xl md:text-2xl text-slate-200 leading-relaxed font-normal drop-shadow-md max-w-3xl mx-auto">
-                  Creemos en el poder de la colaboración para impulsar la economía. ProjectHub centraliza la oferta y demanda del sector corporativo, brindando un entorno seguro donde las empresas bolivianas pueden encontrar aliados estratégicos, gestionar proyectos y escalar a nivel nacional.
-                </p>
-
-              </Reveal>
+          {/* Contenido */}
+          <Reveal className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-primary/30 bg-[#05050A]/60 backdrop-blur-md shadow-inner">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">
+                El Ecosistema
+              </p>
             </div>
 
-          </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 text-white tracking-tight leading-[1.05] drop-shadow-2xl">
+              Innovación <span className="bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent font-serif italic font-normal">empresarial</span>
+            </h2>
+
+            <p className="text-lg md:text-xl text-slate-200 leading-relaxed drop-shadow-md">
+              Creemos en el poder de la colaboración para impulsar la economía. ProjectHub centraliza la oferta y demanda del sector corporativo, brindando un entorno seguro donde las empresas bolivianas pueden encontrar aliados estratégicos, gestionar proyectos y escalar a nivel nacional.
+            </p>
+          </Reveal>
         </section>
 
         {/* ======================================= */}
