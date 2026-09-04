@@ -295,6 +295,20 @@ export class AlmacenamientoService implements OnModuleInit {
     for (const u of urls) await this.eliminarPorUrl(u);
   }
 
+  /** Borra un archivo por su id de registro (disco + fila). Lo usa la limpieza de huérfanos. */
+  async eliminarPorId(id: string): Promise<void> {
+    const archivo = await this.archivoRepo.findOne({ where: { id } });
+    if (!archivo) return;
+    const rutaFisica = normalize(join(this.baseDir, archivo.ruta_relativa));
+    if (rutaFisica.startsWith(this.baseDir + sep)) {
+      await fs.rm(rutaFisica, { force: true }).catch((e) =>
+        this.logger.warn(`No se pudo borrar ${rutaFisica}: ${e.message}`),
+      );
+    }
+    await this.archivoRepo.delete({ id });
+    this.usoCacheBytes = Math.max(0, this.usoCacheBytes - archivo.size_bytes);
+  }
+
   // ── Cuota / uso ───────────────────────────────────────────────────────────
 
   async uso(forzar = false): Promise<{

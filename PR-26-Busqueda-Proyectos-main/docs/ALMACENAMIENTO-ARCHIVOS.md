@@ -47,9 +47,18 @@ ruta (`/api/archivos/<bucket>/AAAA/MM/<uuid>.<ext>`).
     mandando base64 porque ocurre sin sesión; necesita un endpoint de subida
     público con rate-limit. Poco frecuente; la Fase 3 lo migra igual.
   - Pendiente: bajar el límite de `json()` en `main.ts` (va con Fase 5).
-- **Fase 5 — Ciclo de vida y limpieza.** ⏳ Borrado de archivos al reemplazar/eliminar
-  entidades; job semanal (`@nestjs/schedule`) de huérfanos; simplificar los `select`
-  manuales que hoy esconden columnas base64.
+- **Fase 5 — Ciclo de vida y limpieza.** ✅ (parcial)
+  - `recurso.service.remove`: borra del disco el archivo del recurso y de todos
+    sus descendientes (CTE recursiva) al eliminarlo.
+  - `LimpiezaArchivosService`: red de seguridad. `setInterval` semanal (+ una
+    pasada 5 min tras el arranque) que reconstruye el conjunto de ids en uso
+    escaneando las 12 columnas `*_url` y borra del disco los `archivo` con > 2
+    días sin referencia. Salvaguarda: si el escaneo no encuentra ninguna
+    referencia y hay archivos, aborta sin borrar.
+  - **Pendiente 5b:** hooks de borrado explícito en `proyecto` / `usuario` /
+    `empresa` / solicitudes (mientras tanto los cubre la limpieza semanal);
+    simplificar los `select` manuales que esconden columnas ya livianas; bajar
+    `json({ limit })` en `main.ts` (atado a Fase 4b: el registro aún manda base64).
 
 ## Pasos en Dokploy (al desplegar Fase 1+2)
 

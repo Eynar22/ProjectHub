@@ -2,11 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { Recurso } from '../entities/recurso.entity';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
 
 @Injectable()
 export class RecursoService {
   constructor(
     @InjectRepository(Recurso) private recursoRepo: Repository<Recurso>,
+    private almacenamiento: AlmacenamientoService,
   ) {}
 
   async findByProyecto(proyectoId: number) {
@@ -47,7 +49,19 @@ export class RecursoService {
   }
 
   async remove(id: number) {
+    // Junta las urls de este recurso y de todos sus descendientes (el CASCADE de
+    // la BD borra las filas hijas pero no los archivos del disco).
+    const filas: { url: string | null }[] = await this.recursoRepo.query(
+      `WITH RECURSIVE sub AS (
+         SELECT id, url FROM recurso WHERE id = $1
+         UNION ALL
+         SELECT r.id, r.url FROM recurso r JOIN sub ON r.padre_id = sub.id
+       )
+       SELECT url FROM sub WHERE url IS NOT NULL`,
+      [id],
+    );
     await this.recursoRepo.delete(id);
+    await this.almacenamiento.eliminarPorUrls(filas.map((f) => f.url));
     return { message: 'Recurso eliminado' };
   }
 }
