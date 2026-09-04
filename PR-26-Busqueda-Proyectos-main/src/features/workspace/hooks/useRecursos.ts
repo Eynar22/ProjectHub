@@ -48,7 +48,7 @@ export function useEliminarRecurso() {
   });
 }
 
-/** Sube un archivo y devuelve su base64. */
+/** Sube un archivo y devuelve `{ url, filename }` (la url va a la BD). */
 export function useSubirArchivo() {
   return useMutation({
     mutationFn: (file: File) => recursosService.subirArchivo(file),

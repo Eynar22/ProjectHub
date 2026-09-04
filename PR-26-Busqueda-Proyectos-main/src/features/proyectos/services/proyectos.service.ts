@@ -7,23 +7,13 @@
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
+import { subirArchivo } from './archivos';
 import type {
   Project,
   ProjectEstado,
   CrearProjectDto,
   ActualizarProjectDto,
 } from '../types/proyectos.types';
-
-/** Sube un archivo y devuelve su representación base64 (el backend comprime). */
-async function subirArchivo(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
-  const { base64 } = await apiClient.post<{ base64: string }>(
-    ENDPOINTS.RECURSOS.UPLOAD,
-    formData,
-  );
-  return base64;
-}
 
 export const proyectosService = {
   /** Todos los proyectos activos (no archivados). */

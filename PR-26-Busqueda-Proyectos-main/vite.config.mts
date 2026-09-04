@@ -17,6 +17,19 @@ export default defineConfig({
     },
   },
 
+  // En dev, el frontend y el backend viven en puertos distintos. Este proxy hace
+  // que `/api/*` (incluidas las imágenes servidas en `/api/archivos/...`) se
+  // resuelvan same-origin, igual que en producción detrás de nginx. Así una
+  // <img src="/api/archivos/publico/..."> funciona sin ningún helper.
+  server: {
+    proxy: {
+      '/api': {
+        target: process.env.VITE_DEV_API_TARGET || 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })

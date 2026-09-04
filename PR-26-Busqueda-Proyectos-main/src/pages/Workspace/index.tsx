@@ -64,7 +64,7 @@ export default function Workspace() {
   const crearRecurso = useCrearRecurso();
   const eliminarRecursoMut = useEliminarRecurso();
   const subir = useSubirArchivo();
-  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).base64;
+  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).url;
 
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const [messageText, setMessageText] = useState('');
@@ -511,12 +511,12 @@ export default function Workspace() {
 
     setUploadingFile(true);
     try {
-      const { base64, filename } = await recursosService.subirArchivo(file);
+      const { url, filename } = await recursosService.subirArchivo(file);
       await crearRecurso.mutateAsync({
         proyecto_id: project.id,
         nombre: filename || file.name,
         tipo: 'archivo',
-        url: base64,
+        url,
         padre_id: activeFolderId,
       });
     } catch (err) {

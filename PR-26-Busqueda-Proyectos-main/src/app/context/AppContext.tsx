@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { storage } from '@/lib/storage';
+import { config } from '@/lib/config';
 import { authService } from '@/features/auth';
 import {
   proyectosService,
@@ -112,29 +113,49 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryClient.clear();
   };
 
-  const openBase64 = (base64Data: string) => {
-    if (!base64Data || base64Data === '#' || !base64Data.startsWith('data:')) return;
-    try {
-      const arr = base64Data.split(',');
-      const mimeMatch = arr[0].match(/:(.*?);/);
-      if (!mimeMatch) return;
+  // Abre un documento en una pestaña nueva. Acepta tanto el formato histórico
+  // (data URL en base64) como la ruta de un archivo en disco (`/api/archivos/...`).
+  const openBase64 = async (valor: string) => {
+    if (!valor || valor === '#') return;
 
-      const mime = mimeMatch[1];
-      const bstr = atob(arr[1] || arr[0]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
+    // Histórico: data URL -> blob local.
+    if (valor.startsWith('data:')) {
+      try {
+        const arr = valor.split(',');
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        if (!mimeMatch) return;
+        const mime = mimeMatch[1];
+        const bstr = atob(arr[1] || arr[0]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        const blobUrl = URL.createObjectURL(new Blob([u8arr], { type: mime }));
+        window.open(blobUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000 * 60);
+      } catch (e) {
+        console.error('Error opening base64 document:', e);
+        toast.error('Error al abrir el documento. Es posible que el archivo esté corrupto.');
       }
-      const blob = new Blob([u8arr], { type: mime });
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
+      return;
+    }
 
-      // Liberar memoria luego de un tiempo prudente
+    // Nuevo: archivo servido por el backend. El bucket privado exige el token de
+    // sesión, que window.open no envía, así que se baja con fetch autenticado.
+    try {
+      const url = valor.startsWith('/')
+        ? `${config.apiUrl.replace(/\/api$/, '')}${valor}`
+        : valor;
+      const token = storage.obtenerToken();
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blobUrl = URL.createObjectURL(await res.blob());
+      window.open(blobUrl, '_blank');
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000 * 60);
     } catch (e) {
-      console.error('Error opening base64 document:', e);
-      toast.error('Error al abrir el documento. Es posible que el archivo esté corrupto.');
+      console.error('Error opening document:', e);
+      toast.error('No se pudo abrir el documento.');
     }
   };
 

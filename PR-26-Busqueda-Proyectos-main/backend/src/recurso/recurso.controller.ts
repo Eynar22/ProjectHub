@@ -5,17 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Response } from 'express';
 import { MulterError } from 'multer';
-import sharp from 'sharp';
 import { RecursoService } from './recurso.service';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { Proyecto } from '../entities/proyecto.entity';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
 
-// Límites de subida: el techo de Multer cubre imagen o PDF; el PDF además
-// tiene su propio tope más estricto porque no se recomprime.
+// El techo de Multer cubre imagen o PDF; el resto de límites y la compresión
+// viven en AlmacenamientoService.
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024; // 20MB
-const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10MB
-const IMAGE_MAX_DIMENSION = 1600; // px, lado más largo
-const IMAGE_JPEG_QUALITY = 80;
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
 // Cuando Multer corta la subida por el límite de MAX_UPLOAD_BYTES, lanza un MulterError
@@ -40,6 +37,7 @@ class MulterExceptionFilter implements ExceptionFilter {
 export class RecursoController {
   constructor(
     private recursoService: RecursoService,
+    private almacenamiento: AlmacenamientoService,
     @InjectRepository(UsuarioProyecto) private upRepo: Repository<UsuarioProyecto>,
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
   ) {}
@@ -95,38 +93,22 @@ export class RecursoController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: any, @Req() req: any) {
     if (!file) {
-      throw new Error('No file uploaded');
+      throw new PayloadTooLargeException('No se recibió ningún archivo');
     }
 
-    let outputBuffer: Buffer = file.buffer;
-    let outputMimetype: string = file.mimetype;
-
-    if (file.mimetype === 'application/pdf') {
-      if (file.size > MAX_PDF_BYTES) {
-        throw new PayloadTooLargeException(
-          `El PDF supera el máximo permitido de ${MAX_PDF_BYTES / (1024 * 1024)}MB`,
-        );
-      }
-    } else {
-      // Imagen: redimensionar y comprimir para reducir el peso guardado/transmitido
-      outputBuffer = await sharp(file.buffer)
-        .rotate() // respeta la orientación EXIF antes de descartarla
-        .resize({ width: IMAGE_MAX_DIMENSION, height: IMAGE_MAX_DIMENSION, fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: IMAGE_JPEG_QUALITY, mozjpeg: true })
-        .toBuffer();
-      outputMimetype = 'image/jpeg';
-    }
-
-    const base64 = outputBuffer.toString('base64');
-    const base64String = `data:${outputMimetype};base64,${base64}`;
+    // Las imágenes de un recurso se muestran embebidas en el workspace (<img>),
+    // así que van al bucket público (nombre UUID no adivinable). Los PDF van al
+    // privado y se abren con sesión.
+    const bucket = file.mimetype === 'application/pdf' ? 'privado' : 'publico';
+    const guardado = await this.almacenamiento.guardarDesdeMulter(file, bucket, req.user?.id ?? null);
 
     return {
-      base64: base64String,
-      filename: file.originalname,
-      mimetype: outputMimetype,
-      size: outputBuffer.length,
+      url: guardado.url,
+      filename: guardado.nombre_original ?? file.originalname,
+      mimetype: guardado.mimetype,
+      size: guardado.size_bytes,
     };
   }
 

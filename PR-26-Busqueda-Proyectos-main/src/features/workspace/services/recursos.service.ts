@@ -25,13 +25,14 @@ export const recursosService = {
   },
 
   /**
-   * Sube un archivo. El backend lo comprime/redimensiona y devuelve su
-   * representación base64 (y el nombre original).
+   * Sube un archivo. El backend lo comprime/redimensiona, lo escribe en disco y
+   * devuelve la ruta (`/api/archivos/...`) que se guarda en la BD, más el
+   * nombre original.
    */
-  async subirArchivo(file: File): Promise<{ base64: string; filename?: string }> {
+  async subirArchivo(file: File): Promise<{ url: string; filename?: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    return apiClient.post<{ base64: string; filename?: string }>(
+    return apiClient.post<{ url: string; filename?: string }>(
       ENDPOINTS.RECURSOS.UPLOAD,
       formData,
     );

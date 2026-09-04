@@ -33,10 +33,20 @@ ruta (`/api/archivos/<bucket>/AAAA/MM/<uuid>.<ext>`).
   `usuario.documento_url`, `proyecto.documento_url`, `recurso.url`,
   `solicitud_proyecto.propuesta_url`, `solicitud_proyecto.cv_url`,
   `solicitud_membresia.documento_url`, `mensaje.archivo_url`.
-- **Fase 4 — Frontend + endpoints de entidades.** ⏳ `endpoints.ts` + servicios suben a
-  `/api/archivos` y guardan la `url`. Helper `resolveAssetUrl()`. `recurso.controller`
-  deja de devolver base64. Componentes de imagen/PDF pasan por el helper. Bajar el
-  límite de `json()` en `main.ts`.
+- **Fase 4 — Frontend + `recurso.controller`.** ✅ (flujos autenticados)
+  - `recurso.controller` `POST /recursos/upload` usa `AlmacenamientoService` y
+    devuelve `{ url, filename, mimetype, size }` (imágenes → `publico`, PDF → `privado`).
+    **Este cambio de backend se despliega junto con el frontend de esta fase.**
+  - Frontend: `config.ts` usa `/api` relativo + proxy de Vite en dev
+    (`vite.config.mts`), así una `<img src="/api/archivos/...">` funciona
+    same-origin sin helper. Servicios de subida (`proyectos`, `recursos`,
+    `solicitudes`) devuelven la `url`. `openBase64` (AppContext) abre tanto
+    data URLs viejas como rutas nuevas (con `fetch` autenticado para el bucket
+    privado).
+  - **Pendiente 4b:** el registro (`features/auth/services/auth.service.ts`) sigue
+    mandando base64 porque ocurre sin sesión; necesita un endpoint de subida
+    público con rate-limit. Poco frecuente; la Fase 3 lo migra igual.
+  - Pendiente: bajar el límite de `json()` en `main.ts` (va con Fase 5).
 - **Fase 5 — Ciclo de vida y limpieza.** ⏳ Borrado de archivos al reemplazar/eliminar
   entidades; job semanal (`@nestjs/schedule`) de huérfanos; simplificar los `select`
   manuales que hoy esconden columnas base64.

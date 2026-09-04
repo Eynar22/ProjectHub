@@ -37,7 +37,7 @@ function InfoRow({ icon: Icon, label, value, color = 'text-muted-foreground' }: 
 export default function CompanyProfile() {
   const { currentUser, openBase64, updateProfile } = useApp();
   const subir = useSubirArchivo();
-  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).base64;
+  const uploadFile = async (file: File) => (await subir.mutateAsync(file)).url;
   // El detalle de empresa (documento_url, imagenes, enlaces) lo trae este hook;
   // el listado ligero no. Se re-descarga solo tras cada actualización.
   const { data: userCompany } = useEmpresa(currentUser?.empresa_id);

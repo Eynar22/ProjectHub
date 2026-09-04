@@ -7,7 +7,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import { fileToBase64 } from '@/shared/utils/fileToBase64';
+import { subirArchivo } from './archivos';
 import type { Request, CrearSolicitudInput } from '../types/proyectos.types';
 
 export const solicitudesService = {
@@ -31,13 +31,13 @@ export const solicitudesService = {
 
   /**
    * Crea una solicitud de participación en un proyecto. Los postulantes
-   * independientes adjuntan además una propuesta de solución y su CV (el CV
-   * se convierte a base64 aquí antes de enviarlo).
+   * independientes adjuntan además una propuesta de solución y su CV, que se
+   * suben al backend (disco) y quedan como ruta `/api/archivos/...`.
    */
   async crear(proyectoId: number | string, datos: CrearSolicitudInput): Promise<Request> {
     const [cv_url, propuesta_url] = await Promise.all([
-      datos.cv ? fileToBase64(datos.cv) : undefined,
-      datos.propuestaArchivo ? fileToBase64(datos.propuestaArchivo) : undefined,
+      datos.cv ? subirArchivo(datos.cv) : undefined,
+      datos.propuestaArchivo ? subirArchivo(datos.propuestaArchivo) : undefined,
     ]);
 
     return apiClient.post<Request>(ENDPOINTS.PROYECTOS.CREAR_SOLICITUD(proyectoId), {

@@ -10,10 +10,10 @@ function resolverApiUrl(): string {
   if (fromEnv) {
     return `${fromEnv.replace(/\/+$/, '')}/api`;
   }
-  // Sin variable definida: comportamiento histórico del proyecto.
-  const esLocal =
-    typeof window !== 'undefined' && window.location.hostname === 'localhost';
-  return esLocal ? 'http://localhost:3000/api' : '/api';
+  // Sin variable definida: ruta relativa `/api`. En producción la resuelve
+  // nginx; en dev, el proxy de Vite (ver vite.config.mts). Que sea relativa
+  // permite usar `/api/archivos/...` directamente en <img src>.
+  return '/api';
 }
 
 export const config = {
