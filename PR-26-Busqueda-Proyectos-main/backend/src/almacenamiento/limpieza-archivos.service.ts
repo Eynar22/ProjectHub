@@ -2,22 +2,7 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AlmacenamientoService } from './almacenamiento.service';
-
-// Columnas *_url que pueden apuntar a un archivo del almacenamiento.
-const COLUMNAS: [tabla: string, columna: string][] = [
-  ['proyecto_imagen', 'url'],
-  ['empresa_imagen', 'url'],
-  ['empresa', 'logo_url'],
-  ['empresa', 'documento_url'],
-  ['usuario', 'foto_url'],
-  ['usuario', 'documento_url'],
-  ['proyecto', 'documento_url'],
-  ['recurso', 'url'],
-  ['solicitud_proyecto', 'propuesta_url'],
-  ['solicitud_proyecto', 'cv_url'],
-  ['solicitud_membresia', 'documento_url'],
-  ['mensaje', 'archivo_url'],
-];
+import { COLUMNAS_URL } from './almacenamiento.constants';
 
 const UUID_EN_RUTA =
   /archivos\/(?:publico|privado)\/\d{4}\/\d{2}\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\./i;
@@ -61,7 +46,7 @@ export class LimpiezaArchivosService implements OnModuleInit, OnModuleDestroy {
   async ejecutar(origen: string): Promise<{ borrados: number; bytes: number }> {
     try {
       const enUso = new Set<string>();
-      for (const [tabla, columna] of COLUMNAS) {
+      for (const [tabla, columna] of COLUMNAS_URL) {
         let filas: { v: string }[];
         try {
           filas = await this.ds.query(

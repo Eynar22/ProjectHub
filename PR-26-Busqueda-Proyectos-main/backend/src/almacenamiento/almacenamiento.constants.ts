@@ -28,3 +28,20 @@ export const EXT_BY_MIME: Record<string, string> = {
 // Prefijo público de las rutas que se guardan en las columnas *_url de la BD.
 // setGlobalPrefix('api') en main.ts hace que el controller quede bajo /api.
 export const RUTA_PUBLICA_BASE = '/api/archivos';
+
+// Todas las columnas *_url que pueden apuntar a un archivo del almacenamiento.
+// La usan la limpieza de huérfanos y el borrado con refcount.
+export const COLUMNAS_URL: readonly [tabla: string, columna: string][] = [
+  ['proyecto_imagen', 'url'],
+  ['empresa_imagen', 'url'],
+  ['empresa', 'logo_url'],
+  ['empresa', 'documento_url'],
+  ['usuario', 'foto_url'],
+  ['usuario', 'documento_url'],
+  ['proyecto', 'documento_url'],
+  ['recurso', 'url'],
+  ['solicitud_proyecto', 'propuesta_url'],
+  ['solicitud_proyecto', 'cv_url'],
+  ['solicitud_membresia', 'documento_url'],
+  ['mensaje', 'archivo_url'],
+];

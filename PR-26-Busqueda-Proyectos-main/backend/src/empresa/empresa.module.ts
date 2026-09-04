@@ -6,9 +6,13 @@ import { Empresa } from '../entities/empresa.entity';
 import { EmpresaImagen } from '../entities/empresa-imagen.entity';
 import { EmpresaEnlace } from '../entities/empresa-enlace.entity';
 import { Usuario } from '../entities/usuario.entity';
+import { AlmacenamientoModule } from '../almacenamiento/almacenamiento.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Empresa, EmpresaImagen, EmpresaEnlace, Usuario])],
+  imports: [
+    TypeOrmModule.forFeature([Empresa, EmpresaImagen, EmpresaEnlace, Usuario]),
+    AlmacenamientoModule,
+  ],
   controllers: [EmpresaController],
   providers: [EmpresaService],
   exports: [EmpresaService],

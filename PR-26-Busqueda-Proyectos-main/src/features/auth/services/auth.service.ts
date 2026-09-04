@@ -3,12 +3,11 @@
  *
  * Responsabilidad: hablar con los endpoints de autenticación del backend.
  * NO maneja estado de sesión. NO muestra toasts. NO conoce React.
- * Convierte los File a base64 y arma la forma que espera cada endpoint.
+ * Sube los File al backend (disco) y arma la forma que espera cada endpoint.
  * ========================================================================= */
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import { fileToBase64 } from '@/shared/utils/fileToBase64';
 import type { User } from '@/shared/types/user.types';
 import type {
   LoginDto,
@@ -19,6 +18,17 @@ import type {
   RestablecerPasswordInput,
   CambiarPasswordInput,
 } from '../types/auth.types';
+
+/**
+ * Sube un archivo por el endpoint de registro (sin sesión, rate-limited) y
+ * devuelve la ruta `/api/archivos/...` que espera el backend en la columna *_url.
+ */
+async function subir(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { url } = await apiClient.post<{ url: string }>(ENDPOINTS.ARCHIVOS.REGISTRO, formData);
+  return url;
+}
 
 export const authService = {
   /** Autentica al usuario. Devuelve el token y el usuario. */
@@ -34,10 +44,10 @@ export const authService = {
   /** Registra una empresa nueva y su primer administrador. */
   async registrarEmpresa(datos: RegistrarEmpresaInput): Promise<void> {
     const [documento_empresa_url, documento_personal_url, logo_url, imagenes_urls] = await Promise.all([
-      fileToBase64(datos.responsable.documentoEmpresa),
-      fileToBase64(datos.responsable.documentoPersonal),
-      datos.empresa.logo ? fileToBase64(datos.empresa.logo) : Promise.resolve(undefined),
-      Promise.all((datos.empresa.fotos ?? []).map(fileToBase64)),
+      subir(datos.responsable.documentoEmpresa),
+      subir(datos.responsable.documentoPersonal),
+      datos.empresa.logo ? subir(datos.empresa.logo) : Promise.resolve(undefined),
+      Promise.all((datos.empresa.fotos ?? []).map((f) => subir(f))),
     ]);
 
     await apiClient.post(ENDPOINTS.AUTH.REGISTRO_EMPRESA, {
@@ -58,7 +68,7 @@ export const authService = {
 
   /** Registra un empleado que se une a una empresa existente. */
   async registrarEmpleado(datos: RegistrarEmpleadoInput): Promise<void> {
-    const documento_url = await fileToBase64(datos.documento);
+    const documento_url = await subir(datos.documento);
 
     await apiClient.post(ENDPOINTS.AUTH.REGISTRO_EMPLEADO, {
       nombre_completo: datos.nombre_completo,
@@ -72,7 +82,7 @@ export const authService = {
 
   /** Registra un usuario independiente (sin empresa). Acceso inmediato. */
   async registrarIndependiente(datos: RegistrarIndependienteInput): Promise<void> {
-    const documento_url = datos.cv ? await fileToBase64(datos.cv) : undefined;
+    const documento_url = datos.cv ? await subir(datos.cv) : undefined;
 
     await apiClient.post(ENDPOINTS.AUTH.REGISTRO_INDEPENDIENTE, {
       nombre_completo: datos.nombre_completo,

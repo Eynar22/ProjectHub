@@ -10,6 +10,7 @@ import { Usuario } from '../entities/usuario.entity';
 import { Chat } from '../entities/chat.entity';
 import { KanbanColumna } from '../entities/kanban-columna.entity';
 import { Recurso } from '../entities/recurso.entity';
+import { AlmacenamientoModule } from '../almacenamiento/almacenamiento.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Recurso } from '../entities/recurso.entity';
       KanbanColumna,
       Recurso,
     ]),
+    AlmacenamientoModule,
   ],
   controllers: [ProyectoController],
   providers: [ProyectoService],

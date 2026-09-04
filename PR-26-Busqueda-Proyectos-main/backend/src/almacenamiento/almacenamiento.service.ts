@@ -9,8 +9,8 @@ import {
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import { join, sep, normalize } from 'path';
@@ -19,6 +19,7 @@ import { Archivo } from '../entities/archivo.entity';
 import {
   ALLOWED_MIMETYPES,
   Bucket,
+  COLUMNAS_URL,
   EXT_BY_MIME,
   IMAGE_JPEG_QUALITY,
   IMAGE_MAX_DIMENSION,
@@ -55,6 +56,7 @@ export class AlmacenamientoService implements OnModuleInit {
   constructor(
     private readonly config: ConfigService,
     @InjectRepository(Archivo) private readonly archivoRepo: Repository<Archivo>,
+    @InjectDataSource() private readonly ds: DataSource,
   ) {
     this.baseDir = normalize(
       this.config.get<string>('ALMACENAMIENTO_DIR') || join(process.cwd(), 'almacenamiento_data'),
@@ -293,6 +295,35 @@ export class AlmacenamientoService implements OnModuleInit {
 
   async eliminarPorUrls(urls: (string | null | undefined)[]): Promise<void> {
     for (const u of urls) await this.eliminarPorUrl(u);
+  }
+
+  /**
+   * Borra el archivo solo si NINGUNA columna *_url lo sigue apuntando. Se usa
+   * cuando el mismo archivo puede estar referenciado más de una vez (p. ej. una
+   * imagen de proyecto que también existe como recurso). Llamar DESPUÉS de haber
+   * quitado de la BD la fila que ya no lo usa.
+   */
+  async eliminarPorUrlSiHuerfano(url: string | null | undefined): Promise<void> {
+    if (!url) return;
+    const rutaRelativa = this.urlARutaRelativa(url);
+    if (!rutaRelativa) return;
+    const like = `%${RUTA_PUBLICA_BASE}/${rutaRelativa}%`;
+    for (const [tabla, columna] of COLUMNAS_URL) {
+      try {
+        const hit = await this.ds.query(
+          `SELECT 1 FROM ${tabla} WHERE ${columna} LIKE $1 LIMIT 1`,
+          [like],
+        );
+        if (hit.length) return; // sigue en uso
+      } catch {
+        // tabla/columna ausente en este entorno: se ignora
+      }
+    }
+    await this.eliminarPorUrl(url);
+  }
+
+  async eliminarPorUrlsSiHuerfanas(urls: (string | null | undefined)[]): Promise<void> {
+    for (const u of urls) await this.eliminarPorUrlSiHuerfano(u);
   }
 
   /** Borra un archivo por su id de registro (disco + fila). Lo usa la limpieza de huérfanos. */

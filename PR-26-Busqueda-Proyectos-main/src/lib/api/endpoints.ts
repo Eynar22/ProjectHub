@@ -84,6 +84,13 @@ export const ENDPOINTS = {
     UPLOAD: '/recursos/upload',
   },
 
+  ARCHIVOS: {
+    // Subida con sesión (devuelve { url }). El bucket va por query: ?bucket=publico|privado.
+    SUBIR: '/archivos',
+    // Subida sin sesión, solo para el formulario de registro. Rate-limit por IP.
+    REGISTRO: '/archivos/registro',
+  },
+
   CHATS: {
     MENSAJES_POR_PROYECTO: (proyectoId: number | string) =>
       `/chats/proyecto/${proyectoId}/mensajes`,

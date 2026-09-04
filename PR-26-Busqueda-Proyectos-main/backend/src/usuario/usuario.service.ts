@@ -7,6 +7,7 @@ import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
 import { Proyecto } from '../entities/proyecto.entity';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { MailService } from '../mail/mail.service';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
 import { QuickCreateEmpleadoDto } from './dto/usuario.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -30,6 +31,7 @@ export class UsuarioService {
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
     @InjectRepository(UsuarioProyecto) private usuarioProyectoRepo: Repository<UsuarioProyecto>,
     private mailService: MailService,
+    private almacenamiento: AlmacenamientoService,
   ) {}
 
   // select explícito: excluye documento_url (base64) de la lista para no cargar
@@ -102,7 +104,17 @@ export class UsuarioService {
     if (data.foto_url !== undefined) payload.foto_url = data.foto_url;
     if (data.onboarding_completado !== undefined) payload.onboarding_completado = data.onboarding_completado;
 
+    // Si se cambia la foto, se recuerda la anterior para borrar su archivo.
+    const fotoAnterior =
+      data.foto_url !== undefined
+        ? (await this.usuarioRepo.findOne({ where: { id: userId }, select: { id: true, foto_url: true } }))?.foto_url
+        : undefined;
+
     await this.usuarioRepo.update(userId, payload);
+
+    if (fotoAnterior && fotoAnterior !== data.foto_url) {
+      await this.almacenamiento.eliminarPorUrlSiHuerfano(fotoAnterior);
+    }
     return this.findOne(userId);
   }
 
@@ -179,6 +191,7 @@ export class UsuarioService {
   async remove(id: number) {
     const usuario = await this.findOne(id);
     await this.usuarioRepo.remove(usuario);
+    await this.almacenamiento.eliminarPorUrlsSiHuerfanas([usuario.foto_url, usuario.documento_url]);
     return { message: 'Usuario eliminado' };
   }
 
@@ -263,12 +276,22 @@ export class UsuarioService {
   }
 
   async deleteMembership(solicitudId: number) {
-    const solicitud = await this.solicitudRepo.findOne({ where: { id: solicitudId } });
+    const solicitud = await this.solicitudRepo.findOne({
+      where: { id: solicitudId },
+      relations: ['usuario'],
+    });
     if (!solicitud) throw new NotFoundException('Solicitud no encontrada');
+
+    const urls = [
+      solicitud.documento_url,
+      solicitud.usuario?.foto_url,
+      solicitud.usuario?.documento_url,
+    ];
 
     // Also delete the user
     await this.usuarioRepo.delete(solicitud.usuario_id);
     await this.solicitudRepo.remove(solicitud);
+    await this.almacenamiento.eliminarPorUrlsSiHuerfanas(urls);
 
     return { message: 'Solicitud y usuario eliminados' };
   }

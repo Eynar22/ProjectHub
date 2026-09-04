@@ -16,6 +16,7 @@ import {
   ExceptionFilter,
   ArgumentsHost,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -27,6 +28,26 @@ import {
   Bucket,
   MAX_UPLOAD_BYTES,
 } from './almacenamiento.constants';
+
+// Rate-limit en memoria para la subida pública del registro (sin sesión). Es un
+// piso simple contra abuso: no necesita Redis ni una dependencia nueva.
+const REG_VENTANA_MS = 10 * 60 * 1000;
+const REG_MAX_POR_VENTANA = 15;
+const regSubidasPorIp = new Map<string, number[]>();
+
+function chequearRitmoRegistro(ip: string): void {
+  if (regSubidasPorIp.size > 5000) regSubidasPorIp.clear(); // poda dura
+  const ahora = Date.now();
+  const previas = (regSubidasPorIp.get(ip) || []).filter((t) => ahora - t < REG_VENTANA_MS);
+  if (previas.length >= REG_MAX_POR_VENTANA) {
+    throw new HttpException(
+      'Demasiadas subidas desde esta conexión. Esperá unos minutos e intentá de nuevo.',
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
+  }
+  previas.push(ahora);
+  regSubidasPorIp.set(ip, previas);
+}
 
 // Multer corta la subida por tamaño antes de que el controller pueda validar;
 // sin este filtro Nest devolvería un 500 sin mensaje.
@@ -72,6 +93,39 @@ export class ArchivosController {
   ) {
     const bucket: Bucket = bucketQuery === 'publico' ? 'publico' : 'privado';
     return this.almacenamiento.guardarDesdeMulter(file, bucket, req.user?.id ?? null);
+  }
+
+  /**
+   * Subida SIN sesión, solo para el formulario de registro (logo/fotos de la
+   * empresa, documentos de acreditación). Rate-limit por IP. El bucket lo decide
+   * el tipo: imágenes -> publico, PDF -> privado. Si el registro se abandona, el
+   * barrido semanal borra los archivos sin referencia.
+   */
+  @Post('registro')
+  @UseFilters(MulterExceptionFilter)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: MAX_UPLOAD_BYTES },
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_MIMETYPES.includes(file.mimetype as any)) {
+          cb(new BadRequestException('Tipo de archivo no permitido'), false);
+          return;
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async subirRegistro(@UploadedFile() file: any, @Req() req: any) {
+    const ip = (
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      req.ip ||
+      'desconocido'
+    ).trim();
+    chequearRitmoRegistro(ip);
+
+    const bucket: Bucket = file?.mimetype === 'application/pdf' ? 'privado' : 'publico';
+    const guardado = await this.almacenamiento.guardarDesdeMulter(file, bucket, null);
+    return { url: guardado.url, filename: guardado.nombre_original, mimetype: guardado.mimetype };
   }
 
   /** Bucket público: sin auth, cache larga (nombre UUID no adivinable). */

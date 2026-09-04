@@ -18,11 +18,12 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Comprime las respuestas (los listados con base64 embebido pesan bastante en texto plano)
+  // Comprime las respuestas.
   app.use(compression());
 
-  // Payload limit for JSON bodies that embed base64 files (imágenes comprimidas + 1 PDF de hasta 10MB)
-  app.use(json({ limit: '20mb' }));
+  // Los archivos ya no viajan como base64 en el JSON: se suben por multipart a
+  // /api/archivos y en el body solo van rutas cortas. 2 MB sobra.
+  app.use(json({ limit: '2mb' }));
 
   // El body-parser rechaza el request antes de llegar a Nest, así que por defecto Express
   // respondería con HTML/texto plano en vez de JSON. Lo interceptamos para devolver un
@@ -31,7 +32,7 @@ async function bootstrap() {
     if (err?.type === 'entity.too.large' || err?.status === 413) {
       return res.status(413).json({
         statusCode: 413,
-        message: 'El archivo es demasiado grande. El tamaño máximo permitido por solicitud es de 20MB (por ejemplo, un PDF de hasta 10MB).',
+        message: 'La solicitud es demasiado grande. Los archivos deben subirse por separado (imagen o PDF), no dentro del formulario.',
       });
     }
     next(err);

@@ -5,6 +5,7 @@ import { Empresa } from '../entities/empresa.entity';
 import { EmpresaImagen } from '../entities/empresa-imagen.entity';
 import { EmpresaEnlace } from '../entities/empresa-enlace.entity';
 import { Usuario } from '../entities/usuario.entity';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
 
 
 @Injectable()
@@ -14,6 +15,7 @@ export class EmpresaService {
     @InjectRepository(EmpresaImagen) private imagenRepo: Repository<EmpresaImagen>,
     @InjectRepository(EmpresaEnlace) private enlaceRepo: Repository<EmpresaEnlace>,
     @InjectRepository(Usuario) private usuarioRepo: Repository<Usuario>,
+    private almacenamiento: AlmacenamientoService,
   ) {}
 
   // select explícito: excluye documento_url (base64) de la empresa y de cada
@@ -94,11 +96,30 @@ export class EmpresaService {
       ) as Partial<Empresa>;
     }
 
+    // Archivos que van a quedar reemplazados por este update: se recuerdan para
+    // borrar su archivo en disco después (solo si nada más los referencia).
+    const urlsHuerfanas: (string | null | undefined)[] = [];
+    if ('logo_url' in empresaData || 'documento_url' in empresaData) {
+      const prev = await this.empresaRepo.findOne({
+        where: { id },
+        select: { id: true, logo_url: true, documento_url: true },
+      });
+      if (prev) {
+        if ('logo_url' in empresaData && prev.logo_url !== (empresaData as any).logo_url) {
+          urlsHuerfanas.push(prev.logo_url);
+        }
+        if ('documento_url' in empresaData && prev.documento_url !== (empresaData as any).documento_url) {
+          urlsHuerfanas.push(prev.documento_url);
+        }
+      }
+    }
+
     if (Object.keys(empresaData).length > 0) {
       await this.empresaRepo.update(id, empresaData);
     }
 
     if (imagenes_urls) {
+      const previas = await this.imagenRepo.find({ where: { empresa_id: id } });
       await this.imagenRepo.delete({ empresa_id: id });
       if (imagenes_urls.length > 0) {
         const imagenes = imagenes_urls.map((url) =>
@@ -106,6 +127,13 @@ export class EmpresaService {
         );
         await this.imagenRepo.save(imagenes);
       }
+      urlsHuerfanas.push(
+        ...previas.map((p) => p.url).filter((u) => !imagenes_urls!.includes(u)),
+      );
+    }
+
+    if (urlsHuerfanas.length > 0) {
+      await this.almacenamiento.eliminarPorUrlsSiHuerfanas(urlsHuerfanas);
     }
 
     if (enlaces) {

@@ -9,6 +9,7 @@ import { Usuario } from '../entities/usuario.entity';
 import { Chat } from '../entities/chat.entity';
 import { KanbanColumna } from '../entities/kanban-columna.entity';
 import { Recurso } from '../entities/recurso.entity';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
 
 @Injectable()
 export class ProyectoService {
@@ -53,6 +54,7 @@ export class ProyectoService {
     @InjectRepository(Chat) private chatRepo: Repository<Chat>,
     @InjectRepository(KanbanColumna) private columnaRepo: Repository<KanbanColumna>,
     @InjectRepository(Recurso) private recursoRepo: Repository<Recurso>,
+    private almacenamiento: AlmacenamientoService,
   ) { }
 
   // 'recursos' queda afuera de los listados a propósito: solo se usa en la vista de
@@ -247,12 +249,18 @@ export class ProyectoService {
     }
 
     if (imagenes_urls) {
-      // Remove old images and add new ones
+      // Reemplaza la galería. Guarda las urls viejas para borrar sus archivos
+      // después, pero solo si ya no las referencia nada (la misma imagen suele
+      // existir también como Recurso).
+      const previas = await this.imagenRepo.find({ where: { proyecto_id: id } });
       await this.imagenRepo.delete({ proyecto_id: id });
       const imagenes = imagenes_urls.map((url) =>
         this.imagenRepo.create({ proyecto_id: id, url }),
       );
       await this.imagenRepo.save(imagenes);
+      await this.almacenamiento.eliminarPorUrlsSiHuerfanas(
+        previas.map((p) => p.url).filter((u) => !imagenes_urls.includes(u)),
+      );
     }
 
     return this.findOne(id);
@@ -260,7 +268,23 @@ export class ProyectoService {
 
   async remove(id: number) {
     const proyecto = await this.findOne(id);
+
+    // Junta las urls de archivos del proyecto ANTES de borrar (el CASCADE de la
+    // BD elimina proyecto_imagen y recurso, pero no toca el disco). findOne()
+    // excluye documento_url por el select, así que se pide aparte.
+    const [conDoc, imgs, recs] = await Promise.all([
+      this.proyectoRepo.findOne({ where: { id }, select: { id: true, documento_url: true } }),
+      this.imagenRepo.find({ where: { proyecto_id: id } }),
+      this.recursoRepo.find({ where: { proyecto_id: id } }),
+    ]);
+    const urls = [
+      conDoc?.documento_url,
+      ...imgs.map((i) => i.url),
+      ...recs.map((r) => r.url),
+    ];
+
     await this.proyectoRepo.remove(proyecto);
+    await this.almacenamiento.eliminarPorUrlsSiHuerfanas(urls);
     return { message: 'Proyecto eliminado' };
   }
 

@@ -7,11 +7,13 @@ import { SolicitudMembresia } from '../entities/solicitud-membresia.entity';
 import { Proyecto } from '../entities/proyecto.entity';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { MailModule } from '../mail/mail.module';
+import { AlmacenamientoModule } from '../almacenamiento/almacenamiento.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Usuario, SolicitudMembresia, Proyecto, UsuarioProyecto]),
     MailModule,
+    AlmacenamientoModule,
   ],
   controllers: [UsuarioController],
   providers: [UsuarioService],
