@@ -36,3 +36,7 @@ vite.config.js.timestamp-*
 
 # Claude Code
 .claude/
+
+# Almacenamiento de archivos en disco (dev local; en prod es un volumen)
+/almacenamiento_data
+/backend/almacenamiento_data

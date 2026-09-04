@@ -31,8 +31,17 @@ services:
       # Explícito por las mismas columnas timestamp-sin-zona (ver backend/.env);
       # la imagen node:20-alpine ya usa UTC por defecto, esto lo deja documentado.
       - TZ=UTC
+      # Almacenamiento de archivos en disco (imágenes / PDF). Ver backend/.env.example.
+      - ALMACENAMIENTO_DIR=/app/almacenamiento
+      # Tope de uso: 55 GiB (~28% de los 192 GB del host, deja margen sobre el 30%).
+      - ALMACENAMIENTO_MAX_BYTES=59055800320
     ports:
       - "3010:3000"
+    volumes:
+      # Bind mount a la carpeta persistente de Dokploy (entra en sus backups y
+      # sobrevive a los redeploys). En dev, ALMACENAMIENTO_HOST_PATH cae en
+      # ./almacenamiento_data dentro del proyecto (gitignored).
+      - ${ALMACENAMIENTO_HOST_PATH:-./almacenamiento_data}:/app/almacenamiento
     depends_on:
       - postgres
     networks:
