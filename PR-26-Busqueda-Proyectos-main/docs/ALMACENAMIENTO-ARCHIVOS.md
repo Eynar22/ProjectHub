@@ -23,9 +23,16 @@ ruta (`/api/archivos/<bucket>/AAAA/MM/<uuid>.<ext>`).
   - `GET /api/archivos/publico/:a/:m/:nombre` (sin auth, cache larga)
   - `GET /api/archivos/privado/:a/:m/:nombre` (auth + permiso)
   - `GET /api/almacenamiento/estado` (superadmin)
-- **Fase 3 — Migración de datos.** ⏳ Script que decodifica el base64 existente en
-  todas las columnas `*_url` y lo escribe como archivos, actualizando la columna.
-  Idempotente. Correr dentro del contenedor backend tras un `pg_dump`.
+- **Fase 3 — Migración de datos.** ✅ `backend/src/scripts/migrar-base64-a-archivos.ts`.
+  Decodifica el base64 de todas las columnas `*_url`, lo escribe como archivo y
+  reemplaza la columna por la ruta. Idempotente (solo toca `LIKE 'data:%'`), por
+  lotes. `npm run migrar:archivos:dry` para simular, `npm run migrar:archivos`
+  para aplicar. Correr dentro del contenedor backend tras un `pg_dump`.
+  Columnas cubiertas: `proyecto_imagen.url`, `empresa_imagen.url`,
+  `empresa.logo_url`, `empresa.documento_url`, `usuario.foto_url`,
+  `usuario.documento_url`, `proyecto.documento_url`, `recurso.url`,
+  `solicitud_proyecto.propuesta_url`, `solicitud_proyecto.cv_url`,
+  `solicitud_membresia.documento_url`, `mensaje.archivo_url`.
 - **Fase 4 — Frontend + endpoints de entidades.** ⏳ `endpoints.ts` + servicios suben a
   `/api/archivos` y guardan la `url`. Helper `resolveAssetUrl()`. `recurso.controller`
   deja de devolver base64. Componentes de imagen/PDF pasan por el helper. Bajar el
@@ -46,3 +53,17 @@ ruta (`/api/archivos/<bucket>/AAAA/MM/<uuid>.<ext>`).
    `docker exec -i buscador_postgres psql -U postgres -d buscador < data/migrations/009_archivo.sql`
 5. Smoke test: `curl` con token a `POST /api/archivos?bucket=publico` con una imagen;
    luego `GET` a la `url` devuelta.
+
+## Fase 3 — migrar el base64 ya guardado
+
+Dentro del contenedor backend (BD accesible + volumen montado), tras el `pg_dump`:
+
+```
+docker exec -it buscador_backend sh -lc "npm run migrar:archivos:dry"   # simula, cuenta
+docker exec -it buscador_backend sh -lc "npm run migrar:archivos"        # aplica
+```
+
+- Idempotente: si se corta, se vuelve a lanzar y reanuda.
+- Las filas que fallan o cuyo `data:` no se pudo decodificar NO se tocan (su
+  valor original queda intacto); solo se listan en el log para revisarlas a mano.
+- Al terminar imprime el uso del almacenamiento y sale con código 1 si hubo errores.

@@ -126,27 +126,79 @@ export class AlmacenamientoService implements OnModuleInit {
 
     await this.verificarCuota(buffer.length);
 
+    return this.escribirYRegistrar({
+      buffer,
+      mimetype,
+      bucket,
+      nombreOriginal: file.originalname ?? null,
+      subidoPor,
+      referenciado: false,
+    });
+  }
+
+  /**
+   * Guarda un buffer YA listo (sin recomprimir ni topes de tamaño). Lo usa el
+   * script de migración de base64 a disco: el contenido ya venía procesado y no
+   * queremos rechazar datos que llevan tiempo en producción. Sí actualiza el
+   * uso; el llamador decide si le importa la cuota.
+   */
+  async guardarBufferCrudo(params: {
+    buffer: Buffer;
+    mimetype: string;
+    bucket: Bucket;
+    nombreOriginal?: string | null;
+    subidoPor?: number | null;
+    entidadTipo?: string | null;
+    entidadId?: number | null;
+  }): Promise<ArchivoGuardado> {
+    if (!EXT_BY_MIME[params.mimetype]) {
+      throw new Error(`mimetype no soportado: ${params.mimetype}`);
+    }
+    return this.escribirYRegistrar({
+      buffer: params.buffer,
+      mimetype: params.mimetype,
+      bucket: params.bucket,
+      nombreOriginal: params.nombreOriginal ?? null,
+      subidoPor: params.subidoPor ?? null,
+      entidadTipo: params.entidadTipo ?? null,
+      entidadId: params.entidadId ?? null,
+      referenciado: true,
+    });
+  }
+
+  private async escribirYRegistrar(p: {
+    buffer: Buffer;
+    mimetype: string;
+    bucket: Bucket;
+    nombreOriginal: string | null;
+    subidoPor: number | null;
+    referenciado: boolean;
+    entidadTipo?: string | null;
+    entidadId?: number | null;
+  }): Promise<ArchivoGuardado> {
     const id = randomUUID();
-    const ext = EXT_BY_MIME[mimetype];
+    const ext = EXT_BY_MIME[p.mimetype];
     const now = new Date();
     const yyyy = String(now.getUTCFullYear());
     const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const rutaRelativa = `${bucket}/${yyyy}/${mm}/${id}.${ext}`;
-    const rutaFisica = join(this.baseDir, bucket, yyyy, mm, `${id}.${ext}`);
+    const rutaRelativa = `${p.bucket}/${yyyy}/${mm}/${id}.${ext}`;
+    const rutaFisica = join(this.baseDir, p.bucket, yyyy, mm, `${id}.${ext}`);
 
-    await fs.mkdir(join(this.baseDir, bucket, yyyy, mm), { recursive: true });
-    await fs.writeFile(rutaFisica, buffer);
+    await fs.mkdir(join(this.baseDir, p.bucket, yyyy, mm), { recursive: true });
+    await fs.writeFile(rutaFisica, p.buffer);
 
     try {
       await this.archivoRepo.insert({
         id,
-        bucket,
+        bucket: p.bucket,
         ruta_relativa: rutaRelativa,
-        mimetype,
-        size_bytes: buffer.length,
-        nombre_original: file.originalname ?? null,
-        subido_por: subidoPor,
-        referenciado: false,
+        mimetype: p.mimetype,
+        size_bytes: p.buffer.length,
+        nombre_original: p.nombreOriginal,
+        subido_por: p.subidoPor,
+        entidad_tipo: p.entidadTipo ?? null,
+        entidad_id: p.entidadId ?? null,
+        referenciado: p.referenciado,
       });
     } catch (e) {
       // Si falla el registro en BD, no dejamos el archivo colgado.
@@ -154,16 +206,16 @@ export class AlmacenamientoService implements OnModuleInit {
       throw e;
     }
 
-    this.usoCacheBytes += buffer.length;
+    this.usoCacheBytes += p.buffer.length;
 
     return {
       id,
       url: `${RUTA_PUBLICA_BASE}/${rutaRelativa}`,
       ruta_relativa: rutaRelativa,
-      bucket,
-      mimetype,
-      size_bytes: buffer.length,
-      nombre_original: file.originalname ?? null,
+      bucket: p.bucket,
+      mimetype: p.mimetype,
+      size_bytes: p.buffer.length,
+      nombre_original: p.nombreOriginal,
     };
   }
 

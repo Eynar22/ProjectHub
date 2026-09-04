@@ -12,6 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "migrar:archivos": "node dist/scripts/migrar-base64-a-archivos.js",
+    "migrar:archivos:dry": "node dist/scripts/migrar-base64-a-archivos.js --dry-run",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
