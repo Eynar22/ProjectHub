@@ -68,11 +68,19 @@ export class AlmacenamientoService implements OnModuleInit {
     for (const bucket of ['publico', 'privado'] as Bucket[]) {
       await fs.mkdir(join(this.baseDir, bucket), { recursive: true });
     }
-    const { usado, porcentaje } = await this.uso(true);
-    this.logger.log(
-      `Almacenamiento en ${this.baseDir} — ${(usado / 1e9).toFixed(2)} GB usados de ` +
-        `${(this.maxBytes / 1e9).toFixed(2)} GB (${porcentaje.toFixed(1)}%)`,
-    );
+    try {
+      const { usado, porcentaje } = await this.uso(true);
+      this.logger.log(
+        `Almacenamiento en ${this.baseDir} — ${(usado / 1e9).toFixed(2)} GB usados de ` +
+          `${(this.maxBytes / 1e9).toFixed(2)} GB (${porcentaje.toFixed(1)}%)`,
+      );
+    } catch (e: any) {
+      // Típico: la tabla `archivo` aún no existe. No bloquea el arranque; las
+      // subidas fallarán con un error claro hasta que corra 009_archivo.sql.
+      this.logger.warn(
+        `No se pudo leer el uso de almacenamiento (¿falta la migración 009_archivo.sql?): ${e.message}`,
+      );
+    }
   }
 
   // ── Subida ────────────────────────────────────────────────────────────────
