@@ -8,8 +8,7 @@ import { ProyectoModule } from './proyecto/proyecto.module';
 import { ChatModule } from './chat/chat.module';
 import { TareaModule } from './tarea/tarea.module';
 import { RecursoModule } from './recurso/recurso.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { AlmacenamientoModule } from './almacenamiento/almacenamiento.module';
 
 // Entities
 import * as Entities from './entities';
@@ -17,11 +16,6 @@ import * as Entities from './entities';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'backend', 'uploads'),
-      serveRoot: '/uploads',
-      renderPath: '/uploads',
-    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService): any => {
@@ -108,6 +102,7 @@ import * as Entities from './entities';
     ChatModule,
     TareaModule,
     RecursoModule,
+    AlmacenamientoModule,
   ],
 })
 export class AppModule {}

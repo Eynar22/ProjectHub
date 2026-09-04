@@ -11,6 +11,7 @@ export { KanbanColumna } from './kanban-columna.entity';
 export { Tarea } from './tarea.entity';
 export { TareaComentario } from './tarea-comentario.entity';
 export { Recurso } from './recurso.entity';
+export { Archivo } from './archivo.entity';
 export { SolicitudMembresia } from './solicitud-membresia.entity';
 export { SolicitudProyecto } from './solicitud-proyecto.entity';
 export { CodigoRecuperacion } from './codigo-recuperacion.entity';
