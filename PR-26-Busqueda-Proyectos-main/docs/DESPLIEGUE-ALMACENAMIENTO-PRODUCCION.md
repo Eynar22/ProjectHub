@@ -120,6 +120,23 @@ Columnas que migra: `proyecto_imagen.url`, `empresa_imagen.url`,
 `solicitud_proyecto.propuesta_url`, `solicitud_proyecto.cv_url`,
 `solicitud_membresia.documento_url`, `mensaje.archivo_url`.
 
+### 5b. Si un archivo da 404 (existe en el disco pero no en la BD)
+
+Pasa cuando la base de datos se reseteó/restauró pero el volumen de archivos
+se mantuvo: el archivo físico sigue ahí, pero le falta la fila en `archivo`
+que el backend necesita para servirlo (da 404 a **cualquiera**, incluido
+superadmin). Reconciliar:
+
+```bash
+docker exec -it buscador_backend sh -lc "npm run reconciliar:archivos:dry"   # reporta los que faltan
+docker exec -it buscador_backend sh -lc "npm run reconciliar:archivos"        # los da de alta
+```
+
+No borra ni modifica nada existente; solo crea la fila que falta (mimetype por
+extensión, tamaño real del archivo). Sin dueño ni entidad asociada — no hay
+forma de recuperar eso — así que en el bucket privado solo podrá abrirlo el
+superadmin hasta que alguien lo vuelva a subir por el flujo normal.
+
 ---
 
 ## 6. Verificación
