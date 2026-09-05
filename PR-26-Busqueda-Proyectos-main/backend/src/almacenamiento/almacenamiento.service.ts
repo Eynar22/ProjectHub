@@ -263,13 +263,112 @@ export class AlmacenamientoService implements OnModuleInit {
 
   /**
    * ¿Puede este usuario ver un archivo del bucket privado?
-   * Fase 2: superadmin o quien lo subió. Fase 4 lo amplía a participantes del
-   * proyecto / admin de la empresa según entidad_tipo / entidad_id.
+   *
+   * `subido_por` NO alcanza como único criterio: el registro sube sin sesión
+   * (subido_por queda null) y, sobre todo, quien necesita ver la mayoría de estos
+   * documentos NO es quien los subió — el dueño del proyecto revisa el CV/propuesta
+   * de un postulante, el admin de la empresa revisa el documento de un empleado que
+   * se une, etc. Como el `archivo` no queda enlazado a esa fila al subirlo
+   * (entidad_tipo/entidad_id se completan recién en la migración), se resuelve el
+   * permiso en el momento: se busca qué fila de negocio referencia hoy esta ruta y
+   * se aplica la regla de esa relación.
    */
-  puedeVerPrivado(user: { id: number; rol: string } | undefined, archivo: Archivo): boolean {
+  async puedeVerPrivado(
+    user: { id: number; rol: string } | undefined,
+    archivo: Archivo,
+  ): Promise<boolean> {
     if (!user) return false;
     if (user.rol === 'superadmin') return true;
-    return archivo.subido_por === user.id;
+    if (archivo.subido_por === user.id) return true;
+
+    const like = `%${RUTA_PUBLICA_BASE}/${archivo.ruta_relativa}%`;
+
+    // Documento/foto propios del usuario (típico cuando se subieron en el
+    // registro, sin sesión, y por eso subido_por quedó null).
+    const usuario = await this.ds.query(
+      `SELECT id FROM usuario WHERE documento_url LIKE $1 OR foto_url LIKE $1 LIMIT 1`,
+      [like],
+    );
+    if (usuario[0] && Number(usuario[0].id) === user.id) return true;
+
+    // Documento de la empresa: lo revisa el/los admin de esa misma empresa.
+    const empresa = await this.ds.query(
+      `SELECT id FROM empresa WHERE documento_url LIKE $1 LIMIT 1`,
+      [like],
+    );
+    if (empresa[0] && (await this.esAdminDeEmpresa(user.id, Number(empresa[0].id)))) return true;
+
+    // CV / propuesta de una postulación a proyecto: el propio postulante (por si
+    // subido_por no coincidiera) o el dueño del proyecto.
+    const solicitudProyecto = await this.ds.query(
+      `SELECT sp.usuario_id, p.creador_id
+         FROM solicitud_proyecto sp
+         JOIN proyecto p ON p.id = sp.proyecto_id
+        WHERE sp.propuesta_url LIKE $1 OR sp.cv_url LIKE $1
+        LIMIT 1`,
+      [like],
+    );
+    if (solicitudProyecto[0]) {
+      const { usuario_id, creador_id } = solicitudProyecto[0];
+      if (Number(usuario_id) === user.id || Number(creador_id) === user.id) return true;
+    }
+
+    // Documento de una solicitud de membresía a empresa: el propio solicitante o
+    // el admin de esa empresa.
+    const solicitudMembresia = await this.ds.query(
+      `SELECT usuario_id, empresa_id FROM solicitud_membresia WHERE documento_url LIKE $1 LIMIT 1`,
+      [like],
+    );
+    if (solicitudMembresia[0]) {
+      const { usuario_id, empresa_id } = solicitudMembresia[0];
+      if (Number(usuario_id) === user.id) return true;
+      if (await this.esAdminDeEmpresa(user.id, Number(empresa_id))) return true;
+    }
+
+    // PDF de un recurso del workspace: cualquier participante del proyecto.
+    const recurso = await this.ds.query(
+      `SELECT proyecto_id FROM recurso WHERE url LIKE $1 LIMIT 1`,
+      [like],
+    );
+    if (recurso[0] && (await this.esParticipanteDeProyecto(user.id, Number(recurso[0].proyecto_id)))) {
+      return true;
+    }
+
+    // Adjunto de un mensaje de chat: cualquier participante del proyecto del chat.
+    const mensaje = await this.ds.query(
+      `SELECT c.proyecto_id
+         FROM mensaje m
+         JOIN chat c ON c.id = m.chat_id
+        WHERE m.archivo_url LIKE $1
+        LIMIT 1`,
+      [like],
+    );
+    if (mensaje[0] && (await this.esParticipanteDeProyecto(user.id, Number(mensaje[0].proyecto_id)))) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private async esAdminDeEmpresa(usuarioId: number, empresaId: number): Promise<boolean> {
+    const rows = await this.ds.query(
+      `SELECT 1 FROM usuario WHERE id = $1 AND empresa_id = $2 AND rol = 'admin' LIMIT 1`,
+      [usuarioId, empresaId],
+    );
+    return rows.length > 0;
+  }
+
+  private async esParticipanteDeProyecto(usuarioId: number, proyectoId: number): Promise<boolean> {
+    const rows = await this.ds.query(
+      `SELECT 1 FROM proyecto p
+        WHERE p.id = $2 AND (
+          p.creador_id = $1
+          OR EXISTS (SELECT 1 FROM usuario_proyecto up WHERE up.proyecto_id = $2 AND up.usuario_id = $1)
+        )
+        LIMIT 1`,
+      [usuarioId, proyectoId],
+    );
+    return rows.length > 0;
   }
 
   // ── Borrado ───────────────────────────────────────────────────────────────
