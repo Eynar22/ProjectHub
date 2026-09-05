@@ -15,6 +15,8 @@ export interface Resource {
   tipo: 'archivo' | 'carpeta';
   url?: string;
   padre_id?: number | null;
+  /** Solo viene en true en lo que devuelve la página pública del proyecto. */
+  es_publico?: boolean;
   fecha_creacion: string;
 }
 

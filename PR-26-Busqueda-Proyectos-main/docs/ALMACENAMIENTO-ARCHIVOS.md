@@ -59,6 +59,28 @@ Rama: `feature/almacenamiento-archivos`.
 Pendiente opcional (no bloquea): simplificar los `select` manuales de los
 services que hoy esconden columnas ya livianas.
 
+## Hotfixes tras el primer despliegue de prueba
+
+- **403 al abrir documentos privados.** `puedeVerPrivado` solo autorizaba a
+  superadmin o a quien subió el archivo — pero el revisor casi nunca es el
+  autor (el dueño del proyecto revisa el CV de un postulante, el admin de la
+  empresa revisa el documento de un empleado). Ahora resuelve el permiso según
+  qué fila de negocio referencia hoy la ruta (usuario, empresa,
+  solicitud_proyecto, solicitud_membresia, recurso, mensaje).
+- **Recursos del equipo visibles en la página pública del proyecto.**
+  `GET /api/proyectos/:id` (sin guard, la usa `/project/:id`) devolvía TODO el
+  árbol de `recurso`, incluido lo que el equipo sube después desde el
+  workspace. Nueva columna `recurso.es_publico` (migración `010`): solo lo
+  creado al publicar el proyecto (galería + documento de acreditación) se
+  marca público y es lo único que ve esa página; el workspace sigue trayendo el
+  árbol completo, pero por `GET /recursos/proyecto/:id`, que exige ser
+  participante.
+- **Clic en un PDF sin ninguna señal.** `window.open()` después de un `await
+  fetch()` pierde el gesto del usuario y el navegador bloquea el popup en
+  silencio (el request se ve en Network, pero no abre nada). `openBase64`
+  ahora reserva la pestaña ANTES del fetch y muestra un toast "Abriendo
+  documento…" mientras descarga.
+
 ---
 
 ## Desplegar en producción

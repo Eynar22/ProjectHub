@@ -116,9 +116,12 @@ export class ProyectoService {
     });
   }
 
-  // Vista de un único proyecto (Workspace/ProjectDetail): sí necesita 'recursos'
-  // (pestaña de recursos) e 'imagenes' completas, pero documento_url del proyecto y
-  // el documento personal de cada participante/creador siguen sin usarse ahí.
+  // Vista de un único proyecto. Este endpoint NO tiene guard (lo usa la página
+  // pública /project/:id, sin login) — por eso 'recursos' viene filtrado a solo
+  // es_publico: true (galería + documento de acreditación creados al publicar
+  // el proyecto). Lo que el equipo suba después desde el workspace NO debe
+  // aparecer acá; ese árbol completo se pide aparte por
+  // GET /recursos/proyecto/:id, que sí exige ser participante del proyecto.
   async findOne(id: number) {
     const proyecto = await this.proyectoRepo.findOne({
       where: { id },
@@ -132,11 +135,23 @@ export class ProyectoService {
           rol: true,
           usuario: ProyectoService.USUARIO_LIGERO_SELECT,
         },
-        recursos: { id: true, proyecto_id: true, nombre: true, tipo: true, url: true, padre_id: true, fecha_creacion: true },
+        recursos: {
+          id: true,
+          proyecto_id: true,
+          nombre: true,
+          tipo: true,
+          url: true,
+          padre_id: true,
+          fecha_creacion: true,
+          es_publico: true,
+        },
         creador: ProyectoService.USUARIO_LIGERO_SELECT,
       },
     });
     if (!proyecto) throw new NotFoundException('Proyecto no encontrado');
+    if (proyecto.recursos) {
+      proyecto.recursos = proyecto.recursos.filter((r) => r.es_publico);
+    }
     return proyecto;
   }
 
@@ -163,11 +178,13 @@ export class ProyectoService {
     const proyecto = this.proyectoRepo.create(datosProyecto);
     const savedProyecto = await this.proyectoRepo.save(proyecto);
 
-    // Create root Resources folder
+    // Create root Resources folder. es_publico: true porque esta carpeta y su
+    // contenido inicial son lo que se muestra en la página pública del proyecto.
     const recursoRaiz = this.recursoRepo.create({
       proyecto_id: savedProyecto.id,
       nombre: 'Recursos',
       tipo: 'carpeta',
+      es_publico: true,
     });
     const recursoRaizGuardado = await this.recursoRepo.save(recursoRaiz);
 
@@ -177,6 +194,7 @@ export class ProyectoService {
       nombre: 'Principal',
       tipo: 'carpeta',
       padre_id: recursoRaizGuardado.id,
+      es_publico: true,
     });
     const carpetaPrincipalGuardada = await this.recursoRepo.save(carpetaPrincipal);
 
@@ -195,6 +213,7 @@ export class ProyectoService {
           tipo: 'archivo',
           url: url,
           padre_id: carpetaPrincipalGuardada.id,
+          es_publico: true,
         }),
       );
       await this.recursoRepo.save(recursosImagenes);
@@ -208,6 +227,7 @@ export class ProyectoService {
         tipo: 'archivo',
         url: datosProyecto.documento_url,
         padre_id: carpetaPrincipalGuardada.id,
+        es_publico: true,
       });
       await this.recursoRepo.save(recursoPDF);
     }

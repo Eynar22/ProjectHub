@@ -65,20 +65,31 @@ ALMACENAMIENTO_HOST_PATH=../files/almacenamiento
 
 ---
 
-## 4. Migración de esquema — tabla `archivo`
+## 4. Migraciones de esquema — tablas `archivo` y `recurso.es_publico`
 
 ```bash
 docker exec -i buscador_postgres psql -U postgres -d buscador \
   < data/migrations/009_archivo.sql
+
+docker exec -i buscador_postgres psql -U postgres -d buscador \
+  < data/migrations/010_recurso_es_publico.sql
 ```
 
-Si el repo no está en el host: copiá el archivo primero (`docker cp`) o abrí
-`psql` y pegá el contenido. Idempotente (`CREATE TABLE IF NOT EXISTS`).
+Si el repo no está en el host: copiá los archivos primero (`docker cp`) o abrí
+`psql` y pegá el contenido. Ambas son idempotentes.
+
+`010` agrega `recurso.es_publico` y marca como público lo que ya estaba dentro
+de la carpeta "Principal" de cada proyecto (lo creado al publicarlo); lo que el
+equipo subió después desde el workspace queda en `false`. Sin este paso, la
+página pública de cada proyecto deja de mostrar TODOS sus documentos/imágenes
+(porque el filtro nuevo del backend no encuentra ninguno marcado público).
 
 Comprobar:
 
 ```bash
 docker exec -it buscador_postgres psql -U postgres -d buscador -c "\d archivo"
+docker exec -it buscador_postgres psql -U postgres -d buscador \
+  -c "SELECT proyecto_id, count(*) FILTER (WHERE es_publico) AS publicos, count(*) AS total FROM recurso GROUP BY proyecto_id ORDER BY proyecto_id;"
 ```
 
 ---
@@ -135,6 +146,16 @@ curl -s https://projecthub.umaunivalle.com/api/almacenamiento/estado \
       `cache-control: public, max-age=31536000, immutable`.
 - [ ] Un documento privado (`/api/archivos/privado/...`) abierto directo en el
       navegador (sin sesión) da 401/403; desde la app abre bien.
+- [ ] El dueño de un proyecto puede abrir el CV/propuesta de un postulante (no
+      solo el propio postulante). El admin de una empresa puede abrir el
+      documento de un empleado que pide unirse.
+- [ ] Al hacer clic en un PDF: aparece un toast "Abriendo documento…" y se abre
+      una pestaña nueva (no hay que adivinar si el clic funcionó).
+- [ ] En incógnito, `/project/:id` de un proyecto con archivos agregados
+      después desde el workspace: en "Documentos y recursos" **solo** aparecen
+      la galería y el documento originales — nada de lo subido después por el
+      equipo. Desde el workspace del mismo proyecto (con sesión de un
+      participante), esos archivos sí aparecen.
 
 ---
 

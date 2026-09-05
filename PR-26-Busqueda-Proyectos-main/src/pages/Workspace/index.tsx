@@ -16,6 +16,7 @@ import {
   useCrearRecurso,
   useEliminarRecurso,
   useSubirArchivo,
+  useRecursosDeProyecto,
   useMensajesChat,
   useEnviarMensaje,
   useColumnasProyecto,
@@ -149,7 +150,10 @@ export default function Workspace() {
       ? users.filter(u => project.participantes!.some(p => p.usuario_id === u.id))
       : []);
 
-  const projectResources = project?.recursos || [];
+  // Árbol completo de recursos del proyecto (incluye lo que el equipo subió
+  // después, no solo lo público de project.recursos): pide directo el endpoint
+  // guardado por participante, no el detalle público del proyecto.
+  const { data: projectResources = [] } = useRecursosDeProyecto(project?.id);
 
   // Get Recursos folder
   const recursosFolder = projectResources.find(r => r.nombre === 'Recursos' && r.tipo === 'carpeta' && !r.padre_id);

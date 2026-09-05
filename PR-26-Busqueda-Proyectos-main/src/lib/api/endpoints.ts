@@ -78,10 +78,13 @@ export const ENDPOINTS = {
   },
 
   RECURSOS: {
-    LISTAR: '/recursos',
     CREAR: '/recursos',
     ELIMINAR: (id: number | string) => `/recursos/${id}`,
     UPLOAD: '/recursos/upload',
+    // El árbol completo de un proyecto (incluye lo privado del equipo). El
+    // backend exige ser participante del proyecto — a diferencia de
+    // PROYECTOS.DETALLE, que es público y solo trae los recursos es_publico.
+    POR_PROYECTO: (proyectoId: number | string) => `/recursos/proyecto/${proyectoId}`,
   },
 
   ARCHIVOS: {

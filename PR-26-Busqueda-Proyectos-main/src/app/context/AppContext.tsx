@@ -141,6 +141,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     // Nuevo: archivo servido por el backend. El bucket privado exige el token de
     // sesión, que window.open no envía, así que se baja con fetch autenticado.
+    //
+    // OJO: la pestaña se abre ANTES del fetch (sincrónico, dentro del mismo
+    // click) y se le mete el blob adentro cuando llega. Si se abre después del
+    // await, el navegador ya no lo asocia al click del usuario y bloquea el
+    // popup en silencio — el request se ve en Network pero no se abre nada, y
+    // como no había ningún indicio de carga, parecía que el botón no hacía nada.
+    const ventana = window.open('', '_blank');
+    if (ventana) {
+      ventana.document.write(
+        '<title>Abriendo documento…</title><body style="font:14px sans-serif;color:#666;padding:2rem">Abriendo documento…</body>',
+      );
+    }
+    const toastId = toast.loading('Abriendo documento…');
     try {
       const url = valor.startsWith('/')
         ? `${config.apiUrl.replace(/\/api$/, '')}${valor}`
@@ -151,9 +164,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blobUrl = URL.createObjectURL(await res.blob());
-      window.open(blobUrl, '_blank');
+      let abierta = false;
+      if (ventana && !ventana.closed) {
+        ventana.location.href = blobUrl;
+        abierta = true;
+      } else {
+        // El navegador bloqueó la pestaña reservada: se intenta igual, aunque
+        // en algunos navegadores esto también se bloquee.
+        abierta = !!window.open(blobUrl, '_blank');
+      }
+      toast.dismiss(toastId);
+      if (!abierta) {
+        toast.error('El navegador bloqueó la ventana. Habilitá las ventanas emergentes para este sitio e intentá de nuevo.');
+      }
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000 * 60);
     } catch (e) {
+      toast.dismiss(toastId);
+      ventana?.close();
       console.error('Error opening document:', e);
       toast.error('No se pudo abrir el documento.');
     }
