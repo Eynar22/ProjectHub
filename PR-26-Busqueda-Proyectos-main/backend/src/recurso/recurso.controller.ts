@@ -42,10 +42,12 @@ export class RecursoController {
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
   ) {}
 
-  // Verificar que el usuario sea colaborador del proyecto
-  private async verificarAccesoAlProyecto(usuarioId: number, proyectoId: number) {
+  // Verificar que el usuario sea colaborador del proyecto (o superadmin, que
+  // tiene acceso a cualquier proyecto igual que en el resto de la app).
+  private async verificarAccesoAlProyecto(usuario: { id: number; rol: string }, proyectoId: number) {
+    if (usuario.rol === 'superadmin') return;
     const participante = await this.upRepo.findOne({
-      where: { usuario_id: usuarioId, proyecto_id: proyectoId },
+      where: { usuario_id: usuario.id, proyecto_id: proyectoId },
     });
     if (!participante) {
       throw new ForbiddenException('No tienes acceso a los recursos de este proyecto');
@@ -54,13 +56,13 @@ export class RecursoController {
 
   @Get('proyecto/:proyectoId')
   async findByProyecto(@Param('proyectoId', ParseIntPipe) proyectoId: number, @Req() req: any) {
-    await this.verificarAccesoAlProyecto(req.user.id, proyectoId);
+    await this.verificarAccesoAlProyecto(req.user, proyectoId);
     return this.recursoService.findByProyecto(proyectoId);
   }
 
   @Get('proyecto/:proyectoId/raiz')
   async findRootByProyecto(@Param('proyectoId', ParseIntPipe) proyectoId: number, @Req() req: any) {
-    await this.verificarAccesoAlProyecto(req.user.id, proyectoId);
+    await this.verificarAccesoAlProyecto(req.user, proyectoId);
     return this.recursoService.findRootByProyecto(proyectoId);
   }
 
