@@ -38,10 +38,12 @@ services:
     ports:
       - "3010:3000"
     volumes:
-      # Bind mount a la carpeta persistente de Dokploy (entra en sus backups y
-      # sobrevive a los redeploys). En dev, ALMACENAMIENTO_HOST_PATH cae en
-      # ./almacenamiento_data dentro del proyecto (gitignored).
-      - ${ALMACENAMIENTO_HOST_PATH:-./almacenamiento_data}:/app/almacenamiento
+      # Volumen con nombre (igual que postgres_data): lo administra Docker, no
+      # depende de en qué carpeta del host haya quedado el checkout del compose
+      # en este deploy. Un bind mount a ruta relativa (../files/...) se rompía
+      # entre deploys de Dokploy porque esa ruta se resuelve contra el working
+      # dir del compose, que no es estable de un deploy a otro.
+      - almacenamiento_data:/app/almacenamiento
     depends_on:
       - postgres
     networks:
@@ -62,6 +64,7 @@ services:
 
 volumes:
   postgres_data:
+  almacenamiento_data:
 
 networks:
   app-network:

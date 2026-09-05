@@ -10,7 +10,7 @@ Rama: `feature/almacenamiento-archivos`.
 
 | Tema | Decisión |
 |---|---|
-| Ubicación | Bind mount a la carpeta persistente de Dokploy (`../files/almacenamiento` → `/app/almacenamiento`). Entra en los backups de Dokploy y sobrevive a los redeploys. |
+| Ubicación | Volumen Docker con **nombre** (`almacenamiento_data`, igual que `postgres_data`) → `/app/almacenamiento`. Se probó primero como bind mount a `../files/almacenamiento` pero esa ruta relativa no sobrevivía entre deploys de Dokploy (dependía de dónde quedaba el checkout del compose en cada uno); el volumen con nombre lo administra Docker y persiste solo. |
 | Buckets | `publico/` (imágenes de proyecto, logos, avatares, imágenes de recursos) y `privado/` (cédulas, CV, propuestas, PDF de recursos, docs de solicitudes). Subcarpetas `AAAA/MM`. |
 | Límite de uso | `ALMACENAMIENTO_MAX_BYTES` (55 GiB por defecto, ~28 % de un disco de 192 GB). Al superarlo, las subidas responden `507`. Aviso en logs al 80 / 95 %. |
 | Servido | Todo por el backend. `publico` sin auth + cache de 1 año (nombre UUID no adivinable); `privado` con `AuthGuard('jwt')` + permiso. nginx solo mantiene el proxy `/api/`. |
@@ -80,6 +80,20 @@ services que hoy esconden columnas ya livianas.
   silencio (el request se ve en Network, pero no abre nada). `openBase64`
   ahora reserva la pestaña ANTES del fetch y muestra un toast "Abriendo
   documento…" mientras descarga.
+- **Superadmin bloqueado en Recursos del workspace.** Regresión del fix
+  anterior: `verificarAccesoAlProyecto` (usado por `GET /recursos/proyecto/:id`)
+  solo miraba `usuario_proyecto` y nunca dejaba pasar al superadmin si no era
+  participante explícito de ese proyecto puntual. Ahora bypassea por rol, igual
+  que el resto de la app.
+- **Archivos que dan 404 aunque existan en el disco.** Pasa cuando la fila en la
+  tabla `archivo` no existe para ese archivo (la BD se desincronizó del
+  volumen en algún redeploy de prueba). `npm run reconciliar:archivos[:dry]`
+  escanea el disco y da de alta la fila que falte, sin tocar nada existente.
+- **El volumen de almacenamiento "se vaciaba" entre deploys.** Causa raíz: se
+  probó primero con un bind mount a ruta relativa (`../files/almacenamiento`,
+  vía `ALMACENAMIENTO_HOST_PATH`) que no sobrevivía entre deploys de Dokploy.
+  Se cambió a un volumen Docker con **nombre** (`almacenamiento_data`), igual
+  que `postgres_data` — ver la tabla de decisiones más arriba.
 
 ---
 

@@ -38,14 +38,22 @@ Panel de Dokploy → servicio **backend** → Environment → agregar:
 ```
 ALMACENAMIENTO_DIR=/app/almacenamiento
 ALMACENAMIENTO_MAX_BYTES=59055800320
-ALMACENAMIENTO_HOST_PATH=../files/almacenamiento
 ```
 
 | Var | Qué es |
 |---|---|
 | `ALMACENAMIENTO_DIR` | Carpeta dentro del contenedor. Debe coincidir con el destino del volumen en `docker-compose.yml`. |
 | `ALMACENAMIENTO_MAX_BYTES` | `59055800320` = 55 GiB (~29 % de un disco de 192 GB). Al superarlo, las subidas responden `507`. |
-| `ALMACENAMIENTO_HOST_PATH` | Ruta en el host que se monta como volumen. `../files/almacenamiento` cae en la carpeta persistente de Dokploy y entra en sus backups. |
+
+> **Ya no hace falta `ALMACENAMIENTO_HOST_PATH`.** Se probó como bind mount a
+> una ruta relativa (`../files/almacenamiento`) y no sobrevivía entre deploys:
+> esa ruta se resuelve contra el directorio del host donde Dokploy dejó el
+> checkout del compose en ESE deploy, que no es estable de un deploy a otro. El
+> `docker-compose.yml` ahora usa un volumen con **nombre**
+> (`almacenamiento_data`), igual que `postgres_data` — lo administra Docker
+> directamente, no depende de ninguna ruta del host. Si tenías esa variable
+> cargada en Dokploy, se puede borrar (no molesta si queda, simplemente ya no
+> se usa).
 
 ---
 
@@ -62,6 +70,16 @@ ALMACENAMIENTO_HOST_PATH=../files/almacenamiento
 
    y un `warn` de que no pudo leer el uso / falta la migración 009 → **normal**,
    se corrige en el paso 4.
+4. Confirmar que el volumen con nombre existe y es el que está montado:
+
+   ```bash
+   docker volume ls | grep almacenamiento_data
+   docker inspect buscador_backend --format '{{ range .Mounts }}{{ .Name }} -> {{ .Destination }}{{ "\n" }}{{ end }}'
+   ```
+
+   Debe aparecer `almacenamiento_data -> /app/almacenamiento`. A partir de este
+   deploy, ese volumen persiste solo (no se borra en un redeploy normal; solo
+   con `docker compose down -v` o borrándolo a mano).
 
 ---
 
