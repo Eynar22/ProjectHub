@@ -155,6 +155,23 @@ extensión, tamaño real del archivo). Sin dueño ni entidad asociada — no hay
 forma de recuperar eso — así que en el bucket privado solo podrá abrirlo el
 superadmin hasta que alguien lo vuelva a subir por el flujo normal.
 
+### 5c. Pasar los recursos de proyecto al bucket público (opcional, mejora velocidad)
+
+Los PDF de recursos y el documento de acreditación del proyecto no son
+sensibles (los ve cualquier participante / son públicos). Moverlos a `publico/`
+hace que abran por streaming y con caché en vez de bajarse enteros cada vez.
+El código nuevo ya sube ahí por defecto; para los que ya se migraron a
+`privado/`:
+
+```bash
+docker exec -it buscador_backend sh -lc "npm run recursos-a-publico:dry"   # lista qué movería
+docker exec -it buscador_backend sh -lc "npm run recursos-a-publico"        # mueve archivos + actualiza refs
+```
+
+Mueve el archivo en disco de `privado/AAAA/MM/` a `publico/AAAA/MM/` y ajusta
+`archivo` + `recurso.url` / `proyecto.documento_url`. No toca CV, propuestas,
+cédulas ni documentos de empresa (siguen privados). Idempotente.
+
 ---
 
 ## 6. Verificación

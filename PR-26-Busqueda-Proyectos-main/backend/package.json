@@ -16,6 +16,8 @@
     "migrar:archivos:dry": "node dist/scripts/migrar-base64-a-archivos.js --dry-run",
     "reconciliar:archivos": "node dist/scripts/reconciliar-archivos.js",
     "reconciliar:archivos:dry": "node dist/scripts/reconciliar-archivos.js --dry-run",
+    "recursos-a-publico": "node dist/scripts/recursos-a-publico.js",
+    "recursos-a-publico:dry": "node dist/scripts/recursos-a-publico.js --dry-run",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

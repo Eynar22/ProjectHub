@@ -94,6 +94,17 @@ services que hoy esconden columnas ya livianas.
   vía `ALMACENAMIENTO_HOST_PATH`) que no sobrevivía entre deploys de Dokploy.
   Se cambió a un volumen Docker con **nombre** (`almacenamiento_data`), igual
   que `postgres_data` — ver la tabla de decisiones más arriba.
+- **Abrir un PDF privado era lento.** Los PDF privados no se pueden abrir con un
+  `<a href>` normal (necesitan el token en un header), así que el front los baja
+  enteros con `fetch` y los abre como blob — sin streaming ni caché. Dos cambios:
+  1. **A —** los recursos de un proyecto y su documento de acreditación ya no
+     son sensibles → van al bucket **público** (`POST /recursos/upload` ahora usa
+     `publico` por defecto; el que sube algo sensible pasa `?bucket=privado`).
+     Ahí el navegador los abre directo, con streaming y caché. Solo CV /
+     propuestas / cédulas / documentos de empresa siguen privados.
+     Script `recursos-a-publico` mueve los ya migrados de `privado/` a `publico/`.
+  2. **B —** `openBase64` cachea por sesión el blob de los privados: reabrir el
+     mismo documento es instantáneo.
 
 ---
 
