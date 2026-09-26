@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Link } from 'react-router';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
 import { Reveal } from '@/shared/components/Reveal';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
@@ -14,6 +13,8 @@ import { ParaQuien } from '@/shared/components/landing/ParaQuien';
 import { PorQueExiste } from '@/shared/components/landing/PorQueExiste';
 import { TodoEnUnLugar } from '@/shared/components/landing/TodoEnUnLugar';
 import { CtaFinal } from '@/shared/components/landing/CtaFinal';
+import { OdsImpacto } from '@/shared/components/landing/OdsImpacto';
+import { HechoEnBolivia } from '@/shared/components/landing/HechoEnBolivia';
 import {
   Building2,
   ArrowRight,
@@ -35,16 +36,13 @@ const textItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
-// Imagen de fondo de la sección "Impacto Sostenible". TEMPORAL: es de prueba,
-// reemplazar luego por la definitiva (idealmente subida a public/images/).
-const IMPACTO_BG_URL =
-  'https://www.cidob.org/sites/default/files/2024-12/El%20m%C3%B3n%20el%202025_web.jpg';
 
 
 export default function Home() {
   const { currentUser } = useApp();
   const { data: projects = [] } = useProyectos();
   const { data: empresas = [] } = useEmpresas();
+  const reducirMovimiento = useReducedMotion();
 
   // Hooks para el efecto de "Zoom Out" del hero
   const { scrollY } = useScroll();
@@ -52,24 +50,14 @@ export default function Home() {
   const heroScale = useTransform(scrollY, [0, 500], [1, 0.85]);
   const heroY = useTransform(scrollY, [0, 500], [0, 60]);
 
-  // Cálculos ODS
-  const odsConteo = ODS_LIST.map(o => ({
-    ...o,
-    total: projects.filter(p => Array.isArray(p.ods) && p.ods.includes(o.id)).length,
-  })).sort((a, b) => b.total - a.total);
-  const totalAportes = odsConteo.reduce((s, o) => s + o.total, 0);
-  const proyectosConOds = projects.filter(p => Array.isArray(p.ods) && p.ods.length > 0).length;
-  const odsCubiertos = odsConteo.filter(o => o.total > 0).length;
+  // ODS con al menos un proyecto (para la barra de cifras del hero).
+  const odsCubiertos = ODS_LIST.filter(o => projects.some(p => Array.isArray(p.ods) && p.ods.includes(o.id))).length;
   const proyectosEnCurso = projects.filter(p => p.estado === 'en_curso').length;
   const empresasVerificadas = empresas.filter(e => e.estado === 'aprobado').length;
   // Proyecto real para la demo del hero: el más reciente en curso que tenga problema declarado.
   const proyectoDestacado = [...projects]
     .filter(p => p.estado === 'en_curso' && !p.suspendido && (p.problema || p.descripcion_corta))
     .sort((a, b) => (b.fecha_creacion ?? '').localeCompare(a.fecha_creacion ?? ''))[0];
-
-  const [activeOdsId, setActiveOdsId] = useState<number | string>(1);
-  const sortedOds = [...odsConteo].sort((a, b) => Number(a.id) - Number(b.id));
-  const activeOds = sortedOds.find(o => o.id === activeOdsId) || sortedOds[0];
 
   return (
     <AppLayout
@@ -86,12 +74,26 @@ export default function Home() {
         <section className="relative h-[130vh] w-full z-0">
           <div className="sticky top-0 h-[100dvh] w-full bg-[#05050A] overflow-hidden">
 
-            {/* 1. FONDO ESTÁTICO: retícula de puntos + resplandores (antes: foto de stock del espacio,
-                repetida en la sección "Por qué existe"). */}
-            <div aria-hidden="true" className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.6)_1px,transparent_0)] [background-size:28px_28px]" />
-            <div aria-hidden="true" className="absolute -top-40 -left-40 w-[40rem] h-[40rem] rounded-full bg-primary/25 blur-[140px]" />
-            <div aria-hidden="true" className="absolute -bottom-40 right-0 w-[36rem] h-[36rem] rounded-full bg-indigo-500/20 blur-[140px]" />
+            {/* 1. FONDO: La Paz de noche (Unsplash, public/images/landing/) con un zoom muy
+                lento, velado a la izquierda para que el texto se lea y fundido abajo. */}
+            <motion.img
+              src="/images/landing/hero-la-paz-noche.jpg"
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              className="absolute inset-0 w-full h-full object-cover object-[center_70%]"
+              initial={{ scale: 1.08, opacity: 0 }}
+              animate={reducirMovimiento ? { scale: 1.05, opacity: 1 } : { scale: [1.05, 1.15], opacity: 1 }}
+              transition={reducirMovimiento
+                ? { duration: 0.6 }
+                : { scale: { duration: 40, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }, opacity: { duration: 1.2 } }}
+            />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#05050A] via-[#05050A]/80 to-[#05050A]/30" />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-[#05050A]/70 via-transparent to-transparent" />
+            <div aria-hidden="true" className="absolute -top-40 -left-40 w-[40rem] h-[40rem] rounded-full bg-primary/20 blur-[140px]" />
+            <div aria-hidden="true" className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.6)_1px,transparent_0)] [background-size:28px_28px]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-transparent to-transparent opacity-90" />
+            <p className="absolute bottom-4 right-4 z-10 text-[10px] text-white/40">La Paz, Bolivia · Foto: Unsplash</p>
 
             {/* 2. CONTENIDO ANIMADO */}
             <motion.div
@@ -225,118 +227,38 @@ export default function Home() {
         {/* SECCIÓN: TODO EN UN SOLO LUGAR (demo jugable) */}
         <TodoEnUnLugar />
 
+        {/* HECHO EN BOLIVIA: mosaico de fotos */}
+        <HechoEnBolivia />
 
-        {/* ======================================= */}
-        {/* SECCIÓN 5: ALINEACIÓN CON LOS ODS (RUEDA INTERACTIVA) */}
-        {/* ======================================= */}
-        <section id="impacto" className="scroll-mt-16 relative z-20 py-24 border-t border-border/50 overflow-hidden">
-
-          {/* Imagen de fondo (temporal — ver IMPACTO_BG_URL) */}
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url('${IMPACTO_BG_URL}')` }}
-          />
-          {/* Velo: más denso arriba (títulos) y suave sobre la rueda, para que
-              la imagen se vea pero el texto siga legible. Ajustar los /NN. */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/40 to-background/65" />
-
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <Reveal className="text-center mb-10 md:mb-16">
-              <p className="inline-flex items-center justify-center gap-2 text-sm font-bold text-primary uppercase tracking-widest mb-3">
-                <Globe className="w-4 h-4" /> Impacto Sostenible
-              </p>
-              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 font-serif">
-                Aportando a los <span className="text-primary">ODS de la ONU</span>
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Cada empresa indica a qué Objetivos de Desarrollo Sostenible aporta su proyecto.{' '}
-                {proyectosConOds > 0
-                  ? <>Hoy <strong className="text-foreground">{proyectosConOds}</strong> {proyectosConOds === 1 ? 'proyecto suma' : 'proyectos suman'} <strong className="text-foreground">{totalAportes}</strong> {totalAportes === 1 ? 'aporte' : 'aportes'} a <strong className="text-foreground">{odsCubiertos}</strong> de los 17 objetivos.</>
-                  : <>Sé el primero en publicar un proyecto con impacto.</>}
-                {' '}Toca un objetivo para ver cuántos proyectos trabajan en él.
-              </p>
-            </Reveal>
-
-            <div className="relative w-full max-w-[320px] sm:max-w-[480px] md:max-w-[620px] aspect-square mx-auto mt-12 md:mt-24">
-
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[55%] h-[55%] md:w-[50%] md:h-[50%] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] transition-all duration-500 z-20 border border-white/20">
-                {activeOds && (
-                  <img
-                    src={`/images/ods/${activeOds.id}.png`}
-                    alt={activeOds.nombre}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                <div className="absolute inset-x-0 bottom-0 flex justify-center p-3 md:p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <div className="bg-black/40 px-4 md:px-6 py-1.5 md:py-2 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
-                    <span className="text-[10px] md:text-sm font-bold tracking-widest text-white whitespace-nowrap uppercase">
-                      {!activeOds?.total
-                        ? 'Aún sin proyectos'
-                        : `${activeOds.total} ${activeOds.total === 1 ? 'proyecto' : 'proyectos'}`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {sortedOds.map((o, index) => {
-                const angle = (index * (360 / 17)) - 90;
-                const radians = angle * (Math.PI / 180);
-                const radius = 48;
-                const left = `calc(50% + ${Math.cos(radians) * radius}%)`;
-                const top = `calc(50% + ${Math.sin(radians) * radius}%)`;
-                const isActive = activeOdsId === o.id;
-
-                return (
-                  <button
-                    key={o.id}
-                    onClick={() => setActiveOdsId(o.id)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-[4.5rem] sm:h-[4.5rem] md:w-24 md:h-24 rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 focus:outline-none ${
-                      isActive
-                        ? 'scale-125 z-30 border-white shadow-xl'
-                        : 'border-transparent opacity-95 hover:opacity-100 hover:scale-110 hover:z-30 hover:border-white/60 cursor-pointer'
-                    }`}
-                    style={{ left, top }}
-                    title={o.nombre}
-                    aria-label={`ODS ${o.id}: ${o.nombre}, ${o.total} ${o.total === 1 ? 'proyecto' : 'proyectos'}`}
-                    aria-pressed={isActive}
-                  >
-                    <img
-                      src={`/images/ods/${o.id}.png`}
-                      alt={o.nombre}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Nombre del objetivo en texto: la insignia sola no se lee bien en móvil. */}
-            {activeOds && (
-              <div className="mt-16 md:mt-24 text-center" aria-live="polite">
-                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: activeOds.color }}>
-                  ODS {activeOds.id}
-                </p>
-                <p className="text-2xl md:text-3xl font-extrabold font-serif mb-5">{activeOds.nombre}</p>
-                <Link to="/explore" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-                  Ver proyectos abiertos <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            )}
-
-          </div>
-        </section>
+        {/* SECCIÓN 5: IMPACTO SOSTENIBLE (ODS) */}
+        <OdsImpacto proyectos={projects} />
 
         {/* ======================================= */}
         {/* PREGUNTAS FRECUENTES                    */}
         {/* ======================================= */}
         <section id="preguntas" className="scroll-mt-16 relative z-20 py-24 bg-muted/30 border-t border-border/50">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Reveal className="text-center mb-12">
-              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 font-serif">Preguntas frecuentes</h2>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 lg:gap-14 items-start">
+            {/* Columna de la foto */}
+            <Reveal className="lg:sticky lg:top-24">
+              <p className="text-sm font-bold text-primary uppercase tracking-widest mb-3">Resolvemos tus dudas</p>
+              <h2 className="text-3xl md:text-5xl font-extrabold mb-6 font-serif">Preguntas frecuentes</h2>
+              <div className="relative hidden sm:block">
+                <img
+                  src="/images/landing/preguntas.jpg"
+                  alt="Dos personas celebrando un logro frente a su laptop"
+                  loading="lazy"
+                  className="w-full aspect-[4/5] max-h-[460px] object-cover rounded-3xl shadow-xl"
+                />
+                <div className="absolute -bottom-5 left-5 right-5 rounded-2xl bg-card/95 backdrop-blur border border-border/60 p-4 shadow-lg">
+                  <p className="text-sm font-bold text-foreground">¿No encuentras tu respuesta?</p>
+                  <p className="text-sm text-muted-foreground">
+                    Crea tu cuenta y explora la plataforma: <Link to="/register" className="text-primary font-semibold hover:underline">empieza aquí</Link>.
+                  </p>
+                </div>
+              </div>
             </Reveal>
-            <div className="space-y-3">
+
+            <div className="space-y-3 lg:pt-24">
               {[
                 { q: '¿Quién puede publicar proyectos?', a: 'El administrador de una empresa registrada y aprobada. Al registrar tu empresa subes su documentación; el equipo de ProjectHub la revisa y, una vez aprobada, ya puedes publicar.' },
                 { q: '¿Puedo postular sin pertenecer a una empresa?', a: 'Sí. Crea una cuenta como profesional independiente y postula a cualquier proyecto abierto con tu propuesta de solución y tu CV.' },

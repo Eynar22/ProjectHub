@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react';
+import { useAjustarImagen, AJUSTES } from '@/shared/components/ui/useAjustarImagen';
+import { BotonAjustar } from '@/shared/components/ui/AjustarImagen';
 import { LIMITES, hoyISO, CAMPOS, validarCampos, validarRangoFechas } from '@/shared/validacion';
 import { Navigate, useNavigate } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
@@ -35,6 +37,9 @@ export default function CreateProject() {
 
   const [ods, setOds] = useState<number[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  // Originales sin recortar (mismo índice que imageFiles): "Ajustar" parte siempre de la foto completa.
+  const [imagenesOriginales, setImagenesOriginales] = useState<File[]>([]);
+  const { ajustar, editor: editorFotos } = useAjustarImagen();
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
 
   const toggleOds = (id: number) =>
@@ -47,21 +52,33 @@ export default function CreateProject() {
     setErrors({ ...errors, [e.target.name]: '' });
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files) {
-      const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-      if (newFiles.length > 0) {
-        setImageFiles([...imageFiles, ...newFiles]);
-        toast.success(`${newFiles.length} imagen(es) agregada(s)`);
-      } else {
-        toast.error('Por favor selecciona archivos de imagen válidos');
-      }
-    }
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.currentTarget.files ?? []).filter(f => f.type.startsWith('image/'));
     // Reset input
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
+    if (newFiles.length === 0) {
+      toast.error('Por favor selecciona archivos de imagen válidos');
+      return;
+    }
+    // Cada foto pasa por el editor; las canceladas no se agregan.
+    const originales: File[] = [];
+    const ajustadas: File[] = [];
+    for (const [i, file] of newFiles.entries()) {
+      const titulo = newFiles.length > 1 ? `${AJUSTES.proyecto.titulo} (${i + 1} de ${newFiles.length})` : AJUSTES.proyecto.titulo;
+      const r = await ajustar(file, { ...AJUSTES.proyecto, titulo });
+      if (r) { originales.push(file); ajustadas.push(r); }
+    }
+    if (ajustadas.length === 0) return;
+    setImageFiles(prev => [...prev, ...ajustadas]);
+    setImagenesOriginales(prev => [...prev, ...originales]);
+    toast.success(`${ajustadas.length} imagen(es) agregada(s)`);
+  };
+
+  const reajustarImagen = async (index: number) => {
+    const r = await ajustar(imagenesOriginales[index] ?? imageFiles[index], AJUSTES.proyecto);
+    if (r) setImageFiles(prev => prev.map((f, i) => (i === index ? r : f)));
   };
 
   const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +100,7 @@ export default function CreateProject() {
 
   const removeImage = (index: number) => {
     setImageFiles(imageFiles.filter((_, i) => i !== index));
+    setImagenesOriginales(prev => prev.filter((_, i) => i !== index));
   };
 
   const removeResource = (index: number) => {
@@ -361,7 +379,8 @@ export default function CreateProject() {
                       {imageFiles.map((file, i) => (
                         <div key={i} className="relative group rounded-xl overflow-hidden aspect-video bg-muted">
                           <img src={URL.createObjectURL(file)} alt={`img-${i}`} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <BotonAjustar onClick={() => reajustarImagen(i)} className="min-h-11 px-3" />
                             <button type="button" onClick={() => removeImage(i)} aria-label="Quitar imagen"
                               className="min-h-11 min-w-11 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
                               <X className="w-4 h-4 text-primary-foreground" />
@@ -432,6 +451,7 @@ export default function CreateProject() {
               </div>
             </div>
           </form>
+          {editorFotos}
     </AppLayout>
   );
 }

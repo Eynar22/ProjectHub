@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LIMITES } from '@/shared/validacion';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useProyectos } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
@@ -19,13 +19,15 @@ import {
   Info, 
   Filter,
   DollarSign,
-  ChevronDown // Agregado para el nuevo Dropdown
+  ChevronDown, // Agregado para el nuevo Dropdown
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 
 export default function Explore() {
   const { currentUser } = useApp();
@@ -34,6 +36,15 @@ export default function Explore() {
   const { data: users = [] } = useUsuarios(!!currentUser);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  // Filtro por ODS desde la URL (?ods=6): lo usa el landing ("Ver proyectos" de la rueda ODS).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const odsParam = Number(searchParams.get('ods'));
+  const odsFilter = ODS_POR_ID[odsParam] ? odsParam : null;
+  const quitarFiltroOds = () => {
+    const sig = new URLSearchParams(searchParams);
+    sig.delete('ods');
+    setSearchParams(sig, { replace: true });
+  };
   
   // Nuevo estado para controlar el menú desplegable personalizado
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -49,8 +60,9 @@ export default function Explore() {
     const matchesSearch = project.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       company?.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || project.categoria === categoryFilter;
+    const matchesOds = !odsFilter || (Array.isArray(project.ods) && project.ods.includes(odsFilter));
 
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesCategory && matchesOds;
   }).sort((a, b) => b.id - a.id);
 
   const sliderSettings = {
@@ -175,6 +187,26 @@ export default function Explore() {
                 </div>
 
               </div>
+
+              {odsFilter && (
+                <div className="mt-4 flex justify-center">
+                  <span
+                    className="inline-flex items-center gap-2 rounded-full border pl-1.5 pr-2 py-1.5 text-sm font-semibold text-foreground bg-card"
+                    style={{ borderColor: ODS_POR_ID[odsFilter].color }}
+                  >
+                    <img src={`/images/ods/${odsFilter}.png`} alt="" className="w-7 h-7 rounded-full" />
+                    Aportan al ODS {odsFilter}: {ODS_POR_ID[odsFilter].nombre}
+                    <button
+                      type="button"
+                      onClick={quitarFiltroOds}
+                      className="ml-1 w-7 h-7 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
+                      aria-label="Quitar filtro de ODS"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </span>
+                </div>
+              )}
             </motion.div>
 
             {/* ======================================= */}

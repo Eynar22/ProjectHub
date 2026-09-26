@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useAjustarImagen, AJUSTES } from '@/shared/components/ui/useAjustarImagen';
 import { CAMPOS, validarCampo, validarCampos, primerError } from '@/shared/validacion';
 import { useParams, Link } from 'react-router';
 import { toast } from 'sonner';
@@ -67,6 +68,7 @@ export default function Workspace() {
   const eliminarRecursoMut = useEliminarRecurso();
   const subir = useSubirArchivo();
   const uploadFile = async (file: File) => (await subir.mutateAsync(file)).url;
+  const { ajustar, ajustarVarios, editor: editorFotos } = useAjustarImagen();
 
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const [messageText, setMessageText] = useState('');
@@ -333,9 +335,12 @@ export default function Workspace() {
     if (!files || files.length === 0) return;
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (imageFiles.length === 0) { toast.error('Selecciona archivos de imagen válidos'); return; }
+    if (projectImageInputRef.current) projectImageInputRef.current.value = '';
+    const ajustadas = await ajustarVarios(imageFiles, AJUSTES.proyecto);
+    if (ajustadas.length === 0) return;
     setUploadingProjectImage(true);
     try {
-      const uploaded = await Promise.all(imageFiles.map(f => uploadFile(f)));
+      const uploaded = await Promise.all(ajustadas.map(f => uploadFile(f)));
       setEditImagenes(prev => [...prev, ...uploaded]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al subir la imagen');
@@ -346,6 +351,18 @@ export default function Workspace() {
   };
 
   const removeEditImage = (index: number) => setEditImagenes(prev => prev.filter((_, i) => i !== index));
+
+  /** Reajusta una imagen ya subida del proyecto y la reemplaza en la lista. */
+  const reajustarEditImage = async (index: number) => {
+    const ajustada = await ajustar(editImagenes[index], AJUSTES.proyecto);
+    if (!ajustada) return;
+    try {
+      const url = await uploadFile(ajustada);
+      setEditImagenes(prev => prev.map((u, i) => (i === index ? url : u)));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo guardar la imagen ajustada');
+    }
+  };
 
   const handleSaveProjectInfo = async () => {
     if (!project) return;
@@ -657,6 +674,7 @@ export default function Workspace() {
                 toggleEditOds={toggleEditOds}
                 editImagenes={editImagenes}
                 removeEditImage={removeEditImage}
+                reajustarEditImage={reajustarEditImage}
                 uploadingProjectImage={uploadingProjectImage}
                 projectImageInputRef={projectImageInputRef}
                 handleProjectImageSelect={handleProjectImageSelect}
@@ -786,6 +804,7 @@ export default function Workspace() {
             onCreate={handleAddFolder}
           />
         )}
+        {editorFotos}
       </AppLayout>
     </DndProvider>
   );

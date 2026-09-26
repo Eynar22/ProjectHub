@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import { useAjustarImagen, AJUSTES } from '@/shared/components/ui/useAjustarImagen';
+import { BotonAjustar } from '@/shared/components/ui/AjustarImagen';
 import { LIMITES, CAMPOS, validarCampos, validarConfirmacion } from '@/shared/validacion';
 import { toast } from 'sonner';
 import { useRegistrarEmpresa } from '@/features/auth';
@@ -35,6 +37,29 @@ export function NewCompanyForm({ onBack, onSuccess }: {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fotosInputRef = useRef<HTMLInputElement>(null);
+  // Editor de fotos. Se guardan los originales para que "Ajustar" parta de la foto completa.
+  const { ajustar, editor: editorFotos } = useAjustarImagen();
+  const [logoOriginal, setLogoOriginal] = useState<File | null>(null);
+  const [fotosOriginales, setFotosOriginales] = useState<File[]>([]);
+
+  const elegirLogo = async (file: File) => {
+    const r = await ajustar(file, AJUSTES.logo);
+    if (!r) return;
+    setLogoOriginal(file);
+    setData(prev => ({ ...prev, logo: r }));
+  };
+
+  const reajustarLogo = async () => {
+    const fuente = logoOriginal ?? data.logo;
+    if (!fuente) return;
+    const r = await ajustar(fuente, AJUSTES.logo);
+    if (r) setData(prev => ({ ...prev, logo: r }));
+  };
+
+  const reajustarFoto = async (i: number) => {
+    const r = await ajustar(fotosOriginales[i] ?? data.fotos[i], AJUSTES.galeria);
+    if (r) setData(prev => ({ ...prev, fotos: prev.fotos.map((f, j) => (j === i ? r : f)) }));
+  };
 
   const registrarEmpresa = useRegistrarEmpresa();
 
@@ -48,10 +73,19 @@ export function NewCompanyForm({ onBack, onSuccess }: {
     setErrors(prev => ({ ...prev, [key]: '' }));
   };
 
-  const handleFotosSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFotosSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.currentTarget.files ?? []).filter(f => f.type.startsWith('image/'));
-    if (files.length) setData(prev => ({ ...prev, fotos: [...prev.fotos, ...files] }));
     if (fotosInputRef.current) fotosInputRef.current.value = '';
+    const originales: File[] = [];
+    const ajustadas: File[] = [];
+    for (const [i, file] of files.entries()) {
+      const titulo = files.length > 1 ? `${AJUSTES.galeria.titulo} (${i + 1} de ${files.length})` : AJUSTES.galeria.titulo;
+      const r = await ajustar(file, { ...AJUSTES.galeria, titulo });
+      if (r) { originales.push(file); ajustadas.push(r); }
+    }
+    if (ajustadas.length === 0) return;
+    setData(prev => ({ ...prev, fotos: [...prev.fotos, ...ajustadas] }));
+    setFotosOriginales(prev => [...prev, ...originales]);
   };
 
   const validate = () => {
@@ -179,11 +213,17 @@ export function NewCompanyForm({ onBack, onSuccess }: {
               label="Logo de la empresa"
               hint="Imagen cuadrada (PNG o JPG). Se muestra en tu perfil y en tus proyectos."
               value={data.logo}
-              onChange={file => setData(prev => ({ ...prev, logo: file }))}
-              onRemove={() => setData(prev => ({ ...prev, logo: null }))}
+              onChange={file => { void elegirLogo(file); }}
+              onRemove={() => { setData(prev => ({ ...prev, logo: null })); setLogoOriginal(null); }}
               maxSizeMB={MAX_DOCUMENT_MB}
               accept="image/png,image/jpeg,image/webp"
             />
+            {data.logo && (
+              <div className="flex items-center gap-3 -mt-2">
+                <img src={URL.createObjectURL(data.logo)} alt="Vista previa del logo" className="w-12 h-12 rounded-lg object-cover border border-border" />
+                <BotonAjustar onClick={reajustarLogo} />
+              </div>
+            )}
 
             <div>
               <p className="text-sm font-medium mb-2">Fotos de la empresa</p>
@@ -192,9 +232,16 @@ export function NewCompanyForm({ onBack, onSuccess }: {
                   {data.fotos.map((file, i) => (
                     <div key={i} className="relative group/foto aspect-video rounded-lg overflow-hidden bg-muted">
                       <img src={URL.createObjectURL(file)} alt={`foto-${i}`} className="w-full h-full object-cover" />
+                      <BotonAjustar
+                        className="absolute bottom-1 left-1 md:opacity-0 md:group-hover/foto:opacity-100 focus-visible:opacity-100"
+                        onClick={() => reajustarFoto(i)}
+                      />
                       <button
                         type="button"
-                        onClick={() => setData(prev => ({ ...prev, fotos: prev.fotos.filter((_, j) => j !== i) }))}
+                        onClick={() => {
+                          setData(prev => ({ ...prev, fotos: prev.fotos.filter((_, j) => j !== i) }));
+                          setFotosOriginales(prev => prev.filter((_, j) => j !== i));
+                        }}
                         aria-label="Quitar foto"
                         className="absolute top-1 right-1 w-7 h-7 rounded-full bg-foreground/60 text-background flex items-center justify-center opacity-0 group-hover/foto:opacity-100 transition-opacity"
                       >
@@ -255,6 +302,7 @@ export function NewCompanyForm({ onBack, onSuccess }: {
           </Button>
         </div>
       </form>
+      {editorFotos}
     </Card>
   );
 }

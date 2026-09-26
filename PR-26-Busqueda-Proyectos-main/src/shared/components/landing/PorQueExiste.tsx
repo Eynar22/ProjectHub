@@ -52,7 +52,7 @@ export function PorQueExiste() {
       {/* Fondo: foto de la Tierra de noche muy velada + resplandor */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')" }}
+        style={{ backgroundImage: "url('/images/landing/tierra-noche.jpg')" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#05050A] via-[#05050A]/70 to-[#05050A]" />
       <div className="absolute left-1/2 top-1/3 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-primary/15 blur-[140px] pointer-events-none" />

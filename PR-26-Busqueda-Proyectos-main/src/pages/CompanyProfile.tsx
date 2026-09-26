@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import { useAjustarImagen, AJUSTES } from '@/shared/components/ui/useAjustarImagen';
+import { BotonAjustar } from '@/shared/components/ui/AjustarImagen';
 import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import type { ComponentType } from 'react';
 import { useApp } from '@/app/context/AppContext';
@@ -39,6 +41,8 @@ export default function CompanyProfile() {
   const { currentUser, openBase64, updateProfile } = useApp();
   const subir = useSubirArchivo();
   const uploadFile = async (file: File) => (await subir.mutateAsync(file)).url;
+  // Editor de fotos: recorta/ajusta antes de subir y permite reajustar las ya subidas.
+  const { ajustar, ajustarVarios, editor: editorFotos } = useAjustarImagen();
   // El detalle de empresa (documento_url, imagenes, enlaces) lo trae este hook;
   // el listado ligero no. Se re-descarga solo tras cada actualización.
   const { data: userCompany } = useEmpresa(currentUser?.empresa_id);
@@ -86,9 +90,12 @@ export default function CompanyProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Selecciona un archivo de imagen válido'); return; }
+    if (photoInputRef.current) photoInputRef.current.value = '';
+    const ajustada = await ajustar(file, AJUSTES.perfil);
+    if (!ajustada) return;
     setUploadingPhoto(true);
     try {
-      setPhotoPreview(await uploadFile(file));
+      setPhotoPreview(await uploadFile(ajustada));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al subir la foto');
     } finally {
@@ -186,9 +193,12 @@ export default function CompanyProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Selecciona un archivo de imagen válido'); return; }
+    if (logoInputRef.current) logoInputRef.current.value = '';
+    const ajustado = await ajustar(file, AJUSTES.logo);
+    if (!ajustado) return;
     setUploadingLogo(true);
     try {
-      setLogoPreview(await uploadFile(file));
+      setLogoPreview(await uploadFile(ajustado));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al subir el logo');
     } finally {
@@ -216,15 +226,29 @@ export default function CompanyProfile() {
     if (!files || files.length === 0) return;
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (imageFiles.length === 0) { toast.error('Selecciona archivos de imagen válidos'); return; }
+    if (galleryInputRef.current) galleryInputRef.current.value = '';
+    const ajustadas = await ajustarVarios(imageFiles, AJUSTES.galeria);
+    if (ajustadas.length === 0) return;
     setUploadingGallery(true);
     try {
-      const uploaded = await Promise.all(imageFiles.map(f => uploadFile(f)));
+      const uploaded = await Promise.all(ajustadas.map(f => uploadFile(f)));
       setGalleryUrls(prev => [...prev, ...uploaded]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al subir las imágenes');
     } finally {
       setUploadingGallery(false);
       if (galleryInputRef.current) galleryInputRef.current.value = '';
+    }
+  };
+
+  /** Vuelve a abrir el editor sobre una foto ya subida y la reemplaza por la versión ajustada. */
+  const reajustar = async (url: string, opciones: typeof AJUSTES[keyof typeof AJUSTES], aplicar: (nueva: string) => void) => {
+    const ajustada = await ajustar(url, opciones);
+    if (!ajustada) return;
+    try {
+      aplicar(await uploadFile(ajustada));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo guardar la foto ajustada');
     }
   };
 
@@ -326,6 +350,12 @@ export default function CompanyProfile() {
                     )}
                     <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
                   </div>
+                  {editingProfile && photoPreview && (
+                    <BotonAjustar
+                      className="mb-3 -mt-1"
+                      onClick={() => reajustar(photoPreview, AJUSTES.perfil, setPhotoPreview)}
+                    />
+                  )}
 
                   {editingProfile ? (
                     <Input
@@ -581,6 +611,12 @@ export default function CompanyProfile() {
                         <div>
                           <p className="text-sm font-semibold">Logo de la empresa</p>
                           <p className="text-xs text-muted-foreground">Se muestra en el buscador y tu perfil</p>
+                          {logoPreview && (
+                            <BotonAjustar
+                              className="mt-1.5"
+                              onClick={() => reajustar(logoPreview, AJUSTES.logo, setLogoPreview)}
+                            />
+                          )}
                         </div>
                       </div>
 
@@ -638,6 +674,10 @@ export default function CompanyProfile() {
                             {galleryUrls.map((url, i) => (
                               <div key={i} className="relative group aspect-square">
                                 <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-border" />
+                                <BotonAjustar
+                                  className="absolute bottom-1 left-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
+                                  onClick={() => reajustar(url, AJUSTES.galeria, (nueva) => setGalleryUrls(prev => prev.map((u, j) => (j === i ? nueva : u))))}
+                                />
                                 <button
                                   type="button"
                                   onClick={() => removeGalleryImage(i)}
@@ -792,6 +832,7 @@ export default function CompanyProfile() {
               )}
             </motion.div>
           </div>
+          {editorFotos}
     </AppLayout>
   );
 }

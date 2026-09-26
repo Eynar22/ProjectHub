@@ -1,4 +1,5 @@
 import { RefObject } from 'react';
+import { BotonAjustar } from '@/shared/components/ui/AjustarImagen';
 import { LIMITES, hoyISO } from '@/shared/validacion';
 import { motion } from 'motion/react';
 import Slider from 'react-slick';
@@ -41,6 +42,7 @@ export function InfoTab({
   toggleEditOds,
   editImagenes,
   removeEditImage,
+  reajustarEditImage,
   uploadingProjectImage,
   projectImageInputRef,
   handleProjectImageSelect,
@@ -67,6 +69,7 @@ export function InfoTab({
   toggleEditOds: (id: number) => void;
   editImagenes: string[];
   removeEditImage: (index: number) => void;
+  reajustarEditImage: (index: number) => void;
   uploadingProjectImage: boolean;
   projectImageInputRef: RefObject<HTMLInputElement>;
   handleProjectImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -157,6 +160,10 @@ export function InfoTab({
               {editImagenes.map((url, idx) => (
                 <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-border">
                   <img src={url} alt={`Imagen ${idx + 1}`} className="w-full h-full object-cover" />
+                  <BotonAjustar
+                    className="absolute bottom-1 left-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
+                    onClick={() => reajustarEditImage(idx)}
+                  />
                   <button
                     type="button"
                     onClick={() => removeEditImage(idx)}
