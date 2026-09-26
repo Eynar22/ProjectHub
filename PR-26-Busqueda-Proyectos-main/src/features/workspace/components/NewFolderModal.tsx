@@ -1,4 +1,5 @@
 import { Button } from '@/shared/components/ui/Button';
+import { LIMITES } from '@/shared/validacion';
 import { Input } from '@/shared/components/ui/Input';
 import { Modal } from '@/shared/components/ui/Modal';
 
@@ -29,7 +30,7 @@ export function NewFolderModal({
       <Input
         label="Nombre de la carpeta"
         placeholder="Ej: Documentos legales"
-        value={newFolderName}
+        value={newFolderName} maxLength={LIMITES.recurso.nombre}
         onChange={(e) => setNewFolderName(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && onCreate()}
       />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, primerError } from '@/shared/validacion';
 import { useParams, Link, useLocation } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import {
@@ -146,10 +147,12 @@ export default function ProjectDetail() {
     if (crearSolicitud.isPending || !project) return;
 
     // Los postulantes independientes deben adjuntar propuesta de solución y CV.
-    if (usuarioIndependiente) {
-      if (!propuesta.trim()) { toast.error('Escribe tu propuesta de solución'); return; }
-      if (!cvFile) { toast.error('Adjunta tu CV en PDF'); return; }
-    }
+    const error = primerError(validarCampos({ propuesta, message }, {
+      ...(usuarioIndependiente ? { propuesta: CAMPOS.propuesta } : {}),
+      message: CAMPOS.mensaje_solicitud,
+    }));
+    if (error) { toast.error(error); return; }
+    if (usuarioIndependiente && !cvFile) { toast.error('Adjunta tu CV en PDF'); return; }
 
     try {
       await crearSolicitud.mutateAsync({
@@ -528,7 +531,7 @@ export default function ProjectDetail() {
                 label="Propuesta de solución *"
                 placeholder="Describe cómo abordarías el problema de este proyecto..."
                 rows={5}
-                value={propuesta}
+                value={propuesta} maxLength={LIMITES.solicitud.propuesta}
                 onChange={(e) => setPropuesta(e.target.value)}
               />
             </div>
@@ -559,7 +562,7 @@ export default function ProjectDetail() {
           label="Mensaje (opcional)"
           placeholder="Explica por qué tu perfil sumaría valor a este proyecto..."
           rows={4}
-          value={message}
+          value={message} maxLength={LIMITES.solicitud.mensaje}
           onChange={(e) => setMessage(e.target.value)}
         />
       </Modal>

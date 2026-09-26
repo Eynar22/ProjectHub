@@ -1,4 +1,5 @@
 import { useEffect, useRef, memo } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import { motion } from 'motion/react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Input } from '@/shared/components/ui/Input';
@@ -157,7 +158,7 @@ export const ChatTab = memo(function ChatTab({
           <div className="flex items-center gap-2 bg-background border border-border rounded-2xl px-4 py-2 shadow-sm focus-within:border-primary transition-colors">
             <Input
               placeholder={isReadOnly ? "El chat está deshabilitado en proyectos suspendidos, archivados o terminados" : "Escribe un mensaje..."}
-              value={messageText}
+              value={messageText} maxLength={LIMITES.chat.mensaje}
               onChange={(e) => setMessageText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }}
               className="flex-1 border-none bg-transparent shadow-none focus:ring-0 px-0 py-0 text-sm"

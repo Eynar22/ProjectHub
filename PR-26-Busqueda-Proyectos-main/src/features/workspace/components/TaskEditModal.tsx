@@ -1,4 +1,5 @@
 import { MessageSquare, Trash2 } from 'lucide-react';
+import { LIMITES, hoyISO } from '@/shared/validacion';
 import { Button } from '@/shared/components/ui/Button';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { Modal } from '@/shared/components/ui/Modal';
@@ -77,14 +78,14 @@ export function TaskEditModal({
       <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
         <Input
           label="Título"
-          value={editTaskTitle}
+          value={editTaskTitle} maxLength={LIMITES.tarea.titulo}
           onChange={(e) => setEditTaskTitle(e.target.value)}
           placeholder="Nombre de la tarea"
         />
 
         <TextArea
           label="Descripción"
-          value={editTaskDesc}
+          value={editTaskDesc} maxLength={LIMITES.tarea.descripcion}
           onChange={(e) => setEditTaskDesc(e.target.value)}
           placeholder="Añade detalles sobre lo que hay que hacer..."
           rows={3}
@@ -109,7 +110,7 @@ export function TaskEditModal({
           <Input
             label="Fecha límite"
             type="date"
-            value={editTaskDeadline}
+            value={editTaskDeadline} min={hoyISO()}
             onChange={(e) => setEditTaskDeadline(e.target.value)}
             disabled={suspended}
           />
@@ -162,7 +163,7 @@ export function TaskEditModal({
           <div className="flex gap-2">
             <Input
               placeholder="Añadir un comentario..."
-              value={newTaskComment}
+              value={newTaskComment} maxLength={LIMITES.tarea.comentario}
               onChange={(e) => setNewTaskComment(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onAddComment()}
               className="flex-1"

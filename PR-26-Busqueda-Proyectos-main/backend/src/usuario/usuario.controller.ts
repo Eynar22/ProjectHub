@@ -4,6 +4,8 @@ import { UsuarioService } from './usuario.service';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { QuickCreateEmpleadoDto } from './dto/usuario.dto';
+import { ValidarCampos } from '../common/validacion/validar-campos.pipe';
+import { ESQUEMA_ALTA_RAPIDA, ESQUEMA_USUARIO } from '../common/validacion/esquemas';
 
 @Controller('usuarios')
 @UseGuards(AuthGuard('jwt'))
@@ -28,7 +30,7 @@ export class UsuarioController {
   @UseGuards(RolesGuard)
   @Roles('admin', 'superadmin')
   @Post('quick-create')
-  quickCreate(@Request() req: any, @Body() dto: QuickCreateEmpleadoDto) {
+  quickCreate(@Request() req: any, @Body(new ValidarCampos(ESQUEMA_ALTA_RAPIDA)) dto: QuickCreateEmpleadoDto) {
     return this.usuarioService.quickCreateEmpleado(req.user.id, dto);
   }
 
@@ -41,14 +43,14 @@ export class UsuarioController {
   // foto/cargo/nombre. Declarado antes de ':id' para que 'me' no sea
   // interpretado como un id.
   @Patch('me')
-  updateSelf(@Request() req: any, @Body() data: any) {
+  updateSelf(@Request() req: any, @Body(new ValidarCampos(ESQUEMA_USUARIO, true)) data: any) {
     return this.usuarioService.updateSelf(req.user.id, data);
   }
 
   @UseGuards(RolesGuard)
   @Roles('admin', 'superadmin')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body(new ValidarCampos(ESQUEMA_USUARIO, true)) data: any) {
     return this.usuarioService.update(id, data);
   }
 

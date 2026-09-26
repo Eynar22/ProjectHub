@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router';
 import { empresasService, type Company } from '@/features/empresas';
@@ -51,7 +52,7 @@ export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, o
           <input
             type="text"
             aria-label="Buscar tu empresa" placeholder="Nombre de la empresa..."
-            value={companySearch}
+            value={companySearch} maxLength={LIMITES.busqueda}
             onChange={e => setCompanySearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />

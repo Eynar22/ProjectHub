@@ -1,4 +1,5 @@
 import { RefObject } from 'react';
+import { LIMITES, hoyISO } from '@/shared/validacion';
 import { motion } from 'motion/react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -111,15 +112,15 @@ export function InfoTab({
           <h3 className="text-xl font-bold tracking-tight">Datos generales</h3>
           <Input
             label="Nombre del proyecto"
-            value={editNombre}
+            value={editNombre} maxLength={LIMITES.proyecto.nombre}
             onChange={(e) => setEditNombre(e.target.value)}
             placeholder="Nombre del proyecto"
           />
           <TextArea
             label="Descripción corta"
-            value={editDescCorta}
+            value={editDescCorta} maxLength={LIMITES.proyecto.descripcion_corta}
             onChange={(e) => setEditDescCorta(e.target.value)}
-            placeholder="Resumen para las tarjetas (máx. ~120 caracteres)"
+            placeholder="Resumen para las tarjetas (máx. 250 caracteres)"
             rows={2}
           />
         </Card>
@@ -192,7 +193,7 @@ export function InfoTab({
         <h3 className="text-xl font-bold tracking-tight mb-4">Descripción</h3>
         {editingProjectInfo ? (
           <TextArea
-            value={editDescripcion}
+            value={editDescripcion} maxLength={LIMITES.proyecto.descripcion_completa}
             onChange={(e) => setEditDescripcion(e.target.value)}
             placeholder="Descripción completa del proyecto..."
             rows={6}
@@ -211,7 +212,7 @@ export function InfoTab({
         </h3>
         {editingProjectInfo ? (
           <TextArea
-            value={editProblema}
+            value={editProblema} maxLength={LIMITES.proyecto.problema}
             onChange={(e) => setEditProblema(e.target.value)}
             placeholder="¿Qué problema concreto aborda este proyecto?"
             rows={3}
@@ -289,7 +290,7 @@ export function InfoTab({
                 <span>Fin:</span>
                 <Input
                   type="date"
-                  value={editFechaFin}
+                  value={editFechaFin} min={hoyISO()}
                   onChange={(e) => setEditFechaFin(e.target.value)}
                   className="h-8 text-sm w-40"
                 />

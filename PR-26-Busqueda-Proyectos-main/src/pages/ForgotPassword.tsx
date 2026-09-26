@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampo } from '@/shared/validacion';
 import { useNavigate, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useSolicitarCodigoRecuperacion } from '@/features/auth';
@@ -16,8 +17,9 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!correo.trim()) {
-      toast.error('Ingresa tu correo electrónico');
+    const error = validarCampo(correo, CAMPOS.correo);
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -58,7 +60,7 @@ export default function ForgotPassword() {
                 type="email"
                 autoComplete="email"
                 placeholder="tu@empresa.com"
-                value={correo}
+                value={correo} maxLength={LIMITES.usuario.correo}
                 onChange={(e) => setCorreo(e.target.value)}
               />
 

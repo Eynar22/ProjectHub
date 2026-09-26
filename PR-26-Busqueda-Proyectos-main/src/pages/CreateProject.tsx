@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { LIMITES, hoyISO, CAMPOS, validarCampos, validarRangoFechas } from '@/shared/validacion';
 import { Navigate, useNavigate } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useCrearProyecto } from '@/features/proyectos';
@@ -89,27 +90,17 @@ export default function CreateProject() {
   };
 
   const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name) newErrors.name = 'Nombre del proyecto es requerido';
-    if (!formData.description) newErrors.description = 'Descripción es requerida';
-    if (!formData.shortDescription) newErrors.shortDescription = 'Descripción corta es requerida';
-    if (!formData.problema) newErrors.problema = 'El problema que resuelve el proyecto es requerido';
-    if (!formData.startDate) newErrors.startDate = 'Fecha de inicio es requerida';
-    if (!formData.endDate) newErrors.endDate = 'Fecha de finalización es requerida';
-
-    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-      newErrors.endDate = 'La fecha de finalización debe ser posterior a la de inicio';
-    } else if (formData.endDate) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (formData.endDate < todayStr) {
-        newErrors.endDate = 'La fecha de finalización no puede ser anterior a la fecha actual';
-      }
-    }
-
-    if (formData.funding && parseFloat(formData.funding) < 0) {
-      newErrors.funding = 'El financiamiento no puede ser negativo.';
-    }
+    const newErrors = validarCampos(formData, {
+      name: CAMPOS.nombre_proyecto,
+      shortDescription: CAMPOS.descripcion_corta,
+      description: CAMPOS.descripcion_completa,
+      problema: CAMPOS.problema,
+      startDate: CAMPOS.fecha_inicio,
+      endDate: CAMPOS.fecha_fin,
+      funding: CAMPOS.financiamiento,
+    });
+    const rango = validarRangoFechas(formData.startDate, formData.endDate);
+    if (rango && !newErrors.endDate) newErrors.endDate = rango;
 
     setErrors(newErrors);
     return newErrors;
@@ -240,11 +231,11 @@ export default function CreateProject() {
                 <div className="p-6 space-y-4">
                   <Input label="Nombre del Proyecto" name="name"
                     placeholder="Ej: Smart City Platform"
-                    value={formData.name} onChange={handleChange} error={errors.name} />
+                    value={formData.name} maxLength={LIMITES.proyecto.nombre} onChange={handleChange} error={errors.name} />
 
                   <TextArea label="Descripción Corta" name="shortDescription"
-                    placeholder="Resumen para tarjetas (máx. 120 caracteres)"
-                    rows={2} value={formData.shortDescription}
+                    placeholder="Resumen para tarjetas (máx. 250 caracteres)"
+                    rows={2} value={formData.shortDescription} maxLength={LIMITES.proyecto.descripcion_corta}
                     onChange={handleChange} error={errors.shortDescription} />
 
                   <div>
@@ -296,12 +287,12 @@ export default function CreateProject() {
 
                   <TextArea label="Descripción Completa" name="description"
                     placeholder="Describe el proyecto en detalle: objetivos, alcance, tecnologías y requerimientos..."
-                    rows={5} value={formData.description}
+                    rows={5} value={formData.description} maxLength={LIMITES.proyecto.descripcion_completa}
                     onChange={handleChange} error={errors.description} />
 
                   <TextArea label="El Problema que Resuelve" name="problema"
                     placeholder="¿Qué problema concreto aborda este proyecto? Los postulantes usarán esto como base para su propuesta de solución."
-                    rows={3} value={formData.problema}
+                    rows={3} value={formData.problema} maxLength={LIMITES.proyecto.problema}
                     onChange={handleChange} error={errors.problema} />
                 </div>
               </Card>
@@ -319,15 +310,15 @@ export default function CreateProject() {
                 <div className="p-6">
                   <div className="grid sm:grid-cols-3 gap-4">
                     <Input label="Fecha de Inicio" type="date" name="startDate"
-                      value={formData.startDate} onChange={handleChange} error={errors.startDate} />
+                      value={formData.startDate} min={hoyISO()} onChange={handleChange} error={errors.startDate} />
                     <Input label="Fecha de Finalización" type="date" name="endDate"
-                      value={formData.endDate} onChange={handleChange} error={errors.endDate} />
+                      value={formData.endDate} min={formData.startDate || hoyISO()} onChange={handleChange} error={errors.endDate} />
                     <div>
                       <label className="block text-sm font-medium mb-1.5 text-foreground">Financiamiento <span className="text-muted-foreground font-normal">(opcional)</span></label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-sm">$</span>
                         <input type="number" name="funding" placeholder="0.00" min="0"
-                          value={formData.funding} onChange={handleChange}
+                          value={formData.funding} max={LIMITES.proyecto.financiamiento_max} onChange={handleChange}
                           className={`w-full pl-7 pr-4 py-2 bg-input-background border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-all text-sm ${errors.funding ? 'border-destructive' : 'border-input'}`} />
                         {errors.funding && <p className="text-xs text-destructive mt-1">{errors.funding}</p>}
                       </div>

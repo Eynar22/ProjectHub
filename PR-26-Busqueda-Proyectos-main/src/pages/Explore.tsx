@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import { Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { useProyectos } from '@/features/proyectos';
@@ -111,7 +112,7 @@ export default function Explore() {
                   <input
                     type="text"
                     aria-label="Buscar proyectos" placeholder="Buscar por nombre de proyecto o empresa..."
-                    value={searchTerm}
+                    value={searchTerm} maxLength={LIMITES.busqueda}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-transparent border-none outline-none rounded focus-visible:ring-2 focus-visible:ring-ring text-foreground placeholder:text-muted-foreground/70 text-sm md:text-base font-medium"
                   />

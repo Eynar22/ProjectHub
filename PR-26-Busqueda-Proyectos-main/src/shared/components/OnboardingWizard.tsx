@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, hoyISO, CAMPOS, validarCampos, primerError, type Regla } from '@/shared/validacion';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { usuariosService } from '@/features/usuarios';
@@ -76,23 +77,13 @@ export function OnboardingWizard() {
 
   /** Valida solo los campos del sub-paso actual. Devuelve true si puede avanzar. */
   const validarSubPaso = (n: number): boolean => {
-    if (n === 1) {
-      if (!projectForm.nombre.trim()) { toast.error('Ponle un nombre a tu proyecto'); return false; }
-      if (!projectForm.descripcion_corta.trim()) { toast.error('Escribe una descripción corta'); return false; }
-      return true;
-    }
-    if (n === 2) {
-      if (!projectForm.descripcion.trim()) { toast.error('Describe el proyecto en detalle'); return false; }
-      if (!projectForm.problema.trim()) { toast.error('Describe el problema que resuelve el proyecto'); return false; }
-      return true;
-    }
-    if (n === 3) {
-      if (!projectForm.fecha_fin) { toast.error('Selecciona una fecha de fin'); return false; }
-      if (projectForm.financiamiento && parseFloat(projectForm.financiamiento) < 0) {
-        toast.error('El financiamiento no puede ser negativo'); return false;
-      }
-      return true;
-    }
+    const reglasPorSubPaso: Record<number, Record<string, Regla>> = {
+      1: { nombre: CAMPOS.nombre_proyecto, descripcion_corta: CAMPOS.descripcion_corta },
+      2: { descripcion: CAMPOS.descripcion_completa, problema: CAMPOS.problema },
+      3: { fecha_fin: CAMPOS.fecha_fin, financiamiento: CAMPOS.financiamiento },
+    };
+    const error = primerError(validarCampos(projectForm, reglasPorSubPaso[n] ?? {}));
+    if (error) { toast.error(error); return false; }
     return true;
   };
 
@@ -110,7 +101,7 @@ export function OnboardingWizard() {
   const handleCreateProject = async () => {
     setCreatingProject(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = hoyISO();
       const nuevo = await createProject({
         name: projectForm.nombre.trim(),
         shortDescription: projectForm.descripcion_corta.trim(),
@@ -140,7 +131,15 @@ export function OnboardingWizard() {
   const removeEmpleadoRow = (idx: number) => setEmpleados(prev => prev.filter((_, i) => i !== idx));
 
   const handleFinishTeam = async () => {
-    const validRows = empleados.filter(r => r.nombre_completo.trim() && r.correo.trim());
+    const validRows = empleados.filter(r => r.nombre_completo.trim() || r.correo.trim());
+    for (const row of validRows) {
+      const error = primerError(validarCampos(row, {
+        nombre_completo: CAMPOS.nombre_completo,
+        correo: CAMPOS.correo,
+        cargo: CAMPOS.cargo,
+      }));
+      if (error) { toast.error(error); return; }
+    }
 
     if (validRows.length === 0) {
       setStep('listo');
@@ -238,14 +237,14 @@ export function OnboardingWizard() {
                       <Input
                         label="Nombre del proyecto"
                         placeholder="Ej. Sistema de Inventario"
-                        value={projectForm.nombre}
+                        value={projectForm.nombre} maxLength={LIMITES.proyecto.nombre}
                         onChange={(e) => setField('nombre', e.target.value)}
                       />
                       <TextArea
                         label="Descripción corta"
-                        placeholder="Resumen para las tarjetas (máx. ~120 caracteres)"
+                        placeholder="Resumen para las tarjetas (máx. 250 caracteres)"
                         rows={2}
-                        value={projectForm.descripcion_corta}
+                        value={projectForm.descripcion_corta} maxLength={LIMITES.proyecto.descripcion_corta}
                         onChange={(e) => setField('descripcion_corta', e.target.value)}
                       />
                       <div>
@@ -269,14 +268,14 @@ export function OnboardingWizard() {
                         label="Descripción completa"
                         placeholder="Objetivos, alcance, tecnologías y requerimientos..."
                         rows={4}
-                        value={projectForm.descripcion}
+                        value={projectForm.descripcion} maxLength={LIMITES.proyecto.descripcion_completa}
                         onChange={(e) => setField('descripcion', e.target.value)}
                       />
                       <TextArea
                         label="El problema que resuelve"
                         placeholder="¿Qué problema concreto aborda este proyecto? Los postulantes lo usan como base para su propuesta."
                         rows={3}
-                        value={projectForm.problema}
+                        value={projectForm.problema} maxLength={LIMITES.proyecto.problema}
                         onChange={(e) => setField('problema', e.target.value)}
                       />
                     </motion.div>
@@ -288,7 +287,7 @@ export function OnboardingWizard() {
                         <Input
                           label="Fecha de fin estimada"
                           type="date"
-                          value={projectForm.fecha_fin}
+                          value={projectForm.fecha_fin} min={hoyISO()}
                           onChange={(e) => setField('fecha_fin', e.target.value)}
                         />
                         <div>
@@ -301,7 +300,7 @@ export function OnboardingWizard() {
                               type="number"
                               min="0"
                               placeholder="0.00"
-                              value={projectForm.financiamiento}
+                              value={projectForm.financiamiento} max={LIMITES.proyecto.financiamiento_max}
                               onChange={(e) => setField('financiamiento', e.target.value)}
                               className="w-full pl-7 pr-4 py-2.5 bg-input-background border border-input rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-foreground text-sm"
                             />
@@ -372,13 +371,13 @@ export function OnboardingWizard() {
                     <div key={idx} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start">
                       <Input
                         placeholder="Nombre completo"
-                        value={row.nombre_completo}
+                        value={row.nombre_completo} maxLength={LIMITES.usuario.nombre_completo}
                         onChange={(e) => updateEmpleadoRow(idx, 'nombre_completo', e.target.value)}
                       />
                       <Input
                         placeholder="correo@empresa.com"
                         type="email"
-                        value={row.correo}
+                        value={row.correo} maxLength={LIMITES.usuario.correo}
                         onChange={(e) => updateEmpleadoRow(idx, 'correo', e.target.value)}
                       />
                       <button

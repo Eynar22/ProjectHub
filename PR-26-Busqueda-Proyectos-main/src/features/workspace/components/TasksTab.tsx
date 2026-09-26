@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { LIMITES, hoyISO } from '@/shared/validacion';
 import { Plus, ListTodo } from 'lucide-react';
 import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
@@ -60,13 +61,13 @@ export function TasksTab({
           <div className="grid md:grid-cols-2 gap-3 mb-3">
             <Input
               placeholder="Título de la tarea *"
-              value={newTaskTitle}
+              value={newTaskTitle} maxLength={LIMITES.tarea.titulo}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreateTask()}
             />
             <Input
               placeholder="Descripción (opcional)"
-              value={newTaskDesc}
+              value={newTaskDesc} maxLength={LIMITES.tarea.descripcion}
               onChange={(e) => setNewTaskDesc(e.target.value)}
             />
           </div>
@@ -83,7 +84,7 @@ export function TasksTab({
             </select>
             <Input
               type="date"
-              value={newTaskDeadline}
+              value={newTaskDeadline} min={hoyISO()}
               onChange={(e) => setNewTaskDeadline(e.target.value)}
               className="w-44"
             />

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import type { ComponentType } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router';
@@ -257,7 +258,7 @@ export default function AdminProjects() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 aria-label="Buscar proyectos" placeholder="Buscar por nombre, empresa o creador..."
-                value={searchTerm}
+                value={searchTerm} maxLength={LIMITES.busqueda}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />

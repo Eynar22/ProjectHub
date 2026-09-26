@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { json, Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { ErroresBdFilter } from './common/filtros/errores-bd.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -44,8 +45,21 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: false,
+      // Además de la lista de mensajes, devolvemos { campo: mensaje } para que
+      // el frontend pueda marcar el campo exacto que está mal.
+      exceptionFactory: (errores) => {
+        const errors: Record<string, string> = {};
+        for (const e of errores) {
+          const msg = Object.values(e.constraints ?? {})[0];
+          if (msg) errors[e.property] = msg;
+        }
+        return new BadRequestException({ statusCode: 400, message: Object.values(errors), errors });
+      },
     }),
   );
+
+  // Errores de base de datos (texto demasiado largo, duplicados...) -> 4xx legible.
+  app.useGlobalFilters(new ErroresBdFilter());
 
   // Global prefix for API
   app.setGlobalPrefix('api');

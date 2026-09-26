@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TareaService } from './tarea.service';
+import { ValidarCampos } from '../common/validacion/validar-campos.pipe';
+import { ESQUEMA_COLUMNA, ESQUEMA_COMENTARIO, ESQUEMA_TAREA } from '../common/validacion/esquemas';
 
 @Controller('tareas')
 @UseGuards(AuthGuard('jwt'))
@@ -14,12 +16,12 @@ export class TareaController {
   }
 
   @Post('columnas')
-  createColumna(@Body() body: { proyecto_id: number; nombre: string; orden: number }) {
+  createColumna(@Body(new ValidarCampos(ESQUEMA_COLUMNA)) body: { proyecto_id: number; nombre: string; orden: number }) {
     return this.tareaService.createColumna(body.proyecto_id, body.nombre, body.orden);
   }
 
   @Patch('columnas/:id')
-  updateColumna(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  updateColumna(@Param('id', ParseIntPipe) id: number, @Body(new ValidarCampos(ESQUEMA_COLUMNA, true)) data: any) {
     return this.tareaService.updateColumna(id, data);
   }
 
@@ -40,7 +42,7 @@ export class TareaController {
   }
 
   @Post()
-  create(@Body() data: any, @Request() req: any) {
+  create(@Body(new ValidarCampos(ESQUEMA_TAREA)) data: any, @Request() req: any) {
     return this.tareaService.create(data, req.user.id);
   }
 
@@ -54,7 +56,7 @@ export class TareaController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body(new ValidarCampos(ESQUEMA_TAREA, true)) data: any) {
     return this.tareaService.update(id, data);
   }
 
@@ -67,7 +69,7 @@ export class TareaController {
   @Post(':tareaId/comentarios')
   addComment(
     @Param('tareaId', ParseIntPipe) tareaId: number,
-    @Body() body: { texto: string },
+    @Body(new ValidarCampos(ESQUEMA_COMENTARIO)) body: { texto: string },
     @Request() req: any,
   ) {
     return this.tareaService.addComment(tareaId, req.user.id, body.texto);

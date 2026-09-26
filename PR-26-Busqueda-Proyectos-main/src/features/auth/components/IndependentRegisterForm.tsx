@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion } from '@/shared/validacion';
 import { toast } from 'sonner';
 
 import { useRegistrarIndependiente } from '@/features/auth';
@@ -30,11 +31,14 @@ export function IndependentRegisterForm({ onBack, onSuccess }: {
   };
 
   const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!datos.name) errs.name = 'El nombre es requerido';
-    if (!datos.email) errs.email = 'El email es requerido';
-    if (!datos.password) errs.password = 'La contraseña es requerida';
-    if (datos.password !== datos.confirmPassword) errs.confirmPassword = 'Las contraseñas no coinciden';
+    const errs = validarCampos(datos, {
+      name: CAMPOS.nombre_completo,
+      jobTitle: { ...CAMPOS.cargo, etiqueta: 'El rol o profesión' },
+      email: CAMPOS.correo,
+      password: CAMPOS.password,
+    });
+    const confirmacion = validarConfirmacion(datos.password, datos.confirmPassword);
+    if (confirmacion) errs.confirmPassword = confirmacion;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -77,13 +81,13 @@ export function IndependentRegisterForm({ onBack, onSuccess }: {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
-          <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Juan Pérez" value={datos.name} onChange={handleChange} error={errors.name} />
-          <Input label="Rol o profesión" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: Desarrollador Frontend" value={datos.jobTitle} onChange={handleChange} error={errors.jobTitle} />
+          <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Juan Pérez" value={datos.name} maxLength={LIMITES.usuario.nombre_completo} onChange={handleChange} error={errors.name} />
+          <Input label="Rol o profesión" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: Desarrollador Frontend" value={datos.jobTitle} maxLength={LIMITES.usuario.cargo} onChange={handleChange} error={errors.jobTitle} />
         </div>
-        <Input label="Email *" type="email" name="email" autoComplete="email" placeholder="juan@correo.com" value={datos.email} onChange={handleChange} error={errors.email} />
+        <Input label="Email *" type="email" name="email" autoComplete="email" placeholder="juan@correo.com" value={datos.email} maxLength={LIMITES.usuario.correo} onChange={handleChange} error={errors.email} />
         <div className="grid md:grid-cols-2 gap-4">
-          <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={datos.password} onChange={handleChange} error={errors.password} />
-          <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={datos.confirmPassword} onChange={handleChange} error={errors.confirmPassword} />
+          <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={datos.password} maxLength={LIMITES.usuario.password_max} onChange={handleChange} error={errors.password} />
+          <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={datos.confirmPassword} maxLength={LIMITES.usuario.password_max} onChange={handleChange} error={errors.confirmPassword} />
         </div>
 
         <DocumentUpload

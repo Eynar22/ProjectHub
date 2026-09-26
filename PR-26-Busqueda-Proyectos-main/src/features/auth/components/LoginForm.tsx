@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import { useNavigate, Link } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { Button } from '@/shared/components/ui/Button';
@@ -305,7 +306,7 @@ export function LoginForm() {
                   type="email"
                   autoComplete="email"
                   placeholder="tu@empresa.com"
-                  value={email}
+                  value={email} maxLength={LIMITES.usuario.correo}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-input-background hover:bg-muted border border-input text-foreground px-5 py-4 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring outline-none transition-all font-medium"
                 />
@@ -329,7 +330,7 @@ export function LoginForm() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    value={password}
+                    value={password} maxLength={LIMITES.usuario.password_max}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-input-background hover:bg-muted border border-input text-foreground placeholder:text-muted-foreground px-5 py-4 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring outline-none transition-all pr-14 font-medium tracking-wide"
                   />

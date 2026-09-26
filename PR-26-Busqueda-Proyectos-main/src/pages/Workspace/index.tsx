@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { CAMPOS, validarCampo, validarCampos, primerError } from '@/shared/validacion';
 import { useParams, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useApp } from '@/app/context/AppContext';
@@ -178,13 +179,16 @@ export default function Workspace() {
   const { mutateAsync: enviarMensajeAsync, isPending: enviandoMensaje } = enviarMensaje;
   const handleSendMessage = useCallback(async () => {
     if (!messageText.trim() || enviandoMensaje) return;
+    const errorMensaje = validarCampo(messageText, CAMPOS.mensaje_chat);
+    if (errorMensaje) { toast.error(errorMensaje); return; }
     const text = messageText.trim();
     setMessageText('');
     try {
       await enviarMensajeAsync({ contenido: text });
-    } catch {
+    } catch (err) {
       // On error restore the text
       setMessageText(text);
+      toast.error(err instanceof Error ? err.message : 'No se pudo enviar el mensaje');
     }
   }, [messageText, enviandoMensaje, enviarMensajeAsync]);
   // ─────────────────────────────────────────────────────────────────
@@ -344,8 +348,20 @@ export default function Workspace() {
     setSavingProjectInfo(true);
     try {
       const nombreLimpio = editNombre.trim();
-      if (!nombreLimpio) {
-        toast.error('El nombre del proyecto no puede quedar vacío');
+      const fechaFinOriginal = project.fecha_fin ? project.fecha_fin.slice(0, 10) : '';
+      const error = primerError(validarCampos(
+        { editNombre, editDescCorta, editDescripcion, editProblema, editFechaFin },
+        {
+          editNombre: CAMPOS.nombre_proyecto,
+          editDescCorta: { ...CAMPOS.descripcion_corta, requerido: false },
+          editDescripcion: { ...CAMPOS.descripcion_completa, requerido: false },
+          editProblema: { ...CAMPOS.problema, requerido: false },
+          // Solo se exige "no pasada" si el usuario cambió la fecha.
+          ...(editFechaFin !== fechaFinOriginal ? { editFechaFin: { ...CAMPOS.fecha_fin, requerido: false } } : {}),
+        },
+      ));
+      if (error) {
+        toast.error(error);
         setSavingProjectInfo(false);
         return;
       }
@@ -382,7 +398,11 @@ export default function Workspace() {
   };
 
   const handleCreateTask = async () => {
-    if (!newTaskTitle.trim()) return;
+    const error = primerError(validarCampos(
+      { newTaskTitle, newTaskDesc, newTaskDeadline },
+      { newTaskTitle: CAMPOS.titulo_tarea, newTaskDesc: CAMPOS.descripcion_tarea, newTaskDeadline: CAMPOS.fecha_limite },
+    ));
+    if (error) { toast.error(error); return; }
     try {
       const cols = await ensureColumns(project!.id);
       const firstCol = cols[0];
@@ -429,6 +449,16 @@ export default function Workspace() {
 
   const handleSaveEditTask = async () => {
     if (!editingTask) return;
+    const error = primerError(validarCampos(
+      { editTaskTitle, editTaskDesc, editTaskDeadline },
+      {
+        editTaskTitle: CAMPOS.titulo_tarea,
+        editTaskDesc: CAMPOS.descripcion_tarea,
+        // Solo se exige "no pasada" si el usuario cambió la fecha límite.
+        ...(editTaskDeadline !== (editingTask.fecha_limite || '') ? { editTaskDeadline: CAMPOS.fecha_limite } : {}),
+      },
+    ));
+    if (error) { toast.error(error); return; }
     try {
       await actualizarTarea.mutateAsync({
         id: editingTask.id,
@@ -449,8 +479,16 @@ export default function Workspace() {
 
   const handleAddTaskComment = async () => {
     if (!editingTask || !newTaskComment.trim()) return;
+    const errorComentario = validarCampo(newTaskComment, CAMPOS.comentario);
+    if (errorComentario) { toast.error(errorComentario); return; }
     const tareaId = editingTask.id;
-    const newComment = await agregarComentario.mutateAsync({ tareaId, texto: newTaskComment });
+    let newComment: Awaited<ReturnType<typeof agregarComentario.mutateAsync>>;
+    try {
+      newComment = await agregarComentario.mutateAsync({ tareaId, texto: newTaskComment });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo agregar el comentario');
+      return;
+    }
     // Patch del cache de detalle para que el comentario se vea al instante, sin
     // esperar a que la invalidación traiga la tarea de nuevo.
     queryClient.setQueryData<WorkspaceTask>(
@@ -488,7 +526,8 @@ export default function Workspace() {
   })() : [];
 
   const handleAddFolder = async () => {
-    if (!newFolderName.trim()) return;
+    const errorCarpeta = validarCampo(newFolderName, CAMPOS.nombre_carpeta);
+    if (errorCarpeta) { toast.error(errorCarpeta); return; }
     await crearRecurso.mutateAsync({
       proyecto_id: project.id,
       nombre: newFolderName,

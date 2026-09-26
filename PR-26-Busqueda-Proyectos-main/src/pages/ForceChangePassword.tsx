@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import { toast } from 'sonner';
 import { useCambiarPassword } from '@/features/auth';
 import { useApp } from '@/app/context/AppContext';
@@ -19,16 +20,13 @@ export function ForceChangePassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!passwordTemporal || !nuevaPassword) {
-      toast.error('Completa todos los campos');
-      return;
-    }
-    if (nuevaPassword.length < 4) {
-      toast.error('La contraseña debe tener al menos 4 caracteres');
-      return;
-    }
-    if (nuevaPassword !== confirmarPassword) {
-      toast.error('Las contraseñas no coinciden');
+    const error =
+      primerError(validarCampos({ passwordTemporal, nuevaPassword }, {
+        passwordTemporal: { etiqueta: 'La contraseña temporal', requerido: true },
+        nuevaPassword: { ...CAMPOS.password, etiqueta: 'La nueva contraseña' },
+      })) ?? validarConfirmacion(nuevaPassword, confirmarPassword);
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -72,7 +70,7 @@ export function ForceChangePassword() {
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                value={passwordTemporal}
+                value={passwordTemporal} maxLength={LIMITES.usuario.password_max}
                 onChange={(e) => setPasswordTemporal(e.target.value)}
               />
 
@@ -81,7 +79,7 @@ export function ForceChangePassword() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                value={nuevaPassword}
+                value={nuevaPassword} maxLength={LIMITES.usuario.password_max}
                 onChange={(e) => setNuevaPassword(e.target.value)}
               />
 
@@ -90,7 +88,7 @@ export function ForceChangePassword() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                value={confirmarPassword}
+                value={confirmarPassword} maxLength={LIMITES.usuario.password_max}
                 onChange={(e) => setConfirmarPassword(e.target.value)}
               />
 

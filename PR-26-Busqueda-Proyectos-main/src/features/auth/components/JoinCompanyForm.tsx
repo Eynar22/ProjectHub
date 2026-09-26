@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion } from '@/shared/validacion';
 import { toast } from 'sonner';
 import { useRegistrarEmpleado } from '@/features/auth';
 import type { Company } from '@/features/empresas';
@@ -31,12 +32,14 @@ export function JoinCompanyForm({ company, onBack, onSuccess }: {
   };
 
   const validateJoin = () => {
-    const errs: Record<string, string> = {};
-    if (!joinData.name) errs.name = 'El nombre es requerido';
-    if (!joinData.jobTitle) errs.jobTitle = 'El cargo es requerido';
-    if (!joinData.email) errs.email = 'El email es requerido';
-    if (!joinData.password) errs.password = 'La contraseña es requerida';
-    if (joinData.password !== joinData.confirmPassword) errs.confirmPassword = 'Las contraseñas no coinciden';
+    const errs = validarCampos(joinData, {
+      name: CAMPOS.nombre_completo,
+      jobTitle: { ...CAMPOS.cargo, requerido: true },
+      email: CAMPOS.correo,
+      password: CAMPOS.password,
+    });
+    const confirmacion = validarConfirmacion(joinData.password, joinData.confirmPassword);
+    if (confirmacion) errs.confirmPassword = confirmacion;
     if (!joinData.memberDocument) errs.memberDocument = 'Debe adjuntar un documento que acredite su pertenencia a la empresa';
     setJoinErrors(errs);
     return Object.keys(errs).length === 0;
@@ -83,13 +86,13 @@ export function JoinCompanyForm({ company, onBack, onSuccess }: {
 
       <form onSubmit={handleJoinSubmit} className="space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
-          <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Juan Pérez" value={joinData.name} onChange={handleJoinChange} error={joinErrors.name} />
-          <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: Gerente de Proyectos" value={joinData.jobTitle} onChange={handleJoinChange} error={joinErrors.jobTitle} />
+          <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Juan Pérez" value={joinData.name} maxLength={LIMITES.usuario.nombre_completo} onChange={handleJoinChange} error={joinErrors.name} />
+          <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: Gerente de Proyectos" value={joinData.jobTitle} maxLength={LIMITES.usuario.cargo} onChange={handleJoinChange} error={joinErrors.jobTitle} />
         </div>
-        <Input label="Email *" type="email" name="email" autoComplete="email" placeholder="juan@empresa.com" value={joinData.email} onChange={handleJoinChange} error={joinErrors.email} />
+        <Input label="Email *" type="email" name="email" autoComplete="email" placeholder="juan@empresa.com" value={joinData.email} maxLength={LIMITES.usuario.correo} onChange={handleJoinChange} error={joinErrors.email} />
         <div className="grid md:grid-cols-2 gap-4">
-          <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={joinData.password} onChange={handleJoinChange} error={joinErrors.password} />
-          <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={joinData.confirmPassword} onChange={handleJoinChange} error={joinErrors.confirmPassword} />
+          <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={joinData.password} maxLength={LIMITES.usuario.password_max} onChange={handleJoinChange} error={joinErrors.password} />
+          <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={joinData.confirmPassword} maxLength={LIMITES.usuario.password_max} onChange={handleJoinChange} error={joinErrors.confirmPassword} />
         </div>
 
         <DocumentUpload

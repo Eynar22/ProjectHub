@@ -1,5 +1,7 @@
 import { InputHTMLAttributes, TextareaHTMLAttributes, useId, useState } from 'react';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { avisarSiSeRecorta, textoContador } from '@/shared/validacion';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -23,6 +25,7 @@ const fieldClass =
   'aria-[invalid=true]:border-danger';
 
 export function Input({ label, error, hint, className = '', type, id, ...props }: InputProps) {
+  hint = hint ?? textoContador(props.value, props.maxLength, false);
   const autoId = useId();
   const fieldId = id ?? autoId;
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +48,7 @@ export function Input({ label, error, hint, className = '', type, id, ...props }
           aria-describedby={describedBy}
           className={`${fieldClass} ${isPassword ? 'pr-11' : ''} ${className}`}
           {...props}
+          onPaste={(e) => { avisarSiSeRecorta(e, props.maxLength, toast.warning); props.onPaste?.(e); }}
         />
         {isPassword && (
           <button
@@ -72,6 +76,7 @@ export function Input({ label, error, hint, className = '', type, id, ...props }
 }
 
 export function TextArea({ label, error, hint, className = '', id, ...props }: TextAreaProps) {
+  hint = hint ?? textoContador(props.value, props.maxLength, true);
   const autoId = useId();
   const fieldId = id ?? autoId;
   const describedBy = [hint && `${fieldId}-hint`, error && `${fieldId}-error`].filter(Boolean).join(' ') || undefined;
@@ -89,6 +94,7 @@ export function TextArea({ label, error, hint, className = '', id, ...props }: T
         aria-describedby={describedBy}
         className={`${fieldClass} min-h-24 resize-none ${className}`}
         {...props}
+        onPaste={(e) => { avisarSiSeRecorta(e, props.maxLength, toast.warning); props.onPaste?.(e); }}
       />
       {hint && !error && (
         <p id={`${fieldId}-hint`} className="mt-1 text-sm text-muted-foreground">{hint}</p>

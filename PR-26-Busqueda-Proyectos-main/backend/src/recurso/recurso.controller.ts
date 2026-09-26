@@ -9,6 +9,8 @@ import { RecursoService } from './recurso.service';
 import { UsuarioProyecto } from '../entities/usuario-proyecto.entity';
 import { Proyecto } from '../entities/proyecto.entity';
 import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service';
+import { ValidarCampos } from '../common/validacion/validar-campos.pipe';
+import { ESQUEMA_RECURSO } from '../common/validacion/esquemas';
 
 // El techo de Multer cubre imagen o PDF; el resto de límites y la compresión
 // viven en AlmacenamientoService.
@@ -75,7 +77,7 @@ export class RecursoController {
   }
 
   @Post()
-  create(@Body() data: any) {
+  create(@Body(new ValidarCampos(ESQUEMA_RECURSO)) data: any) {
     return this.recursoService.create(data);
   }
 
@@ -113,7 +115,7 @@ export class RecursoController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body(new ValidarCampos(ESQUEMA_RECURSO, true)) data: any) {
     return this.recursoService.update(id, data);
   }
 

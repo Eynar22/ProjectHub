@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import type { ComponentType } from 'react';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresa, useActualizarEmpresa } from '@/features/empresas';
@@ -97,7 +98,11 @@ export default function CompanyProfile() {
   };
 
   const handleSaveProfile = async () => {
-    if (!profileForm.nombre_completo.trim()) { toast.error('El nombre no puede estar vacío'); return; }
+    const error = primerError(validarCampos(profileForm, {
+      nombre_completo: CAMPOS.nombre_completo,
+      cargo: CAMPOS.cargo,
+    }));
+    if (error) { toast.error(error); return; }
     setSavingProfile(true);
     try {
       await updateProfile({
@@ -124,9 +129,12 @@ export default function CompanyProfile() {
   };
 
   const handleSavePassword = async () => {
-    if (!passwordForm.actual || !passwordForm.nueva) { toast.error('Completa todos los campos'); return; }
-    if (passwordForm.nueva.length < 4) { toast.error('La nueva contraseña debe tener al menos 4 caracteres'); return; }
-    if (passwordForm.nueva !== passwordForm.confirmar) { toast.error('Las contraseñas no coinciden'); return; }
+    const error =
+      primerError(validarCampos(passwordForm, {
+        actual: { etiqueta: 'La contraseña actual', requerido: true },
+        nueva: { ...CAMPOS.password, etiqueta: 'La nueva contraseña' },
+      })) ?? validarConfirmacion(passwordForm.nueva, passwordForm.confirmar);
+    if (error) { toast.error(error); return; }
 
     setSavingPassword(true);
     try {
@@ -223,9 +231,13 @@ export default function CompanyProfile() {
   const removeGalleryImage = (index: number) => setGalleryUrls(prev => prev.filter((_, i) => i !== index));
 
   const addLink = () => {
-    if (!newLinkUrl.trim()) { toast.error('Ingresa una URL'); return; }
     let url = newLinkUrl.trim();
-    if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+    if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
+    const error = primerError(validarCampos({ url, nombre: newLinkNombre }, {
+      url: CAMPOS.enlace_url,
+      nombre: CAMPOS.enlace_nombre,
+    }));
+    if (error) { toast.error(error); return; }
     setLinks(prev => [...prev, { url, nombre: newLinkNombre.trim() || undefined }]);
     setNewLinkUrl('');
     setNewLinkNombre('');
@@ -235,6 +247,12 @@ export default function CompanyProfile() {
 
   const handleSaveCompany = async () => {
     if (!userCompany) return;
+    const error = primerError(validarCampos(companyForm, {
+      descripcion: { ...CAMPOS.descripcion_empresa, requerido: false },
+      num_empleados: { ...CAMPOS.num_empleados, requerido: false },
+      portafolio: { ...CAMPOS.portafolio, requerido: false },
+    }));
+    if (error) { toast.error(error); return; }
     setSavingCompany(true);
     try {
       await actualizarEmpresa.mutateAsync({
@@ -311,7 +329,7 @@ export default function CompanyProfile() {
 
                   {editingProfile ? (
                     <Input
-                      value={profileForm.nombre_completo}
+                      value={profileForm.nombre_completo} maxLength={LIMITES.usuario.nombre_completo}
                       onChange={(e) => setProfileForm(f => ({ ...f, nombre_completo: e.target.value }))}
                       className="text-center font-bold"
                     />
@@ -408,7 +426,7 @@ export default function CompanyProfile() {
                     <Input
                       label="Cargo"
                       placeholder="Ej. Desarrollador"
-                      value={profileForm.cargo}
+                      value={profileForm.cargo} maxLength={LIMITES.usuario.cargo}
                       onChange={(e) => setProfileForm(f => ({ ...f, cargo: e.target.value }))}
                     />
                     <div>
@@ -463,21 +481,21 @@ export default function CompanyProfile() {
                       label="Contraseña actual"
                       type="password"
                       placeholder="••••••••"
-                      value={passwordForm.actual}
+                      value={passwordForm.actual} maxLength={LIMITES.usuario.password_max}
                       onChange={(e) => setPasswordForm(f => ({ ...f, actual: e.target.value }))}
                     />
                     <Input
                       label="Nueva contraseña"
                       type="password"
                       placeholder="••••••••"
-                      value={passwordForm.nueva}
+                      value={passwordForm.nueva} maxLength={LIMITES.usuario.password_max}
                       onChange={(e) => setPasswordForm(f => ({ ...f, nueva: e.target.value }))}
                     />
                     <Input
                       label="Confirmar nueva contraseña"
                       type="password"
                       placeholder="••••••••"
-                      value={passwordForm.confirmar}
+                      value={passwordForm.confirmar} maxLength={LIMITES.usuario.password_max}
                       onChange={(e) => setPasswordForm(f => ({ ...f, confirmar: e.target.value }))}
                     />
                   </div>
@@ -570,21 +588,21 @@ export default function CompanyProfile() {
                         label="Número de Empleados"
                         type="number"
                         min={0}
-                        value={companyForm.num_empleados}
+                        value={companyForm.num_empleados} max={LIMITES.empresa.num_empleados_max}
                         onChange={(e) => setCompanyForm(f => ({ ...f, num_empleados: e.target.value }))}
                       />
 
                       <TextArea
                         label="Descripción"
                         rows={3}
-                        value={companyForm.descripcion}
+                        value={companyForm.descripcion} maxLength={LIMITES.empresa.descripcion}
                         onChange={(e) => setCompanyForm(f => ({ ...f, descripcion: e.target.value }))}
                       />
 
                       <TextArea
                         label="Portafolio / Experiencia"
                         rows={3}
-                        value={companyForm.portafolio}
+                        value={companyForm.portafolio} maxLength={LIMITES.empresa.portafolio}
                         onChange={(e) => setCompanyForm(f => ({ ...f, portafolio: e.target.value }))}
                       />
 
@@ -657,13 +675,13 @@ export default function CompanyProfile() {
                         <div className="flex flex-col sm:flex-row gap-2">
                           <input
                             placeholder="Nombre (opcional, ej. Sitio web)"
-                            value={newLinkNombre}
+                            value={newLinkNombre} maxLength={LIMITES.empresa.enlace_nombre}
                             onChange={(e) => setNewLinkNombre(e.target.value)}
                             className="flex-1 px-3 py-2 text-sm bg-input-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                           />
                           <input
                             placeholder="https://..."
-                            value={newLinkUrl}
+                            value={newLinkUrl} maxLength={LIMITES.empresa.enlace_url}
                             onChange={(e) => setNewLinkUrl(e.target.value)}
                             className="flex-1 px-3 py-2 text-sm bg-input-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                           />

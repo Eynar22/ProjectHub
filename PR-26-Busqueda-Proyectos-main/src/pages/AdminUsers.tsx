@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import type { ComponentType } from 'react';
 import { useUsuarios, useModerarUsuario, type AccionUsuario, type User } from '@/features/usuarios';
 import { useEmpresas } from '@/features/empresas';
@@ -110,7 +111,7 @@ export default function AdminUsers() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   aria-label="Buscar usuarios" placeholder="Buscar por nombre o correo..."
-                  value={searchTerm}
+                  value={searchTerm} maxLength={LIMITES.busqueda}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="pl-9"
                 />

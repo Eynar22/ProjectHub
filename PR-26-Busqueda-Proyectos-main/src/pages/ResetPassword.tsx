@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import { useNavigate, useSearchParams, Link } from 'react-router';
 import { toast } from 'sonner';
 import { useRestablecerPassword } from '@/features/auth';
@@ -21,16 +22,14 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!correo.trim() || !codigo.trim() || !nuevaPassword) {
-      toast.error('Completa todos los campos');
-      return;
-    }
-    if (nuevaPassword.length < 4) {
-      toast.error('La contraseña debe tener al menos 4 caracteres');
-      return;
-    }
-    if (nuevaPassword !== confirmarPassword) {
-      toast.error('Las contraseñas no coinciden');
+    const error =
+      primerError(validarCampos({ correo, codigo, nuevaPassword }, {
+        correo: CAMPOS.correo,
+        codigo: CAMPOS.codigo,
+        nuevaPassword: { ...CAMPOS.password, etiqueta: 'La nueva contraseña' },
+      })) ?? validarConfirmacion(nuevaPassword, confirmarPassword);
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -75,7 +74,7 @@ export default function ResetPassword() {
                 type="email"
                 autoComplete="email"
                 placeholder="tu@empresa.com"
-                value={correo}
+                value={correo} maxLength={LIMITES.usuario.correo}
                 onChange={(e) => setCorreo(e.target.value)}
               />
 
@@ -96,7 +95,7 @@ export default function ResetPassword() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                value={nuevaPassword}
+                value={nuevaPassword} maxLength={LIMITES.usuario.password_max}
                 onChange={(e) => setNuevaPassword(e.target.value)}
               />
 
@@ -105,7 +104,7 @@ export default function ResetPassword() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
-                value={confirmarPassword}
+                value={confirmarPassword} maxLength={LIMITES.usuario.password_max}
                 onChange={(e) => setConfirmarPassword(e.target.value)}
               />
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LIMITES } from '@/shared/validacion';
 import { Link, useSearchParams } from 'react-router';
 import { useEmpresas } from '@/features/empresas';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
@@ -53,7 +54,7 @@ export default function AdminCompanies() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     aria-label="Buscar empresas" placeholder="Buscar empresas..."
-                    value={searchTerm}
+                    value={searchTerm} maxLength={LIMITES.busqueda}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />

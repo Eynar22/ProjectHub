@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, ParseIntPipe, Request, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProyectoService } from './proyecto.service';
+import { ValidarCampos } from '../common/validacion/validar-campos.pipe';
+import { ESQUEMA_PROYECTO, ESQUEMA_SOLICITUD_PROYECTO } from '../common/validacion/esquemas';
 
 @Controller('proyectos')
 export class ProyectoController {
@@ -79,7 +81,7 @@ export class ProyectoController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Body() data: any, @Request() req: any) {
+  create(@Body(new ValidarCampos(ESQUEMA_PROYECTO)) data: any, @Request() req: any) {
     // Solo el administrador de una empresa (o el superadmin) puede publicar
     // proyectos. Los empleados y usuarios independientes no.
     if (req.user.rol !== 'admin' && req.user.rol !== 'superadmin') {
@@ -90,7 +92,7 @@ export class ProyectoController {
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param('id', ParseIntPipe) id: number, @Body(new ValidarCampos(ESQUEMA_PROYECTO, true)) data: any) {
     return this.proyectoService.update(id, data);
   }
 
@@ -163,7 +165,7 @@ export class ProyectoController {
   @Post(':id/solicitudes')
   createRequest(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { mensaje?: string; propuesta?: string; propuesta_url?: string; cv_url?: string },
+    @Body(new ValidarCampos(ESQUEMA_SOLICITUD_PROYECTO)) body: { mensaje?: string; propuesta?: string; propuesta_url?: string; cv_url?: string },
     @Request() req: any,
   ) {
     return this.proyectoService.createRequest(id, req.user.id, body);

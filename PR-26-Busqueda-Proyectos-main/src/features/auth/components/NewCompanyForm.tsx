@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion } from '@/shared/validacion';
 import { toast } from 'sonner';
 import { useRegistrarEmpresa } from '@/features/auth';
 import { Input, TextArea } from '@/shared/components/ui/Input';
@@ -54,17 +55,18 @@ export function NewCompanyForm({ onBack, onSuccess }: {
   };
 
   const validate = () => {
-    const errs: Record<string, string> = {};
-    if (!data.name) errs.name = 'El nombre es requerido';
-    if (!data.jobTitle) errs.jobTitle = 'El cargo en la empresa es requerido';
-    if (!data.email) errs.email = 'Email es requerido';
-    if (!data.password) errs.password = 'Contraseña es requerida';
-    if (data.password !== data.confirmPassword) errs.confirmPassword = 'Las contraseñas no coinciden';
-    if (!data.companyName) errs.companyName = 'Nombre de empresa es requerido';
-    if (!data.description) errs.description = 'Descripción es requerida';
-    if (!data.employees) errs.employees = 'Número de empleados es requerido';
-    else if (parseInt(data.employees) < 1) errs.employees = 'El número de empleados debe ser al menos 1';
-    if (!data.portfolio) errs.portfolio = 'Portafolio es requerido';
+    const errs = validarCampos(data, {
+      name: CAMPOS.nombre_completo,
+      jobTitle: { ...CAMPOS.cargo, requerido: true },
+      email: CAMPOS.correo,
+      password: CAMPOS.password,
+      companyName: CAMPOS.nombre_empresa,
+      description: CAMPOS.descripcion_empresa,
+      employees: CAMPOS.num_empleados,
+      portfolio: CAMPOS.portafolio,
+    });
+    const confirmacion = validarConfirmacion(data.password, data.confirmPassword);
+    if (confirmacion) errs.confirmPassword = confirmacion;
     if (!data.companyDocument) errs.companyDocument = 'Obligatorio: documento de acreditación de la empresa (NIT, Matrícula, etc.)';
     if (!data.personalDocument) errs.personalDocument = 'Obligatorio: documento que prueba su pertenencia a esta empresa';
     setErrors(errs);
@@ -132,12 +134,12 @@ export function NewCompanyForm({ onBack, onSuccess }: {
             <User className="w-4 h-4 text-muted-foreground" /> Datos del Responsable
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Ana García" value={data.name} onChange={handleChange} error={errors.name} />
-            <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: CEO, Director Técnico" value={data.jobTitle} onChange={handleChange} error={errors.jobTitle} />
-            <Input label="Email de contacto *" type="email" name="email" autoComplete="email" placeholder="ana@empresa.com" value={data.email} onChange={handleChange} error={errors.email} />
+            <Input label="Nombre completo *" type="text" name="name" autoComplete="name" placeholder="Ana García" value={data.name} maxLength={LIMITES.usuario.nombre_completo} onChange={handleChange} error={errors.name} />
+            <Input label="Cargo en la empresa *" type="text" name="jobTitle" autoComplete="organization-title" placeholder="Ej: CEO, Director Técnico" value={data.jobTitle} maxLength={LIMITES.usuario.cargo} onChange={handleChange} error={errors.jobTitle} />
+            <Input label="Email de contacto *" type="email" name="email" autoComplete="email" placeholder="ana@empresa.com" value={data.email} maxLength={LIMITES.usuario.correo} onChange={handleChange} error={errors.email} />
             <div className="hidden md:block" />
-            <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={data.password} onChange={handleChange} error={errors.password} />
-            <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={data.confirmPassword} onChange={handleChange} error={errors.confirmPassword} />
+            <Input label="Contraseña *" type="password" name="password" autoComplete="new-password" placeholder="••••••••" value={data.password} maxLength={LIMITES.usuario.password_max} onChange={handleChange} error={errors.password} />
+            <Input label="Confirmar Contraseña *" type="password" name="confirmPassword" autoComplete="new-password" placeholder="••••••••" value={data.confirmPassword} maxLength={LIMITES.usuario.password_max} onChange={handleChange} error={errors.confirmPassword} />
           </div>
         </section>
 
@@ -147,13 +149,13 @@ export function NewCompanyForm({ onBack, onSuccess }: {
             <Building2 className="w-4 h-4 text-muted-foreground" /> Datos de la Empresa
           </h2>
           <div className="space-y-4">
-            <Input label="Nombre de la empresa *" type="text" name="companyName" autoComplete="organization" placeholder="Mi Empresa S.A." value={data.companyName} onChange={handleChange} error={errors.companyName} />
-            <TextArea label="Descripción *" name="description" placeholder="Describe tu empresa, industria y servicios..." rows={3} value={data.description} onChange={handleChange} error={errors.description} />
+            <Input label="Nombre de la empresa *" type="text" name="companyName" autoComplete="organization" placeholder="Mi Empresa S.A." value={data.companyName} maxLength={LIMITES.empresa.nombre} onChange={handleChange} error={errors.companyName} />
+            <TextArea label="Descripción *" name="description" placeholder="Describe tu empresa, industria y servicios..." rows={3} value={data.description} maxLength={LIMITES.empresa.descripcion} onChange={handleChange} error={errors.description} />
             <div className="grid md:grid-cols-2 gap-4">
-              <Input label="Número de Empleados *" type="number" name="employees" min="1" placeholder="50" value={data.employees} onChange={handleChange} error={errors.employees} />
+              <Input label="Número de Empleados *" type="number" name="employees" min="1" placeholder="50" value={data.employees} max={LIMITES.empresa.num_empleados_max} onChange={handleChange} error={errors.employees} />
               <div className="hidden md:block" />
             </div>
-            <TextArea label="Portafolio / Experiencia *" name="portfolio" placeholder="Proyectos anteriores, clientes principales, tecnologías..." rows={3} value={data.portfolio} onChange={handleChange} error={errors.portfolio} />
+            <TextArea label="Portafolio / Experiencia *" name="portfolio" placeholder="Proyectos anteriores, clientes principales, tecnologías..." rows={3} value={data.portfolio} maxLength={LIMITES.empresa.portafolio} onChange={handleChange} error={errors.portfolio} />
           </div>
         </section>
 
