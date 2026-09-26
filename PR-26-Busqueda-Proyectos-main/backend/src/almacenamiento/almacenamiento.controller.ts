@@ -163,7 +163,7 @@ export class ArchivosController {
       mes,
       nombre,
     );
-    if (!this.almacenamiento.puedeVerPrivado(req.user, archivo)) {
+    if (!(await this.almacenamiento.puedeVerPrivado(req.user, archivo))) {
       throw new ForbiddenException('No tienes permiso para ver este archivo');
     }
     res.setHeader('Content-Type', archivo.mimetype);

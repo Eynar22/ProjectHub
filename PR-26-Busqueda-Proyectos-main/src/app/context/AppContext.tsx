@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { storage } from '@/lib/storage';
@@ -107,18 +107,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Blobs ya descargados de archivos privados, cacheados por sesión: reabrir el
+  // mismo documento es instantáneo. Se liberan al cerrar sesión.
+  const blobCacheRef = useRef<Map<string, string>>(new Map());
+  const MAX_BLOB_CACHE = 8;
+
+  const limpiarBlobCache = () => {
+    blobCacheRef.current.forEach((u) => URL.revokeObjectURL(u));
+    blobCacheRef.current.clear();
+  };
+
   const logout = () => {
     storage.limpiarSesion();
     setCurrentUser(null);
     queryClient.clear();
+    limpiarBlobCache();
   };
 
-  // Abre un documento en una pestaña nueva. Acepta tanto el formato histórico
-  // (data URL en base64) como la ruta de un archivo en disco (`/api/archivos/...`).
+  const POPUP_BLOQUEADO =
+    'El navegador bloqueó la ventana. Habilitá las ventanas emergentes para este sitio e intentá de nuevo.';
+
+  // Abre un documento en una pestaña nueva. Tres casos:
+  //  - data URL en base64 (histórico) -> blob local.
+  //  - /api/archivos/publico/... (o url externa) -> window.open directo: el
+  //    navegador lo transmite nativo y lo cachea. Rápido.
+  //  - /api/archivos/privado/... -> necesita el token en un header, así que se
+  //    baja con fetch y se abre como blob (cacheado por sesión).
   const openBase64 = async (valor: string) => {
     if (!valor || valor === '#') return;
 
-    // Histórico: data URL -> blob local.
     if (valor.startsWith('data:')) {
       try {
         const arr = valor.split(',');
@@ -139,21 +156,66 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Nuevo: archivo servido por el backend. El bucket privado exige el token de
-    // sesión, que window.open no envía, así que se baja con fetch autenticado.
+    const abs = valor.startsWith('/')
+      ? `${config.apiUrl.replace(/\/api$/, '')}${valor}`
+      : valor;
+
+    // Público: directo. window.open sincrónico dentro del click, sin bloqueo.
+    if (!valor.includes('/api/archivos/privado/')) {
+      if (!window.open(abs, '_blank')) toast.error(POPUP_BLOQUEADO);
+      return;
+    }
+
+    // Privado. La pestaña se abre ANTES del fetch (sincrónico, dentro del
+    // click) y se le mete el blob cuando llega; si se abre después del await el
+    // navegador lo bloquea en silencio.
+    const ventana = window.open('', '_blank');
+    if (ventana) {
+      ventana.document.write(
+        '<title>Abriendo documento…</title><body style="font:14px sans-serif;color:#666;padding:2rem">Abriendo documento…</body>',
+      );
+    }
+
+    const meterEnVentana = (blobUrl: string) => {
+      let abierta: boolean;
+      if (ventana && !ventana.closed) {
+        ventana.location.href = blobUrl;
+        abierta = true;
+      } else {
+        abierta = !!window.open(blobUrl, '_blank');
+      }
+      if (!abierta) toast.error(POPUP_BLOQUEADO);
+    };
+
+    const cacheado = blobCacheRef.current.get(abs);
+    if (cacheado) {
+      meterEnVentana(cacheado);
+      return;
+    }
+
+    const toastId = toast.loading('Abriendo documento…');
     try {
-      const url = valor.startsWith('/')
-        ? `${config.apiUrl.replace(/\/api$/, '')}${valor}`
-        : valor;
       const token = storage.obtenerToken();
-      const res = await fetch(url, {
+      const res = await fetch(abs, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blobUrl = URL.createObjectURL(await res.blob());
-      window.open(blobUrl, '_blank');
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000 * 60);
+
+      const cache = blobCacheRef.current;
+      cache.set(abs, blobUrl);
+      if (cache.size > MAX_BLOB_CACHE) {
+        const primera = cache.keys().next().value as string;
+        const viejo = cache.get(primera);
+        if (viejo) URL.revokeObjectURL(viejo);
+        cache.delete(primera);
+      }
+
+      toast.dismiss(toastId);
+      meterEnVentana(blobUrl);
     } catch (e) {
+      toast.dismiss(toastId);
+      ventana?.close();
       console.error('Error opening document:', e);
       toast.error('No se pudo abrir el documento.');
     }

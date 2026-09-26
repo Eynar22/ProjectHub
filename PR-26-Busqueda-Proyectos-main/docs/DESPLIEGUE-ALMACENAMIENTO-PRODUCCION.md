@@ -38,14 +38,22 @@ Panel de Dokploy → servicio **backend** → Environment → agregar:
 ```
 ALMACENAMIENTO_DIR=/app/almacenamiento
 ALMACENAMIENTO_MAX_BYTES=59055800320
-ALMACENAMIENTO_HOST_PATH=../files/almacenamiento
 ```
 
 | Var | Qué es |
 |---|---|
 | `ALMACENAMIENTO_DIR` | Carpeta dentro del contenedor. Debe coincidir con el destino del volumen en `docker-compose.yml`. |
 | `ALMACENAMIENTO_MAX_BYTES` | `59055800320` = 55 GiB (~29 % de un disco de 192 GB). Al superarlo, las subidas responden `507`. |
-| `ALMACENAMIENTO_HOST_PATH` | Ruta en el host que se monta como volumen. `../files/almacenamiento` cae en la carpeta persistente de Dokploy y entra en sus backups. |
+
+> **Ya no hace falta `ALMACENAMIENTO_HOST_PATH`.** Se probó como bind mount a
+> una ruta relativa (`../files/almacenamiento`) y no sobrevivía entre deploys:
+> esa ruta se resuelve contra el directorio del host donde Dokploy dejó el
+> checkout del compose en ESE deploy, que no es estable de un deploy a otro. El
+> `docker-compose.yml` ahora usa un volumen con **nombre**
+> (`almacenamiento_data`), igual que `postgres_data` — lo administra Docker
+> directamente, no depende de ninguna ruta del host. Si tenías esa variable
+> cargada en Dokploy, se puede borrar (no molesta si queda, simplemente ya no
+> se usa).
 
 ---
 
@@ -62,23 +70,44 @@ ALMACENAMIENTO_HOST_PATH=../files/almacenamiento
 
    y un `warn` de que no pudo leer el uso / falta la migración 009 → **normal**,
    se corrige en el paso 4.
+4. Confirmar que el volumen con nombre existe y es el que está montado:
+
+   ```bash
+   docker volume ls | grep almacenamiento_data
+   docker inspect buscador_backend --format '{{ range .Mounts }}{{ .Name }} -> {{ .Destination }}{{ "\n" }}{{ end }}'
+   ```
+
+   Debe aparecer `almacenamiento_data -> /app/almacenamiento`. A partir de este
+   deploy, ese volumen persiste solo (no se borra en un redeploy normal; solo
+   con `docker compose down -v` o borrándolo a mano).
 
 ---
 
-## 4. Migración de esquema — tabla `archivo`
+## 4. Migraciones de esquema — tablas `archivo` y `recurso.es_publico`
 
 ```bash
 docker exec -i buscador_postgres psql -U postgres -d buscador \
   < data/migrations/009_archivo.sql
+
+docker exec -i buscador_postgres psql -U postgres -d buscador \
+  < data/migrations/010_recurso_es_publico.sql
 ```
 
-Si el repo no está en el host: copiá el archivo primero (`docker cp`) o abrí
-`psql` y pegá el contenido. Idempotente (`CREATE TABLE IF NOT EXISTS`).
+Si el repo no está en el host: copiá los archivos primero (`docker cp`) o abrí
+`psql` y pegá el contenido. Ambas son idempotentes.
+
+`010` agrega `recurso.es_publico` y marca como público lo que ya estaba dentro
+de la carpeta "Principal" de cada proyecto (lo creado al publicarlo); lo que el
+equipo subió después desde el workspace queda en `false`. Sin este paso, la
+página pública de cada proyecto deja de mostrar TODOS sus documentos/imágenes
+(porque el filtro nuevo del backend no encuentra ninguno marcado público).
 
 Comprobar:
 
 ```bash
 docker exec -it buscador_postgres psql -U postgres -d buscador -c "\d archivo"
+docker exec -it buscador_postgres psql -U postgres -d buscador \
+  -c "SELECT proyecto_id, count(*) FILTER (WHERE es_publico) AS publicos, count(*) AS total FROM recurso GROUP BY proyecto_id ORDER BY proyecto_id;"
 ```
 
 ---
@@ -109,6 +138,40 @@ Columnas que migra: `proyecto_imagen.url`, `empresa_imagen.url`,
 `solicitud_proyecto.propuesta_url`, `solicitud_proyecto.cv_url`,
 `solicitud_membresia.documento_url`, `mensaje.archivo_url`.
 
+### 5b. Si un archivo da 404 (existe en el disco pero no en la BD)
+
+Pasa cuando la base de datos se reseteó/restauró pero el volumen de archivos
+se mantuvo: el archivo físico sigue ahí, pero le falta la fila en `archivo`
+que el backend necesita para servirlo (da 404 a **cualquiera**, incluido
+superadmin). Reconciliar:
+
+```bash
+docker exec -it buscador_backend sh -lc "npm run reconciliar:archivos:dry"   # reporta los que faltan
+docker exec -it buscador_backend sh -lc "npm run reconciliar:archivos"        # los da de alta
+```
+
+No borra ni modifica nada existente; solo crea la fila que falta (mimetype por
+extensión, tamaño real del archivo). Sin dueño ni entidad asociada — no hay
+forma de recuperar eso — así que en el bucket privado solo podrá abrirlo el
+superadmin hasta que alguien lo vuelva a subir por el flujo normal.
+
+### 5c. Pasar los recursos de proyecto al bucket público (opcional, mejora velocidad)
+
+Los PDF de recursos y el documento de acreditación del proyecto no son
+sensibles (los ve cualquier participante / son públicos). Moverlos a `publico/`
+hace que abran por streaming y con caché en vez de bajarse enteros cada vez.
+El código nuevo ya sube ahí por defecto; para los que ya se migraron a
+`privado/`:
+
+```bash
+docker exec -it buscador_backend sh -lc "npm run recursos-a-publico:dry"   # lista qué movería
+docker exec -it buscador_backend sh -lc "npm run recursos-a-publico"        # mueve archivos + actualiza refs
+```
+
+Mueve el archivo en disco de `privado/AAAA/MM/` a `publico/AAAA/MM/` y ajusta
+`archivo` + `recurso.url` / `proyecto.documento_url`. No toca CV, propuestas,
+cédulas ni documentos de empresa (siguen privados). Idempotente.
+
 ---
 
 ## 6. Verificación
@@ -135,6 +198,16 @@ curl -s https://projecthub.umaunivalle.com/api/almacenamiento/estado \
       `cache-control: public, max-age=31536000, immutable`.
 - [ ] Un documento privado (`/api/archivos/privado/...`) abierto directo en el
       navegador (sin sesión) da 401/403; desde la app abre bien.
+- [ ] El dueño de un proyecto puede abrir el CV/propuesta de un postulante (no
+      solo el propio postulante). El admin de una empresa puede abrir el
+      documento de un empleado que pide unirse.
+- [ ] Al hacer clic en un PDF: aparece un toast "Abriendo documento…" y se abre
+      una pestaña nueva (no hay que adivinar si el clic funcionó).
+- [ ] En incógnito, `/project/:id` de un proyecto con archivos agregados
+      después desde el workspace: en "Documentos y recursos" **solo** aparecen
+      la galería y el documento originales — nada de lo subido después por el
+      equipo. Desde el workspace del mismo proyecto (con sesión de un
+      participante), esos archivos sí aparecen.
 
 ---
 

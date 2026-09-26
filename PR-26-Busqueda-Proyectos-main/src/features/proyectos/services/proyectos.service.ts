@@ -34,8 +34,8 @@ export const proyectosService = {
   /** Crea un proyecto: primero sube imágenes/PDF, luego crea el registro. */
   async crear(dto: CrearProjectDto): Promise<Project> {
     const [imagenes_urls, pdfs] = await Promise.all([
-      Promise.all((dto.imageFiles ?? []).map(subirArchivo)),
-      Promise.all((dto.pdfFiles ?? []).map(subirArchivo)),
+      Promise.all((dto.imageFiles ?? []).map((f) => subirArchivo(f))),
+      Promise.all((dto.pdfFiles ?? []).map((f) => subirArchivo(f))),
     ]);
 
     return apiClient.post<Project>(ENDPOINTS.PROYECTOS.CREAR, {

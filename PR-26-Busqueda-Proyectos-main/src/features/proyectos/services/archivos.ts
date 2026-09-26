@@ -8,12 +8,21 @@
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 
-export async function subirArchivo(file: File): Promise<string> {
+/**
+ * @param opts.privado true para documentos sensibles (CV, propuesta de una
+ *   postulación) — se sirven con sesión y sin caché. Por defecto va al bucket
+ *   público (recursos de proyecto: se abren directo y cachean).
+ */
+export async function subirArchivo(
+  file: File,
+  opts?: { privado?: boolean },
+): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
   const { url } = await apiClient.post<{ url: string }>(
     ENDPOINTS.RECURSOS.UPLOAD,
     formData,
+    opts?.privado ? { params: { bucket: 'privado' } } : undefined,
   );
   return url;
 }

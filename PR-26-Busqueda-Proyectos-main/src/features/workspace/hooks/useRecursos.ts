@@ -10,12 +10,15 @@ import { PROYECTOS_KEYS } from '@/features/proyectos';
 
 export const RECURSOS_KEYS = {
   todos: ['recursos'] as const,
+  porProyecto: (proyectoId: number | string) => ['recursos', 'proyecto', String(proyectoId)] as const,
 };
 
-export function useRecursos() {
+/** Árbol completo de recursos de un proyecto (requiere ser participante). */
+export function useRecursosDeProyecto(proyectoId: number | string | undefined) {
   return useQuery({
-    queryKey: RECURSOS_KEYS.todos,
-    queryFn: () => recursosService.listar(),
+    queryKey: RECURSOS_KEYS.porProyecto(proyectoId ?? 'ninguno'),
+    queryFn: () => recursosService.listarPorProyecto(proyectoId!),
+    enabled: proyectoId !== undefined && proyectoId !== null,
   });
 }
 

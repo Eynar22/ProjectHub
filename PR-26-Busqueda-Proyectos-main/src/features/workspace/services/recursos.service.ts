@@ -9,9 +9,12 @@ import { ENDPOINTS } from '@/lib/api/endpoints';
 import type { Resource } from '@/features/proyectos';
 
 export const recursosService = {
-  /** Todos los recursos (el backend suele devolverlos anidados en el proyecto). */
-  async listar(): Promise<Resource[]> {
-    return apiClient.get<Resource[]>(ENDPOINTS.RECURSOS.LISTAR);
+  /**
+   * Árbol completo de recursos de un proyecto (incluye lo que el equipo subió
+   * después, no solo lo público). El backend exige ser participante.
+   */
+  async listarPorProyecto(proyectoId: number | string): Promise<Resource[]> {
+    return apiClient.get<Resource[]>(ENDPOINTS.RECURSOS.POR_PROYECTO(proyectoId));
   },
 
   /** Crea un recurso (carpeta o archivo ya subido). */

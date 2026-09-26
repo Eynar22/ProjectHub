@@ -15,7 +15,7 @@ export {
 export { CHAT_KEYS, useMensajesChat, useEnviarMensaje } from './hooks/useChat';
 export {
   RECURSOS_KEYS,
-  useRecursos,
+  useRecursosDeProyecto,
   useCrearRecurso,
   useEliminarRecurso,
   useSubirArchivo,

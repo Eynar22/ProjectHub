@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, UseFilters, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException, PayloadTooLargeException, UnsupportedMediaTypeException, ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseGuards, UseFilters, ParseIntPipe, UseInterceptors, UploadedFile, Req, ForbiddenException, PayloadTooLargeException, UnsupportedMediaTypeException, ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -44,10 +44,12 @@ export class RecursoController {
     @InjectRepository(Proyecto) private proyectoRepo: Repository<Proyecto>,
   ) {}
 
-  // Verificar que el usuario sea colaborador del proyecto
-  private async verificarAccesoAlProyecto(usuarioId: number, proyectoId: number) {
+  // Verificar que el usuario sea colaborador del proyecto (o superadmin, que
+  // tiene acceso a cualquier proyecto igual que en el resto de la app).
+  private async verificarAccesoAlProyecto(usuario: { id: number; rol: string }, proyectoId: number) {
+    if (usuario.rol === 'superadmin') return;
     const participante = await this.upRepo.findOne({
-      where: { usuario_id: usuarioId, proyecto_id: proyectoId },
+      where: { usuario_id: usuario.id, proyecto_id: proyectoId },
     });
     if (!participante) {
       throw new ForbiddenException('No tienes acceso a los recursos de este proyecto');
@@ -56,13 +58,13 @@ export class RecursoController {
 
   @Get('proyecto/:proyectoId')
   async findByProyecto(@Param('proyectoId', ParseIntPipe) proyectoId: number, @Req() req: any) {
-    await this.verificarAccesoAlProyecto(req.user.id, proyectoId);
+    await this.verificarAccesoAlProyecto(req.user, proyectoId);
     return this.recursoService.findByProyecto(proyectoId);
   }
 
   @Get('proyecto/:proyectoId/raiz')
   async findRootByProyecto(@Param('proyectoId', ParseIntPipe) proyectoId: number, @Req() req: any) {
-    await this.verificarAccesoAlProyecto(req.user.id, proyectoId);
+    await this.verificarAccesoAlProyecto(req.user, proyectoId);
     return this.recursoService.findRootByProyecto(proyectoId);
   }
 
@@ -95,15 +97,20 @@ export class RecursoController {
       },
     }),
   )
-  async uploadFile(@UploadedFile() file: any, @Req() req: any) {
+  async uploadFile(
+    @UploadedFile() file: any,
+    @Query('bucket') bucketQuery: string | undefined,
+    @Req() req: any,
+  ) {
     if (!file) {
       throw new PayloadTooLargeException('No se recibió ningún archivo');
     }
 
-    // Las imágenes de un recurso se muestran embebidas en el workspace (<img>),
-    // así que van al bucket público (nombre UUID no adivinable). Los PDF van al
-    // privado y se abren con sesión.
-    const bucket = file.mimetype === 'application/pdf' ? 'privado' : 'publico';
+    // Por defecto todo va al bucket público: los recursos de un proyecto (imágenes
+    // Y PDF) y el documento del proyecto los ve cualquier participante y no tiene
+    // sentido re-descargarlos con fetch+blob cada vez. El que sube algo sensible
+    // (CV / propuesta de una postulación) pasa `?bucket=privado` explícitamente.
+    const bucket: 'publico' | 'privado' = bucketQuery === 'privado' ? 'privado' : 'publico';
     const guardado = await this.almacenamiento.guardarDesdeMulter(file, bucket, req.user?.id ?? null);
 
     return {

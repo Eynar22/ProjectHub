@@ -36,8 +36,8 @@ export const solicitudesService = {
    */
   async crear(proyectoId: number | string, datos: CrearSolicitudInput): Promise<Request> {
     const [cv_url, propuesta_url] = await Promise.all([
-      datos.cv ? subirArchivo(datos.cv) : undefined,
-      datos.propuestaArchivo ? subirArchivo(datos.propuestaArchivo) : undefined,
+      datos.cv ? subirArchivo(datos.cv, { privado: true }) : undefined,
+      datos.propuestaArchivo ? subirArchivo(datos.propuestaArchivo, { privado: true }) : undefined,
     ]);
 
     return apiClient.post<Request>(ENDPOINTS.PROYECTOS.CREAR_SOLICITUD(proyectoId), {

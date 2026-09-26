@@ -10,7 +10,7 @@ Rama: `feature/almacenamiento-archivos`.
 
 | Tema | Decisión |
 |---|---|
-| Ubicación | Bind mount a la carpeta persistente de Dokploy (`../files/almacenamiento` → `/app/almacenamiento`). Entra en los backups de Dokploy y sobrevive a los redeploys. |
+| Ubicación | Volumen Docker con **nombre** (`almacenamiento_data`, igual que `postgres_data`) → `/app/almacenamiento`. Se probó primero como bind mount a `../files/almacenamiento` pero esa ruta relativa no sobrevivía entre deploys de Dokploy (dependía de dónde quedaba el checkout del compose en cada uno); el volumen con nombre lo administra Docker y persiste solo. |
 | Buckets | `publico/` (imágenes de proyecto, logos, avatares, imágenes de recursos) y `privado/` (cédulas, CV, propuestas, PDF de recursos, docs de solicitudes). Subcarpetas `AAAA/MM`. |
 | Límite de uso | `ALMACENAMIENTO_MAX_BYTES` (55 GiB por defecto, ~28 % de un disco de 192 GB). Al superarlo, las subidas responden `507`. Aviso en logs al 80 / 95 %. |
 | Servido | Todo por el backend. `publico` sin auth + cache de 1 año (nombre UUID no adivinable); `privado` con `AuthGuard('jwt')` + permiso. nginx solo mantiene el proxy `/api/`. |
@@ -58,6 +58,53 @@ Rama: `feature/almacenamiento-archivos`.
 
 Pendiente opcional (no bloquea): simplificar los `select` manuales de los
 services que hoy esconden columnas ya livianas.
+
+## Hotfixes tras el primer despliegue de prueba
+
+- **403 al abrir documentos privados.** `puedeVerPrivado` solo autorizaba a
+  superadmin o a quien subió el archivo — pero el revisor casi nunca es el
+  autor (el dueño del proyecto revisa el CV de un postulante, el admin de la
+  empresa revisa el documento de un empleado). Ahora resuelve el permiso según
+  qué fila de negocio referencia hoy la ruta (usuario, empresa,
+  solicitud_proyecto, solicitud_membresia, recurso, mensaje).
+- **Recursos del equipo visibles en la página pública del proyecto.**
+  `GET /api/proyectos/:id` (sin guard, la usa `/project/:id`) devolvía TODO el
+  árbol de `recurso`, incluido lo que el equipo sube después desde el
+  workspace. Nueva columna `recurso.es_publico` (migración `010`): solo lo
+  creado al publicar el proyecto (galería + documento de acreditación) se
+  marca público y es lo único que ve esa página; el workspace sigue trayendo el
+  árbol completo, pero por `GET /recursos/proyecto/:id`, que exige ser
+  participante.
+- **Clic en un PDF sin ninguna señal.** `window.open()` después de un `await
+  fetch()` pierde el gesto del usuario y el navegador bloquea el popup en
+  silencio (el request se ve en Network, pero no abre nada). `openBase64`
+  ahora reserva la pestaña ANTES del fetch y muestra un toast "Abriendo
+  documento…" mientras descarga.
+- **Superadmin bloqueado en Recursos del workspace.** Regresión del fix
+  anterior: `verificarAccesoAlProyecto` (usado por `GET /recursos/proyecto/:id`)
+  solo miraba `usuario_proyecto` y nunca dejaba pasar al superadmin si no era
+  participante explícito de ese proyecto puntual. Ahora bypassea por rol, igual
+  que el resto de la app.
+- **Archivos que dan 404 aunque existan en el disco.** Pasa cuando la fila en la
+  tabla `archivo` no existe para ese archivo (la BD se desincronizó del
+  volumen en algún redeploy de prueba). `npm run reconciliar:archivos[:dry]`
+  escanea el disco y da de alta la fila que falte, sin tocar nada existente.
+- **El volumen de almacenamiento "se vaciaba" entre deploys.** Causa raíz: se
+  probó primero con un bind mount a ruta relativa (`../files/almacenamiento`,
+  vía `ALMACENAMIENTO_HOST_PATH`) que no sobrevivía entre deploys de Dokploy.
+  Se cambió a un volumen Docker con **nombre** (`almacenamiento_data`), igual
+  que `postgres_data` — ver la tabla de decisiones más arriba.
+- **Abrir un PDF privado era lento.** Los PDF privados no se pueden abrir con un
+  `<a href>` normal (necesitan el token en un header), así que el front los baja
+  enteros con `fetch` y los abre como blob — sin streaming ni caché. Dos cambios:
+  1. **A —** los recursos de un proyecto y su documento de acreditación ya no
+     son sensibles → van al bucket **público** (`POST /recursos/upload` ahora usa
+     `publico` por defecto; el que sube algo sensible pasa `?bucket=privado`).
+     Ahí el navegador los abre directo, con streaming y caché. Solo CV /
+     propuestas / cédulas / documentos de empresa siguen privados.
+     Script `recursos-a-publico` mueve los ya migrados de `privado/` a `publico/`.
+  2. **B —** `openBase64` cachea por sesión el blob de los privados: reabrir el
+     mismo documento es instantáneo.
 
 ---
 

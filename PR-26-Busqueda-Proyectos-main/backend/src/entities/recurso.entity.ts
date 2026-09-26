@@ -21,6 +21,13 @@ export class Recurso {
   @Column({ type: 'int', nullable: true })
   padre_id: number;
 
+  // true solo para lo creado al publicar el proyecto (galería + documento de
+  // acreditación y sus carpetas contenedoras): es lo único que devuelve la
+  // página pública /project/:id. Lo que el equipo sube después desde el
+  // workspace queda en false y solo lo ven los participantes del proyecto.
+  @Column({ type: 'boolean', default: false })
+  es_publico: boolean;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   fecha_creacion: Date;
 
