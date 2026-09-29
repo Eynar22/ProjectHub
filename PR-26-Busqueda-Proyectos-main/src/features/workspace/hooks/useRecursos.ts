@@ -6,6 +6,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { recursosService } from '../services/recursos.service';
+import { subirAjustada } from '@/shared/components/ui/useAjustarImagen';
 import { PROYECTOS_KEYS } from '@/features/proyectos';
 
 export const RECURSOS_KEYS = {
@@ -51,9 +52,13 @@ export function useEliminarRecurso() {
   });
 }
 
-/** Sube un archivo y devuelve `{ url, filename }` (la url va a la BD). */
+/**
+ * Sube un archivo y devuelve `{ url, filename }` (la url va a la BD). Si el
+ * archivo salió del editor de fotos, sube también la original y las enlaza.
+ */
 export function useSubirArchivo() {
   return useMutation({
-    mutationFn: (file: File) => recursosService.subirArchivo(file),
+    mutationFn: (file: File) =>
+      subirAjustada(file, (f, original) => recursosService.subirArchivo(f, original)),
   });
 }

@@ -206,6 +206,7 @@ const NAV: Record<string, { to: string; icon: IconoLucide; label: string }> = {
   projects:       { to: '/dashboard/projects',       icon: FolderKanban,    label: 'Mis Proyectos' },
   create:         { to: '/dashboard/create-project', icon: Plus,            label: 'Crear Proyecto' },
   explore:        { to: '/explore',                  icon: Search,          label: 'Explorar' },
+  companies:      { to: '/empresas',                 icon: Building2,       label: 'Empresas' },
   profile:        { to: '/dashboard/profile',        icon: Building2,       label: 'Mi Perfil' },
   members:        { to: '/dashboard/members',        icon: UserCheck,       label: 'Gestión de Miembros' },
   adminHome:      { to: '/admin',                    icon: LayoutDashboard, label: 'Dashboard' },
@@ -216,9 +217,9 @@ const NAV: Record<string, { to: string; icon: IconoLucide; label: string }> = {
 
 const LINKS_BY_ROLE: Record<SidebarRole, string[]> = {
   superadmin:   ['adminHome', 'adminCompanies', 'adminProjects', 'adminUsers'],
-  companyAdmin: ['dashboard', 'projects', 'create', 'explore', 'profile', 'members'],
-  employee:     ['dashboard', 'projects', 'explore', 'profile'],
-  independent:  ['dashboard', 'projects', 'explore', 'profile'],
+  companyAdmin: ['dashboard', 'projects', 'create', 'explore', 'companies', 'profile', 'members'],
+  employee:     ['dashboard', 'projects', 'explore', 'companies', 'profile'],
+  independent:  ['dashboard', 'projects', 'explore', 'companies', 'profile'],
 };
 
 function StatRow({ icon: Icon, label, value, color, bg }: {

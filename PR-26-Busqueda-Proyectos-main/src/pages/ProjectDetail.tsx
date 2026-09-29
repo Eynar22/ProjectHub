@@ -258,7 +258,7 @@ export default function ProjectDetail() {
                       {project.imagenes.map((img, idx) => (
                         <div key={idx} className="outline-none">
                           <div className="relative aspect-[4/3] bg-muted">
-                            <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-cover" />
+                            <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-contain" />
                           </div>
                         </div>
                       ))}
@@ -419,7 +419,8 @@ export default function ProjectDetail() {
                     {ownerCompany && (
                       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
                         <dt className="flex items-center gap-2 text-muted-foreground"><Building2 className="w-4 h-4" /> Empresa</dt>
-                        <dd className="flex items-center gap-2.5 font-semibold min-w-0">
+                        <dd className="min-w-0">
+                          <Link to={`/empresa/${ownerCompany.id}`} className="flex items-center gap-2.5 font-semibold min-w-0 rounded hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring">
                           {ownerCompany.logo_url ? (
                             <img src={ownerCompany.logo_url} alt={ownerCompany.nombre} className="w-10 h-10 rounded-lg object-contain bg-white border border-border/60 flex-shrink-0" />
                           ) : (
@@ -428,6 +429,7 @@ export default function ProjectDetail() {
                             </span>
                           )}
                           <span className="truncate">{ownerCompany.nombre}</span>
+                          </Link>
                         </dd>
                       </div>
                     )}

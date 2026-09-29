@@ -378,7 +378,7 @@ export default function CreateProject() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                       {imageFiles.map((file, i) => (
                         <div key={i} className="relative group rounded-xl overflow-hidden aspect-video bg-muted">
-                          <img src={URL.createObjectURL(file)} alt={`img-${i}`} className="w-full h-full object-cover" />
+                          <img src={URL.createObjectURL(file)} alt={`img-${i}`} className="w-full h-full object-contain bg-muted" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <BotonAjustar onClick={() => reajustarImagen(i)} className="min-h-11 px-3" />
                             <button type="button" onClick={() => removeImage(i)} aria-label="Quitar imagen"

@@ -330,10 +330,10 @@ export default function CompanyProfile() {
                       <img
                         src={editingProfile ? photoPreview : currentUser?.foto_url}
                         alt={currentUser?.nombre_completo}
-                        className="w-20 h-20 rounded-2xl object-cover shadow-xl"
+                        className="w-20 h-20 rounded-full object-cover shadow-xl"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl">
+                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-black shadow-xl">
                         {initials}
                       </div>
                     )}
@@ -673,7 +673,7 @@ export default function CompanyProfile() {
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             {galleryUrls.map((url, i) => (
                               <div key={i} className="relative group aspect-square">
-                                <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-border" />
+                                <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-contain bg-muted rounded-lg border border-border" />
                                 <BotonAjustar
                                   className="absolute bottom-1 left-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
                                   onClick={() => reajustar(url, AJUSTES.galeria, (nueva) => setGalleryUrls(prev => prev.map((u, j) => (j === i ? nueva : u))))}
@@ -761,7 +761,7 @@ export default function CompanyProfile() {
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Fotos de la Empresa</p>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             {userCompany?.imagenes.map(img => (
-                              <img key={img.id} src={img.url} alt="" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                              <img key={img.id} src={img.url} alt="" className="w-full aspect-square object-contain bg-muted rounded-lg border border-border" />
                             ))}
                           </div>
                         </div>

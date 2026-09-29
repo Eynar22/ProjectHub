@@ -167,6 +167,7 @@ export function Navbar() {
           ))}
           {!currentUser && <span className="hidden lg:block w-px h-5 bg-border mx-2" aria-hidden="true" />}
           <NavLink to="/explore" icon={<Compass className="w-4 h-4" />} label="Explorar proyectos" current={location.pathname} />
+          <NavLink to="/empresas" icon={<Building2 className="w-4 h-4" />} label="Empresas" current={location.pathname} />
           {currentUser && (
             <NavLink to={dashboardPath} icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" current={location.pathname} />
           )}
@@ -294,6 +295,7 @@ export function Navbar() {
                 </>
               )}
               <MobileNavLink to="/explore" label="Explorar proyectos" />
+              <MobileNavLink to="/empresas" label="Empresas" />
               {currentUser ? (
                 <>
                   <MobileNavLink to={dashboardPath} label="Dashboard" />

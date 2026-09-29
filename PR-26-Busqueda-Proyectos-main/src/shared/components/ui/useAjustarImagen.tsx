@@ -13,10 +13,38 @@
 
 import { useCallback, useState, type ReactNode } from 'react';
 import { EditorImagen } from './AjustarImagen';
+import { apiClient } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/endpoints';
+
+/** De qué foto salió cada resultado del editor (File recién elegido o url ya subida). */
+const fuenteDe = new WeakMap<File, File | string>();
+
+/**
+ * Sube una foto. Si salió del editor, primero guarda la original completa (o
+ * reutiliza la ya subida) y la enlaza, para que "Ajustar" parta siempre de la
+ * foto entera. Si no salió del editor, la sube tal cual.
+ */
+export async function subirAjustada<T extends { url: string }>(
+  file: File,
+  subir: (f: File, original?: string) => Promise<T>,
+): Promise<T> {
+  const fuente = fuenteDe.get(file);
+  if (!fuente) return subir(file);
+  let original: string | undefined;
+  try {
+    if (fuente instanceof File) original = (await subir(fuente)).url;
+    else if (fuente.includes('/api/archivos/')) original = fuente;
+  } catch {
+    // Sin original solo se pierde poder reajustar desde la foto completa.
+  }
+  return subir(file, original);
+}
 
 export interface Proporcion { etiqueta: string; valor: number }
 
 export const PROPORCIONES = {
+  /** Proporción de la propia foto (valor 0 = se calcula al cargarla). Sin recorte. */
+  original: { etiqueta: 'Original', valor: 0 },
   cuadrada: { etiqueta: '1:1', valor: 1 },
   vertical: { etiqueta: '4:5', valor: 4 / 5 },
   clasica: { etiqueta: '4:3', valor: 4 / 3 },
@@ -38,8 +66,8 @@ export interface OpcionesAjuste {
 export const AJUSTES = {
   perfil: { titulo: 'Ajustar foto de perfil', forma: 'redonda', proporciones: [PROPORCIONES.cuadrada], maxLado: 600 },
   logo: { titulo: 'Ajustar logo', proporciones: [PROPORCIONES.cuadrada], maxLado: 600 },
-  galeria: { titulo: 'Ajustar foto', proporciones: [PROPORCIONES.clasica, PROPORCIONES.cuadrada, PROPORCIONES.vertical, PROPORCIONES.panoramica] },
-  proyecto: { titulo: 'Ajustar imagen del proyecto', proporciones: [PROPORCIONES.panoramica, PROPORCIONES.clasica, PROPORCIONES.cuadrada, PROPORCIONES.portada] },
+  galeria: { titulo: 'Ajustar foto', proporciones: [PROPORCIONES.original, PROPORCIONES.clasica, PROPORCIONES.cuadrada, PROPORCIONES.vertical, PROPORCIONES.panoramica] },
+  proyecto: { titulo: 'Ajustar imagen del proyecto', proporciones: [PROPORCIONES.original, PROPORCIONES.panoramica, PROPORCIONES.clasica, PROPORCIONES.cuadrada, PROPORCIONES.portada] },
 } satisfies Record<string, OpcionesAjuste>;
 
 export interface Pedido extends OpcionesAjuste {
@@ -63,8 +91,14 @@ export function useAjustarImagen(): {
     let nombre: string;
     let tipo: string;
     let revocar = true;
+    const origen = fuente;
     if (typeof fuente === 'string') {
-      // Foto ya subida: se baja como blob para poder dibujarla en el canvas.
+      // Foto ya subida: si es una recortada, se parte de su original completa.
+      try {
+        const { url: original } = await apiClient.get<{ url: string | null }>(ENDPOINTS.ARCHIVOS.ORIGINAL, { params: { url: fuente } });
+        if (original) fuente = original;
+      } catch { /* sin original: se ajusta la que hay */ }
+      // Se baja como blob para poder dibujarla en el canvas.
       try {
         const res = await fetch(fuente);
         if (!res.ok) throw new Error();
@@ -83,9 +117,11 @@ export function useAjustarImagen(): {
       nombre = fuente.name;
       tipo = fuente.type;
     }
-    return new Promise<File | null>((resolver) => {
+    const resultado = await new Promise<File | null>((resolver) => {
       setPedido({ ...opciones, url, nombre, tipo, revocar, resolver });
     });
+    if (resultado) fuenteDe.set(resultado, origen instanceof File ? origen : fuente);
+    return resultado;
   }, []);
 
   /** Ajusta varios archivos uno tras otro. Los cancelados se omiten. */

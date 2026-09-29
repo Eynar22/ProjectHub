@@ -100,6 +100,7 @@ export class RecursoController {
   async uploadFile(
     @UploadedFile() file: any,
     @Query('bucket') bucketQuery: string | undefined,
+    @Body('original') originalUrl: string | undefined,
     @Req() req: any,
   ) {
     if (!file) {
@@ -111,7 +112,7 @@ export class RecursoController {
     // sentido re-descargarlos con fetch+blob cada vez. El que sube algo sensible
     // (CV / propuesta de una postulación) pasa `?bucket=privado` explícitamente.
     const bucket: 'publico' | 'privado' = bucketQuery === 'privado' ? 'privado' : 'publico';
-    const guardado = await this.almacenamiento.guardarDesdeMulter(file, bucket, req.user?.id ?? null);
+    const guardado = await this.almacenamiento.guardarDesdeMulter(file, bucket, req.user?.id ?? null, originalUrl);
 
     return {
       url: guardado.url,

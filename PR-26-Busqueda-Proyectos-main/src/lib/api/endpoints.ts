@@ -25,6 +25,9 @@ export const ENDPOINTS = {
     APROBAR: (id: number | string) => `/empresas/${id}/aprobar`,
     BLOQUEAR: (id: number | string) => `/empresas/${id}/bloquear`,
     DESBLOQUEAR: (id: number | string) => `/empresas/${id}/desbloquear`,
+    // Directorio público (sin sesión): solo empresas aprobadas y datos públicos.
+    PUBLICAS: '/empresas/publicas',
+    PUBLICA: (id: number | string) => `/empresas/publicas/${id}`,
   },
 
   PROYECTOS: {
@@ -92,6 +95,8 @@ export const ENDPOINTS = {
     SUBIR: '/archivos',
     // Subida sin sesión, solo para el formulario de registro. Rate-limit por IP.
     REGISTRO: '/archivos/registro',
+    // Url de la foto original de una imagen recortada: ?url=... -> { url | null }.
+    ORIGINAL: '/archivos/original',
   },
 
   CHATS: {

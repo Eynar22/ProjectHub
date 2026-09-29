@@ -7,7 +7,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import type { Company, ActualizarCompanyDto } from '../types/empresas.types';
+import type { Company, ActualizarCompanyDto, EmpresaPublica, EmpresaPublicaDetalle } from '../types/empresas.types';
 
 export const empresasService = {
   /** Todas las empresas (el listado no incluye galería de imágenes). */
@@ -38,6 +38,16 @@ export const empresasService = {
   /** Desbloquea una empresa previamente bloqueada (superadmin). */
   async desbloquear(id: number | string): Promise<void> {
     await apiClient.patch(ENDPOINTS.EMPRESAS.DESBLOQUEAR(id), {});
+  },
+
+  /** Directorio público: empresas aprobadas con conteos de proyectos y ODS. */
+  async listarPublicas(): Promise<EmpresaPublica[]> {
+    return apiClient.get<EmpresaPublica[]>(ENDPOINTS.EMPRESAS.PUBLICAS);
+  },
+
+  /** Página pública de una empresa: galería, enlaces y proyectos públicos. */
+  async obtenerPublica(id: number | string): Promise<EmpresaPublicaDetalle> {
+    return apiClient.get<EmpresaPublicaDetalle>(ENDPOINTS.EMPRESAS.PUBLICA(id));
   },
 
   /** Elimina una empresa (superadmin). */

@@ -64,6 +64,15 @@ export class LimpiezaArchivosService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
+      // Las originales de fotos recortadas en uso también están en uso.
+      if (enUso.size > 0) {
+        const originales: { original_id: string }[] = await this.ds.query(
+          `SELECT original_id FROM archivo WHERE original_id IS NOT NULL AND id = ANY($1::uuid[])`,
+          [[...enUso]],
+        );
+        for (const o of originales) enUso.add(o.original_id.toLowerCase());
+      }
+
       const candidatos: { id: string; size_bytes: string }[] = await this.ds.query(
         `SELECT id, size_bytes FROM archivo WHERE creado_en < now() - ${GRACIA}`,
       );

@@ -54,3 +54,45 @@ export type ActualizarCompanyDto = Partial<Omit<Company, 'imagenes' | 'enlaces'>
   imagenes_urls?: string[];
   enlaces?: { url: string; nombre?: string }[];
 };
+
+/* ── Directorio público (/empresas) ─────────────────────────────────────────
+ * Solo datos públicos de empresas aprobadas: sin documento, usuarios ni correos. */
+
+/** Tarjeta del listado público. */
+export interface EmpresaPublica {
+  id: number;
+  nombre: string;
+  descripcion?: string | null;
+  num_empleados?: number | null;
+  portafolio?: string | null;
+  logo_url?: string | null;
+  fecha_aprobacion?: string | null;
+  /** Primera foto de la galería, para la portada de la tarjeta. */
+  portada_url?: string | null;
+  total_proyectos: number;
+  proyectos_activos: number;
+  /** ODS (1..17) que trabaja en sus proyectos públicos, sin repetir. */
+  ods: number[];
+}
+
+/** Proyecto público de una empresa, en su página de detalle. */
+export interface ProyectoDeEmpresa {
+  id: number;
+  nombre: string;
+  descripcion_corta?: string | null;
+  categoria?: string | null;
+  estado: 'en_curso' | 'terminado';
+  ods: number[];
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  imagen_url?: string | null;
+}
+
+/** Página pública de una empresa. */
+export interface EmpresaPublicaDetalle extends Omit<EmpresaPublica, 'ods' | 'portada_url'> {
+  imagenes: CompanyImagen[];
+  enlaces: CompanyEnlace[];
+  proyectos: ProyectoDeEmpresa[];
+  /** Cuántos proyectos tiene en cada ODS. */
+  ods: { ods: number; proyectos: number }[];
+}

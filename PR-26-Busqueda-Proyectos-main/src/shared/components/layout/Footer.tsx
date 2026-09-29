@@ -14,6 +14,9 @@ export function Footer() {
           <Link to="/explore" className="rounded transition-colors hover:text-foreground hover:underline">
             Explorar proyectos
           </Link>
+          <Link to="/empresas" className="rounded transition-colors hover:text-foreground hover:underline">
+            Empresas
+          </Link>
           <a
             href="mailto:soporte@projecthub.umaunivalle.com"
             className="rounded transition-colors hover:text-foreground hover:underline"

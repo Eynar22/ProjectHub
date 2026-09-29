@@ -46,6 +46,10 @@ export class Archivo {
   @Column({ type: 'boolean', default: false })
   referenciado: boolean;
 
+  // Foto original completa de una imagen recortada con el editor (null si no aplica).
+  @Column({ type: 'uuid', nullable: true })
+  original_id: string | null;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   creado_en: Date;
 

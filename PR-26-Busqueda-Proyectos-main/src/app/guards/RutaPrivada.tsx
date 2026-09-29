@@ -3,8 +3,11 @@ import { Navigate } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
 import { ForceChangePassword } from '@/pages/ForceChangePassword';
 
-/** Protege rutas que requieren sesión iniciada. */
-export function RutaPrivada({ children }: { children: ReactNode }) {
+/**
+ * Protege rutas que requieren sesión iniciada. `redirigirA` es a dónde se manda
+ * al visitante sin sesión (por defecto, al inicio).
+ */
+export function RutaPrivada({ children, redirigirA = '/' }: { children: ReactNode; redirigirA?: string }) {
   const { currentUser, loading } = useApp();
 
   if (loading) {
@@ -16,7 +19,7 @@ export function RutaPrivada({ children }: { children: ReactNode }) {
   }
 
   if (!currentUser) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirigirA} replace />;
   }
 
   // Empleados creados desde el wizard de bienvenida reciben una contraseña

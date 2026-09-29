@@ -128,6 +128,13 @@ export class ArchivosController {
     return { url: guardado.url, filename: guardado.nombre_original, mimetype: guardado.mimetype };
   }
 
+  /** Url de la foto original (completa) de una imagen recortada: { url | null }. */
+  @Get('original')
+  @UseGuards(AuthGuard('jwt'))
+  async original(@Query('url') url: string | undefined) {
+    return { url: url ? await this.almacenamiento.urlOriginal(url) : null };
+  }
+
   /** Bucket público: sin auth, cache larga (nombre UUID no adivinable). */
   @Get('publico/:anio/:mes/:nombre')
   async servirPublico(

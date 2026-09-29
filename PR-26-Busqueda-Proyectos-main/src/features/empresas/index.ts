@@ -7,6 +7,8 @@ export {
   useEmpresa,
   useActualizarEmpresa,
   useModerarEmpresa,
+  useEmpresasPublicas,
+  useEmpresaPublica,
 } from './hooks/useEmpresas';
 export type {
   Company,
@@ -16,4 +18,7 @@ export type {
   CompanyRegistrant,
   MemberRequest,
   ActualizarCompanyDto,
+  EmpresaPublica,
+  EmpresaPublicaDetalle,
+  ProyectoDeEmpresa,
 } from './types/empresas.types';

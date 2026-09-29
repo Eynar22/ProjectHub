@@ -11,6 +11,9 @@ import { Modal } from '@/shared/components/ui/Modal';
 import { Button } from '@/shared/components/ui/Button';
 import { PROPORCIONES, type Pedido } from './useAjustarImagen';
 
+/** Zoom menor a 1 permite alejar la foto para que entre completa (el sobrante queda con fondo). */
+const MIN_ZOOM = 0.5;
+
 export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTerminar: (f: File | null) => void }) {
   const proporciones = pedido.proporciones?.length ? pedido.proporciones : [PROPORCIONES.cuadrada];
   const redonda = pedido.forma === 'redonda';
@@ -18,7 +21,11 @@ export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTermina
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotacion, setRotacion] = useState(0);
-  const [aspecto, setAspecto] = useState(proporciones[0].valor);
+  // Proporción elegida (índice) y proporción real de la foto, para la opción "Original".
+  const [elegida, setElegida] = useState(0);
+  const [aspectoFoto, setAspectoFoto] = useState(1);
+  const rotada = Math.abs(rotacion) % 180 === 90;
+  const aspecto = proporciones[elegida].valor || (rotada ? 1 / aspectoFoto : aspectoFoto);
   const [area, setArea] = useState<Area | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +34,7 @@ export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTermina
   // Si se desmonta sin confirmar (p. ej. cambio de página), se trata como cancelar.
   useEffect(() => () => { if (!terminado.current) onTerminar(null); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const reiniciar = () => { setCrop({ x: 0, y: 0 }); setZoom(1); setRotacion(0); };
+  const reiniciar = () => { setCrop({ x: 0, y: 0 }); setZoom(1); setRotacion(0); setElegida(0); };
 
   const confirmar = async () => {
     if (!area) return;
@@ -70,7 +77,9 @@ export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTermina
             aspect={aspecto}
             cropShape={redonda ? 'round' : 'rect'}
             showGrid={!redonda}
-            minZoom={1}
+            minZoom={MIN_ZOOM}
+            restrictPosition={false}
+            onMediaLoaded={(m) => setAspectoFoto(m.naturalWidth / m.naturalHeight)}
             maxZoom={4}
             zoomSpeed={0.2}
             onCropChange={setCrop}
@@ -81,17 +90,17 @@ export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTermina
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Arrastra para mover la foto. Usa la rueda del mouse, el control de zoom o dos dedos para acercar.
+          Arrastra para mover la foto. Usa la rueda del mouse, el control de zoom o dos dedos para acercar o alejar. Elige «Original» para no recortarla.
         </p>
 
         {/* Zoom */}
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => setZoom((z) => Math.max(1, z - 0.2))} aria-label="Alejar"
+          <button type="button" onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.2))} aria-label="Alejar"
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
             <ZoomOut className="w-4 h-4" />
           </button>
           <input
-            type="range" min={1} max={4} step={0.01} value={zoom}
+            type="range" min={MIN_ZOOM} max={4} step={0.01} value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
             aria-label="Zoom"
             className="flex-1 accent-[var(--color-primary)]"
@@ -107,15 +116,15 @@ export function EditorImagen({ pedido, onTerminar }: { pedido: Pedido; onTermina
           {proporciones.length > 1 ? (
             <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Proporción">
               <Crop className="w-4 h-4 text-muted-foreground mr-1" aria-hidden="true" />
-              {proporciones.map((p) => (
+              {proporciones.map((p, i) => (
                 <button
                   key={p.etiqueta}
                   type="button"
                   role="radio"
-                  aria-checked={aspecto === p.valor}
-                  onClick={() => setAspecto(p.valor)}
+                  aria-checked={elegida === i}
+                  onClick={() => { setElegida(i); setCrop({ x: 0, y: 0 }); setZoom(1); }}
                   className={`px-3 h-9 rounded-full text-xs font-semibold border transition-colors ${
-                    aspecto === p.valor ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-muted'
+                    elegida === i ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-muted'
                   }`}
                 >
                   {p.etiqueta}
@@ -183,10 +192,13 @@ async function recortar(src: string, area: Area, rotacion: number, tipo: string,
   salida.height = Math.round(area.height * escala);
   const sctx = salida.getContext('2d')!;
   sctx.imageSmoothingQuality = 'high';
-  sctx.drawImage(lienzo, area.x, area.y, area.width, area.height, 0, 0, salida.width, salida.height);
-
   // PNG solo si el original podía tener transparencia (logos); si no, JPG más liviano.
   const png = tipo === 'image/png' || tipo === 'image/webp' || tipo === 'image/gif';
+  // El área puede salirse de la foto (zoom < 1 o foto movida al borde): el sobrante
+  // queda transparente en PNG y blanco en JPG, en vez de estirar o desplazar la foto.
+  if (!png) { sctx.fillStyle = '#fff'; sctx.fillRect(0, 0, salida.width, salida.height); }
+  sctx.drawImage(lienzo, -area.x * escala, -area.y * escala, lienzo.width * escala, lienzo.height * escala);
+
   const mime = png ? 'image/png' : 'image/jpeg';
   const blob = await new Promise<Blob>((ok, fallo) =>
     salida.toBlob((b) => (b ? ok(b) : fallo(new Error('toBlob'))), mime, 0.9),

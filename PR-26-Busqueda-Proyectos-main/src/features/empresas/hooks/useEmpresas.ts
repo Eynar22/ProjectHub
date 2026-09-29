@@ -12,6 +12,8 @@ export const EMPRESAS_KEYS = {
   todas: ['empresas'] as const,
   lista: () => [...EMPRESAS_KEYS.todas, 'lista'] as const,
   detalle: (id: number | string) => [...EMPRESAS_KEYS.todas, 'detalle', String(id)] as const,
+  publicas: () => [...EMPRESAS_KEYS.todas, 'publicas'] as const,
+  publica: (id: number | string) => [...EMPRESAS_KEYS.todas, 'publica', String(id)] as const,
 };
 
 const REFETCH_MS = 60_000;
@@ -30,6 +32,23 @@ export function useEmpresa(id: number | string | undefined) {
   return useQuery({
     queryKey: EMPRESAS_KEYS.detalle(id ?? ''),
     queryFn: () => empresasService.obtenerPorId(id!),
+    enabled: id != null && id !== '',
+  });
+}
+
+/** Directorio público de empresas (no requiere sesión). */
+export function useEmpresasPublicas() {
+  return useQuery({
+    queryKey: EMPRESAS_KEYS.publicas(),
+    queryFn: () => empresasService.listarPublicas(),
+  });
+}
+
+/** Página pública de una empresa (no requiere sesión). */
+export function useEmpresaPublica(id: number | string | undefined) {
+  return useQuery({
+    queryKey: EMPRESAS_KEYS.publica(id ?? ''),
+    queryFn: () => empresasService.obtenerPublica(id!),
     enabled: id != null && id !== '',
   });
 }

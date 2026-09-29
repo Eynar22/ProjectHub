@@ -231,7 +231,7 @@ export function NewCompanyForm({ onBack, onSuccess }: {
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {data.fotos.map((file, i) => (
                     <div key={i} className="relative group/foto aspect-video rounded-lg overflow-hidden bg-muted">
-                      <img src={URL.createObjectURL(file)} alt={`foto-${i}`} className="w-full h-full object-cover" />
+                      <img src={URL.createObjectURL(file)} alt={`foto-${i}`} className="w-full h-full object-contain" />
                       <BotonAjustar
                         className="absolute bottom-1 left-1 md:opacity-0 md:group-hover/foto:opacity-100 focus-visible:opacity-100"
                         onClick={() => reajustarFoto(i)}

@@ -27,6 +27,9 @@ import {
   RUTA_PUBLICA_BASE,
 } from './almacenamiento.constants';
 
+const UUID_EN_URL =
+  /archivos\/(?:publico|privado)\/\d{4}\/\d{2}\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\./i;
+
 export interface ArchivoGuardado {
   id: string;
   url: string; // '/api/archivos/<bucket>/AAAA/MM/<id>.<ext>' — esto va a la columna *_url
@@ -92,6 +95,7 @@ export class AlmacenamientoService implements OnModuleInit {
     file: { buffer: Buffer; mimetype: string; originalname?: string; size: number },
     bucket: Bucket,
     subidoPor: number | null,
+    originalUrl?: string | null,
   ): Promise<ArchivoGuardado> {
     if (!file || !file.buffer?.length) {
       throw new PayloadTooLargeException('No se recibió ningún archivo');
@@ -127,6 +131,7 @@ export class AlmacenamientoService implements OnModuleInit {
     }
 
     await this.verificarCuota(buffer.length);
+    const originalId = await this.resolverOriginal(originalUrl, subidoPor);
 
     return this.escribirYRegistrar({
       buffer,
@@ -135,6 +140,7 @@ export class AlmacenamientoService implements OnModuleInit {
       nombreOriginal: file.originalname ?? null,
       subidoPor,
       referenciado: false,
+      originalId,
     });
   }
 
@@ -177,6 +183,7 @@ export class AlmacenamientoService implements OnModuleInit {
     referenciado: boolean;
     entidadTipo?: string | null;
     entidadId?: number | null;
+    originalId?: string | null;
   }): Promise<ArchivoGuardado> {
     const id = randomUUID();
     const ext = EXT_BY_MIME[p.mimetype];
@@ -201,6 +208,7 @@ export class AlmacenamientoService implements OnModuleInit {
         entidad_tipo: p.entidadTipo ?? null,
         entidad_id: p.entidadId ?? null,
         referenciado: p.referenciado,
+        original_id: p.originalId ?? null,
       });
     } catch (e) {
       // Si falla el registro en BD, no dejamos el archivo colgado.
@@ -426,6 +434,30 @@ export class AlmacenamientoService implements OnModuleInit {
   }
 
   /** Borra un archivo por su id de registro (disco + fila). Lo usa la limpieza de huérfanos. */
+  /**
+   * Id del archivo original a partir de su url. Solo se acepta una imagen que
+   * subió el mismo usuario (o sin dueño, en el registro); si no, se ignora.
+   * Si esa url ya era una recortada, se enlaza con SU original (siempre la raíz).
+   */
+  private async resolverOriginal(url: string | null | undefined, subidoPor: number | null): Promise<string | null> {
+    const id = url ? UUID_EN_URL.exec(url)?.[1]?.toLowerCase() : undefined;
+    if (!id) return null;
+    const a = await this.archivoRepo.findOne({ where: { id } });
+    if (!a || !a.mimetype.startsWith('image/')) return null;
+    if (a.subido_por != null && a.subido_por !== subidoPor) return null;
+    return a.original_id ?? a.id;
+  }
+
+  /** Url de la foto original de una imagen recortada, o null si no tiene. */
+  async urlOriginal(url: string): Promise<string | null> {
+    const id = UUID_EN_URL.exec(url)?.[1]?.toLowerCase();
+    if (!id) return null;
+    const a = await this.archivoRepo.findOne({ where: { id } });
+    if (!a?.original_id) return null;
+    const o = await this.archivoRepo.findOne({ where: { id: a.original_id } });
+    return o ? `${RUTA_PUBLICA_BASE}/${o.ruta_relativa}` : null;
+  }
+
   async eliminarPorId(id: string): Promise<void> {
     const archivo = await this.archivoRepo.findOne({ where: { id } });
     if (!archivo) return;

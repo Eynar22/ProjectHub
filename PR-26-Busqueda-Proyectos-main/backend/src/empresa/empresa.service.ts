@@ -51,6 +51,88 @@ export class EmpresaService {
     return this.empresaRepo.find({ where: { estado: 'aprobado' } });
   }
 
+  // ── Directorio público (sin sesión) ───────────────────────────────────────
+  // Solo empresas aprobadas y solo datos públicos: nada de documento de
+  // acreditación, usuarios ni correos. Cuenta únicamente los proyectos que
+  // también son públicos (en curso o terminados, no suspendidos).
+
+  private static readonly PROYECTOS_PUBLICOS_SQL = `
+    SELECT p.*, u.empresa_id
+    FROM proyecto p
+    JOIN usuario u ON u.id = p.creador_id
+    WHERE p.estado IN ('en_curso', 'terminado') AND NOT p.suspendido`;
+
+  /** ODS de un proyecto: la columna es simple-json en texto y puede venir vacía o mal formada. */
+  private static odsDe(valor: string | null): number[] {
+    if (!valor) return [];
+    try {
+      const v = JSON.parse(valor);
+      return Array.isArray(v) ? v.map(Number).filter((n) => Number.isInteger(n) && n >= 1 && n <= 17) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Listado público: datos básicos, portada y conteos de proyectos y ODS. */
+  async findPublicas() {
+    const empresas: any[] = await this.empresaRepo.query(`
+      SELECT e.id, e.nombre, e.descripcion, e.num_empleados, e.portafolio, e.logo_url, e.fecha_aprobacion,
+             (SELECT url FROM empresa_imagen i WHERE i.empresa_id = e.id ORDER BY i.id LIMIT 1) AS portada_url
+      FROM empresa e
+      WHERE e.estado = 'aprobado'
+      ORDER BY e.nombre`);
+    const proyectos: { empresa_id: number; estado: string; ods: string | null }[] = await this.empresaRepo.query(
+      `SELECT pp.empresa_id, pp.estado, pp.ods FROM (${EmpresaService.PROYECTOS_PUBLICOS_SQL}) pp`,
+    );
+    return empresas.map((e) => {
+      const suyos = proyectos.filter((p) => p.empresa_id === e.id);
+      const ods = [...new Set(suyos.flatMap((p) => EmpresaService.odsDe(p.ods)))].sort((a, b) => a - b);
+      return {
+        ...e,
+        total_proyectos: suyos.length,
+        proyectos_activos: suyos.filter((p) => p.estado === 'en_curso').length,
+        ods,
+      };
+    });
+  }
+
+  /** Detalle público: galería, enlaces, proyectos públicos y proyectos por ODS. */
+  async findPublica(id: number) {
+    const [empresa] = await this.empresaRepo.query(
+      `SELECT id, nombre, descripcion, num_empleados, portafolio, logo_url, fecha_aprobacion
+       FROM empresa WHERE id = $1 AND estado = 'aprobado'`,
+      [id],
+    );
+    if (!empresa) throw new NotFoundException('Empresa no encontrada');
+
+    const [imagenes, enlaces, filas] = await Promise.all([
+      this.imagenRepo.find({ where: { empresa_id: id }, select: { id: true, url: true }, order: { id: 'ASC' } }),
+      this.enlaceRepo.find({ where: { empresa_id: id }, select: { id: true, url: true, nombre: true }, order: { id: 'ASC' } }),
+      this.empresaRepo.query(
+        `SELECT pp.id, pp.nombre, pp.descripcion_corta, pp.categoria, pp.estado, pp.ods, pp.fecha_inicio, pp.fecha_fin,
+                (SELECT url FROM proyecto_imagen pi WHERE pi.proyecto_id = pp.id ORDER BY pi.id LIMIT 1) AS imagen_url
+         FROM (${EmpresaService.PROYECTOS_PUBLICOS_SQL}) pp
+         WHERE pp.empresa_id = $1
+         ORDER BY pp.fecha_creacion DESC`,
+        [id],
+      ),
+    ]);
+
+    const proyectos = (filas as any[]).map((p) => ({ ...p, ods: EmpresaService.odsDe(p.ods) }));
+    const conteo = new Map<number, number>();
+    for (const p of proyectos) for (const o of p.ods) conteo.set(o, (conteo.get(o) ?? 0) + 1);
+
+    return {
+      ...empresa,
+      imagenes,
+      enlaces,
+      proyectos,
+      total_proyectos: proyectos.length,
+      proyectos_activos: proyectos.filter((p) => p.estado === 'en_curso').length,
+      ods: [...conteo.entries()].sort((a, b) => a[0] - b[0]).map(([ods, proyectos]) => ({ ods, proyectos })),
+    };
+  }
+
   async findOne(id: number) {
     const empresa = await this.empresaRepo.findOne({
       where: { id },

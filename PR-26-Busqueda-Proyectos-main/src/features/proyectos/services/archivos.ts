@@ -7,6 +7,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/endpoints';
+import { subirAjustada } from '@/shared/components/ui/useAjustarImagen';
 
 /**
  * @param opts.privado true para documentos sensibles (CV, propuesta de una
@@ -17,12 +18,16 @@ export async function subirArchivo(
   file: File,
   opts?: { privado?: boolean },
 ): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
-  const { url } = await apiClient.post<{ url: string }>(
-    ENDPOINTS.RECURSOS.UPLOAD,
-    formData,
-    opts?.privado ? { params: { bucket: 'privado' } } : undefined,
-  );
+  // Si la foto salió del editor, también se guarda su original (ver subirAjustada).
+  const { url } = await subirAjustada(file, (f, original) => {
+    const formData = new FormData();
+    formData.append('file', f);
+    if (original) formData.append('original', original);
+    return apiClient.post<{ url: string }>(
+      ENDPOINTS.RECURSOS.UPLOAD,
+      formData,
+      opts?.privado ? { params: { bucket: 'privado' } } : undefined,
+    );
+  });
   return url;
 }

@@ -21,6 +21,17 @@ export class EmpresaController {
     return this.empresaService.findApproved();
   }
 
+  /** Directorio público de empresas aprobadas (sin sesión, solo datos públicos). */
+  @Get('publicas')
+  findPublicas() {
+    return this.empresaService.findPublicas();
+  }
+
+  @Get('publicas/:id')
+  findPublica(@Param('id', ParseIntPipe) id: number) {
+    return this.empresaService.findPublica(id);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.empresaService.findOne(id);

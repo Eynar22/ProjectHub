@@ -159,7 +159,7 @@ export function InfoTab({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {editImagenes.map((url, idx) => (
                 <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-border">
-                  <img src={url} alt={`Imagen ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={url} alt={`Imagen ${idx + 1}`} className="w-full h-full object-contain bg-muted" />
                   <BotonAjustar
                     className="absolute bottom-1 left-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100"
                     onClick={() => reajustarEditImage(idx)}
@@ -186,7 +186,7 @@ export function InfoTab({
                   <img
                     src={img.url}
                     alt={`${project.nombre} ${idx + 1}`}
-                    className="w-full h-96 object-cover"
+                    className="w-full h-96 object-contain bg-muted"
                   />
                 </div>
               ))}

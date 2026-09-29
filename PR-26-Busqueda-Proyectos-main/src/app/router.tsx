@@ -16,6 +16,8 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Explore from '@/pages/Explore';
 import ProjectDetail from '@/pages/ProjectDetail';
+import Companies from '@/pages/Companies';
+import CompanyPublic from '@/pages/CompanyPublic';
 import CompanyDashboard from '@/pages/CompanyDashboard';
 import MyProjects from '@/pages/MyProjects';
 import CreateProject from '@/pages/CreateProject';
@@ -41,7 +43,10 @@ export const router = createBrowserRouter([
       { path: '/forgot-password', Component: ForgotPassword, handle: { titulo: 'Recuperar contraseña' } },
       { path: '/reset-password', Component: ResetPassword, handle: { titulo: 'Restablecer contraseña' } },
       { path: '/explore', Component: Explore, handle: { titulo: 'Explorar proyectos' } },
-      { path: '/project/:id', Component: ProjectDetail, handle: { titulo: 'Detalle del proyecto' } },
+      // El detalle de un proyecto solo lo ven usuarios registrados; al visitante se le invita a registrarse.
+      { path: '/project/:id', element: <RutaPrivada redirigirA="/register"><ProjectDetail /></RutaPrivada>, handle: { titulo: 'Detalle del proyecto' } },
+      { path: '/empresas', Component: Companies, handle: { titulo: 'Empresas' } },
+      { path: '/empresa/:id', Component: CompanyPublic, handle: { titulo: 'Empresa' } },
 
       // ── Rutas de usuario autenticado ──
       { path: '/dashboard', element: <RutaPrivada><CompanyDashboard /></RutaPrivada>, handle: { titulo: 'Panel de empresa' } },

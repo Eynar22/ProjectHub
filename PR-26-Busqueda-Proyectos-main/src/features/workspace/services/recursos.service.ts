@@ -30,11 +30,13 @@ export const recursosService = {
   /**
    * Sube un archivo. El backend lo comprime/redimensiona, lo escribe en disco y
    * devuelve la ruta (`/api/archivos/...`) que se guarda en la BD, más el
-   * nombre original.
+   * nombre original. `original` es la url de la foto completa cuando `file` es
+   * una versión recortada con el editor.
    */
-  async subirArchivo(file: File): Promise<{ url: string; filename?: string }> {
+  async subirArchivo(file: File, original?: string): Promise<{ url: string; filename?: string }> {
     const formData = new FormData();
     formData.append('file', file);
+    if (original) formData.append('original', original);
     return apiClient.post<{ url: string; filename?: string }>(
       ENDPOINTS.RECURSOS.UPLOAD,
       formData,
