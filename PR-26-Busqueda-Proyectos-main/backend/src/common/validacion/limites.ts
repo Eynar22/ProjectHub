@@ -12,7 +12,6 @@ export const LIMITES = {
   },
   empresa: {
     nombre: 150,
-    descripcion: 1000,
     portafolio: 250,
     num_empleados_max: 10_000,
     enlace_nombre: 100,
@@ -21,7 +20,6 @@ export const LIMITES = {
   proyecto: {
     nombre: 150,
     descripcion_corta: 500,
-    descripcion_completa: 1000,
     problema: 3000,
     categoria: 100,
     financiamiento_max: 9_999_999_999.99, // numeric(12,2)

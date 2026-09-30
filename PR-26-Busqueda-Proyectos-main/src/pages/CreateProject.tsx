@@ -305,7 +305,7 @@ export default function CreateProject() {
 
                   <TextArea label="Descripción Completa" name="description"
                     placeholder="Describe el proyecto en detalle: objetivos, alcance, tecnologías y requerimientos..."
-                    rows={5} value={formData.description} maxLength={LIMITES.proyecto.descripcion_completa}
+                    rows={5} value={formData.description}
                     onChange={handleChange} error={errors.description} />
 
                   <TextArea label="El Problema que Resuelve" name="problema"

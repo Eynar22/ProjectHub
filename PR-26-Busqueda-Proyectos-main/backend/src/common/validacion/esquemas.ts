@@ -27,7 +27,7 @@ export const CAMPOS = {
   url: { etiqueta: 'El archivo', max: L.url },
 
   nombre_empresa: { etiqueta: 'El nombre de la empresa', requerido: true, max: L.empresa.nombre },
-  descripcion_empresa: { etiqueta: 'La descripción', max: L.empresa.descripcion },
+  descripcion_empresa: { etiqueta: 'La descripción' }, // sin tope (columna text)
   portafolio: { etiqueta: 'El portafolio', max: L.empresa.portafolio },
   num_empleados: {
     etiqueta: 'El número de empleados', tipo: 'entero', min: 1, max: L.empresa.num_empleados_max,
@@ -35,7 +35,7 @@ export const CAMPOS = {
 
   nombre_proyecto: { etiqueta: 'El nombre del proyecto', requerido: true, max: L.proyecto.nombre },
   descripcion_corta: { etiqueta: 'La descripción corta', max: L.proyecto.descripcion_corta },
-  descripcion_completa: { etiqueta: 'La descripción completa', max: L.proyecto.descripcion_completa },
+  descripcion_completa: { etiqueta: 'La descripción completa' }, // sin tope (columna text)
   problema: { etiqueta: 'El problema que resuelve', max: L.proyecto.problema },
   fecha_inicio: { etiqueta: 'La fecha de inicio', tipo: 'fecha', noPasado: true },
   fecha_fin: { etiqueta: 'La fecha de finalización', tipo: 'fecha', noPasado: true },

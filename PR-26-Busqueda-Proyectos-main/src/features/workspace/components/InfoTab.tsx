@@ -200,7 +200,7 @@ export function InfoTab({
         <h3 className="text-xl font-bold tracking-tight mb-4">Descripción</h3>
         {editingProjectInfo ? (
           <TextArea
-            value={editDescripcion} maxLength={LIMITES.proyecto.descripcion_completa}
+            value={editDescripcion}
             onChange={(e) => setEditDescripcion(e.target.value)}
             placeholder="Descripción completa del proyecto..."
             rows={6}

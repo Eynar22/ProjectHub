@@ -184,7 +184,7 @@ export function NewCompanyForm({ onBack, onSuccess }: {
           </h2>
           <div className="space-y-4">
             <Input label="Nombre de la empresa *" type="text" name="companyName" autoComplete="organization" placeholder="Mi Empresa S.A." value={data.companyName} maxLength={LIMITES.empresa.nombre} onChange={handleChange} error={errors.companyName} />
-            <TextArea label="Descripción *" name="description" placeholder="Describe tu empresa, industria y servicios..." rows={5} value={data.description} maxLength={LIMITES.empresa.descripcion} onChange={handleChange} error={errors.description} />
+            <TextArea label="Descripción *" name="description" placeholder="Describe tu empresa, industria y servicios..." rows={5} value={data.description} onChange={handleChange} error={errors.description} />
             <div className="grid md:grid-cols-2 gap-4">
               <Input label="Número de Empleados *" type="number" name="employees" min="1" placeholder="50" value={data.employees} max={LIMITES.empresa.num_empleados_max} onChange={handleChange} error={errors.employees} />
               <div className="hidden md:block" />

@@ -91,7 +91,7 @@ ALTER TABLE public.codigo_recuperacion ALTER COLUMN id ADD GENERATED ALWAYS AS I
 CREATE TABLE public.empresa (
     id smallint NOT NULL,
     nombre character varying(150) NOT NULL,
-    descripcion character varying(1000),
+    descripcion text,
     num_empleados integer,
     portafolio character varying(250),
     documento_url text,

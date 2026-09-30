@@ -631,7 +631,7 @@ export default function CompanyProfile() {
                       <TextArea
                         label="Descripción"
                         rows={6}
-                        value={companyForm.descripcion} maxLength={LIMITES.empresa.descripcion}
+                        value={companyForm.descripcion}
                         onChange={(e) => setCompanyForm(f => ({ ...f, descripcion: e.target.value }))}
                       />
 

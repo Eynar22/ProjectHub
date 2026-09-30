@@ -268,7 +268,7 @@ export function OnboardingWizard() {
                         label="Descripción completa"
                         placeholder="Objetivos, alcance, tecnologías y requerimientos..."
                         rows={4}
-                        value={projectForm.descripcion} maxLength={LIMITES.proyecto.descripcion_completa}
+                        value={projectForm.descripcion}
                         onChange={(e) => setField('descripcion', e.target.value)}
                       />
                       <TextArea

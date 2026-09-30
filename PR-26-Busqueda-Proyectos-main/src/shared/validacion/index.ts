@@ -18,7 +18,6 @@ export const LIMITES = {
   },
   empresa: {
     nombre: 150,
-    descripcion: 1000,
     portafolio: 250,
     num_empleados_max: 10_000,
     enlace_nombre: 100,
@@ -27,7 +26,6 @@ export const LIMITES = {
   proyecto: {
     nombre: 150,
     descripcion_corta: 500,
-    descripcion_completa: 1000,
     problema: 3000,
     financiamiento_max: 9_999_999_999.99,
   },
@@ -88,7 +86,7 @@ export const CAMPOS = {
   },
 
   nombre_empresa: { etiqueta: 'El nombre de la empresa', requerido: true, max: L.empresa.nombre },
-  descripcion_empresa: { etiqueta: 'La descripción', requerido: true, max: L.empresa.descripcion },
+  descripcion_empresa: { etiqueta: 'La descripción', requerido: true }, // sin tope (columna text)
   portafolio: { etiqueta: 'El portafolio', requerido: true, max: L.empresa.portafolio },
   num_empleados: {
     etiqueta: 'El número de empleados', tipo: 'entero', requerido: true,
@@ -99,7 +97,7 @@ export const CAMPOS = {
 
   nombre_proyecto: { etiqueta: 'El nombre del proyecto', requerido: true, max: L.proyecto.nombre },
   descripcion_corta: { etiqueta: 'La descripción corta', requerido: true, max: L.proyecto.descripcion_corta },
-  descripcion_completa: { etiqueta: 'La descripción completa', requerido: true, max: L.proyecto.descripcion_completa },
+  descripcion_completa: { etiqueta: 'La descripción completa', requerido: true }, // sin tope (columna text)
   problema: { etiqueta: 'El problema que resuelve', requerido: true, max: L.proyecto.problema },
   fecha_inicio: { etiqueta: 'La fecha de inicio', tipo: 'fecha', requerido: true, noPasado: true },
   fecha_fin: { etiqueta: 'La fecha de finalización', tipo: 'fecha', requerido: true, noPasado: true },
