@@ -91,7 +91,7 @@ ALTER TABLE public.codigo_recuperacion ALTER COLUMN id ADD GENERATED ALWAYS AS I
 CREATE TABLE public.empresa (
     id smallint NOT NULL,
     nombre character varying(150) NOT NULL,
-    descripcion character varying(250),
+    descripcion character varying(1000),
     num_empleados integer,
     portafolio character varying(250),
     documento_url text,
@@ -244,7 +244,7 @@ ALTER TABLE public.mensaje ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 CREATE TABLE public.proyecto (
     id integer NOT NULL,
     nombre character varying(150) NOT NULL,
-    descripcion_corta character varying(250),
+    descripcion_corta character varying(500),
     descripcion_completa text,
     fecha_inicio date,
     fecha_fin date,

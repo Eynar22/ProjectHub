@@ -11,7 +11,7 @@ export class Empresa {
   @Column({ type: 'varchar', length: 150 })
   nombre: string;
 
-  @Column({ type: 'varchar', length: 250, nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   descripcion: string;
 
   @Column({ type: 'int', nullable: true })

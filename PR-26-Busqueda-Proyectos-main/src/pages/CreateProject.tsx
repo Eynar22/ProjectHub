@@ -252,7 +252,7 @@ export default function CreateProject() {
                     value={formData.name} maxLength={LIMITES.proyecto.nombre} onChange={handleChange} error={errors.name} />
 
                   <TextArea label="Descripción Corta" name="shortDescription"
-                    placeholder="Resumen para tarjetas (máx. 250 caracteres)"
+                    placeholder="Resumen para tarjetas (máx. 500 caracteres)"
                     rows={2} value={formData.shortDescription} maxLength={LIMITES.proyecto.descripcion_corta}
                     onChange={handleChange} error={errors.shortDescription} />
 

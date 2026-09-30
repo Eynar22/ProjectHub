@@ -123,7 +123,7 @@ export function InfoTab({
             label="Descripción corta"
             value={editDescCorta} maxLength={LIMITES.proyecto.descripcion_corta}
             onChange={(e) => setEditDescCorta(e.target.value)}
-            placeholder="Resumen para las tarjetas (máx. 250 caracteres)"
+            placeholder="Resumen para las tarjetas (máx. 500 caracteres)"
             rows={2}
           />
         </Card>

@@ -108,7 +108,7 @@ export default function AdminCompanyRequest() {
                       )}
                       <div>
                         <h1 className="text-3xl font-black tracking-tight mb-2">{company.nombre}</h1>
-                        <p className="text-lg text-muted-foreground leading-relaxed">{company.descripcion}</p>
+                        <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line break-words">{company.descripcion}</p>
                       </div>
                     </div>
 

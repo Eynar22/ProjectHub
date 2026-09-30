@@ -40,3 +40,4 @@ vite.config.js.timestamp-*
 # Almacenamiento de archivos en disco (dev local; en prod es un volumen)
 /almacenamiento_data
 /backend/almacenamiento_data
+respaldos/

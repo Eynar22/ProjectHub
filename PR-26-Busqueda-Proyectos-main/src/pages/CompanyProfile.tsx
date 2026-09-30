@@ -630,7 +630,7 @@ export default function CompanyProfile() {
 
                       <TextArea
                         label="Descripción"
-                        rows={3}
+                        rows={6}
                         value={companyForm.descripcion} maxLength={LIMITES.empresa.descripcion}
                         onChange={(e) => setCompanyForm(f => ({ ...f, descripcion: e.target.value }))}
                       />
@@ -745,7 +745,7 @@ export default function CompanyProfile() {
                       {userCompany.descripcion && (
                         <div className="px-6 pb-4">
                           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Descripción</p>
-                          <p className="text-sm text-foreground leading-relaxed bg-muted/40 rounded-xl p-4">{userCompany.descripcion}</p>
+                          <p className="text-sm text-foreground leading-relaxed bg-muted/40 rounded-xl p-4 whitespace-pre-line break-words max-h-72 overflow-y-auto">{userCompany.descripcion}</p>
                         </div>
                       )}
 

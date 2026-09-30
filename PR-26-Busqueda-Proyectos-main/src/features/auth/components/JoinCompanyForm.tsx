@@ -79,7 +79,7 @@ export function JoinCompanyForm({ company, onBack, onSuccess }: {
           <h1 className="text-2xl font-bold">{company?.nombre}</h1>
           <p className="text-muted-foreground text-sm">Solicitar acceso a esta empresa</p>
           {company?.descripcion && (
-            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{company.descripcion}</p>
+            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 break-words">{company.descripcion}</p>
           )}
         </div>
       </div>

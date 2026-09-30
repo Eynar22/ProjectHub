@@ -15,7 +15,7 @@ export class Proyecto {
   @Column({ type: 'varchar', length: 150 })
   nombre: string;
 
-  @Column({ type: 'varchar', length: 250, nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   descripcion_corta: string;
 
   @Column({ type: 'text', nullable: true })

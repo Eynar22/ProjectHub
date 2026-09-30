@@ -244,7 +244,7 @@ export default function ProjectDetail() {
                 </h1>
 
                 {project.descripcion_corta && (
-                  <p className="mt-3 text-lg text-muted-foreground leading-relaxed">
+                  <p className="mt-3 text-lg text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                     {project.descripcion_corta}
                   </p>
                 )}

@@ -242,7 +242,7 @@ export function OnboardingWizard() {
                       />
                       <TextArea
                         label="Descripción corta"
-                        placeholder="Resumen para las tarjetas (máx. 250 caracteres)"
+                        placeholder="Resumen para las tarjetas (máx. 500 caracteres)"
                         rows={2}
                         value={projectForm.descripcion_corta} maxLength={LIMITES.proyecto.descripcion_corta}
                         onChange={(e) => setField('descripcion_corta', e.target.value)}

@@ -86,7 +86,7 @@ export default function CompanyPublic() {
                   {/* Columna principal */}
                   <div className="lg:col-span-2 space-y-8">
                     <Seccion titulo="Sobre la empresa">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                         {empresa.descripcion || 'Esta empresa todavía no agregó una descripción.'}
                       </p>
                       {empresa.portafolio && (
