@@ -271,10 +271,12 @@ export function OdsImpacto({ proyectos }: { proyectos: Project[] }) {
                           <ProjectImage imagenes={p.imagenes} alt="" className="w-14 h-14 rounded-xl flex-shrink-0" />
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{p.nombre}</p>
-                            <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                              <Building2 className="w-3 h-3 flex-shrink-0" />
-                              {p.creador?.empresa?.nombre ?? 'Empresa verificada'}
-                            </p>
+                            {p.creador?.empresa?.nombre && (
+                              <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                                <Building2 className="w-3 h-3 flex-shrink-0" />
+                                {p.creador.empresa.nombre}
+                              </p>
+                            )}
                           </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                         </Link>

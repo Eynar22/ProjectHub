@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { CheckCircle2, FileText, MessageSquare, Paperclip, Sparkles } from 'lucide-react';
+import { CheckCircle2, FileText, MessageSquare, Paperclip } from 'lucide-react';
 import type { Project } from '@/features/proyectos';
 import { ODS_POR_ID } from '@/shared/constants/ods';
 import { ProjectImage } from '@/shared/components/ui/ProjectImage';
@@ -61,7 +61,7 @@ export function HeroDemo({ proyecto }: { proyecto?: Project }) {
         problema: proyecto.problema || proyecto.descripcion_corta || '',
         ods: (proyecto.ods ?? []).slice(0, 3),
         imagenes: proyecto.imagenes,
-        empresa: proyecto.creador?.empresa?.nombre ?? 'Empresa verificada',
+        empresa: proyecto.creador?.empresa?.nombre ?? '',
       }
     : PROYECTO_EJEMPLO;
 
@@ -80,7 +80,7 @@ export function HeroDemo({ proyecto }: { proyecto?: Project }) {
         {/* Barra superior: indica que es una demostración y en qué paso va */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-blue-300">
-            <Sparkles className="w-3.5 h-3.5" /> Así funciona
+            Así funciona
           </span>
           <AnimatePresence mode="wait">
             <motion.span
@@ -100,7 +100,7 @@ export function HeroDemo({ proyecto }: { proyecto?: Project }) {
           <div className="flex gap-4">
             <ProjectImage imagenes={datos.imagenes} alt="" className="h-16 w-16 rounded-xl flex-shrink-0" fallback="dark" />
             <div className="min-w-0">
-              <p className="text-[11px] text-slate-400 font-medium truncate">{datos.empresa}</p>
+              {datos.empresa && <p className="text-[11px] text-slate-400 font-medium truncate">{datos.empresa}</p>}
               <p className="text-white font-bold leading-snug line-clamp-2">{datos.nombre}</p>
             </div>
           </div>

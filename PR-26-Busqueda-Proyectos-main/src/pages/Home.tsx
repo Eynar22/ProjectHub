@@ -7,7 +7,6 @@ import { useApp } from '@/app/context/AppContext';
 import { useProyectos } from '@/features/proyectos';
 import { useEmpresas } from '@/features/empresas';
 import { ODS_LIST } from '@/shared/constants/ods';
-import { HeroDemo } from '@/shared/components/landing/HeroDemo';
 import { ComoFunciona } from '@/shared/components/landing/ComoFunciona';
 import { ParaQuien } from '@/shared/components/landing/ParaQuien';
 import { PorQueExiste } from '@/shared/components/landing/PorQueExiste';
@@ -15,6 +14,7 @@ import { TodoEnUnLugar } from '@/shared/components/landing/TodoEnUnLugar';
 import { CtaFinal } from '@/shared/components/landing/CtaFinal';
 import { OdsImpacto } from '@/shared/components/landing/OdsImpacto';
 import { HechoEnBolivia } from '@/shared/components/landing/HechoEnBolivia';
+import { ProjectImage } from '@/shared/components/ui/ProjectImage';
 import {
   Building2,
   ArrowRight,
@@ -23,7 +23,6 @@ import {
   FolderUp,
   ShieldCheck,
   ChevronDown,
-  Sparkles,
 } from 'lucide-react';
 
 const textContainer = {
@@ -54,10 +53,11 @@ export default function Home() {
   const odsCubiertos = ODS_LIST.filter(o => projects.some(p => Array.isArray(p.ods) && p.ods.includes(o.id))).length;
   const proyectosEnCurso = projects.filter(p => p.estado === 'en_curso').length;
   const empresasVerificadas = empresas.filter(e => e.estado === 'aprobado').length;
-  // Proyecto real para la demo del hero: el más reciente en curso que tenga problema declarado.
-  const proyectoDestacado = [...projects]
-    .filter(p => p.estado === 'en_curso' && !p.suspendido && (p.problema || p.descripcion_corta))
-    .sort((a, b) => (b.fecha_creacion ?? '').localeCompare(a.fecha_creacion ?? ''))[0];
+  // Proyectos reales para el panel del hero: los 3 más recientes en curso.
+  const proyectosRecientes = [...projects]
+    .filter(p => p.estado === 'en_curso' && !p.suspendido)
+    .sort((a, b) => (b.fecha_creacion ?? '').localeCompare(a.fecha_creacion ?? ''))
+    .slice(0, 3);
 
   return (
     <AppLayout
@@ -105,9 +105,6 @@ export default function Home() {
                 <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center relative z-20 pointer-events-none">
 
                   <motion.div variants={textContainer} initial="hidden" animate="show" className="max-w-xl pointer-events-auto">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary/20 border border-primary/30 text-blue-400 text-xs font-bold tracking-wide backdrop-blur-sm uppercase">
-                      <Sparkles className="w-4 h-4" /> Proyectos con propósito en Bolivia
-                    </div>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight drop-shadow-lg text-white">
                       Publica tu problema. <br/>
@@ -137,15 +134,43 @@ export default function Home() {
                     </motion.p>
                   </motion.div>
 
-                  {/* Demo del flujo: publicar → propuestas → aceptar → tablero */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3 }}
-                    className="hidden lg:block pointer-events-auto"
-                  >
-                    <HeroDemo proyecto={proyectoDestacado} />
-                  </motion.div>
+                  {/* Proyectos reales más recientes (solo si hay alguno publicado) */}
+                  {proyectosRecientes.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.7, delay: 0.3 }}
+                      className="hidden lg:block w-full max-w-md justify-self-end pointer-events-auto"
+                    >
+                      <div className="rounded-3xl border border-white/15 bg-[#0B0F1E]/80 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.5)] overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
+                          <span className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Proyectos recientes</span>
+                          <Link to="/explore" className="text-[11px] font-semibold text-slate-300 hover:text-white inline-flex items-center gap-1">
+                            Ver todos <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <ul className="p-3 space-y-2">
+                          {proyectosRecientes.map(p => (
+                            <li key={p.id}>
+                              <Link
+                                to={`/project/${p.id}`}
+                                className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 hover:border-primary/50 hover:bg-white/[0.06] transition-colors"
+                              >
+                                <ProjectImage imagenes={p.imagenes} alt="" className="w-14 h-14 rounded-xl flex-shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-bold text-white truncate group-hover:text-blue-300 transition-colors">{p.nombre}</p>
+                                  {(p.problema || p.descripcion_corta) && (
+                                    <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">{p.problema || p.descripcion_corta}</p>
+                                  )}
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-300 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </motion.div>
+                  )}
 
                 </div>
               </div>
