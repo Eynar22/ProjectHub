@@ -1,0 +1,12 @@
+<!-- Favicon provisional de ProjectHub: el mismo ícono del logo de la barra
+     (edificio, lucide "building-2") en blanco sobre el azul de la marca.
+     Reemplazar cuando exista un logo definitivo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="32" fill="#2B5BDB"/>
+  <g transform="translate(16 16) scale(1.333)" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+    <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+    <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+    <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+  </g>
+</svg>

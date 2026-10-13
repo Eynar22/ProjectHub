@@ -17,7 +17,10 @@ export function TitleSync() {
       (m) => (m.handle as { titulo?: string } | undefined)?.titulo,
     );
     const titulo = (conTitulo?.handle as { titulo?: string } | undefined)?.titulo;
-    document.title = titulo ? `${titulo} · ${BASE_TITLE}` : BASE_TITLE;
+    // En la portada la marca va primero (es lo que se lee en la pestaña);
+    // en el resto, primero el nombre de la página.
+    const enPortada = matches[matches.length - 1]?.pathname === '/';
+    document.title = !titulo ? BASE_TITLE : enPortada ? `${BASE_TITLE} · ${titulo}` : `${titulo} · ${BASE_TITLE}`;
   }, [matches]);
   return <Outlet />;
 }
