@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { LIMITES, CAMPOS, validarCampos, primerError } from '@/shared/validacion';
 import { useParams, Link, useLocation } from 'react-router';
 import { useApp } from '@/app/context/AppContext';
@@ -15,7 +15,6 @@ import { useEmpresas } from '@/features/empresas';
 import { useUsuarios } from '@/features/usuarios';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
-import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import { TextArea } from '@/shared/components/ui/Input';
@@ -35,14 +34,11 @@ import {
   ArrowRight,
   FolderOpen,
   Users,
-  DollarSign,
-  Calendar
+  Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion } from 'motion/react';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import s from '@/pages/proyecto/Detalle.module.css';
+import { FotosHero, Revelar } from '@/pages/proyecto/piezas';
 
 const parseDate = (dateString) => {
   if (!dateString) return { day: '--', month: '---', year: '----' };
@@ -87,6 +83,17 @@ export default function ProjectDetail() {
   const [propuesta, setPropuesta] = useState('');
   const [propuestaFile, setPropuestaFile] = useState<File | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [hoy] = useState(() => Date.now());
+  // La barra fija con la acción principal se muestra cuando la cabecera sale de la pantalla.
+  const cabecera = useRef<HTMLElement>(null);
+  const [verBarra, setVerBarra] = useState(false);
+  useEffect(() => {
+    const el = cabecera.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setVerBarra(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  });
 
   const projectLigero = projects.find(p => p.id === Number(id)) || archivedProjects.find(p => p.id === Number(id));
   const { data: projectCompleto } = useProyecto(id);
@@ -182,314 +189,242 @@ export default function ProjectDetail() {
     }
   };
 
-  const tieneVariasImagenes = (project.imagenes?.length ?? 0) > 1;
-  const sliderSettings = {
-    infinite: tieneVariasImagenes,
-    slidesToShow: 1,
-    speed: 500,
-    autoplay: tieneVariasImagenes,
-    autoplaySpeed: 4000,
-    arrows: false,
-    dots: true,
-  };
-
   const dateInicio = parseDate(project.fecha_inicio);
   const dateFin = parseDate(project.fecha_fin);
 
+  // Cifras del proyecto (para la fila de cifras grandes y la ficha).
+  const DIA = 864e5;
+  const tInicio = project.fecha_inicio ? new Date(project.fecha_inicio + 'T00:00:00').getTime() : NaN;
+  const tFin = project.fecha_fin ? new Date(project.fecha_fin + 'T00:00:00').getTime() : NaN;
+  const duracionDias = Number.isFinite(tInicio) && Number.isFinite(tFin) ? Math.max(0, Math.round((tFin - tInicio) / DIA)) : null;
+  const diasRestantes = Number.isFinite(tFin) ? Math.ceil((tFin - hoy) / DIA) : null;
+  const avance = duracionDias && Number.isFinite(tInicio) ? Math.min(100, Math.max(0, ((hoy - tInicio) / (tFin - tInicio)) * 100)) : 0;
+  const duracionTexto = duracionDias == null ? '—'
+    : duracionDias >= 60 ? `${Math.round(duracionDias / 30)}` : `${duracionDias}`;
+  const duracionUnidad = duracionDias == null ? '' : duracionDias >= 60 ? 'meses' : 'días';
+  const fotos = (project.imagenes ?? []).map(i => i.url).filter(Boolean);
+  const titulo = project.nombre.split(' ');
+
   return (
-    <div className="min-h-screen text-foreground font-sans relative overflow-x-clip selection:bg-primary/30">
-
-      {/* Decoración de fondo muy sutil */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-
+    <div className={s.raiz}>
       <Navbar />
-
-      <div className="flex relative z-10">
+      <div style={{ display: 'flex' }}>
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
 
-        <main id="contenido" tabIndex={-1} className="flex-1 w-full min-w-0 overflow-x-clip pb-24">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-            <Link
-              to={backUrl}
-              className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {backLabel}
-            </Link>
+        <main id="contenido" tabIndex={-1} style={{ flex: 1, minWidth: 0 }}>
+          <div className={s.contenedor}>
+            <Link to={backUrl} className={s.volver}><ArrowLeft size={17} /> {backLabel}</Link>
 
             {project.suspendido && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-5 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-start gap-4">
-                <AlertOctagon className="w-6 h-6 text-destructive mt-1 flex-shrink-0" />
+              <div className={`${s.alerta} ${s.aparece}`} role="alert">
+                <AlertOctagon size={22} style={{ flexShrink: 0, marginTop: 2 }} />
                 <div>
-                  <h3 className="font-bold text-destructive text-lg">Proyecto Suspendido</h3>
-                  <p className="text-sm text-destructive/90 mt-1 leading-relaxed">
-                    Este proyecto se encuentra suspendido.
-                    {canTransfer && " Como administrador, transfiere la propiedad para reanudarlo."}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── CABECERA ── */}
-            <header className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-8">
-              {/* Identidad pura: categoría · título · subtítulo */}
-              <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-8 flex flex-col justify-center">
-                <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                  {project.categoria || 'Proyecto'}
-                </span>
-
-                <h1 className="mt-3 text-3xl md:text-4xl font-bold text-foreground tracking-tight leading-tight">
-                  {project.nombre}
-                </h1>
-
-                {project.descripcion_corta && (
-                  <p className="mt-3 text-lg text-muted-foreground leading-relaxed whitespace-pre-line break-words">
-                    {project.descripcion_corta}
-                  </p>
-                )}
-              </motion.div>
-
-              {/* Riel derecho: imagen + acción principal (alineado con la ficha) */}
-              <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-4 flex flex-col gap-4">
-                {project.imagenes && project.imagenes.length > 0 ? (
-                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted shadow-sm">
-                    <Slider {...sliderSettings}>
-                      {project.imagenes.map((img, idx) => (
-                        <div key={idx} className="outline-none">
-                          <div className="relative aspect-[4/3] bg-muted">
-                            <img src={img.url} alt={`${project.nombre} ${idx + 1}`} className="w-full h-full object-contain" />
-                          </div>
-                        </div>
-                      ))}
-                    </Slider>
-                  </div>
-                ) : (
-                  <div className="w-full aspect-[4/3] rounded-2xl bg-primary/5 border border-border/60 flex flex-col items-center justify-center">
-                    <Building2 className="w-14 h-14 text-muted-foreground/30 mb-3" />
-                    <p className="text-sm font-semibold text-muted-foreground">Sin imágenes</p>
-                  </div>
-                )}
-
-                {(canRequestParticipation ||
-                  ((isOwner || isParticipant) && !project.suspendido) ||
-                  (canTransfer && project.suspendido) ||
-                  hasPendingRequest) && (
-                  <div className="flex flex-col gap-2">
-                    {canRequestParticipation && (
-                      <Button variant="primary" className="w-full flex items-center justify-center gap-2 shadow-lg shadow-primary/20" onClick={() => setShowRequestModal(true)}>
-                        Solicitar Participación <Send className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {(isOwner || isParticipant) && !project.suspendido && (
-                      <Link to={`/grupo-trabajo/${project.id}`} className="w-full">
-                        <Button variant="primary" className="w-full flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-                          Ir al Espacio de Trabajo <ArrowRight className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                    )}
-                    {canTransfer && project.suspendido && (
-                      <Button variant="warning" className="w-full flex items-center justify-center gap-2" onClick={() => setShowTransferModal(true)}>
-                        <RefreshCcw className="w-4 h-4" /> Transferir Proyecto
-                      </Button>
-                    )}
-                    {hasPendingRequest && (
-                      <span className="inline-flex items-center justify-center gap-2 rounded-full bg-warning-subtle border border-warning/30 text-warning-strong px-4 py-2 text-xs font-bold uppercase tracking-widest">
-                        <RefreshCcw className="w-4 h-4 animate-spin-slow" /> Solicitud en revisión
-                      </span>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </header>
-
-            {/* ── APORTA A LOS ODS — franja separadora entre identidad y detalle ── */}
-            {Array.isArray(project.ods) && project.ods.length > 0 && (
-              <div className="mb-10 flex flex-wrap items-center gap-x-3 gap-y-2 border-y border-border/60 py-4">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Aporta a los ODS</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {project.ods.map(odsId => {
-                    const o = ODS_POR_ID[odsId];
-                    if (!o) return null;
-                    return (
-                      <span
-                        key={odsId}
-                        title={etiquetaOds(o.id)}
-                        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-semibold text-white"
-                        style={{ backgroundColor: o.color }}
-                      >
-                        <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white/25 text-[10px] font-bold">{o.id}</span>
-                        <span className="max-w-[10rem] truncate">{o.nombre}</span>
-                      </span>
-                    );
-                  })}
+                  <h2>Proyecto suspendido</h2>
+                  <p>Este proyecto se encuentra suspendido.{canTransfer && ' Como administrador, transfiere la propiedad para reanudarlo.'}</p>
                 </div>
               </div>
             )}
 
-            {/* ── DETALLE — contenido | ficha ── */}
-            <div className="grid lg:grid-cols-12 gap-8 lg:gap-10">
+            {/* ── CABECERA: imagen | ficha (todo lo esencial en la primera pantalla) ── */}
+            <header ref={cabecera} className={s.cabecera}>
+              <div className={`${s.hero} ${s.aparece}`}>
+                <FotosHero fotos={fotos} nombre={project.nombre} />
+              </div>
 
-              {/* MAIN */}
-              <div className="lg:col-span-8 space-y-10">
+              <div className={s.info}>
+                <div className={`${s.etiquetas} ${s.aparece}`} style={{ animationDelay: '.05s' }}>
+                  <span className={`${s.etiqueta} ${s.etiquetaMarca}`}>{project.categoria || 'Proyecto'}</span>
+                  {ownerCompany && (
+                    <Link to={`/empresa/${ownerCompany.id}`} className={s.etiqueta}>
+                      {ownerCompany.logo_url ? <img src={ownerCompany.logo_url} alt="" /> : <Building2 size={16} aria-hidden="true" />}
+                      {ownerCompany.nombre}
+                    </Link>
+                  )}
+                </div>
+                <h1 className={s.titulo}>
+                  {titulo.map((w, i) => <span key={i} className={s.w} style={{ animationDelay: `${0.15 + i * 0.07}s` }}>{w} </span>)}
+                </h1>
+                {project.descripcion_corta && (
+                  <p className={`${s.bajada} ${s.aparece}`} style={{ animationDelay: '.45s' }}>{project.descripcion_corta}</p>
+                )}
+                <div className={`${s.estados} ${s.aparece}`} style={{ animationDelay: '.55s' }}>
+                <span className={s.estado}><Users size={14} aria-hidden="true" /> {participatingUsers.length} {participatingUsers.length === 1 ? 'participante' : 'participantes'}</span>
+                {diasRestantes != null && (
+                  diasRestantes > 0
+                    ? <span className={`${s.estado} ${diasRestantes <= 15 ? s.estadoAviso : s.estadoBien}`}><Clock size={14} aria-hidden="true" /> {diasRestantes === 1 ? 'Termina mañana' : `Termina en ${diasRestantes} días`}</span>
+                    : <span className={s.estado}><Clock size={14} aria-hidden="true" /> Finalizado</span>
+                )}
+                </div>
+                <div className={`${s.botones} ${s.aparece}`} style={{ animationDelay: '.65s' }}>
+                {canRequestParticipation && (
+                  <button type="button" className={s.btn} onClick={() => setShowRequestModal(true)}>
+                    Solicitar participación <Send size={16} />
+                  </button>
+                )}
+                {(isOwner || isParticipant) && !project.suspendido && (
+                  <Link to={`/grupo-trabajo/${project.id}`} className={s.btn}>Ir al espacio de trabajo <ArrowRight size={16} /></Link>
+                )}
+                {canTransfer && project.suspendido && (
+                  <button type="button" className={`${s.btn} ${s.btnAviso}`} onClick={() => setShowTransferModal(true)}>
+                    <RefreshCcw size={16} /> Transferir proyecto
+                  </button>
+                )}
+                {hasPendingRequest && (
+                  <span className={s.pendiente}><RefreshCcw size={16} className={s.girar} /> Solicitud en revisión</span>
+                )}
+                </div>
+
+                <div className={`${s.cifras} ${s.aparece}`} style={{ animationDelay: '.75s' }}>
+                  <div className={s.cifra}><b>{duracionTexto}<small> {duracionUnidad}</small></b><span>de duración</span></div>
+                  <div className={s.cifra}><b>{project.financiamiento ? `$${formatNumber(project.financiamiento)}` : '—'}</b><span>{project.financiamiento ? 'de presupuesto' : 'presupuesto sin definir'}</span></div>
+                  <div className={s.cifra}><b>{participatingUsers.length}</b><span>{participatingUsers.length === 1 ? 'persona en el equipo' : 'personas en el equipo'}</span></div>
+                  <div className={s.cifra}><b>{project.ods?.length ?? 0}</b><span>{(project.ods?.length ?? 0) === 1 ? 'ODS al que aporta' : 'ODS a los que aporta'}</span></div>
+                </div>
+              </div>
+            </header>
+
+            {/* ── BARRA FIJA: aparece solo cuando la cabecera ya salió de la pantalla ── */}
+            <div className={`${s.accion} ${verBarra ? s.accionOn : ''}`} aria-hidden={!verBarra}>
+              <span className={s.accionNombre}>{project.nombre}</span>
+              <div className={s.estados}>
+                <span className={s.estado}><Users size={14} aria-hidden="true" /> {participatingUsers.length} {participatingUsers.length === 1 ? 'participante' : 'participantes'}</span>
+                {diasRestantes != null && (
+                  diasRestantes > 0
+                    ? <span className={`${s.estado} ${diasRestantes <= 15 ? s.estadoAviso : s.estadoBien}`}><Clock size={14} aria-hidden="true" /> {diasRestantes === 1 ? 'Termina mañana' : `Termina en ${diasRestantes} días`}</span>
+                    : <span className={s.estado}><Clock size={14} aria-hidden="true" /> Finalizado</span>
+                )}
+              </div>
+              <div className={s.botones} style={{ marginLeft: 'auto' }}>
+                {canRequestParticipation && (
+                  <button type="button" className={s.btn} onClick={() => setShowRequestModal(true)}>
+                    Solicitar participación <Send size={16} />
+                  </button>
+                )}
+                {(isOwner || isParticipant) && !project.suspendido && (
+                  <Link to={`/grupo-trabajo/${project.id}`} className={s.btn}>Ir al espacio de trabajo <ArrowRight size={16} /></Link>
+                )}
+                {canTransfer && project.suspendido && (
+                  <button type="button" className={`${s.btn} ${s.btnAviso}`} onClick={() => setShowTransferModal(true)}>
+                    <RefreshCcw size={16} /> Transferir proyecto
+                  </button>
+                )}
+                {hasPendingRequest && (
+                  <span className={s.pendiente}><RefreshCcw size={16} className={s.girar} /> Solicitud en revisión</span>
+                )}
+              </div>
+            </div>
+
+            {/* ── CUERPO: contenido | ficha ── */}
+            <div className={s.cuerpo}>
+              <div>
                 {project.problema ? (
-                  <section className="rounded-xl border border-border border-l-4 border-l-warning bg-card p-5 sm:p-6">
-                    <h2 className="text-xs font-bold text-warning-strong uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <AlertOctagon className="w-4 h-4" />
-                      El problema que resuelve
-                    </h2>
-                    <p className="text-base text-foreground/90 leading-relaxed whitespace-pre-line">
-                      {project.problema}
-                    </p>
-                  </section>
+                  <Revelar className={s.bloque}>
+                    <p className={s.eyebrow}><AlertOctagon size={15} aria-hidden="true" /> El problema que resuelve</p>
+                    <p className={s.problema}>{project.problema}</p>
+                  </Revelar>
                 ) : isOwner ? (
-                  <section className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground flex items-center gap-3">
-                    <AlertOctagon className="w-4 h-4 flex-shrink-0" />
-                    Aún no describiste el problema que resuelve este proyecto. Los postulantes lo usan como base para su propuesta.
-                  </section>
+                  <Revelar className={s.bloque}>
+                    <p className={s.sinProblema}>Aún no describiste el problema que resuelve este proyecto. Los postulantes lo usan como base para su propuesta.</p>
+                  </Revelar>
                 ) : null}
 
                 {project.descripcion_completa && (
-                  <section>
-                    <h2 className="text-lg font-semibold tracking-tight mb-3">Descripción</h2>
-                    <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
-                      {project.descripcion_completa}
-                    </p>
-                  </section>
+                  <Revelar className={s.bloque}>
+                    <p className={s.eyebrow}>Descripción</p>
+                    <p className={s.texto}>{project.descripcion_completa}</p>
+                  </Revelar>
                 )}
 
-                <section>
-                  <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
-                    <FolderOpen className="w-5 h-5 text-primary" />
-                    Documentos y recursos
-                  </h2>
+                {Array.isArray(project.ods) && project.ods.length > 0 && (
+                  <Revelar className={s.bloque}>
+                    <p className={s.eyebrow}>Aporta a los ODS</p>
+                    <div className={s.ods}>
+                      {project.ods.map(odsId => {
+                        const o = ODS_POR_ID[odsId];
+                        if (!o) return null;
+                        return (
+                          <Link key={odsId} to={`/explore?ods=${odsId}`} className={s.odsCard} title={etiquetaOds(o.id)} style={{ '--c': o.color } as CSSProperties}>
+                            <img src={`/images/ods/${o.id}.png`} alt="" />
+                            <div><b>ODS {o.id}</b><span>{o.nombre}</span></div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </Revelar>
+                )}
+
+                <Revelar className={s.bloque}>
+                  <p className={s.eyebrow}><FolderOpen size={15} aria-hidden="true" /> Documentos y recursos</p>
                   {archivos && archivos.length > 0 ? (
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <div className={s.docs}>
                       {archivos.map((archivo, idx: number) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          className="flex items-center justify-between gap-3 p-4 bg-card border border-border/50 rounded-xl hover:border-primary/40 hover:shadow-md transition-all text-left group"
-                          onClick={() => archivo.url && openBase64(archivo.url)}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">
-                              {archivo.nombre}
-                            </span>
-                          </div>
-                          <Download className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                        <button key={idx} type="button" className={s.doc} onClick={() => archivo.url && openBase64(archivo.url)}>
+                          <i><FileText size={19} /></i>
+                          <span>{archivo.nombre}</span>
+                          <Download size={17} className={s.bajar} />
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-border p-8 flex flex-col items-center justify-center text-center">
-                      <FolderOpen className="w-9 h-9 text-muted-foreground/30 mb-3" />
-                      <p className="text-sm text-muted-foreground">No hay documentos adjuntos a este proyecto.</p>
-                    </div>
+                    <p className={s.vacio}>No hay documentos adjuntos a este proyecto.</p>
                   )}
-                </section>
+                </Revelar>
               </div>
 
-              {/* RAIL */}
-              <aside className="lg:col-span-4">
-                <div className="lg:sticky lg:top-24 space-y-6">
-                {/* Ficha del proyecto: cronograma + presupuesto + participantes + creador */}
-                <Card className="p-6">
-                  <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Ficha del proyecto</h3>
-                  <dl className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4" /> Inicio</dt>
-                      <dd className="font-semibold">{dateInicio.day} {dateInicio.month} {dateInicio.year}</dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4" /> Finalización</dt>
-                      <dd className="font-semibold text-primary">{dateFin.day} {dateFin.month} {dateFin.year}</dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
-                      <dt className="flex items-center gap-2 text-muted-foreground"><DollarSign className="w-4 h-4" /> Presupuesto</dt>
-                      <dd className="font-semibold text-success-strong">{project.financiamiento ? formatNumber(project.financiamiento) : 'Sin definir'}</dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="flex items-center gap-2 text-muted-foreground"><Users className="w-4 h-4" /> Participantes</dt>
-                      <dd className="font-semibold">{participatingUsers.length}</dd>
-                    </div>
-                    {ownerCompany && (
-                      <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
-                        <dt className="flex items-center gap-2 text-muted-foreground"><Building2 className="w-4 h-4" /> Empresa</dt>
-                        <dd className="min-w-0">
-                          <Link to={`/empresa/${ownerCompany.id}`} className="flex items-center gap-2.5 font-semibold min-w-0 rounded hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring">
-                          {ownerCompany.logo_url ? (
-                            <img src={ownerCompany.logo_url} alt={ownerCompany.nombre} className="w-10 h-10 rounded-lg object-contain bg-white border border-border/60 flex-shrink-0" />
-                          ) : (
-                            <span className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                              <Building2 className="w-4 h-4 text-muted-foreground" />
-                            </span>
-                          )}
-                          <span className="truncate">{ownerCompany.nombre}</span>
-                          </Link>
-                        </dd>
-                      </div>
-                    )}
-                  </dl>
-                  <div className="mt-4 pt-4 border-t border-border/60 flex items-center gap-3">
-                    <Avatar
-                      name={creator?.nombre_completo || '?'}
-                      src={creator?.foto_url}
-                      className="w-10 h-10 rounded-full text-sm border border-primary/20"
-                      fallbackClassName="bg-primary/10 text-primary font-bold"
-                    />
-                    <div className="min-w-0">
-                      <div className="font-bold text-sm truncate">{creator?.nombre_completo || 'Cargando…'}</div>
-                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Creador</div>
-                    </div>
+              {/* FICHA LATERAL */}
+              <aside className={s.ficha}>
+                <Revelar className={s.panel}>
+                  <h3>Cronograma</h3>
+                  <div className={s.fechas}>
+                    <div className={s.fecha}><b>{dateInicio.day}</b><small>{dateInicio.month} {dateInicio.year}</small></div>
+                    <ArrowRight size={18} className={s.flechaFechas} aria-hidden="true" />
+                    <div className={`${s.fecha} ${s.fechaFin}`}><b>{dateFin.day}</b><small>{dateFin.month} {dateFin.year}</small></div>
                   </div>
-                </Card>
+                  <div className={s.progreso} aria-hidden="true"><i style={{ width: `${avance}%` }} /></div>
+                  <p className={s.progresoTxt}>{avance >= 100 ? 'Plazo cumplido' : avance <= 0 ? 'Aún no comienza' : `${Math.round(avance)}% del plazo transcurrido`}</p>
 
-                {/* Equipo */}
+                  <div className={s.separador} />
+                  {ownerCompany && (
+                    <Link to={`/empresa/${ownerCompany.id}`} className={s.persona}>
+                      {ownerCompany.logo_url
+                        ? <img src={ownerCompany.logo_url} alt="" className={s.logoEmp} />
+                        : <Building2 size={22} aria-hidden="true" />}
+                      <div style={{ minWidth: 0 }}><b>{ownerCompany.nombre}</b><small>Empresa</small></div>
+                    </Link>
+                  )}
+                  <div className={s.separador} />
+                  <div className={s.persona}>
+                    <Avatar name={creator?.nombre_completo || '?'} src={creator?.foto_url} className="w-11 h-11 rounded-full text-sm" fallbackClassName="bg-primary/10 text-primary font-bold" />
+                    <div style={{ minWidth: 0 }}><b>{creator?.nombre_completo || 'Cargando…'}</b><small>Creador</small></div>
+                  </div>
+                </Revelar>
+
                 {participatingUsers.length > 0 && (
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Equipo</h3>
-                      <span className="inline-flex items-center bg-info-subtle text-info-strong text-xs font-bold px-2 py-0.5 rounded-full">
-                        <Users className="w-3 h-3 mr-1" /> {participatingUsers.length}
-                      </span>
+                  <Revelar className={s.panel} retraso={0.1}>
+                    <h3>Equipo · {participatingUsers.length}</h3>
+                    <div className={s.avatares}>
+                      {participatingUsers.slice(0, 7).map((user, idx) => user && (
+                        <Avatar key={user.id || idx} name={user.nombre_completo} src={user.foto_url} className="w-11 h-11 rounded-full text-xs" fallbackClassName="bg-primary text-primary-foreground font-bold" />
+                      ))}
                     </div>
-                    <div className="space-y-4 max-h-[260px] overflow-y-auto pr-2">
+                    <div className={s.miembros}>
                       {participatingUsers.map((user, idx) => {
                         if (!user) return null;
                         const userComp = companies.find(c => c.id === user.empresa_id);
                         const esCreador = user.id === project.creador_id;
                         return (
-                          <div key={user.id || idx} className="flex items-center gap-3">
-                            <Avatar
-                              name={user.nombre_completo}
-                              src={user.foto_url}
-                              className="w-9 h-9 rounded-full text-xs"
-                              fallbackClassName="bg-primary text-primary-foreground font-bold"
-                            />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span className="font-bold text-sm truncate">{user.nombre_completo}</span>
-                                {esCreador && (
-                                  <span className="flex-shrink-0 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5">
-                                    Creador
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[10px] font-semibold text-muted-foreground truncate">
-                                {userComp?.nombre || (esIndependiente(user) ? 'Independiente' : user.cargo) || 'Miembro'}
-                              </div>
+                          <div key={user.id || idx} className={s.miembro}>
+                            <Avatar name={user.nombre_completo} src={user.foto_url} className="w-9 h-9 rounded-full text-xs" fallbackClassName="bg-primary text-primary-foreground font-bold" />
+                            <div style={{ minWidth: 0 }}>
+                              <b>{user.nombre_completo}</b>{esCreador && <span className={s.creadorTag}>Creador</span>}
+                              <small>{userComp?.nombre || (esIndependiente(user) ? 'Independiente' : user.cargo) || 'Miembro'}</small>
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  </Card>
+                  </Revelar>
                 )}
-                </div>
               </aside>
             </div>
           </div>

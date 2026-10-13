@@ -6,13 +6,13 @@
 .seccion { padding: 16vh 7.1vw 18vh }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
 .cabecera { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5vw; align-items: end; margin-bottom: clamp(48px, 6vw, 110px) }
-.titulo { font-weight: 500; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.05em; margin: 0 }
+.titulo { font-weight: 500; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 }
 .w { display: inline-block; white-space: pre }
 
 /* Cifras grandes con una línea arriba */
 .cifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.4vw }
 .cifra { border-top: 1px solid var(--linea); padding-top: clamp(12px, 1vw, 20px) }
-.cifra b { display: block; font-weight: 500; font-size: clamp(2rem, 3.4vw, 4.4rem); line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums }
+.cifra b { display: block; font-weight: 500; font-size: clamp(2rem, 3.4vw, 4.4rem); line-height: 1; letter-spacing: -.032em; font-variant-numeric: tabular-nums }
 .cifra b small { font-size: .45em; color: var(--tinta-2); letter-spacing: -.02em }
 .cifra span { display: block; margin-top: 8px; color: var(--tinta-2); font-size: clamp(.85rem, .9vw, 1.15rem); line-height: 1.35 }
 
@@ -22,31 +22,31 @@
 .rueda { position: relative; width: min(100%, 44vw, 720px); aspect-ratio: 1; margin-inline: auto }
 .giro { position: absolute; inset: 0; transition: transform 1.1s cubic-bezier(.16,1,.3,1) }
 .ficha { position: absolute; width: 15%; aspect-ratio: 1; margin: -7.5% 0 0 -7.5%; border: 0; padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer;
-  background: var(--c); box-shadow: 0 8px 22px rgba(17,18,22,.14); transition: transform 1.1s cubic-bezier(.16,1,.3,1), opacity .4s, filter .4s, box-shadow .3s }
+  background: var(--c); box-shadow: var(--shadow-xl); transition: transform 1.1s cubic-bezier(.16,1,.3,1), opacity .4s, filter .4s, box-shadow .3s }
 .ficha img { width: 100%; height: 100%; display: block; object-fit: contain }
 .vacia { opacity: .32; filter: grayscale(.6) }
 .vacia:hover, .vacia:focus-visible { opacity: .75; filter: none }
-.activa { box-shadow: 0 0 0 3px var(--pagina), 0 0 0 6px var(--tinta), 0 18px 40px rgba(17,18,22,.25); opacity: 1; filter: none }
+.activa { box-shadow: 0 0 0 3px var(--pagina), 0 0 0 6px var(--tinta), var(--shadow-xl); opacity: 1; filter: none }
 .ficha:focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px }
 .cuenta { position: absolute; right: 4px; top: 4px; min-width: 1.5em; height: 1.5em; padding: 0 .4em; border-radius: 999px; background: var(--tinta); color: var(--sobre-tinta);
   font-size: clamp(.6rem, .65vw, .85rem); font-weight: 600; display: grid; place-items: center; font-variant-numeric: tabular-nums }
 
 /* Centro: el ODS elegido en grande */
 .centro { position: absolute; left: 50%; top: 50%; width: 40%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 22px; overflow: hidden;
-  box-shadow: 0 30px 70px rgba(17,18,22,.22) }
+  box-shadow: var(--shadow-xl) }
 .centroImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0; filter: blur(10px); transform: scale(.94); transition: opacity .6s, filter .6s, transform .6s cubic-bezier(.16,1,.3,1) }
 .centroActiva { opacity: 1; filter: none; transform: none }
 
 /* Ficha del ODS (columna derecha) */
 .panel { max-width: 560px }
 .panelNum { font-size: clamp(.85rem, .9vw, 1.1rem); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px }
-.panel h3 { font-weight: 500; font-size: clamp(1.8rem, 2.8vw, 3.6rem); letter-spacing: -.045em; line-height: 1.06; margin: 0 0 14px }
+.panel h3 { font-weight: 500; font-size: clamp(1.8rem, 2.8vw, 3.6rem); letter-spacing: -.03em; line-height: 1.06; margin: 0 0 14px }
 .panelMeta { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.55; margin: 0 0 clamp(20px, 2vw, 36px) }
 .panelCuenta { font-size: clamp(.95rem, 1vw, 1.25rem); font-weight: 500; margin: 0 0 12px }
 .lista { list-style: none; margin: 0 0 clamp(22px, 2vw, 36px); padding: 0; display: grid; gap: 10px }
 .proyecto { display: flex; align-items: center; gap: 14px; padding: 10px 14px 10px 10px; border-radius: 14px; background: var(--superficie); text-decoration: none; color: var(--tinta);
-  box-shadow: 0 6px 18px rgba(17,18,22,.06); transition: transform .25s, box-shadow .25s }
-.proyecto:hover { transform: translateX(4px); box-shadow: 0 12px 26px rgba(17,18,22,.12) }
+  box-shadow: var(--shadow-lg); transition: transform .25s, box-shadow .25s }
+.proyecto:hover { transform: translateX(4px); box-shadow: var(--shadow-lg) }
 .proyecto .img { width: clamp(44px, 3.4vw, 64px); height: clamp(44px, 3.4vw, 64px); border-radius: 10px; flex-shrink: 0 }
 .proyecto div { min-width: 0; flex: 1 }
 .proyecto strong { display: block; font-weight: 500; font-size: clamp(.95rem, 1vw, 1.25rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
@@ -54,7 +54,8 @@
 .flecha { color: var(--tinta-2); flex-shrink: 0 }
 .vacioTxt { color: var(--tinta-2); font-size: clamp(.95rem, 1vw, 1.25rem); line-height: 1.5; margin: 0 0 clamp(22px, 2vw, 36px) }
 .acciones { display: flex; align-items: center; gap: clamp(18px, 2vw, 40px); flex-wrap: wrap }
-.btn { display: inline-block; background: var(--tinta); color: var(--sobre-tinta); text-decoration: none; padding: clamp(13px, 1vw, 20px) clamp(26px, 2.1vw, 44px); border-radius: 999px; font-size: clamp(.95rem, .9vw, 1.15rem); font-weight: 500 }
+.btn { display: inline-block; background: var(--primary); color: var(--primary-foreground); text-decoration: none; padding: clamp(13px, 1vw, 20px) clamp(26px, 2.1vw, 44px); border-radius: 999px; font-size: clamp(.95rem, .9vw, 1.15rem); font-weight: 500 }
+.btn:hover { background: var(--primary-hover) }
 .pausa { border: 0; background: none; padding: 0; cursor: pointer; color: var(--tinta-2); font: inherit; font-size: clamp(.85rem, .85vw, 1.05rem); text-decoration: underline; text-underline-offset: 3px }
 
 @media (max-width: 1000px) {

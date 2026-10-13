@@ -61,14 +61,12 @@ export function LoginForm() {
     }
   };
 
-  const navDerecha = <><span>¿No tienes cuenta?</span><Link to="/register">Crear cuenta</Link></>;
-
   // Pantalla de estado de la cuenta
   if (statusMessage) {
     const color = statusMessage.type === 'rejected' ? 'var(--rojo)' : 'var(--ambar)';
     const Icono = statusMessage.type === 'rejected' ? AlertCircle : statusMessage.type === 'pending' ? Clock : Info;
     return (
-      <AccesoLayout navDerecha={navDerecha}>
+      <AccesoLayout>
         <div className={s.estado}>
           <div className={`${s.estadoIcono} ${s.aparece}`} style={{ background: color }}><Icono size={38} /></div>
           <TituloAnimado texto={statusMessage.title} retraso={0.1} />
@@ -88,7 +86,7 @@ export function LoginForm() {
   );
 
   return (
-    <AccesoLayout navDerecha={navDerecha} panel={panel}>
+    <AccesoLayout panel={panel}>
       <p className={`${s.eyebrow} ${s.aparece}`}>Iniciar sesión</p>
       <TituloAnimado texto="Hola de nuevo." retraso={0.1} />
       <p className={s.sub}>Ingresa tus datos para continuar con tus proyectos.</p>

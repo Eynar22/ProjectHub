@@ -1,19 +1,20 @@
 /* ============================================================================
  * src/pages/empresas/EmpresasPublico.tsx
- * Directorio de empresas para VISITANTES, con el estilo de la portada.
- * (Con sesión iniciada se sigue mostrando la versión del sistema.)
+ * Directorio de empresas (/empresas). Una sola versión para todos; con sesión
+ * va dentro del panel, junto a la barra lateral.
  * Misma información que antes: empresas aprobadas, sus conteos de proyectos
  * y los ODS que trabajan; búsqueda y filtro por ODS en la URL (?ods=6).
  * ========================================================================= */
 
 import { useState, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ArrowRight, Search } from 'lucide-react';
+import { Activity, ChevronRight, FolderKanban, Search, Target } from 'lucide-react';
 import { LIMITES } from '@/shared/validacion';
 import { useEmpresasPublicas, type EmpresaPublica } from '@/features/empresas';
 import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
-import { NavPortada } from '@/pages/portada/NavPortada';
-import { useFuenteGeist } from '@/pages/portada/useFuenteGeist';
+import { useApp } from '@/app/context/AppContext';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
 import s from './EmpresasPublico.module.css';
 
 function Palabras({ texto, retraso = 0 }: { texto: string; retraso?: number }) {
@@ -21,7 +22,8 @@ function Palabras({ texto, retraso = 0 }: { texto: string; retraso?: number }) {
 }
 
 export default function EmpresasPublico() {
-  useFuenteGeist();
+  const { currentUser } = useApp();
+  const sesion = !!currentUser;
   const { data: empresas = [], isLoading, isError } = useEmpresasPublicas();
   const [busqueda, setBusqueda] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,10 +45,8 @@ export default function EmpresasPublico() {
   const totalOds = new Set(empresas.flatMap(e => e.ods)).size;
   const hayFiltro = !!texto || !!odsFiltro;
 
-  return (
-    <div className={s.raiz}>
-      <NavPortada />
-
+  const contenido = (
+    <>
       <header className={s.cabecera}>
         <div>
           <p className={`${s.eyebrow} ${s.aparece}`}>Empresas</p>
@@ -93,7 +93,7 @@ export default function EmpresasPublico() {
         )}
       </div>
 
-      <main id="contenido" className={s.lista}>
+      <div className={s.lista}>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <div key={i} className={s.cargando} />)
         ) : isError ? (
@@ -103,43 +103,66 @@ export default function EmpresasPublico() {
         ) : (
           filtradas.map((e, i) => <Tarjeta key={e.id} empresa={e} indice={i} />)
         )}
-      </main>
+      </div>
 
+      {!sesion && (
       <section className={s.cierre}>
         <h2>¿Tu empresa tiene un problema que resolver?</h2>
         <Link to="/register" className={s.btn}>Registrar mi empresa</Link>
       </section>
+      )}
+    </>
+  );
+
+  return (
+    <div className={s.raiz}>
+      <Navbar />
+      {sesion ? (
+        // Con sesión: dentro del panel, junto a la barra lateral del sistema.
+        <div style={{ display: 'flex' }}>
+          <Sidebar isAdmin={currentUser?.rol === 'superadmin'} />
+          <main id="contenido" tabIndex={-1} style={{ flex: 1, minWidth: 0 }}>{contenido}</main>
+        </div>
+      ) : (
+        <main id="contenido" tabIndex={-1}>{contenido}</main>
+      )}
     </div>
   );
 }
 
 function Tarjeta({ empresa: e, indice }: { empresa: EmpresaPublica; indice: number }) {
-  const MAX_ODS = 8;
-  // Sin foto: fondo del color del primer ODS que trabaja (o el azul).
+  const MAX_ODS = 6;
+  // Color de la empresa: el de su primer ODS (o el de la marca).
   const color = e.ods.length ? ODS_POR_ID[e.ods[0]]?.color : undefined;
+  const inicial = e.nombre.trim().charAt(0).toUpperCase();
   return (
-    <Link to={`/empresa/${e.id}`} className={s.tarjeta} style={{ animationDelay: `${0.2 + Math.min(indice, 8) * 0.08}s` }}>
-      <div className={s.portada} style={{ '--c': color } as CSSProperties}>
+    <Link to={`/empresa/${e.id}`} className={s.tarjeta} style={{ '--c': color, animationDelay: `${0.2 + Math.min(indice, 8) * 0.08}s` } as CSSProperties}>
+      <div className={s.portada}>
         {e.portada_url
           ? <img src={e.portada_url} alt="" className={s.foto} />
-          : <div className={s.sinFoto} aria-hidden="true"><span>{e.nombre.trim().charAt(0).toUpperCase()}</span></div>}
-        {e.logo_url && <div className={s.logo}><img src={e.logo_url} alt={`Logo de ${e.nombre}`} /></div>}
+          : <span className={s.sinFoto} aria-hidden="true">{inicial}</span>}
+      </div>
+      <div className={s.logo}>
+        {e.logo_url ? <img src={e.logo_url} alt={`Logo de ${e.nombre}`} /> : <span aria-hidden="true">{inicial}</span>}
       </div>
       <div className={s.cuerpo}>
         <h2 className={s.nombre}>{e.nombre}</h2>
         <p className={s.desc}>{e.descripcion || 'Sin descripción.'}</p>
+        <div className={s.datos}>
+          <span><FolderKanban size={17} aria-hidden="true" /><b>{e.total_proyectos}</b>Proyectos</span>
+          <span><Activity size={17} aria-hidden="true" /><b>{e.proyectos_activos}</b>Activos</span>
+          <span><Target size={17} aria-hidden="true" /><b>{e.ods.length}</b>ODS</span>
+        </div>
         {e.ods.length > 0 && (
           <div className={s.odsFila}>
-            {e.ods.slice(0, MAX_ODS).map(id => <img key={id} src={`/images/ods/${id}.png`} alt={etiquetaOds(id)} title={etiquetaOds(id)} />)}
+            {e.ods.slice(0, MAX_ODS).map(id => (
+              <span key={id} className={s.odsChip} title={etiquetaOds(id)} style={{ '--c': ODS_POR_ID[id]?.color } as CSSProperties}>{id}</span>
+            ))}
+            {e.ods.length > MAX_ODS && <span className={s.odsMas}>+{e.ods.length - MAX_ODS}</span>}
           </div>
         )}
-        <div className={s.datos}>
-          <span><b>{e.total_proyectos}</b> {e.total_proyectos === 1 ? 'proyecto' : 'proyectos'}</span>
-          <span><b>{e.proyectos_activos}</b> {e.proyectos_activos === 1 ? 'activo' : 'activos'}</span>
-          {e.num_empleados ? <span><b>{e.num_empleados}</b> empleados</span> : null}
-        </div>
+        <span className={s.pie}>Ver empresa <ChevronRight size={18} aria-hidden="true" /></span>
       </div>
-      <div className={s.flecha} aria-hidden="true"><span><ArrowRight size={22} /></span></div>
     </Link>
   );
 }

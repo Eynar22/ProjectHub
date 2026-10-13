@@ -9,6 +9,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { FileText } from 'lucide-react';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './ParaQuien.module.css';
 
 /** Palabras que entran de borroso a nítido cuando `visible` pasa a true. */
@@ -96,7 +97,7 @@ export function ParaQuien() {
           destino="/register"
           cartas={<>
             <div className={s.carta}><img src="/images/landing/bolivia-mercado.jpg" alt="" /><b>Mercados con pago digital</b></div>
-            <div className={`${s.carta} ${s.cartaOds}`} style={{ background: '#FD9D24' }}><img src="/images/ods/11.png" alt="" /></div>
+            <div className={`${s.carta} ${s.cartaOds}`} style={{ background: ODS_POR_ID[11].color }}><img src="/images/ods/11.png" alt="" /></div>
             <div className={s.carta}><img src="/images/landing/empresas.jpg" alt="" /><b>Capacitación docente rural</b></div>
           </>}
         />

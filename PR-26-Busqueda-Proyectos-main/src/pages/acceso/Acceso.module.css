@@ -1,53 +1,28 @@
 /* ============================================================================
  * src/pages/acceso/Acceso.module.css
- * Estilo de las páginas de ACCESO (login, registro, contraseñas): el mismo de
- * la portada (fondo blanco, Geist, tinta casi negra, acentos de las burbujas).
- * Es un CSS Module con variables locales: no toca el tema global del sistema.
+ * Estilo de las páginas de ACCESO (login, registro, contraseñas), con el mismo
+ * diseño de la portada. Los colores son alias de los tokens del tema global.
  * ========================================================================= */
 
 .raiz {
-  --fondo: #F7F7F8;
-  --tinta: #111216;
-  --tinta-2: #5D606B;
-  --azul: #2B59F0;
-  --verde: #2FA36B;
-  --rojo: #D6403A;
-  --ambar: #E8A13A;
-  --superficie: #FFFFFF;
-  --linea: #D4D6DC;
-  --linea-suave: #ECEDF0;
-  --f: "Geist", "Segoe UI", system-ui, sans-serif;
-
-  /* Tokens del tema que usan algunas piezas compartidas (p. ej. el osito):
-     aquí se fijan con los colores de la portada. */
-  --primary: var(--azul);
-  --primary-foreground: #fff;
-  --muted: var(--linea-suave);
-  --foreground: var(--tinta);
-  --muted-foreground: var(--tinta-2);
-  --border: var(--linea);
-  --ring: var(--azul);
-  /* Resto de tokens del tema, fijos en su versión clara: así los campos,
-     botones y subidas de archivo compartidos se ven igual aunque la
-     plataforma esté en modo oscuro. */
-  --background: var(--fondo);
-  --card: var(--superficie);
-  --card-foreground: var(--tinta);
-  --popover: var(--superficie);
-  --popover-foreground: var(--tinta);
-  --input: var(--linea);
-  --input-background: var(--superficie);
-  --secondary: var(--linea-suave);
-  --secondary-foreground: var(--tinta);
-  --accent: var(--linea-suave);
-  --accent-foreground: var(--tinta);
-  --primary-hover: #1F45C9;
-
-  color-scheme: light;
+  /* Alias de la portada → tokens del tema global (theme.css). Así la portada,
+     el acceso y los directorios usan los mismos colores que todo el sistema,
+     en modo claro y oscuro (Anexo A: un solo color de marca + semánticos). */
+  --fondo: var(--background);
+  --pagina: var(--background);
+  --tinta: var(--foreground);
+  --tinta-2: var(--muted-foreground);
+  --azul: var(--primary);
+  --verde: var(--success);
+  --rojo: var(--danger);
+  --ambar: var(--warning);
+  --superficie: var(--card);
+  --linea: var(--border);
+  --linea-suave: var(--muted);
+  --sobre-tinta: var(--background);
   min-height: 100vh;
   background: var(--fondo);
   color: var(--tinta);
-  font-family: var(--f);
   display: flex;
   flex-direction: column;
 }
@@ -55,17 +30,12 @@
 .raiz a:focus-visible, .raiz button:focus-visible { outline: 2px solid var(--azul); outline-offset: 3px }
 
 /* ───── Barra superior ───── */
-.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 5.2vw }
-.logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1rem; color: var(--tinta); text-decoration: none }
-.logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--azul); display: inline-block }
-.navDer { font-size: .95rem; color: var(--tinta-2) }
-.navDer a { color: var(--tinta); font-weight: 500; margin-left: 10px; padding: 8px 16px; border: 1px solid var(--linea); border-radius: 999px; text-decoration: none }
 
 /* ───── Cuerpo en dos columnas ───── */
 .cuerpo { flex: 1; display: grid; grid-template-columns: minmax(320px, 32vw) minmax(0, 1fr); gap: 5vw; align-items: center; padding: 2vh 7.1vw 6vh }
 .form { width: 100%; max-width: 100% }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.2vw }
-.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.4vw, 5.4rem); line-height: 1.04; letter-spacing: -.05em; margin: 0 0 14px }
+.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.4vw, 5.4rem); line-height: 1.04; letter-spacing: -.032em; margin: 0 0 14px }
 .w { display: inline-block; white-space: pre; opacity: 0; filter: blur(10px); transform: translateY(8px); animation: entra .7s cubic-bezier(.16,1,.3,1) forwards }
 @keyframes entra { to { opacity: 1; filter: none; transform: none } }
 .sub { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.3rem); line-height: 1.55; margin: 0 0 clamp(26px, 2.6vw, 44px); opacity: 0; animation: entra .7s .35s cubic-bezier(.16,1,.3,1) forwards }
@@ -77,14 +47,14 @@
 .etiqueta { font-size: .92rem; font-weight: 500 }
 .input { width: 100%; font: inherit; font-size: 1.05rem; color: var(--tinta); background: var(--superficie); border: 1px solid var(--linea); border-radius: 14px; padding: 16px 18px;
   transition: border-color .2s, box-shadow .2s }
-.input::placeholder { color: #A6A9B2 }
-.input:hover { border-color: #BFC2CA }
-.input:focus { outline: none; border-color: var(--tinta); box-shadow: 0 0 0 4px rgba(17,18,22,.06) }
+.input::placeholder { color: var(--muted-foreground) }
+.input:hover { border-color: var(--input) }
+.input:focus { outline: none; border-color: var(--tinta); box-shadow: 0 0 0 4px var(--muted) }
 .conIcono { position: relative }
 .conIcono .input { padding-right: 56px }
 .ojo { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--linea-suave);
   color: var(--tinta-2); display: grid; place-items: center; cursor: pointer; transition: background .2s, color .2s }
-.ojo:hover { background: var(--tinta); color: #fff }
+.ojo:hover { background: var(--tinta); color: var(--sobre-tinta) }
 .input[type="password"]::-ms-reveal, .input[type="password"]::-ms-clear { display: none }
 
 .fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .92rem; color: var(--tinta-2); margin-top: 4px }
@@ -92,23 +62,23 @@
 .fila input { width: 16px; height: 16px; accent-color: var(--tinta) }
 .enlace { color: var(--tinta); font-weight: 500; text-decoration: underline; text-underline-offset: 3px }
 
-.btn { width: 100%; margin-top: 12px; border: 0; cursor: pointer; font: inherit; font-size: 1.05rem; font-weight: 500; color: #fff; background: var(--tinta); padding: 17px 28px; border-radius: 999px;
+.btn { width: 100%; margin-top: 12px; border: 0; cursor: pointer; font: inherit; font-size: 1.05rem; font-weight: 500; color: var(--primary-foreground); background: var(--primary); padding: 17px 28px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: transform .2s, box-shadow .2s, opacity .2s }
-.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(17,18,22,.18) }
+.btn:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-xl) }
 .btn:disabled { opacity: .6; cursor: not-allowed }
 .btnSec { background: transparent; color: var(--tinta); border: 1px solid var(--linea) }
-.girando { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: gira .8s linear infinite }
+.girando { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--primary-foreground); border-top-color: var(--primary-foreground); animation: gira .8s linear infinite }
 @keyframes gira { to { transform: rotate(360deg) } }
 .pie { margin: 28px 0 0; color: var(--tinta-2); font-size: .98rem }
 
-.error { display: flex; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: #FBE9E8; color: #A3302B; font-size: .95rem; margin-bottom: 18px; animation: sacude .4s }
+.error { display: flex; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: var(--danger-subtle); color: var(--danger-strong); font-size: .95rem; margin-bottom: 18px; animation: sacude .4s }
 @keyframes sacude { 20%, 60% { transform: translateX(-6px) } 40%, 80% { transform: translateX(6px) } }
 
 /* ───── Panel ilustrado (columna derecha) ───── */
 .panel { position: relative; height: min(82vh, 52vw); /* Sin caja: la ilustración flota directamente sobre el fondo de la página */
   display: grid; place-items: center; overflow: visible; opacity: 0; animation: entra .9s .2s cubic-bezier(.16,1,.3,1) forwards }
-.burbuja { position: absolute; z-index: 2; font-size: clamp(.85rem, 1vw, 1.25rem); font-weight: 500; color: #fff; padding: .5em 1.05em; border-radius: 999px; white-space: nowrap;
-  box-shadow: 0 12px 30px rgba(17,18,22,.18); transform: scale(0); animation: pop .5s cubic-bezier(.34,1.56,.64,1) forwards }
+.burbuja { position: absolute; z-index: 2; font-size: clamp(.85rem, 1vw, 1.25rem); font-weight: 500; color: var(--primary-foreground); padding: .5em 1.05em; border-radius: 999px; white-space: nowrap;
+  box-shadow: var(--shadow-xl); transform: scale(0); animation: pop .5s cubic-bezier(.34,1.56,.64,1) forwards }
 .burbuja::after { content: ""; position: absolute; bottom: -5px; left: 18px; width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
 @keyframes pop { to { transform: scale(1) } }
 .flota { animation: pop .5s cubic-bezier(.34,1.56,.64,1) forwards, flotar 5s ease-in-out infinite 1s }
@@ -116,15 +86,13 @@
 
 /* Pantalla de estado (cuenta pendiente, rechazada, suspendida) */
 .estado { max-width: 560px; margin: auto; text-align: center; padding: 6vh 20px }
-.estadoIcono { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 24px; color: #fff }
+.estadoIcono { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 24px; color: var(--primary-foreground) }
 
 @media (max-width: 900px) {
   .cuerpo { grid-template-columns: 1fr; padding: 2vh 20px 8vh; gap: 28px }
   .panel { order: -1; height: 240px }
   .form { margin-inline: auto }
   .titulo { font-size: clamp(2.2rem, 10vw, 3rem) }
-  .navDer span { display: none }
-  .nav { padding: 18px 20px }
 }
 @media (prefers-reduced-motion: reduce) {
   .w, .sub, .aparece, .panel, .burbuja { animation: none; opacity: 1; filter: none; transform: none }
@@ -139,7 +107,7 @@
 /* Encabezado común: volver + eyebrow + título + texto */
 .volver { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 18px; padding: 8px 14px 8px 10px; border: 1px solid var(--linea); border-radius: 999px;
   background: none; cursor: pointer; font: inherit; font-size: .92rem; color: var(--tinta-2); transition: background .2s, color .2s }
-.volver:hover { background: var(--tinta); color: #fff; border-color: var(--tinta) }
+.volver:hover { background: var(--tinta); color: var(--sobre-tinta); border-color: var(--tinta) }
 
 @media (max-width: 900px) {
   .ancho { grid-template-columns: 1fr }
@@ -156,12 +124,12 @@
 .filaProy em { display: block; height: 100%; border-radius: 99px; transition: width 1s }
 
 /* Login: ventanita del espacio de trabajo */
-.ventanita { position: relative; width: min(100%, 820px); border-radius: 22px; background: var(--superficie); box-shadow: 0 30px 70px rgba(17,18,22,.16); overflow: hidden; border: 1px solid var(--linea-suave) }
+.ventanita { position: relative; width: min(100%, 820px); border-radius: 22px; background: var(--superficie); box-shadow: var(--shadow-xl); overflow: hidden; border: 1px solid var(--linea-suave) }
 .ventCab { display: flex; align-items: center; gap: 6px; padding: 14px 18px; border-bottom: 1px solid var(--linea-suave); font-size: clamp(.8rem, .85vw, 1rem); color: var(--tinta-2) }
 .ventCab i { width: 9px; height: 9px; border-radius: 50%; background: var(--linea) }
 .ventCab span { margin-left: 8px }
 .ventCuerpo { padding: clamp(22px, 2.2vw, 44px); display: grid; gap: clamp(10px, .9vw, 16px); transition: filter .5s, opacity .5s }
-.saludo { margin: 0; font-size: clamp(1.8rem, 3vw, 3.6rem); font-weight: 500; letter-spacing: -.045em; line-height: 1.05 }
+.saludo { margin: 0; font-size: clamp(1.8rem, 3vw, 3.6rem); font-weight: 500; letter-spacing: -.03em; line-height: 1.05 }
 .saludoSub { margin: 0 0 6px; color: var(--tinta-2); font-size: clamp(.9rem, 1vw, 1.2rem) }
 .avisos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px }
 .avisos span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--linea-suave); font-size: clamp(.8rem, .9vw, 1.05rem); font-weight: 500 }
@@ -172,43 +140,43 @@
 
 /* Registro: roles */
 .roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.2vw, 22px); width: 100%; height: min(100%, 720px); align-items: stretch; transition: grid-template-columns .7s cubic-bezier(.16,1,.3,1), gap .7s }
-.rol { display: flex; flex-direction: column; height: 100%; border-radius: 22px; background: var(--superficie); box-shadow: 0 18px 44px rgba(17,18,22,.12); border: 3px solid transparent; overflow: hidden;
+.rol { display: flex; flex-direction: column; height: 100%; border-radius: 22px; background: var(--superficie); box-shadow: var(--shadow-lg); border: 3px solid transparent; overflow: hidden;
   opacity: 0; animation: entra .6s cubic-bezier(.16,1,.3,1) forwards; transition: transform .4s cubic-bezier(.16,1,.3,1), opacity .3s, border-color .3s, filter .3s }
 .rolFoto { flex: 1; min-height: 0; overflow: hidden }
 .rolFoto img { width: 100%; height: 100%; object-fit: cover; display: block }
 .rolTxt { display: grid; gap: 4px; padding: clamp(14px, 1.3vw, 24px) }
 .rolTxt b { font-weight: 500; font-size: clamp(1.15rem, 1.6vw, 2rem); letter-spacing: -.035em }
 .rolTxt small { color: var(--tinta-2); font-size: clamp(.82rem, .9vw, 1.1rem); line-height: 1.4 }
-.rolIcono { width: clamp(30px, 2.4vw, 42px); aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; background: var(--c); color: #fff; margin-bottom: 6px }
+.rolIcono { width: clamp(30px, 2.4vw, 42px); aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; background: var(--c); color: var(--primary-foreground); margin-bottom: 6px }
 .rolOn { border-color: var(--c) }
 .rolOff { opacity: 0 !important; pointer-events: none }
 
 /* Registro: ficha de empresa */
-.ficha { width: min(100%, 720px); border-radius: 24px; background: var(--superficie); box-shadow: 0 30px 70px rgba(17,18,22,.16); overflow: hidden; position: relative }
+.ficha { width: min(100%, 720px); border-radius: 24px; background: var(--superficie); box-shadow: var(--shadow-xl); overflow: hidden; position: relative }
 .fichaPortada { height: clamp(140px, 13vw, 240px); overflow: hidden }
 .fichaPortada img { width: 100%; height: 100%; object-fit: cover; display: block }
-.fichaLogo { position: absolute; left: 26px; top: calc(clamp(140px, 13vw, 240px) - 40px); width: clamp(68px, 5.6vw, 96px); aspect-ratio: 1; border-radius: 20px; background: var(--azul); color: #fff; display: grid; place-items: center;
+.fichaLogo { position: absolute; left: 26px; top: calc(clamp(140px, 13vw, 240px) - 40px); width: clamp(68px, 5.6vw, 96px); aspect-ratio: 1; border-radius: 20px; background: var(--azul); color: var(--primary-foreground); display: grid; place-items: center;
   font-size: 1.8rem; font-weight: 600; border: 4px solid var(--superficie) }
 .fichaCuerpo { padding: clamp(48px, 4vw, 70px) 26px 26px; display: grid; gap: 10px }
-.fichaCuerpo > b, .perfil > b, .credCuerpo > b { font-weight: 500; font-size: clamp(1.5rem, 2.3vw, 2.8rem); letter-spacing: -.04em; line-height: 1.08; overflow-wrap: anywhere }
+.fichaCuerpo > b, .perfil > b, .credCuerpo > b { font-weight: 500; font-size: clamp(1.5rem, 2.3vw, 2.8rem); letter-spacing: -.026em; line-height: 1.08; overflow-wrap: anywhere }
 .fichaCuerpo p { margin: 0; color: var(--tinta-2); font-size: clamp(.92rem, 1vw, 1.2rem); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden }
 .fichaDatos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px }
 .fichaDatos span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--linea-suave); font-size: clamp(.8rem, .9vw, 1.05rem) }
 
 /* Registro: perfil y credencial */
-.perfil, .credencial { width: min(100%, 620px); border-radius: 24px; background: var(--superficie); box-shadow: 0 30px 70px rgba(17,18,22,.16); overflow: hidden }
+.perfil, .credencial { width: min(100%, 620px); border-radius: 24px; background: var(--superficie); box-shadow: var(--shadow-xl); overflow: hidden }
 .perfil { padding: clamp(28px, 2.6vw, 48px) clamp(24px, 2vw, 40px) clamp(22px, 2vw, 36px); display: grid; justify-items: center; gap: 8px; text-align: center }
-.avatar { width: clamp(84px, 7vw, 128px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-size: clamp(2rem, 3vw, 3.4rem); font-weight: 600; color: #fff; background: var(--verde); margin-bottom: 6px }
+.avatar { width: clamp(84px, 7vw, 128px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-size: clamp(2rem, 3vw, 3.4rem); font-weight: 600; color: var(--primary-foreground); background: var(--verde); margin-bottom: 6px }
 .cargo { color: var(--tinta-2); font-size: clamp(.95rem, 1.1vw, 1.3rem) }
 .chips { display: flex; gap: 6px; margin: 6px 0 10px }
 .chips span { padding: 5px 10px; border-radius: 999px; background: var(--linea-suave); font-size: .78rem; font-weight: 500 }
 .postulaciones { width: 100%; display: grid; gap: 8px; text-align: left; border-top: 1px solid var(--linea-suave); padding-top: 14px }
 .postulaciones small { color: var(--tinta-2) }
-.credCab { display: flex; align-items: center; gap: 12px; padding: clamp(16px, 1.4vw, 26px) clamp(20px, 1.8vw, 32px); background: var(--tinta); color: #fff; font-size: clamp(1rem, 1.1vw, 1.3rem) }
+.credCab { display: flex; align-items: center; gap: 12px; padding: clamp(16px, 1.4vw, 26px) clamp(20px, 1.8vw, 32px); background: var(--tinta); color: var(--sobre-tinta); font-size: clamp(1rem, 1.1vw, 1.3rem) }
 .credCab img, .credCab span { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; background: var(--azul); display: grid; place-items: center; font-weight: 600 }
 .credCuerpo { padding: clamp(26px, 2.4vw, 44px) 24px clamp(20px, 2vw, 34px); display: grid; justify-items: center; gap: 8px; text-align: center }
 .credCuerpo .avatar { background: var(--azul) }
-.sello { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; border: 1.5px dashed var(--ambar); color: #9A6312; font-size: clamp(.82rem, .9vw, 1.05rem); font-weight: 500; transform: rotate(-3deg) }
+.sello { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; border: 1.5px dashed var(--ambar); color: var(--warning-strong); font-size: clamp(.82rem, .9vw, 1.05rem); font-weight: 500; transform: rotate(-3deg) }
 .credPie { padding: 12px; text-align: center; font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-2); border-top: 1px dashed var(--linea) }
 
 @media (prefers-reduced-motion: reduce) {

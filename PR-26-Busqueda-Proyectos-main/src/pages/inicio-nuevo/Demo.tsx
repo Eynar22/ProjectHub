@@ -106,7 +106,7 @@ export function Demo() {
           </ul>
         </div>
 
-        <div className={`${s.mazo} ${s.claro}`}>
+        <div className={`${s.mazo}`}>
           {HERRAMIENTAS.map((h, i) => {
             const adelante = i === activa;
             return (

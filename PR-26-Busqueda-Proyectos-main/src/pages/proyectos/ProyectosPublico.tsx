@@ -1,29 +1,36 @@
 /* ============================================================================
  * src/pages/proyectos/ProyectosPublico.tsx
- * Proyectos abiertos para VISITANTES, con el estilo de la portada.
- * (Con sesión iniciada se sigue mostrando la versión del sistema.)
- * Muestra lo que invita (foto, título, problema, ODS, empresa) y deja cerrado
- * el detalle (fechas, financiamiento, postular): para eso hay que registrarse.
- * Filtros: búsqueda, categoría y ODS en la URL (?ods=6), como antes.
+ * Proyectos abiertos (/explore). Una sola versión para todos:
+ *  - Visitante: muestra lo que invita (foto, título, problema, ODS, empresa) y
+ *    el detalle queda cerrado: la tarjeta lleva a crear cuenta.
+ *  - Con sesión: misma página dentro del panel (barra lateral), con el logo de
+ *    la empresa, fechas, participantes y financiamiento; lleva al proyecto.
+ * Las fotos de cada proyecto rotan solas con un fundido (si tiene varias).
+ * Filtros: búsqueda, categoría y ODS en la URL (?ods=6).
  * ========================================================================= */
 
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { Lock, Search } from 'lucide-react';
+import { ArrowRight, Building2, Calendar, DollarSign, Lock, Search, Users } from 'lucide-react';
 import { LIMITES } from '@/shared/validacion';
+import { useApp } from '@/app/context/AppContext';
 import { useProyectos, type Project } from '@/features/proyectos';
+import { useEmpresas } from '@/features/empresas';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
-import { NavPortada } from '@/pages/portada/NavPortada';
-import { useFuenteGeist } from '@/pages/portada/useFuenteGeist';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
 import e from '@/pages/empresas/EmpresasPublico.module.css';
 import s from './ProyectosPublico.module.css';
 
 const DIAS_NUEVO = 14;
+const ROTAR_FOTO_MS = 4000;
 
 export default function ProyectosPublico() {
-  useFuenteGeist();
+  const { currentUser } = useApp();
+  const sesion = !!currentUser;
   const { data: proyectos = [], isLoading, isError } = useProyectos();
+  const { data: listaEmpresas = [] } = useEmpresas();
   const [busqueda, setBusqueda] = useState('');
   const [ahora] = useState(() => Date.now()); // para marcar los proyectos nuevos
   const [categoria, setCategoria] = useState('');
@@ -48,12 +55,11 @@ export default function ProyectosPublico() {
   const odsPresentes = ODS_LIST.filter(o => abiertos.some(p => p.ods?.includes(o.id)));
   const empresas = new Set(abiertos.map(p => p.creador?.empresa?.nombre).filter(Boolean)).size;
   const hayFiltro = !!texto || !!categoria || !!odsFiltro;
+  const logoDe = (p: Project) => listaEmpresas.find(c => c.id === p.creador?.empresa?.id)?.logo_url ?? null;
   const titulo = 'Problemas reales esperando a quien sepa resolverlos.';
 
-  return (
-    <div className={e.raiz}>
-      <NavPortada />
-
+  const contenido = (
+    <>
       <header className={e.cabecera}>
         <div>
           <p className={`${e.eyebrow} ${e.aparece}`}>Proyectos abiertos</p>
@@ -68,15 +74,17 @@ export default function ProyectosPublico() {
         </div>
       </header>
 
-      <div className={s.aviso}>
-        <p>
-          Crea tu cuenta para ver el detalle completo y postular.
-          <small>Fechas, financiamiento y documentos de cada proyecto. Es gratis.</small>
-        </p>
-        <Link to="/register">Crear cuenta</Link>
-      </div>
+      {!sesion && (
+        <div className={s.aviso}>
+          <p>
+            Crea tu cuenta para ver el detalle completo y postular.
+            <small>Fechas, financiamiento y documentos de cada proyecto. Es gratis.</small>
+          </p>
+          <Link to="/register">Crear cuenta</Link>
+        </div>
+      )}
 
-      <div className={e.barra} style={{ marginTop: '4vh' }}>
+      <div className={e.barra} style={{ marginTop: sesion ? 0 : '4vh' }}>
         <label className={e.buscador}>
           <Search size={19} aria-hidden="true" />
           <input type="text" aria-label="Buscar proyectos" placeholder="Buscar por proyecto, empresa o problema…"
@@ -110,7 +118,7 @@ export default function ProyectosPublico() {
         )}
       </div>
 
-      <main id="contenido" className={s.grilla}>
+      <div className={s.grilla}>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <div key={i} className={`${e.cargando} ${i === 0 ? s.destacada : ''}`} style={{ height: 'auto' }} />)
         ) : isError ? (
@@ -118,46 +126,111 @@ export default function ProyectosPublico() {
         ) : filtrados.length === 0 ? (
           <p className={e.vacio} style={{ gridColumn: '1 / -1' }}>{abiertos.length === 0 ? 'Todavía no hay proyectos abiertos.' : 'Ningún proyecto coincide con la búsqueda.'}</p>
         ) : (
-          filtrados.map((p, i) => <Tarjeta key={p.id} p={p} indice={i} ahora={ahora} destacada={i === 0 && !hayFiltro && filtrados.length > 2} />)
+          filtrados.map((p, i) => (
+            <Tarjeta key={p.id} p={p} indice={i} ahora={ahora} sesion={sesion} logo={logoDe(p)}
+              destacada={i === 0 && !hayFiltro && filtrados.length > 2} />
+          ))
         )}
-      </main>
+      </div>
 
-      <section className={e.cierre}>
-        <h2>¿Tienes un problema que resolver? Publícalo.</h2>
-        <Link to="/register" className={e.btn}>Registrar mi empresa</Link>
-      </section>
+      {!sesion && (
+        <section className={e.cierre}>
+          <h2>¿Tienes un problema que resolver? Publícalo.</h2>
+          <Link to="/register" className={e.btn}>Registrar mi empresa</Link>
+        </section>
+      )}
+    </>
+  );
+
+  return (
+    <div className={e.raiz}>
+      <Navbar />
+      {sesion ? (
+        // Con sesión: dentro del panel, junto a la barra lateral del sistema.
+        <div style={{ display: 'flex' }}>
+          <Sidebar isAdmin={currentUser?.rol === 'superadmin'} />
+          <main id="contenido" tabIndex={-1} style={{ flex: 1, minWidth: 0 }}>{contenido}</main>
+        </div>
+      ) : (
+        <main id="contenido" tabIndex={-1}>{contenido}</main>
+      )}
     </div>
   );
 }
 
-function Tarjeta({ p, indice, destacada, ahora }: { p: Project; indice: number; destacada: boolean; ahora: number }) {
-  const foto = p.imagenes?.[0]?.url;
-  const color = p.ods?.length ? ODS_POR_ID[p.ods[0]]?.color : undefined;
+/** Fotos del proyecto que rotan solas con un fundido. */
+function FotosRotativas({ fotos }: { fotos: string[] }) {
+  const [actual, setActual] = useState(0);
+  useEffect(() => {
+    if (fotos.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Cada tarjeta arranca un poco desfasada para que no cambien todas a la vez.
+    const t = setInterval(() => setActual(i => (i + 1) % fotos.length), ROTAR_FOTO_MS + Math.random() * 1500);
+    return () => clearInterval(t);
+  }, [fotos.length]);
+  return (
+    <>
+      {fotos.map((url, i) => (
+        <img key={url + i} src={url} alt="" className={`${s.fotoCapa} ${i === actual ? s.fotoActiva : ''}`} loading={i === 0 ? undefined : 'lazy'} />
+      ))}
+      {fotos.length > 1 && (
+        <span className={s.puntos} aria-hidden="true">
+          {fotos.map((_, i) => <i key={i} className={i === actual ? s.puntoOn : ''} />)}
+        </span>
+      )}
+    </>
+  );
+}
+
+const fecha = (iso?: string) => (iso ? new Date(iso + 'T00:00:00').toLocaleDateString('es-BO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
+
+/** Tarjeta de proyecto con el diseño de siempre: foto de fondo completa (rota
+ *  sola), capa oscura, logo y categoría arriba, datos y botón abajo. */
+function Tarjeta({ p, indice, ahora, sesion, logo }: {
+  p: Project; indice: number; destacada?: boolean; ahora: number; sesion: boolean; logo: string | null;
+}) {
+  const fotos = (p.imagenes ?? []).map(i => i.url).filter(Boolean);
   const empresa = p.creador?.empresa;
   const nuevo = p.fecha_creacion && ahora - new Date(p.fecha_creacion).getTime() < DIAS_NUEVO * 864e5;
-  const problema = p.problema || p.descripcion_corta;
+  const participantes = p.participantes?.length ?? 0;
+
   return (
-    // El detalle es solo para usuarios registrados: la tarjeta lleva a crear cuenta.
-    <Link to="/register" className={`${s.tarjeta} ${destacada ? s.destacada : ''}`} style={{ animationDelay: `${0.15 + Math.min(indice, 8) * 0.07}s` }}
-      aria-label={`${p.nombre}. Crea tu cuenta para ver el detalle`}>
-      <div className={s.foto} style={{ '--c': color } as CSSProperties}>
-        {foto ? <img src={foto} alt="" /> : <div className={s.sinFoto} aria-hidden="true"><span>{p.nombre.trim().charAt(0).toUpperCase()}</span></div>}
-        {p.categoria && <span className={s.categoria}>{p.categoria}</span>}
-        {nuevo && <span className={s.nuevo}>Nuevo</span>}
+    <Link
+      // Visitante: el detalle es solo para registrados, la tarjeta lleva a crear cuenta.
+      to={sesion ? `/project/${p.id}` : '/register'}
+      state={sesion ? { from: 'explore' } : undefined}
+      className={s.card}
+      style={{ animationDelay: `${0.15 + Math.min(indice, 8) * 0.07}s` }}
+      aria-label={sesion ? `${p.nombre}. Ver proyecto completo` : `${p.nombre}. Regístrate para ver más`}
+    >
+      <span className={s.brillo} aria-hidden="true" />
+      <div className={s.cardFondo} aria-hidden="true">
+        {fotos.length ? <FotosRotativas fotos={fotos} /> : <Building2 className={s.cardSinFoto} />}
       </div>
-      <div className={s.cuerpo}>
-        {empresa?.nombre && (
-          <span className={s.empresa}>
-            {empresa.nombre}
+      <div className={s.cardVelo} aria-hidden="true" />
+
+      <div className={s.cardContenido}>
+        <div className={s.cardArriba}>
+          <span className={`${s.cardLogo} ${sesion ? '' : s.borroso}`}>
+            {logo ? <img src={logo} alt="" /> : <Building2 size={26} aria-hidden="true" />}
           </span>
-        )}
-        <h2 className={s.titulo}>{p.nombre}</h2>
-        {problema && <p className={s.problema}>{p.problema && <b>Problema: </b>}{problema}</p>}
-        <div className={s.pie}>
-          <div className={s.ods}>
-            {(p.ods ?? []).slice(0, destacada ? 6 : 4).map(id => <img key={id} src={`/images/ods/${id}.png`} alt={etiquetaOds(id)} title={etiquetaOds(id)} />)}
+          <span className={s.cardEtiquetas}>
+            {nuevo && <span className={s.cardNuevo}>Nuevo</span>}
+            <span className={s.cardCategoria}>{p.categoria || 'Sin categoría'}</span>
+          </span>
+        </div>
+
+        <div className={s.cardAbajo}>
+          <h2 className={s.cardTitulo}>{p.nombre}</h2>
+          {(p.descripcion_corta || p.problema) && <p className={s.cardDesc}>{p.descripcion_corta || p.problema}</p>}
+          <div className={`${s.cardChips} ${sesion ? '' : s.borroso}`}>
+            <span><Building2 size={14} aria-hidden="true" /> {empresa?.nombre || 'Empresa'}</span>
+            <span><Calendar size={14} aria-hidden="true" /> {fecha(p.fecha_inicio)} – {fecha(p.fecha_fin)}</span>
+            <span><Users size={14} aria-hidden="true" /> {participantes} {participantes === 1 ? 'participante' : 'participantes'}</span>
+            {p.financiamiento ? <span className={s.cardDinero}><DollarSign size={14} aria-hidden="true" /> {p.financiamiento.toLocaleString('es-BO')}</span> : null}
           </div>
-          <span className={s.candado}><span className={s.candadoTxt}>Ver detalle</span><span><Lock size={16} /></span></span>
+          <span className={s.cardBoton}>
+            {sesion ? <>Ver proyecto completo <ArrowRight size={17} /></> : <><Lock size={16} /> Regístrate para ver más</>}
+          </span>
         </div>
       </div>
     </Link>

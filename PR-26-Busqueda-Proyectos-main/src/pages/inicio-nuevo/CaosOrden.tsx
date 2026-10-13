@@ -22,11 +22,11 @@ interface Pieza {
 }
 
 const PIEZAS: Pieza[] = [
-  { caos: 'RE: RE: FW: propuesta final (v3)', iconoCaos: Mail, colorCaos: '#E5484D', orden: '3 propuestas recibidas', iconoOrden: FileText, x: 0.02, y: 0.08, r: -9 },
-  { caos: '¿Alguien tiene el Excel actualizado?', iconoCaos: MessageCircle, colorCaos: '#25A35A', orden: 'Chat del proyecto', iconoOrden: MessageSquare, x: 0.38, y: 0.26, r: 7 },
-  { caos: 'tareas_proyecto_FINAL2.xlsx', iconoCaos: FileSpreadsheet, colorCaos: '#1D7A46', orden: 'Tablero de tareas', iconoOrden: ListChecks, x: 0.0, y: 0.47, r: 5 },
-  { caos: 'informe_sin_nombre (1).pdf', iconoCaos: FileText, colorCaos: '#E8742A', orden: 'Archivos del proyecto', iconoOrden: FolderOpen, x: 0.42, y: 0.64, r: -6 },
-  { caos: '¿Quién estaba a cargo de esto?', iconoCaos: Mail, colorCaos: '#E5484D', orden: 'Responsables asignados', iconoOrden: UserCheck, x: 0.08, y: 0.84, r: 10 },
+  { caos: 'RE: RE: FW: propuesta final (v3)', iconoCaos: Mail, colorCaos: 'var(--danger)', orden: '3 propuestas recibidas', iconoOrden: FileText, x: 0.02, y: 0.08, r: -9 },
+  { caos: '¿Alguien tiene el Excel actualizado?', iconoCaos: MessageCircle, colorCaos: 'var(--success)', orden: 'Chat del proyecto', iconoOrden: MessageSquare, x: 0.38, y: 0.26, r: 7 },
+  { caos: 'tareas_proyecto_FINAL2.xlsx', iconoCaos: FileSpreadsheet, colorCaos: 'var(--success-strong)', orden: 'Tablero de tareas', iconoOrden: ListChecks, x: 0.0, y: 0.47, r: 5 },
+  { caos: 'informe_sin_nombre (1).pdf', iconoCaos: FileText, colorCaos: 'var(--warning)', orden: 'Archivos del proyecto', iconoOrden: FolderOpen, x: 0.42, y: 0.64, r: -6 },
+  { caos: '¿Quién estaba a cargo de esto?', iconoCaos: Mail, colorCaos: 'var(--danger)', orden: 'Responsables asignados', iconoOrden: UserCheck, x: 0.08, y: 0.84, r: 10 },
 ];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -78,7 +78,7 @@ export function CaosOrden() {
         iCaos!.style.opacity = listo ? '0' : '1';
         iOrden!.style.opacity = listo ? '1' : '0';
         (el.firstElementChild as HTMLElement).style.background = listo ? 'var(--tinta)' : pz.colorCaos;
-        (el.firstElementChild as HTMLElement).style.color = listo ? 'var(--sobre-tinta)' : '#fff';
+        (el.firstElementChild as HTMLElement).style.color = listo ? 'var(--sobre-tinta)' : 'var(--primary-foreground)';
         check!.style.opacity = listo ? '1' : '0';
         check!.style.transform = listo ? 'scale(1)' : 'scale(.4)';
       });
@@ -121,7 +121,7 @@ export function CaosOrden() {
           </div>
           {PIEZAS.map((pz, i) => (
             <div key={pz.caos} ref={el => { piezas.current[i] = el; }} className={s.pieza}>
-              <span className={s.icono} style={{ background: pz.colorCaos, color: '#fff' }}>
+              <span className={s.icono} style={{ background: pz.colorCaos, color: 'var(--primary-foreground)' }}>
                 <pz.iconoCaos data-icaos />
                 <pz.iconoOrden data-iorden style={{ opacity: 0 }} />
               </span>

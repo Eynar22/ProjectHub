@@ -9,7 +9,7 @@
  * ========================================================================= */
 
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { CheckCircle2 } from 'lucide-react';
 import { useEmpresas } from '@/features/empresas';
 import { RegisterChooseStep } from '@/features/auth/components/RegisterChooseStep';
@@ -54,12 +54,10 @@ export default function Register() {
   }, [mode]);
   const navigate = useNavigate();
 
-  const navDerecha = <><span>¿Ya tienes cuenta?</span><Link to="/login">Ingresar</Link></>;
-
   // ── Éxito ──
   if (mode === 'success') {
     return (
-      <AccesoLayout navDerecha={navDerecha}>
+      <AccesoLayout>
         <div className={s.estado}>
           <div className={`${s.estadoIcono} ${s.aparece}`} style={{ background: 'var(--verde)' }}><CheckCircle2 size={38} /></div>
           <TituloAnimado texto={independiente ? '¡Cuenta creada!' : '¡Solicitud enviada!'} retraso={0.1} />
@@ -97,7 +95,7 @@ export default function Register() {
   );
 
   return (
-    <AccesoLayout navDerecha={navDerecha} panel={panel} ancho={mode !== 'choose'}>
+    <AccesoLayout panel={panel} ancho={mode !== 'choose'}>
       {/* key = modo: cada paso entra con su animación */}
       <div key={mode} ref={contenedor} onMouseOverCapture={mode === 'choose' ? alMirar : undefined} onMouseLeave={() => setRolMirado(null)}>
         {mode === 'choose' && (

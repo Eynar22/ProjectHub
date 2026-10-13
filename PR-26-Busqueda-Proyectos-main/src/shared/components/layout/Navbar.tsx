@@ -12,8 +12,9 @@ import { Avatar } from '@/shared/components/ui/Avatar';
 /* Secciones del landing a las que se puede saltar desde el navbar. Los ids
  * están en Home.tsx y en src/shared/components/landing/*. */
 const SECCIONES = [
-  { id: 'para-quien', label: 'Para quién' },
+  // En el mismo orden en que aparecen en la portada.
   { id: 'como-funciona', label: 'Cómo funciona' },
+  { id: 'para-quien', label: 'Para quién' },
   { id: 'demo', label: 'Demo' },
   { id: 'impacto', label: 'Impacto ODS' },
   { id: 'preguntas', label: 'Preguntas' },
@@ -132,14 +133,22 @@ export function Navbar() {
           conScroll
             ? 'bg-card/90 backdrop-blur-md border-border/60 shadow-[0_6px_24px_rgba(0,0,0,0.15)]'
             : enLanding
-              // Arriba del todo en la portada: transparente sobre el hero. El hero
-              // siempre es oscuro, así que se fuerzan los colores del tema oscuro.
-              ? 'dark bg-transparent border-transparent'
+              // Arriba del todo en la portada: transparente sobre el hero.
+              ? 'bg-transparent border-transparent'
               : 'bg-card/70 backdrop-blur-md border-transparent'
         }`}
       >
         {/* 1. Isla izquierda: logo en su cápsula */}
-        <Link to="/" className="bg-card px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-2 shadow-sm border border-border/40 hover:shadow-md transition-all group flex-shrink-0">
+        <Link
+          to="/"
+          onClick={(e) => {
+            // Ya en la portada: subir al inicio y repetir la animación del hero.
+            if (!enLanding) return;
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'auto' });
+            window.dispatchEvent(new Event('portada:reiniciar'));
+          }}
+          className="bg-card px-3 py-1.5 md:px-4 md:py-2 rounded-full flex items-center gap-2 shadow-sm border border-border/40 hover:shadow-md transition-all group flex-shrink-0">
           <div className="w-6 h-6 md:w-7 md:h-7 bg-primary rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
             <Building2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-primary-foreground" />
           </div>

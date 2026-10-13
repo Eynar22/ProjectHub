@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './Cierre.module.css';
 
 const PREGUNTAS = [
@@ -20,9 +21,9 @@ const PREGUNTAS = [
 
 const CARTAS = [
   { img: '/images/landing/bolivia-murales.jpg' },
-  { ods: 4, color: '#C5192D' },
+  { ods: 4, color: ODS_POR_ID[4].color },
   { img: '/images/landing/equipos.jpg' },
-  { ods: 7, color: '#FCC30B' },
+  { ods: 7, color: ODS_POR_ID[7].color },
   { img: '/images/landing/profesionales.jpg' },
 ];
 

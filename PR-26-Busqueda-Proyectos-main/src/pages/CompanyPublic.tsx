@@ -1,14 +1,17 @@
 /* ============================================================================
  * src/pages/CompanyPublic.tsx
- * Página pública de una empresa (/empresa/:id). Visible sin sesión: datos
- * públicos, galería de fotos, ODS que trabaja y sus proyectos públicos.
+ * Página pública de una empresa (/empresa/:id). Visible sin sesión.
+ * Misma información de siempre (datos públicos, galería, ODS, enlaces y sus
+ * proyectos públicos), con el lenguaje del detalle de proyecto:
+ *  - Cabecera en 2 columnas: fotos que rotan | logo, nombre, descripción,
+ *    acción y cifras. Todo lo esencial en la primera pantalla.
+ *  - Abajo: sobre la empresa, galería y proyectos (con la tarjeta de
+ *    /explore); a un lado, ODS y enlaces. Los bloques entran al aparecer.
  * ========================================================================= */
 
+import type { CSSProperties } from 'react';
 import { Link, useParams } from 'react-router';
-import { motion } from 'motion/react';
-import {
-  ArrowLeft, Lock, Building2, FolderKanban, Activity, Target, Users, Briefcase, CalendarCheck, ChevronRight,
-} from 'lucide-react';
+import { ArrowDown, ArrowLeft, BadgeCheck, Briefcase, Building2, CalendarCheck, Lock, ArrowRight } from 'lucide-react';
 import { useApp } from '@/app/context/AppContext';
 import { useEmpresaPublica, type ProyectoDeEmpresa } from '@/features/empresas';
 import { Navbar } from '@/shared/components/layout/Navbar';
@@ -16,6 +19,9 @@ import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { Galeria } from '@/shared/components/ui/Galeria';
 import { EnlaceSocial } from '@/shared/components/ui/EnlaceSocial';
 import { ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
+import { FotosHero, Revelar } from '@/pages/proyecto/piezas';
+import s from '@/pages/proyecto/Detalle.module.css';
+import t from '@/pages/proyectos/ProyectosPublico.module.css';
 
 export default function CompanyPublic() {
   const { id } = useParams();
@@ -23,195 +29,167 @@ export default function CompanyPublic() {
   const { data: empresa, isLoading, isError } = useEmpresaPublica(id);
 
   return (
-    <div className="min-h-screen text-foreground font-sans relative overflow-x-clip">
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-primary/5 pointer-events-none -z-10" />
+    <div className={s.raiz}>
       <Navbar />
-
-      <div className="flex relative z-10">
+      <div style={{ display: 'flex' }}>
         {currentUser && <Sidebar isAdmin={currentUser.rol === 'superadmin'} />}
 
-        <main id="contenido" tabIndex={-1} className="flex-1 w-full min-w-0 overflow-x-clip">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-            <Link to="/empresas" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground mb-6 rounded focus-visible:ring-2 focus-visible:ring-ring">
-              <ArrowLeft className="w-4 h-4" /> Todas las empresas
-            </Link>
+        <main id="contenido" tabIndex={-1} style={{ flex: 1, minWidth: 0 }}>
+          <div className={s.contenedor}>
+            <Link to="/empresas" className={s.volver}><ArrowLeft size={17} /> Todas las empresas</Link>
 
             {isLoading ? (
-              <div className="space-y-6">
-                <div className="h-64 rounded-3xl bg-muted animate-pulse" />
-                <div className="h-40 rounded-3xl bg-muted animate-pulse" />
+              <div className={s.cabecera}>
+                <div className={s.hero} style={{ background: 'var(--muted)' }} />
+                <div className={s.info} style={{ height: 320, borderRadius: 24, background: 'var(--muted)' }} />
               </div>
             ) : isError || !empresa ? (
-              <div className="text-center py-20 border border-dashed border-border rounded-3xl">
-                <Building2 className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-                <p className="font-semibold">Empresa no encontrada</p>
-                <p className="text-sm text-muted-foreground mt-1">Puede que no exista o que todavía no esté aprobada.</p>
+              <div className={s.vacio} style={{ padding: '80px 20px' }}>
+                <Building2 size={40} style={{ margin: '0 auto 12px', display: 'block' }} aria-hidden="true" />
+                <p style={{ margin: 0, fontWeight: 600, color: 'var(--tinta)' }}>Empresa no encontrada</p>
+                <p style={{ margin: '6px 0 0' }}>Puede que no exista o que todavía no esté aprobada.</p>
               </div>
             ) : (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-
-                {/* Cabecera */}
-                <section className="rounded-3xl overflow-hidden border border-border/60 bg-card shadow-sm">
-                  <div className="relative h-40 md:h-56 bg-primary/10">
-                    {empresa.imagenes[0] && <img src={empresa.imagenes[0].url} alt="" className="w-full h-full object-cover" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <>
+                {/* ── CABECERA: fotos | identidad, acción y cifras ── */}
+                <header className={s.cabecera}>
+                  <div className={`${s.hero} ${s.aparece}`}>
+                    <FotosHero fotos={empresa.imagenes.map(i => i.url)} nombre={empresa.nombre} />
                   </div>
-                  <div className="px-6 md:px-8 pb-6 md:pb-8">
-                    <div className="relative z-10 flex flex-col sm:flex-row sm:items-end gap-4">
-                      <div className="-mt-12 w-24 h-24 rounded-3xl bg-muted border-4 border-card shadow-xl overflow-hidden flex items-center justify-center flex-shrink-0">
-                        {empresa.logo_url
-                          ? <img src={empresa.logo_url} alt={`Logo de ${empresa.nombre}`} className="w-full h-full object-cover" />
-                          : <Building2 className="w-10 h-10 text-muted-foreground" />}
-                      </div>
-                      <div className="min-w-0 pt-1 sm:pt-4">
-                        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight break-words">{empresa.nombre}</h1>
-                        {empresa.fecha_aprobacion && (
-                          <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
-                            <CalendarCheck className="w-4 h-4" /> En la plataforma desde {new Date(empresa.fecha_aprobacion).getFullYear()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-                      <Stat icono={FolderKanban} valor={empresa.total_proyectos} etiqueta="Proyectos" />
-                      <Stat icono={Activity} valor={empresa.proyectos_activos} etiqueta="En curso" />
-                      <Stat icono={Target} valor={empresa.ods.length} etiqueta="ODS abordados" />
-                      {empresa.num_empleados ? <Stat icono={Users} valor={empresa.num_empleados} etiqueta="Empleados" /> : null}
+                  <div className={s.info}>
+                    <div className={`${s.etiquetas} ${s.aparece}`} style={{ alignItems: 'center', gap: 14 }}>
+                      <span className={s.logoGrande}>
+                        {empresa.logo_url ? <img src={empresa.logo_url} alt={`Logo de ${empresa.nombre}`} /> : <Building2 size={34} aria-hidden="true" />}
+                      </span>
+                      <span className={`${s.etiqueta} ${s.etiquetaMarca}`}><BadgeCheck size={15} aria-hidden="true" /> Empresa verificada</span>
+                      {empresa.fecha_aprobacion && (
+                        <span className={s.etiqueta}><CalendarCheck size={15} aria-hidden="true" /> Desde {new Date(empresa.fecha_aprobacion).getFullYear()}</span>
+                      )}
+                    </div>
+                    <h1 className={s.titulo}>
+                      {empresa.nombre.split(' ').map((w, i) => <span key={i} className={s.w} style={{ animationDelay: `${0.15 + i * 0.07}s` }}>{w} </span>)}
+                    </h1>
+                    {empresa.descripcion && (
+                      <p className={`${s.bajada} ${s.aparece} ${s.bajadaCorta}`} style={{ animationDelay: '.45s' }}>{empresa.descripcion}</p>
+                    )}
+                    {empresa.proyectos.length > 0 && (
+                      <div className={`${s.botones} ${s.aparece}`} style={{ animationDelay: '.6s' }}>
+                        <a href="#proyectos" className={s.btn}>Ver sus proyectos <ArrowDown size={16} /></a>
+                      </div>
+                    )}
+                    <div className={`${s.cifras} ${s.aparece}`} style={{ animationDelay: '.7s' }}>
+                      <div className={s.cifra}><b>{empresa.total_proyectos}</b><span>{empresa.total_proyectos === 1 ? 'proyecto publicado' : 'proyectos publicados'}</span></div>
+                      <div className={s.cifra}><b>{empresa.proyectos_activos}</b><span>en curso</span></div>
+                      <div className={s.cifra}><b>{empresa.ods.length}</b><span>{empresa.ods.length === 1 ? 'ODS abordado' : 'ODS abordados'}</span></div>
+                      <div className={s.cifra}><b>{empresa.num_empleados ?? '—'}</b><span>empleados</span></div>
                     </div>
                   </div>
-                </section>
+                </header>
 
-                <div className="grid gap-8 lg:grid-cols-3">
-                  {/* Columna principal */}
-                  <div className="lg:col-span-2 space-y-8">
-                    <Seccion titulo="Sobre la empresa">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line break-words">
-                        {empresa.descripcion || 'Esta empresa todavía no agregó una descripción.'}
-                      </p>
+                {/* ── CUERPO: contenido | lateral ── */}
+                <div className={s.cuerpo}>
+                  <div>
+                    <Revelar className={s.bloque}>
+                      <p className={s.eyebrow}>Sobre la empresa</p>
+                      <p className={s.texto}>{empresa.descripcion || 'Esta empresa todavía no agregó una descripción.'}</p>
                       {empresa.portafolio && (
-                        <div className="mt-5 rounded-2xl bg-muted/60 p-4">
-                          <p className="text-sm font-semibold flex items-center gap-2 mb-1"><Briefcase className="w-4 h-4 text-primary" /> Portafolio</p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-line">{empresa.portafolio}</p>
+                        <div className={s.portafolio}>
+                          <p className={s.eyebrow} style={{ marginBottom: 8 }}><Briefcase size={15} aria-hidden="true" /> Portafolio</p>
+                          <p className={s.texto} style={{ color: 'var(--tinta-2)' }}>{empresa.portafolio}</p>
                         </div>
                       )}
-                    </Seccion>
+                    </Revelar>
 
                     {empresa.imagenes.length > 0 && (
-                      <Seccion titulo="Galería">
+                      <Revelar className={s.bloque}>
+                        <p className={s.eyebrow}>Galería</p>
                         <Galeria fotos={empresa.imagenes.map((img) => img.url)} nombre={empresa.nombre} />
-                      </Seccion>
+                      </Revelar>
                     )}
 
-                    <Seccion titulo={`Proyectos (${empresa.proyectos.length})`}>
+                    <Revelar className={s.bloque} id="proyectos">
+                      <p className={s.eyebrow}>Proyectos · {empresa.proyectos.length}</p>
                       {empresa.proyectos.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Esta empresa todavía no tiene proyectos públicos.</p>
+                        <p className={s.vacio}>Esta empresa todavía no tiene proyectos públicos.</p>
                       ) : (
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          {empresa.proyectos.map((p) => <TarjetaProyecto key={p.id} proyecto={p} visitante={!currentUser} />)}
+                        <div className={s.proyectos}>
+                          {empresa.proyectos.map((p, i) => <TarjetaProyecto key={p.id} proyecto={p} visitante={!currentUser} indice={i} />)}
                         </div>
                       )}
-                    </Seccion>
+                    </Revelar>
                   </div>
 
-                  {/* Columna lateral */}
-                  <aside className="space-y-8">
-                    <Seccion titulo="Objetivos de Desarrollo Sostenible">
+                  <aside className={s.ficha}>
+                    <Revelar className={s.panel}>
+                      <h3>Objetivos de Desarrollo Sostenible</h3>
                       {empresa.ods.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Sus proyectos aún no declaran ODS.</p>
+                        <p style={{ margin: 0, color: 'var(--tinta-2)', fontSize: '.92rem' }}>Sus proyectos aún no declaran ODS.</p>
                       ) : (
-                        <ul className="space-y-2">
+                        <div className={s.odsLista}>
                           {empresa.ods.map(({ ods, proyectos }) => {
                             const o = ODS_POR_ID[ods];
                             return (
-                              <li key={ods}>
-                                <Link to={`/explore?ods=${ods}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-muted transition-colors">
-                                  <span className="w-10 h-10 rounded-lg text-sm font-extrabold text-white flex items-center justify-center flex-shrink-0" style={{ backgroundColor: o?.color }}>
-                                    {ods}
-                                  </span>
-                                  <span className="min-w-0 flex-1">
-                                    <span className="block text-sm font-semibold leading-tight">{o?.nombre ?? etiquetaOds(ods)}</span>
-                                    <span className="block text-xs text-muted-foreground">{proyectos} {proyectos === 1 ? 'proyecto' : 'proyectos'}</span>
-                                  </span>
-                                </Link>
-                              </li>
+                              <Link key={ods} to={`/explore?ods=${ods}`} className={s.odsCard} title={etiquetaOds(ods)} style={{ '--c': o?.color } as CSSProperties}>
+                                <img src={`/images/ods/${ods}.png`} alt="" />
+                                <div><b>{proyectos} {proyectos === 1 ? 'proyecto' : 'proyectos'}</b><span>{o?.nombre ?? etiquetaOds(ods)}</span></div>
+                              </Link>
                             );
                           })}
-                        </ul>
+                        </div>
                       )}
-                    </Seccion>
+                    </Revelar>
 
                     {empresa.enlaces.length > 0 && (
-                      <Seccion titulo="Redes y enlaces">
-                        <div className="space-y-2">
+                      <Revelar className={s.panel} retraso={0.1}>
+                        <h3>Redes y enlaces</h3>
+                        <div style={{ display: 'grid', gap: 8 }}>
                           {empresa.enlaces.map((l, i) => <EnlaceSocial key={l.id ?? i} url={l.url} nombre={l.nombre} />)}
                         </div>
-                      </Seccion>
+                      </Revelar>
                     )}
                   </aside>
                 </div>
-              </motion.div>
+              </>
             )}
           </div>
         </main>
       </div>
-
     </div>
   );
 }
 
-function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+/** Tarjeta de proyecto con el mismo diseño de /explore. El visitante sin
+ *  sesión ve la tarjeta, pero el detalle lo lleva a registrarse. */
+function TarjetaProyecto({ proyecto: p, visitante, indice }: { proyecto: ProyectoDeEmpresa; visitante: boolean; indice: number }) {
+  const enCurso = p.estado === 'en_curso';
   return (
-    <section className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
-      <h2 className="text-lg font-bold mb-4">{titulo}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Stat({ icono: Icono, valor, etiqueta }: { icono: typeof Target; valor: number; etiqueta: string }) {
-  return (
-    <div className="rounded-2xl bg-muted/60 p-4 flex items-center gap-3">
-      <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-        <Icono className="w-5 h-5" aria-hidden="true" />
-      </span>
-      <span>
-        <span className="block text-xl font-extrabold leading-none">{valor}</span>
-        <span className="block text-xs text-muted-foreground mt-1">{etiqueta}</span>
-      </span>
-    </div>
-  );
-}
-
-/** El visitante sin sesión ve la tarjeta, pero el detalle lo lleva a registrarse (igual que en Explorar). */
-function TarjetaProyecto({ proyecto: p, visitante }: { proyecto: ProyectoDeEmpresa; visitante: boolean }) {
-  return (
-    <Link to={visitante ? '/register' : `/project/${p.id}`}
-      className="group flex flex-col rounded-2xl overflow-hidden border border-border/60 bg-background hover:shadow-lg transition-shadow focus-visible:ring-2 focus-visible:ring-ring outline-none">
-      <div className="relative aspect-video bg-primary/10">
-        {p.imagen_url
-          ? <img src={p.imagen_url} alt="" className="w-full h-full object-cover" />
-          : <FolderKanban className="absolute inset-0 m-auto w-8 h-8 text-primary/40" />}
-        <span className={`absolute top-2 right-2 text-[11px] font-bold px-2 py-1 rounded-full ${p.estado === 'en_curso' ? 'bg-success text-white' : 'bg-black/60 text-white'}`}>
-          {p.estado === 'en_curso' ? 'En curso' : 'Terminado'}
-        </span>
+    <Link to={visitante ? '/register' : `/project/${p.id}`} className={t.card} style={{ height: 420, animationDelay: `${0.1 + Math.min(indice, 6) * 0.07}s` }}
+      aria-label={visitante ? `${p.nombre}. Regístrate para ver más` : `${p.nombre}. Ver proyecto`}>
+      <span className={t.brillo} aria-hidden="true" />
+      <div className={t.cardFondo} aria-hidden="true">
+        {p.imagen_url ? <img src={p.imagen_url} alt="" className={`${t.fotoCapa} ${t.fotoActiva}`} /> : <Building2 className={t.cardSinFoto} />}
       </div>
-      <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-bold leading-tight line-clamp-2">{p.nombre}</h3>
-        {p.descripcion_corta && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{p.descripcion_corta}</p>}
-        {p.ods.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-3">
-            {p.ods.map((id) => (
-              <span key={id} title={etiquetaOds(id)} className="w-6 h-6 rounded text-[10px] font-bold text-white flex items-center justify-center"
-                style={{ backgroundColor: ODS_POR_ID[id]?.color }}>{id}</span>
-            ))}
-          </div>
-        )}
-        <span className="mt-auto pt-3 text-sm font-semibold text-primary flex items-center gap-1">
-          {visitante
-            ? <><Lock className="w-4 h-4" /> Regístrate para ver más</>
-            : <>Ver proyecto <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>}
-        </span>
+      <div className={t.cardVelo} aria-hidden="true" />
+      <div className={t.cardContenido}>
+        <div className={t.cardArriba}>
+          <span />
+          <span className={t.cardEtiquetas}>
+            <span className={enCurso ? t.cardNuevo : t.cardCategoria}>{enCurso ? 'En curso' : 'Terminado'}</span>
+          </span>
+        </div>
+        <div className={t.cardAbajo}>
+          <h3 className={t.cardTitulo}>{p.nombre}</h3>
+          {p.descripcion_corta && <p className={t.cardDesc}>{p.descripcion_corta}</p>}
+          {p.ods.length > 0 && (
+            <div className={t.cardChips}>
+              {p.ods.map(id => <span key={id} title={etiquetaOds(id)}>ODS {id}</span>)}
+            </div>
+          )}
+          <span className={t.cardBoton}>
+            {visitante ? <><Lock size={16} /> Regístrate para ver más</> : <>Ver proyecto <ArrowRight size={17} /></>}
+          </span>
+        </div>
       </div>
     </Link>
   );

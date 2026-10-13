@@ -5,24 +5,10 @@
  * panel ilustrado a la derecha. Separado del sistema (no usa el tema global).
  * ========================================================================= */
 
-import { useEffect, type ReactNode } from 'react';
-import { Link } from 'react-router';
+import type { ReactNode } from 'react';
+import { Navbar } from '@/shared/components/layout/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import s from './Acceso.module.css';
-
-const FUENTE = 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap';
-
-/** Carga la fuente Geist mientras la página está abierta. */
-function useFuenteGeist() {
-  useEffect(() => {
-    if (document.querySelector(`link[href="${FUENTE}"]`)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = FUENTE;
-    document.head.appendChild(link);
-    return () => link.remove();
-  }, []);
-}
 
 /** Título que entra palabra por palabra (de borroso a nítido). */
 export function TituloAnimado({ texto, retraso = 0 }: { texto: string; retraso?: number }) {
@@ -56,22 +42,16 @@ export function EncabezadoAcceso({ eyebrow, titulo, texto, onVolver }: {
   );
 }
 
-export function AccesoLayout({ navDerecha, panel, ancho = false, children }: {
-  /** Contenido a la derecha de la barra (p. ej. "¿No tienes cuenta? Crear cuenta"). */
-  navDerecha?: ReactNode;
+export function AccesoLayout({ panel, ancho = false, children }: {
   /** Ilustración de la columna derecha. Sin panel, el contenido va centrado. */
   panel?: ReactNode;
   /** Columnas más anchas para formularios largos (registro). */
   ancho?: boolean;
   children: ReactNode;
 }) {
-  useFuenteGeist();
   return (
     <div className={s.raiz}>
-      <nav className={s.nav} aria-label="Principal">
-        <Link to="/" className={s.logo}><i />ProjectHub</Link>
-        {navDerecha && <div className={s.navDer}>{navDerecha}</div>}
-      </nav>
+      <Navbar />
       {panel ? (
         <main className={`${s.cuerpo} ${ancho ? s.ancho : ''}`}>
           <div className={s.form}>{children}</div>

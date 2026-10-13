@@ -10,12 +10,13 @@
  * ========================================================================= */
 
 import { Building2, CheckCircle2, Clock, Lock, MessageSquare, UserRound, Users } from 'lucide-react';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './Acceso.module.css';
 
 /** Burbuja de chat apoyada en un punto (posición en %). */
 function Burbuja({ texto, color, x, y, retraso = 0 }: { texto: string; color: string; x: string; y: string; retraso?: number }) {
   return (
-    <span className={`${s.burbuja} ${s.flota}`} style={{ background: color, left: x, top: y, animationDelay: `${retraso}s, ${retraso + 1}s` }}>
+    <span className={`${s.burbuja} ${s.flota}`} style={{ background: color, color: color === 'var(--tinta)' ? 'var(--sobre-tinta)' : undefined, left: x, top: y, animationDelay: `${retraso}s, ${retraso + 1}s` }}>
       {texto}
     </span>
   );
@@ -27,9 +28,9 @@ export function EspacioPrevio({ correo, privado }: { correo: string; privado: bo
   const usuario = correo.split('@')[0].replace(/[._-]+/g, ' ').trim();
   const nombre = usuario ? usuario.charAt(0).toUpperCase() + usuario.slice(1) : '';
   const proyectos = [
-    { t: 'Monitoreo de agua potable', avance: 72, color: '#26BDE2' },
-    { t: 'Software para cooperativas', avance: 45, color: '#A21942' },
-    { t: 'Energía solar en escuelas', avance: 90, color: '#FCC30B' },
+    { t: 'Monitoreo de agua potable', avance: 72, color: ODS_POR_ID[6].color },
+    { t: 'Software para cooperativas', avance: 45, color: ODS_POR_ID[8].color },
+    { t: 'Energía solar en escuelas', avance: 90, color: ODS_POR_ID[7].color },
   ];
   return (
     <div className={s.vista}>
@@ -148,7 +149,7 @@ export function PerfilPrevio({ v }: { v: Valores }) {
         <div className={s.postulaciones}>
           <small>Proyectos para postular</small>
           {['Monitoreo de agua potable', 'Energía solar en escuelas'].map((p, i) => (
-            <div key={p} className={s.filaProy} style={{ animationDelay: `${0.4 + i * 0.12}s` }}><i style={{ background: i ? '#FCC30B' : '#26BDE2' }} /><span>{p}</span></div>
+            <div key={p} className={s.filaProy} style={{ animationDelay: `${0.4 + i * 0.12}s` }}><i style={{ background: i ? ODS_POR_ID[7].color : ODS_POR_ID[6].color }} /><span>{p}</span></div>
           ))}
         </div>
       </div>

@@ -45,8 +45,8 @@ const PASOS = [
 const GIROS = ['rotateY(-10deg) rotateZ(-2deg)', 'rotateY(8deg) rotateZ(1.5deg)', 'rotateY(-6deg) rotateZ(-1deg)', 'rotateY(0deg) rotateZ(0deg)'];
 const COLOR_ESTADO = [
   { background: 'var(--linea-suave)', color: 'var(--tinta)' },
-  { background: '#E1F3EA', color: 'var(--verde)' },
-  { background: '#FBE4E3', color: 'var(--rojo)' },
+  { background: 'var(--success-subtle)', color: 'var(--verde)' },
+  { background: 'var(--danger-subtle)', color: 'var(--rojo)' },
   { background: 'var(--tinta)', color: 'var(--sobre-tinta)' },
 ];
 

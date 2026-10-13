@@ -12,7 +12,8 @@
 
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
-import { useApp } from '@/app/context/AppContext';
+import { Navbar } from '@/shared/components/layout/Navbar';
+import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './InicioNuevo.module.css';
 import { CaosOrden } from './inicio-nuevo/CaosOrden';
 import { ComoFunciona } from './inicio-nuevo/ComoFunciona';
@@ -25,20 +26,14 @@ import { Cierre } from './inicio-nuevo/Cierre';
 // "Obras" del mazo: fotos alternadas con íconos de ODS (aportan el color).
 const CARTAS = [
   { img: '/images/landing/bolivia-murales.jpg', titulo: 'Arte urbano en El Alto' },
-  { ods: 4, color: '#C5192D' },
+  { ods: 4, color: ODS_POR_ID[4].color },
   { img: '/images/landing/equipos.jpg', titulo: 'Software para cooperativas' },
-  { ods: 7, color: '#FCC30B' },
+  { ods: 7, color: ODS_POR_ID[7].color },
   { img: '/images/landing/bolivia-mercado.jpg', titulo: 'Mercados con pago digital' },
-  { ods: 11, color: '#FD9D24' },
+  { ods: 11, color: ODS_POR_ID[11].color },
   { img: '/images/landing/profesionales.jpg', titulo: 'Consultoría ambiental' },
-  { ods: 6, color: '#26BDE2' },
+  { ods: 6, color: ODS_POR_ID[6].color },
 ] as const;
-
-// Prueba: true = la portada usa el fondo/colores del tema de la plataforma;
-// false = fondo blanco fijo (diseño original de la portada nueva).
-const USAR_TEMA = false;
-
-const FUENTE = 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap';
 
 /** Texto partido en palabras animables; `grupo` las agrupa para el JS. */
 function Palabras({ texto, grupo }: { texto: string; grupo: string }) {
@@ -54,22 +49,12 @@ function Palabras({ texto, grupo }: { texto: string; grupo: string }) {
 type Pose = { x: number; y: number; rz: number; ry: number; e: number; o: number };
 
 export default function InicioNuevo() {
-  const { currentUser } = useApp();
   const raiz = useRef<HTMLDivElement>(null);
   const recorrido = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
   const bajo = useRef<HTMLDivElement>(null);
   const cartas = useRef<(HTMLDivElement | null)[]>([]);
   const burbujas = useRef<(HTMLSpanElement | null)[]>([]);
-
-  // Fuente Geist solo mientras esta página está abierta.
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = FUENTE;
-    document.head.appendChild(link);
-    return () => link.remove();
-  }, []);
 
   useEffect(() => {
     const r = raiz.current!;
@@ -124,6 +109,11 @@ export default function InicioNuevo() {
     let intro = reducir ? 1 : 0;
     let raf = 0;
 
+    // Posición del mouse (-1..1), suavizada, para el efecto de profundidad.
+    let mx = 0, my = 0, mxS = 0, myS = 0;
+    const alMover = (ev: MouseEvent) => { mx = (ev.clientX / innerWidth) * 2 - 1; my = (ev.clientY / innerHeight) * 2 - 1; };
+    addEventListener('mousemove', alMover, { passive: true });
+
     const cuadro = (ts: number) => {
       if (t0 === null) t0 = ts;
       if (!reducir) intro = clamp((ts - t0) / 2600);
@@ -140,6 +130,12 @@ export default function InicioNuevo() {
       subtitulo.forEach((w, i) => pintar(w, ease(clamp((intro - 0.68 - i * 0.015) / 0.12))));
       botonesHero.forEach((w, i) => pintar(w, ease(clamp((intro - 0.85 - i * 0.04) / 0.1))));
 
+      // Movimiento en reposo: con el abanico (arriba) o la cascada (abajo) quietos,
+      // las tarjetas flotan y siguen un poco al mouse. Se apaga durante las transiciones.
+      mxS += (mx - mxS) * 0.06; myS += (my - myS) * 0.06;
+      const reposo = reducir ? 0 : clamp((intro - 0.8) / 0.2) * Math.max(1 - clamp(p / 0.06), clamp((p - 0.72) / 0.12));
+      const seg = ts / 1000;
+
       cartas.current.forEach((el, i) => {
         if (!el) return;
         let q: Pose;
@@ -155,6 +151,16 @@ export default function InicioNuevo() {
           else if (p < 0.36) c = pose.unica(i);
           else c = mezclar(pose.unica(i), pose.cascada(i), easeIO(clamp((p - 0.36) / 0.34)));
           q = intro >= 1 ? c : mezclar(q, c, clamp(p * 6));
+        }
+        if (reposo > 0) {
+          const prof = 0.6 + Math.abs(i - M) / M * 0.8; // las de los extremos se mueven más
+          q = {
+            ...q,
+            x: q.x + mxS * 14 * prof * k * reposo,
+            y: q.y + (Math.sin(seg * 1.1 + i * 0.9) * 7 + myS * 8 * prof) * k * reposo,
+            rz: q.rz + Math.sin(seg * 0.8 + i * 1.3) * 1.4 * reposo,
+            ry: q.ry + mxS * 6 * reposo,
+          };
         }
         el.style.transform = `translate(${q.x}px, ${q.y}px) rotateY(${q.ry}deg) rotateZ(${q.rz}deg) scale(${q.e})`;
         el.style.opacity = String(q.o);
@@ -190,27 +196,16 @@ export default function InicioNuevo() {
       raf = requestAnimationFrame(cuadro);
     };
     raf = requestAnimationFrame(cuadro);
-    return () => cancelAnimationFrame(raf);
+    // El logo de la barra pide repetir la animación de entrada del hero.
+    const reiniciar = () => { t0 = null; intro = reducir ? 1 : 0; };
+    addEventListener('portada:reiniciar', reiniciar);
+    return () => { cancelAnimationFrame(raf); removeEventListener('portada:reiniciar', reiniciar); removeEventListener('mousemove', alMover); };
   }, []);
 
   return (
-    <div ref={raiz} className={`${s.raiz} ${USAR_TEMA ? s.tema : ''}`}>
+    <div ref={raiz} className={s.raiz}>
       <div className={s.marco}>
-        <nav className={s.nav} aria-label="Principal">
-          <Link to="/" className={s.logo}><i />ProjectHub</Link>
-          <ul className={s.enlaces}>
-            <li><Link to="/register">Crear cuenta</Link></li>
-            <li><a href="#como-funciona">Cómo funciona</a></li>
-            <li><Link to="/explore">Proyectos</Link></li>
-            <li><Link to="/empresas">Empresas</Link></li>
-            <li><a href="#preguntas">Preguntas</a></li>
-          </ul>
-          <div className={s.cuenta}>
-            {currentUser
-              ? <Link to={currentUser.rol === 'superadmin' ? '/admin' : '/dashboard'} className={s.ingresar}>Ir a mi panel</Link>
-              : <Link to="/login" className={s.ingresar}>Ingresar</Link>}
-          </div>
-        </nav>
+        <Navbar />
 
         <section ref={recorrido} className={s.recorrido}>
           <div className={s.escena}>

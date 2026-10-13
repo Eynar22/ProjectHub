@@ -1,60 +1,87 @@
 /* ============================================================================
- * Proyectos para visitantes (portada). La cabecera, la barra de búsqueda y el
- * cierre reutilizan EmpresasPublico.module.css; aquí van las tarjetas.
+ * Proyectos (/explore). La cabecera, la barra de búsqueda y el cierre
+ * reutilizan EmpresasPublico.module.css; aquí van los filtros por categoría,
+ * el aviso para visitantes y la tarjeta de proyecto (diseño de siempre:
+ * foto de fondo completa, capa oscura, contenido en blanco encima).
+ * Colores: tokens del tema. Sin degradados (Anexo A11).
  * ========================================================================= */
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px }
 .chip { border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta-2); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: .92rem; cursor: pointer; transition: background .2s, color .2s, border-color .2s }
 .chip:hover { color: var(--tinta); border-color: var(--tinta) }
-.chipOn { background: var(--tinta); color: #fff; border-color: var(--tinta) }
-
-/* Grilla tipo revista: el primero ocupa 2 columnas y 2 filas */
-.grilla { padding: 4vh 7.1vw 12vh; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(clamp(380px, 30vw, 560px), auto); gap: clamp(16px, 1.6vw, 28px) }
-.tarjeta { position: relative; display: flex; flex-direction: column; border-radius: 26px; overflow: hidden; background: var(--superficie); color: var(--tinta); text-decoration: none;
-  box-shadow: 0 18px 50px rgba(17,18,22,.07); opacity: 0; animation: entra .8s cubic-bezier(.16,1,.3,1) forwards; transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s }
-@keyframes entra { from { opacity: 0; filter: blur(10px); transform: translateY(16px) } to { opacity: 1; filter: none; transform: none } }
-.tarjeta:hover { transform: translateY(-5px); box-shadow: 0 30px 70px rgba(17,18,22,.14) }
-.tarjeta:focus-visible { outline: 3px solid var(--azul); outline-offset: 4px }
-.destacada { grid-column: span 2; grid-row: span 2 }
-
-.foto { position: relative; flex: 1 1 52%; min-height: 160px; overflow: hidden; background: var(--c, var(--azul)) }
-.foto img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1s cubic-bezier(.16,1,.3,1) }
-.tarjeta:hover .foto img { transform: scale(1.06) }
-.sinFoto { position: absolute; inset: 0; display: grid; place-items: center; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px) }
-.sinFoto span { font-size: clamp(3rem, 6vw, 7rem); font-weight: 600; color: #fff; opacity: .9 }
-.categoria { position: absolute; left: 16px; top: 16px; padding: 7px 13px; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--tinta); font-size: .82rem; font-weight: 500; backdrop-filter: blur(6px) }
-.nuevo { position: absolute; right: 16px; top: 16px; padding: 7px 13px; border-radius: 999px; background: var(--rojo); color: #fff; font-size: .82rem; font-weight: 500 }
-
-.cuerpo { padding: clamp(20px, 1.8vw, 34px); display: flex; flex-direction: column; gap: 10px }
-.empresa { display: flex; align-items: center; gap: 8px; color: var(--tinta-2); font-size: .9rem }
-.empresa img { width: 22px; height: 22px; border-radius: 6px; object-fit: cover }
-.titulo { margin: 0; font-weight: 500; font-size: clamp(1.25rem, 1.6vw, 2rem); letter-spacing: -.035em; line-height: 1.12 }
-.destacada .titulo { font-size: clamp(1.8rem, 3vw, 3.8rem); letter-spacing: -.05em }
-.problema { margin: 0; color: var(--tinta-2); font-size: clamp(.92rem, 1vw, 1.2rem); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
-.destacada .problema { -webkit-line-clamp: 3; font-size: clamp(1rem, 1.25vw, 1.5rem); max-width: 50ch }
-.problema b { color: var(--tinta); font-weight: 500 }
-.pie { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px }
-.ods { display: flex; gap: 5px; flex-wrap: wrap }
-.ods img { width: clamp(28px, 2.2vw, 40px); height: clamp(28px, 2.2vw, 40px); border-radius: 7px }
-.candado { display: inline-flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 500; color: var(--tinta); white-space: nowrap }
-.candado span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--linea); transition: background .3s, color .3s, border-color .3s }
-.tarjeta:hover .candado span { background: var(--tinta); color: #fff; border-color: var(--tinta) }
-.candadoTxt { max-width: 0; overflow: hidden; opacity: 0; transition: max-width .4s cubic-bezier(.16,1,.3,1), opacity .3s }
-.tarjeta:hover .candadoTxt { max-width: 14em; opacity: 1 }
+.chipOn { background: var(--tinta); color: var(--sobre-tinta); border-color: var(--tinta) }
 
 /* Aviso para visitantes */
 .aviso { margin: 0 7.1vw; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 30px; padding: clamp(20px, 2vw, 34px) clamp(22px, 2.4vw, 44px);
-  border-radius: 24px; background: var(--tinta); color: #fff }
+  border-radius: 24px; background: var(--surface-inverse); color: var(--surface-inverse-foreground) }
 .aviso p { margin: 0; font-size: clamp(1rem, 1.3vw, 1.6rem); letter-spacing: -.02em; max-width: 46ch }
-.aviso p small { display: block; margin-top: 6px; color: #A3A7B3; font-size: .7em; letter-spacing: 0 }
-.aviso a { background: #fff; color: var(--tinta); text-decoration: none; padding: 15px 28px; border-radius: 999px; font-weight: 500; white-space: nowrap }
+.aviso p small { display: block; margin-top: 6px; color: color-mix(in oklch, var(--surface-inverse-foreground) 62%, var(--surface-inverse)); font-size: .7em; letter-spacing: 0 }
+.aviso a { background: var(--primary); color: var(--primary-foreground); text-decoration: none; padding: 15px 28px; border-radius: 999px; font-weight: 500; white-space: nowrap }
+.aviso a:hover { background: var(--primary-hover) }
 
-@media (max-width: 1100px) {
-  .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-}
+/* Grilla pareja de tarjetas */
+.grilla { padding: 4vh 7.1vw 12vh; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 2vw, 34px) }
+.destacada { /* sin efecto: todas las tarjetas miden lo mismo */ }
+
+/* ───── Tarjeta ───── */
+.card { position: relative; display: block; height: clamp(440px, 32vw, 560px); border-radius: 32px; text-decoration: none; color: var(--surface-inverse-foreground);
+  opacity: 0; animation: entra .8s cubic-bezier(.16,1,.3,1) forwards; isolation: isolate }
+@keyframes entra { from { opacity: 0; filter: blur(10px); transform: translateY(16px) } to { opacity: 1; filter: none; transform: none } }
+.card:focus-visible { outline: 3px solid var(--primary); outline-offset: 5px }
+
+/* Resplandor de marca detrás de la tarjeta (al pasar el mouse) */
+.brillo { position: absolute; inset: -6px; z-index: -1; border-radius: 38px; background: var(--primary); filter: blur(22px); opacity: 0; transition: opacity .5s }
+.card:hover .brillo { opacity: .4 }
+
+.cardFondo, .cardVelo, .cardContenido { position: absolute; inset: 0; border-radius: 32px }
+.cardFondo { overflow: hidden; background: var(--surface-inverse); box-shadow: var(--shadow-xl) }
+.cardVelo { background: color-mix(in oklch, var(--surface-inverse) 55%, transparent); pointer-events: none }
+.cardFondo, .cardVelo, .cardContenido { transition: transform .5s cubic-bezier(.16,1,.3,1) }
+.card:hover .cardFondo, .card:hover .cardVelo, .card:hover .cardContenido { transform: translateY(-8px) }
+.cardSinFoto { position: absolute; left: 50%; top: 45%; width: 30%; height: auto; transform: translate(-50%, -50%); color: var(--surface-inverse-foreground); opacity: .12 }
+
+/* Fotos que rotan con fundido; zoom lento al pasar el mouse */
+.fotoCapa { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.1s ease, transform 1.2s cubic-bezier(.16,1,.3,1) }
+.fotoActiva { opacity: 1 }
+.card:hover .fotoCapa { transform: scale(1.1) }
+.puntos { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2 }
+.puntos i { width: 7px; height: 7px; border-radius: 50%; background: var(--surface-inverse-foreground); opacity: .5; transition: width .4s, opacity .4s }
+.puntos i.puntoOn { width: 20px; border-radius: 99px; opacity: 1 }
+
+.cardContenido { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(20px, 1.8vw, 30px) }
+.cardArriba { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px }
+.cardLogo { width: 56px; height: 56px; border-radius: 16px; overflow: hidden; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--card); color: var(--muted-foreground); box-shadow: var(--shadow-lg); transition: filter .3s, opacity .3s }
+.cardLogo img { width: 100%; height: 100%; object-fit: contain; padding: 6px }
+.cardEtiquetas { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px }
+.cardCategoria, .cardNuevo { padding: 7px 13px; border-radius: 999px; font-size: .8rem; font-weight: 600; backdrop-filter: blur(10px) }
+.cardCategoria { background: color-mix(in oklch, var(--surface-inverse-foreground) 22%, transparent); border: 1px solid color-mix(in oklch, var(--surface-inverse-foreground) 15%, transparent) }
+.cardNuevo { background: var(--primary); color: var(--primary-foreground) }
+
+.cardAbajo { display: flex; flex-direction: column; gap: 14px }
+.cardTitulo { margin: 0; font-size: clamp(1.5rem, 1.9vw, 2.3rem); font-weight: 700; line-height: 1.1; letter-spacing: -.02em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.cardDesc { margin: -4px 0 0; font-size: clamp(.92rem, .95vw, 1.1rem); line-height: 1.55; color: color-mix(in oklch, var(--surface-inverse-foreground) 82%, transparent);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.cardChips { display: flex; flex-wrap: wrap; gap: 6px; transition: filter .3s, opacity .3s }
+.cardChips span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; font-size: .78rem; font-weight: 500; backdrop-filter: blur(10px);
+  background: color-mix(in oklch, var(--surface-inverse-foreground) 14%, transparent); border: 1px solid color-mix(in oklch, var(--surface-inverse-foreground) 12%, transparent);
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cardChips .cardDinero { background: color-mix(in oklch, var(--success) 28%, transparent); border-color: color-mix(in oklch, var(--success) 50%, transparent) }
+.cardBoton { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px 20px; border-radius: 999px; font-weight: 700; font-size: .95rem;
+  background: var(--background); color: var(--foreground); box-shadow: var(--shadow-lg); transition: transform .25s, background .2s }
+.card:hover .cardBoton { transform: scale(1.02) }
+
+/* Visitante: logo y datos borrosos (se ven al registrarse) */
+.borroso { filter: blur(5px); opacity: .6; user-select: none }
+
+@media (max-width: 1100px) { .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 @media (max-width: 700px) {
   .grilla { grid-template-columns: 1fr; padding: 3vh 20px 10vh }
-  .destacada { grid-column: auto; grid-row: auto }
   .aviso { margin: 0 20px }
+  .card { height: 460px }
 }
-@media (prefers-reduced-motion: reduce) { .tarjeta { animation: none; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; opacity: 1 }
+  .fotoCapa, .cardFondo, .cardVelo, .cardContenido, .brillo { transition: none }
+}
