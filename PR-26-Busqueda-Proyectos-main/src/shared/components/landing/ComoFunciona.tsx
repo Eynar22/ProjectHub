@@ -1,16 +1,16 @@
 /* ============================================================================
  * src/shared/components/landing/ComoFunciona.tsx
  * Sección "Cómo funciona" del landing, contada con el scroll:
- *  - Escritorio: la sección es alta; a la izquierda los 3 pasos con una línea
- *    que se llena al bajar, y a la derecha una pantalla fija (sticky) que
- *    cambia con el paso activo y muestra una maqueta animada de la plataforma.
+ *  - Escritorio: la sección es alta; a la izquierda los 3 pasos, y a la
+ *    derecha una pantalla fija (sticky) con el número del paso activo
+ *    ("01 / 03") y una maqueta animada de la plataforma que cambia al bajar.
  *  - Móvil: los pasos van uno debajo del otro, cada uno con su maqueta.
  * Las maquetas son ilustrativas (datos de ejemplo), hechas con JSX: no
  * dependen de imágenes externas y se ven bien en tema claro y oscuro.
  * ========================================================================= */
 
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from 'motion/react';
+import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/react';
 import {
   BadgeCheck, Building2, CheckCircle2, FileText, FolderUp, Lightbulb,
   MessageSquare, Rocket, Send, Upload, UserPlus,
@@ -44,7 +44,6 @@ export function ComoFunciona() {
 
   // 0 → 1 mientras la sección recorre la pantalla.
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 60%', 'end 70%'] });
-  const progreso = useSpring(scrollYProgress, { stiffness: 120, damping: 25 });
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
     setActivo(Math.min(PASOS.length - 1, Math.max(0, Math.floor(v * PASOS.length))));
   });
@@ -67,13 +66,6 @@ export function ComoFunciona() {
         {/* ───── Escritorio: pasos + pantalla fija ───── */}
         <div ref={ref} className="hidden lg:grid grid-cols-2 gap-16">
           <div className="relative">
-            {/* Línea de progreso */}
-            <div className="absolute left-7 top-4 bottom-4 w-[3px] rounded-full bg-border" />
-            <motion.div
-              className="absolute left-7 top-4 bottom-4 w-[3px] rounded-full bg-gradient-to-b from-primary to-indigo-400 origin-top"
-              style={{ scaleY: reducir ? 1 : progreso }}
-            />
-
             {PASOS.map((p, i) => {
               const esActivo = i === activo;
               const hecho = i < activo;
@@ -109,7 +101,43 @@ export function ComoFunciona() {
           </div>
 
           <div className="relative">
-            <div className="sticky top-28 h-[calc(100vh-10rem)] max-h-[560px] flex items-center">
+            <div className="sticky top-24 h-[calc(100vh-8rem)] max-h-[660px] flex flex-col justify-center gap-5">
+              {/* Indicador del paso: número grande + nombres de los pasos */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-end gap-2 [font-variant-numeric:lining-nums_tabular-nums]">
+                  <span className="relative inline-block overflow-hidden h-12 w-[3.6rem] text-5xl font-extrabold leading-[3rem] tracking-tight text-primary">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.span
+                        key={activo}
+                        initial={reducir ? { opacity: 0 } : { y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={reducir ? { opacity: 0 } : { y: '-100%', opacity: 0 }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute inset-0"
+                      >
+                        {String(activo + 1).padStart(2, '0')}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
+                  <span className="text-xl font-bold leading-[3rem] text-muted-foreground">/ {String(PASOS.length).padStart(2, '0')}</span>
+                </div>
+                <div className="flex gap-1.5">
+                  {PASOS.map((p, i) => (
+                    <span
+                      key={p.titulo}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors duration-500 ${
+                        i === activo
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : i < activo
+                            ? 'border-primary/40 text-primary'
+                            : 'border-border text-muted-foreground'
+                      }`}
+                    >
+                      {p.titulo}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <Pantalla paso={activo} />
             </div>
           </div>

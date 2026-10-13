@@ -4,12 +4,13 @@
  * Las rutas protegidas se envuelven con los guards de app/guards.
  * ========================================================================= */
 
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import { RutaPrivada } from './guards/RutaPrivada';
 import { RutaPorRol } from './guards/RutaPorRol';
 import { TitleSync } from './TitleSync';
 
 import Home from '@/pages/Home';
+import InicioNuevo from '@/pages/InicioNuevo';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -37,7 +38,10 @@ export const router = createBrowserRouter([
     element: <TitleSync />,
     children: [
       // ── Rutas públicas ──
-      { path: '/', Component: Home, handle: { titulo: 'Conecta empresas y proyectos' } },
+      { path: '/', Component: InicioNuevo, handle: { titulo: 'Conecta empresas y proyectos' } },
+      // Portada anterior, por si hay que compararla o volver atrás.
+      { path: '/inicio-anterior', Component: Home, handle: { titulo: 'Inicio (anterior)' } },
+      { path: '/inicio-nuevo', element: <Navigate to="/" replace /> },
       { path: '/login', Component: Login, handle: { titulo: 'Iniciar sesión' } },
       { path: '/register', Component: Register, handle: { titulo: 'Crear cuenta' } },
       { path: '/forgot-password', Component: ForgotPassword, handle: { titulo: 'Recuperar contraseña' } },

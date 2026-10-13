@@ -128,10 +128,14 @@ export function Navbar() {
     <div className="sticky top-0 z-sticky w-full h-14 md:h-16 pointer-events-none">
       <nav
         aria-label="Principal"
-        className={`pointer-events-auto w-full h-full flex items-center gap-2 px-4 md:px-6 backdrop-blur-md border-b transition-[background-color,box-shadow,border-color] duration-300 ${
+        className={`pointer-events-auto w-full h-full flex items-center gap-2 px-4 md:px-6 border-b transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ${
           conScroll
-            ? 'bg-card/90 border-border/60 shadow-[0_6px_24px_rgba(0,0,0,0.15)]'
-            : 'bg-card/70 border-transparent'
+            ? 'bg-card/90 backdrop-blur-md border-border/60 shadow-[0_6px_24px_rgba(0,0,0,0.15)]'
+            : enLanding
+              // Arriba del todo en la portada: transparente sobre el hero. El hero
+              // siempre es oscuro, así que se fuerzan los colores del tema oscuro.
+              ? 'dark bg-transparent border-transparent'
+              : 'bg-card/70 backdrop-blur-md border-transparent'
         }`}
       >
         {/* 1. Isla izquierda: logo en su cápsula */}

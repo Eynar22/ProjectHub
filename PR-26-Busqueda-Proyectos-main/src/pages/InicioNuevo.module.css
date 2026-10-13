@@ -1,0 +1,114 @@
+/* ============================================================================
+ * src/pages/InicioNuevo.module.css
+ * Estilos SOLO de la portada nueva (/inicio-nuevo). Es un CSS Module: las
+ * clases quedan con nombre único y los colores son variables locales de
+ * .raiz, así que no tocan el tema global (theme.css) ni el resto de la app.
+ * ========================================================================= */
+
+.raiz {
+  --fondo: #F7F7F8;
+  --pagina: #F7F7F8;
+  --tinta: #111216;
+  --tinta-2: #5D606B;
+  --azul: #2B59F0;
+  --verde: #2FA36B;
+  --rojo: #D6403A;
+  --superficie: #FFFFFF;     /* tarjetas y paneles */
+  --linea: #D4D6DC;          /* líneas divisorias */
+  --linea-suave: #ECEDF0;    /* fondos suaves de chips y cabeceras */
+  --sobre-tinta: #FFFFFF;    /* texto sobre botones negros */
+  --f: "Geist", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+  min-height: 100vh;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--f);
+  padding: 0;
+}
+/* PRUEBA: la portada toma el fondo y los textos del tema de la plataforma
+   (claro u oscuro según la preferencia). Para volver al blanco fijo, quitar
+   la clase `tema` en InicioNuevo.tsx (constante USAR_TEMA). */
+.tema {
+  --fondo: var(--background);
+  --pagina: var(--background);
+  --tinta: var(--foreground);
+  --tinta-2: var(--muted-foreground);
+  --superficie: var(--card);
+  --linea: var(--border);
+  --linea-suave: var(--muted);
+  --sobre-tinta: var(--background);
+  color-scheme: normal;
+}
+
+.raiz *, .raiz *::before, .raiz *::after { box-sizing: border-box }
+.raiz a:focus-visible { outline: 2px solid var(--azul); outline-offset: 3px }
+
+.marco { background: var(--pagina); position: relative }
+
+/* ───── Menú ───── */
+.nav { position: sticky; top: 0; background: var(--pagina); z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 5.2vw; opacity: 0; animation: fade .8s .1s forwards }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1rem; color: var(--tinta); text-decoration: none }
+.logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--azul); display: inline-block }
+.enlaces { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; font-size: .95rem; font-weight: 500 }
+.enlaces a { color: var(--tinta); text-decoration: none }
+.enlaces li:first-child::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tinta); margin-right: 6px; vertical-align: 1px }
+.cuenta { display: flex; gap: 8px; align-items: center }
+.ingresar { font-size: .82rem; font-weight: 500; color: var(--tinta); text-decoration: none; padding: 8px 14px; border: 1px solid var(--linea); border-radius: 999px }
+@media (max-width: 860px) { .enlaces { display: none } .nav { padding: 18px 20px } }
+@keyframes fade { to { opacity: 1 } }
+
+/* ───── Escena con scroll ───── */
+.recorrido { position: relative; height: 260vh }
+.escena { position: sticky; top: 0; height: 100vh; overflow: hidden }
+
+/* Palabra que entra de borroso a nítido (el JS controla opacidad y desenfoque) */
+.w { display: inline-block; white-space: pre; opacity: 0; filter: blur(10px); transform: translateY(6px) }
+
+.hero { position: absolute; inset: 0; text-align: center; padding: 15vh 20px 0; will-change: transform, opacity }
+.hero h1 { font-weight: 500; font-size: clamp(2.4rem, 4.8vw, 7rem); line-height: 1.08; letter-spacing: -.05em; margin: 0 auto }
+.bajo { position: absolute; left: 0; right: 0; text-align: center; padding-inline: 20px }
+.bajo p { margin: 0 auto clamp(20px, 3vh, 48px); font-size: clamp(1rem, 1.05vw, 1.4rem); color: var(--tinta); max-width: 60ch }
+.acciones { display: flex; justify-content: center; gap: clamp(22px, 2.2vw, 48px); align-items: center }
+.accionesIzq { justify-content: flex-start }
+.btn { background: var(--tinta); color: var(--sobre-tinta); text-decoration: none; padding: clamp(13px, 1vw, 20px) clamp(26px, 2.1vw, 44px); border-radius: 999px; font-size: clamp(.95rem, .9vw, 1.15rem); font-weight: 500 }
+.mas { font-size: clamp(.95rem, .9vw, 1.15rem); color: var(--tinta-2); text-decoration: none }
+
+.seccion2 { position: absolute; left: 0; top: 0; padding: 104px 0 0 7.1vw; max-width: 48vw }
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; margin: 0 0 1.2vw; color: var(--tinta-2) }
+.seccion2 h2 { font-weight: 500; font-size: clamp(2.4rem, 5vw, 6.4rem); line-height: 1.07; letter-spacing: -.05em; margin: 0 0 clamp(28px, 3.6vw, 80px) }
+.color { color: var(--rojo) }
+.seccion2 p { color: var(--tinta-2); font-size: clamp(1rem, 1vw, 1.35rem); max-width: 19vw; min-width: 260px; margin: 0 0 clamp(28px, 4.2vw, 90px); line-height: 1.6 }
+
+/* ───── Tarjetas ───── */
+.mesa { position: absolute; inset: 0; perspective: 1400px; pointer-events: none }
+.carta { position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 14px 34px rgba(17,18,22,.22), 0 0 0 1px rgba(255,255,255,.6) inset; background: #ddd; will-change: transform, opacity; transform-style: preserve-3d }
+.carta img { width: 100%; height: 100%; object-fit: cover; display: block }
+.cartaOds img { object-fit: contain; padding: 14px }
+.carta b { position: absolute; left: 8px; right: 8px; bottom: 8px; font-size: .68rem; font-weight: 600; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); line-height: 1.2 }
+
+/* ───── Burbujas ───── */
+.burbuja { position: absolute; z-index: 40; font-size: clamp(.85rem, 1.05vw, 1.35rem); font-weight: 500; color: #fff; padding: .45em 1em; border-radius: 999px; transform: translate(-50%, -50%) scale(0); transition: transform .45s cubic-bezier(.34,1.56,.64,1); white-space: nowrap }
+.burbuja::after { content: ""; position: absolute; bottom: -5px; left: calc(50% - 5px); width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
+.izq::after { left: auto; right: 14px }
+.der::after { left: 14px }
+.on { transform: translate(-50%, -50%) scale(1) }
+
+.nota { position: absolute; right: 18px; bottom: 14px; font-size: .7rem; color: var(--tinta-2) }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .nav { animation: none; opacity: 1 }
+  .w { opacity: 1 !important; filter: none !important; transform: none !important }
+}
+
+
+/* ───── Celular ───── */
+@media (max-width: 759px) {
+  .hero { padding-top: 14vh }
+  .hero h1 { font-size: clamp(2rem, 9vw, 2.8rem) }
+  .seccion2 { max-width: none; padding: 84px 20px 0 }
+  .seccion2 h2 { font-size: clamp(2rem, 9vw, 2.8rem); margin-bottom: 16px }
+  .seccion2 p { max-width: none; min-width: 0; margin-bottom: 18px }
+  .eyebrow { margin-bottom: 10px }
+}

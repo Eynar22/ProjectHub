@@ -79,7 +79,7 @@ export function OdsImpacto({ proyectos }: { proyectos: Project[] }) {
   };
 
   return (
-    <section id="impacto" className="scroll-mt-16 relative z-20 py-24 border-t border-border/50 overflow-hidden bg-background">
+    <section id="impacto" className="scroll-mt-16 relative z-20 py-24 border-t border-border/50 overflow-hidden bg-muted/30">
       {/* Fondo: anillo difuso con los colores de los ODS */}
       <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
         <motion.div

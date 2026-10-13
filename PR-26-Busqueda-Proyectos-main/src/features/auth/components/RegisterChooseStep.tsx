@@ -3,9 +3,39 @@ import { LIMITES } from '@/shared/validacion';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router';
 import { empresasService, type Company } from '@/features/empresas';
-import { Card } from '@/shared/components/ui/Card';
+import { EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
 import { Button } from '@/shared/components/ui/Button';
-import { Building2, Search, UserPlus, UserRound, Users } from 'lucide-react';
+import { Building2, ChevronRight, Search, UserRound, Users, type LucideIcon } from 'lucide-react';
+
+/** Tarjeta de opción del primer paso del registro. */
+function OpcionRegistro({ icon: Icon, titulo, descripcion, activa, onClick, ...rest }: {
+  icon: LucideIcon;
+  titulo: string;
+  descripcion: string;
+  activa?: boolean;
+  onClick: () => void;
+  'aria-expanded'?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      {...rest}
+      className={`group w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${
+        activa ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/40'
+      }`}
+    >
+      <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{titulo}</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{descripcion}</p>
+      </div>
+      <ChevronRight className={`w-5 h-5 text-muted-foreground flex-shrink-0 transition-transform ${activa ? 'rotate-90 text-primary' : 'group-hover:translate-x-0.5'}`} />
+    </button>
+  );
+}
 
 export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, onIndependent }: {
   companies: Company[];
@@ -14,6 +44,7 @@ export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, o
   onIndependent: () => void;
 }) {
   const [companySearch, setCompanySearch] = useState('');
+  const [buscando, setBuscando] = useState(false);
 
   const approvedCompanies = companies.filter(c => c.estado === 'aprobado');
   const filteredCompanies = approvedCompanies.filter(c =>
@@ -36,31 +67,38 @@ export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, o
   }, [companySearch, companies]);
 
   return (
-    <Card className="p-8">
-      <div className="flex justify-center mb-6">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
-          <Building2 className="w-8 h-8 text-primary-foreground" />
-        </div>
-      </div>
-      <h1 className="text-3xl font-bold text-center mb-2">Crear Cuenta</h1>
-      <p className="text-center text-muted-foreground mb-8">¿Tu empresa ya está registrada en la plataforma?</p>
+    <div>
+      <EncabezadoAcceso eyebrow="Crear cuenta" titulo="¿Cómo vas a usar ProjectHub?" texto="Elige tu camino. Crear una cuenta es gratis." />
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Busca tu empresa</label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            aria-label="Buscar tu empresa" placeholder="Nombre de la empresa..."
-            value={companySearch} maxLength={LIMITES.busqueda}
-            onChange={e => setCompanySearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-      </div>
+      <div className="space-y-3">
+        <OpcionRegistro
+          icon={Search}
+          titulo="Mi empresa ya está registrada"
+          descripcion="Búscala y únete como miembro de su equipo."
+          activa={buscando}
+          onClick={() => setBuscando(b => !b)}
+          aria-expanded={buscando}
+        />
+
+        <AnimatePresence initial={false}>
+          {buscando && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+              <div className="relative pt-1 pb-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text" autoFocus
+                  aria-label="Buscar tu empresa" placeholder="Escribe el nombre de tu empresa..."
+                  value={companySearch} maxLength={LIMITES.busqueda}
+                  onChange={e => setCompanySearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       <AnimatePresence>
-        {companySearch.length > 0 && (
+        {buscando && companySearch.length > 0 && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-6 overflow-hidden">
             {filteredCompanies.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
@@ -113,22 +151,23 @@ export function RegisterChooseStep({ companies, onSelectCompany, onNewCompany, o
         )}
       </AnimatePresence>
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-        <div className="relative flex justify-center text-xs text-muted-foreground"><span className="bg-card px-2">o</span></div>
+        <OpcionRegistro
+          icon={Building2}
+          titulo="Quiero registrar mi empresa"
+          descripcion="Crea el perfil de tu empresa para publicar proyectos. Lo revisa el equipo de ProjectHub."
+          onClick={onNewCompany}
+        />
+        <OpcionRegistro
+          icon={UserRound}
+          titulo="Soy independiente"
+          descripcion="No perteneces a ninguna empresa y quieres postular a proyectos."
+          onClick={onIndependent}
+        />
       </div>
 
-      <Button variant="outline" className="w-full" onClick={onNewCompany}>
-        <UserPlus className="w-4 h-4 mr-2" />
-        Mi empresa no está — Quiero registrarla
-      </Button>
-      <Button variant="outline" className="w-full mt-3" onClick={onIndependent}>
-        <UserRound className="w-4 h-4 mr-2" />
-        No pertenezco a ninguna empresa
-      </Button>
-      <p className="text-center text-muted-foreground mt-6 text-sm">
+      <p className="text-center text-muted-foreground mt-8 text-sm">
         ¿Ya tienes cuenta? <Link to="/login" className="text-primary hover:underline">Inicia sesión</Link>
       </p>
-    </Card>
+    </div>
   );
 }

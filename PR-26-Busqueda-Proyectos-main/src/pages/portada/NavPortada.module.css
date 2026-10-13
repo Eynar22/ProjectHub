@@ -1,0 +1,13 @@
+/* Barra superior de la portada y sus páginas públicas. Usa las variables del
+   contenedor (--pagina, --tinta, --azul, --linea). */
+.nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 5.2vw;
+  background: color-mix(in srgb, var(--pagina, #F7F7F8) 88%, transparent); backdrop-filter: blur(12px) }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1rem; color: var(--tinta); text-decoration: none }
+.logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--azul); display: inline-block }
+.enlaces { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; font-size: .95rem; font-weight: 500 }
+.enlaces a { color: var(--tinta-2); text-decoration: none; transition: color .2s }
+.enlaces a:hover, .enlaces a.actual { color: var(--tinta) }
+.enlaces a.actual::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--tinta); margin-right: 7px; vertical-align: 2px }
+.cuenta { font-size: .95rem; font-weight: 500; color: var(--tinta); text-decoration: none; padding: 9px 18px; border: 1px solid var(--linea); border-radius: 999px; transition: background .2s, color .2s }
+.cuenta:hover { background: var(--tinta); color: #fff; border-color: var(--tinta) }
+@media (max-width: 860px) { .enlaces { display: none } .nav { padding: 16px 20px } }

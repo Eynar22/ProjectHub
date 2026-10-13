@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useRegistrarEmpresa } from '@/features/auth';
 import { Input, TextArea } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
+import { EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
 import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { Building2, User, Paperclip, Sparkles, ChevronDown, X } from 'lucide-react';
 
@@ -151,15 +151,13 @@ export function NewCompanyForm({ onBack, onSuccess }: {
   };
 
   return (
-    <Card className="p-8">
-      <button onClick={onBack} className="text-sm text-muted-foreground hover:text-foreground mb-4 -ml-2 px-2 min-h-11 inline-flex items-center gap-1">← Volver</button>
-      <div className="flex justify-center mb-6">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
-          <Building2 className="w-8 h-8 text-primary-foreground" />
-        </div>
-      </div>
-      <h1 className="text-2xl font-black tracking-tight text-center mb-2">Registrar Empresa</h1>
-      <p className="text-center text-muted-foreground mb-8 text-sm">El Super Admin revisará tu solicitud antes de aprobarla.</p>
+    <div>
+      <EncabezadoAcceso
+        onVolver={onBack}
+        eyebrow="Crear cuenta · Empresa"
+        titulo="Registra tu empresa."
+        texto="El equipo de ProjectHub revisará tu solicitud antes de aprobarla. Después podrás publicar proyectos."
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Datos del responsable */}
@@ -303,6 +301,6 @@ export function NewCompanyForm({ onBack, onSuccess }: {
         </div>
       </form>
       {editorFotos}
-    </Card>
+    </div>
   );
 }

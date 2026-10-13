@@ -28,8 +28,15 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 import { ODS_POR_ID } from '@/shared/constants/ods';
+import ProyectosPublico from '@/pages/proyectos/ProyectosPublico';
 
+/** Visitantes: proyectos con el estilo de la portada. Con sesión: versión del sistema. */
 export default function Explore() {
+  const { currentUser } = useApp();
+  return currentUser ? <ExploreSistema /> : <ProyectosPublico />;
+}
+
+function ExploreSistema() {
   const { currentUser } = useApp();
   const { data: projects = [] } = useProyectos();
   const { data: companies = [] } = useEmpresas();

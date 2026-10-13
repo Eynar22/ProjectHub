@@ -1,0 +1,60 @@
+/* ============================================================================
+ * Proyectos para visitantes (portada). La cabecera, la barra de búsqueda y el
+ * cierre reutilizan EmpresasPublico.module.css; aquí van las tarjetas.
+ * ========================================================================= */
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chip { border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta-2); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: .92rem; cursor: pointer; transition: background .2s, color .2s, border-color .2s }
+.chip:hover { color: var(--tinta); border-color: var(--tinta) }
+.chipOn { background: var(--tinta); color: #fff; border-color: var(--tinta) }
+
+/* Grilla tipo revista: el primero ocupa 2 columnas y 2 filas */
+.grilla { padding: 4vh 7.1vw 12vh; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(clamp(380px, 30vw, 560px), auto); gap: clamp(16px, 1.6vw, 28px) }
+.tarjeta { position: relative; display: flex; flex-direction: column; border-radius: 26px; overflow: hidden; background: var(--superficie); color: var(--tinta); text-decoration: none;
+  box-shadow: 0 18px 50px rgba(17,18,22,.07); opacity: 0; animation: entra .8s cubic-bezier(.16,1,.3,1) forwards; transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s }
+@keyframes entra { from { opacity: 0; filter: blur(10px); transform: translateY(16px) } to { opacity: 1; filter: none; transform: none } }
+.tarjeta:hover { transform: translateY(-5px); box-shadow: 0 30px 70px rgba(17,18,22,.14) }
+.tarjeta:focus-visible { outline: 3px solid var(--azul); outline-offset: 4px }
+.destacada { grid-column: span 2; grid-row: span 2 }
+
+.foto { position: relative; flex: 1 1 52%; min-height: 160px; overflow: hidden; background: var(--c, var(--azul)) }
+.foto img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1s cubic-bezier(.16,1,.3,1) }
+.tarjeta:hover .foto img { transform: scale(1.06) }
+.sinFoto { position: absolute; inset: 0; display: grid; place-items: center; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px) }
+.sinFoto span { font-size: clamp(3rem, 6vw, 7rem); font-weight: 600; color: #fff; opacity: .9 }
+.categoria { position: absolute; left: 16px; top: 16px; padding: 7px 13px; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--tinta); font-size: .82rem; font-weight: 500; backdrop-filter: blur(6px) }
+.nuevo { position: absolute; right: 16px; top: 16px; padding: 7px 13px; border-radius: 999px; background: var(--rojo); color: #fff; font-size: .82rem; font-weight: 500 }
+
+.cuerpo { padding: clamp(20px, 1.8vw, 34px); display: flex; flex-direction: column; gap: 10px }
+.empresa { display: flex; align-items: center; gap: 8px; color: var(--tinta-2); font-size: .9rem }
+.empresa img { width: 22px; height: 22px; border-radius: 6px; object-fit: cover }
+.titulo { margin: 0; font-weight: 500; font-size: clamp(1.25rem, 1.6vw, 2rem); letter-spacing: -.035em; line-height: 1.12 }
+.destacada .titulo { font-size: clamp(1.8rem, 3vw, 3.8rem); letter-spacing: -.05em }
+.problema { margin: 0; color: var(--tinta-2); font-size: clamp(.92rem, 1vw, 1.2rem); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.destacada .problema { -webkit-line-clamp: 3; font-size: clamp(1rem, 1.25vw, 1.5rem); max-width: 50ch }
+.problema b { color: var(--tinta); font-weight: 500 }
+.pie { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px }
+.ods { display: flex; gap: 5px; flex-wrap: wrap }
+.ods img { width: clamp(28px, 2.2vw, 40px); height: clamp(28px, 2.2vw, 40px); border-radius: 7px }
+.candado { display: inline-flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 500; color: var(--tinta); white-space: nowrap }
+.candado span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--linea); transition: background .3s, color .3s, border-color .3s }
+.tarjeta:hover .candado span { background: var(--tinta); color: #fff; border-color: var(--tinta) }
+.candadoTxt { max-width: 0; overflow: hidden; opacity: 0; transition: max-width .4s cubic-bezier(.16,1,.3,1), opacity .3s }
+.tarjeta:hover .candadoTxt { max-width: 14em; opacity: 1 }
+
+/* Aviso para visitantes */
+.aviso { margin: 0 7.1vw; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 30px; padding: clamp(20px, 2vw, 34px) clamp(22px, 2.4vw, 44px);
+  border-radius: 24px; background: var(--tinta); color: #fff }
+.aviso p { margin: 0; font-size: clamp(1rem, 1.3vw, 1.6rem); letter-spacing: -.02em; max-width: 46ch }
+.aviso p small { display: block; margin-top: 6px; color: #A3A7B3; font-size: .7em; letter-spacing: 0 }
+.aviso a { background: #fff; color: var(--tinta); text-decoration: none; padding: 15px 28px; border-radius: 999px; font-weight: 500; white-space: nowrap }
+
+@media (max-width: 1100px) {
+  .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+}
+@media (max-width: 700px) {
+  .grilla { grid-template-columns: 1fr; padding: 3vh 20px 10vh }
+  .destacada { grid-column: auto; grid-row: auto }
+  .aviso { margin: 0 20px }
+}
+@media (prefers-reduced-motion: reduce) { .tarjeta { animation: none; opacity: 1 } }

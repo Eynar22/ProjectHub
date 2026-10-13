@@ -47,7 +47,7 @@ export function TodoEnUnLugar() {
   const actual = HERRAMIENTAS.find((h) => h.id === activa)!;
 
   return (
-    <section id="demo" className="scroll-mt-16 relative z-20 py-24 border-b border-border/50">
+    <section id="demo" className="scroll-mt-16 relative z-20 py-24 border-b border-border/50 bg-gradient-to-b from-background via-primary/[0.05] to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-14 max-w-3xl mx-auto">
           <p className="text-sm font-bold text-primary uppercase tracking-widest mb-3">Pruébalo aquí mismo</p>
@@ -154,7 +154,7 @@ function coords(e: MouseEvent | TouchEvent | PointerEvent): [number, number] {
   return [p.clientX, p.clientY];
 }
 
-function DemoTablero() {
+export function DemoTablero() {
   const [tareas, setTareas] = useState(TAREAS_INICIALES);
   const [sobre, setSobre] = useState<number | null>(null);
   const colsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -231,7 +231,7 @@ const RESPUESTAS = [
   'Gracias, ya lo vi. Subo el informe a Archivos.',
 ];
 
-function DemoChat() {
+export function DemoChat() {
   const [mensajes, setMensajes] = useState<MensajeDemo[]>([
     { id: 1, yo: false, quien: 'MR', texto: 'Los sensores del piloto ya están enviando datos 🎉' },
     { id: 2, yo: false, quien: 'JC', texto: '¿Agendamos la capacitación para el jueves?' },
@@ -331,7 +331,7 @@ const CARPETAS: { nombre: string; archivos: { nombre: string; tipo: 'pdf' | 'img
   ] },
 ];
 
-function DemoArchivos() {
+export function DemoArchivos() {
   const [abierta, setAbierta] = useState<number | null>(null);
   const carpeta = abierta === null ? null : CARPETAS[abierta];
 

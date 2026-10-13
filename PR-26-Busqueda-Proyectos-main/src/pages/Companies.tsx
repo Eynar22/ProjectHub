@@ -14,8 +14,15 @@ import { useEmpresasPublicas, type EmpresaPublica } from '@/features/empresas';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
 import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
+import EmpresasPublico from '@/pages/empresas/EmpresasPublico';
 
+/** Visitantes: directorio con el estilo de la portada. Con sesión: versión del sistema. */
 export default function Companies() {
+  const { currentUser } = useApp();
+  return currentUser ? <CompaniesSistema /> : <EmpresasPublico />;
+}
+
+function CompaniesSistema() {
   const { currentUser } = useApp();
   const { data: empresas = [], isLoading, isError } = useEmpresasPublicas();
   const [busqueda, setBusqueda] = useState('');

@@ -1,0 +1,55 @@
+/* ============================================================================
+ * Sección "Para quién" de la portada nueva. Usa las variables de .raiz
+ * (InicioNuevo.module.css), que solo existen dentro de esa página.
+ * ========================================================================= */
+
+.seccion { padding: 16vh 7.1vw 18vh }
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
+.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.05em; margin: 0 0 clamp(48px, 6vw, 120px); max-width: 18ch }
+.w { display: inline-block; white-space: pre }
+
+.columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw }
+.columna { min-width: 0 }
+
+/* Mazo: 3 tarjetas que se abren en abanico al entrar en pantalla */
+.mazo { position: relative; height: clamp(260px, 24vw, 460px); perspective: 1200px; margin-bottom: clamp(28px, 3vw, 56px) }
+.carta { position: absolute; left: 50%; top: 50%; width: clamp(150px, 13vw, 260px); aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: var(--superficie);
+  box-shadow: 0 18px 44px rgba(17,18,22,.2); transform: translate(-50%, -50%) rotate(0deg);
+  transition: transform .9s cubic-bezier(.16,1,.3,1), box-shadow .3s }
+.carta img { width: 100%; height: 100%; object-fit: cover; display: block }
+.carta b { position: absolute; left: 10px; right: 10px; bottom: 10px; color: #fff; font-size: clamp(.7rem, .75vw, .95rem); font-weight: 600; text-shadow: 0 1px 6px rgba(0,0,0,.6); line-height: 1.25 }
+.cartaOds img { object-fit: contain; padding: 12% }
+.cartaDoc { display: grid; place-content: center; gap: 10px; text-align: center; padding: 14px; color: var(--tinta) }
+.cartaDoc .icono { width: clamp(36px, 3.4vw, 64px); height: auto; margin-inline: auto; color: var(--verde) }
+.cartaDoc span { font-size: clamp(.75rem, .8vw, 1rem); font-weight: 600 }
+.cartaDoc small { font-size: clamp(.65rem, .7vw, .85rem); color: var(--tinta-2) }
+
+/* Abanico abierto (al entrar en pantalla) y un poco más al pasar el mouse */
+.abierto .carta:nth-child(1) { transform: translate(calc(-50% - 62%), -46%) rotate(-9deg) }
+.abierto .carta:nth-child(2) { transform: translate(-50%, -54%) rotate(0deg) }
+.abierto .carta:nth-child(3) { transform: translate(calc(-50% + 62%), -46%) rotate(9deg) }
+.columna:hover .abierto .carta:nth-child(1) { transform: translate(calc(-50% - 78%), -44%) rotate(-13deg) }
+.columna:hover .abierto .carta:nth-child(3) { transform: translate(calc(-50% + 78%), -44%) rotate(13deg) }
+
+.burbuja { position: absolute; z-index: 5; font-size: clamp(.82rem, 1vw, 1.3rem); font-weight: 500; color: #fff; padding: .45em 1em; border-radius: 999px; white-space: nowrap;
+  top: 4%; left: 50%; transform: translate(-50%, -50%) scale(0); transition: transform .5s .5s cubic-bezier(.34,1.56,.64,1) }
+.burbuja::after { content: ""; position: absolute; bottom: -5px; left: calc(50% - 5px); width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
+.abierto .burbuja { transform: translate(-50%, -50%) scale(1) }
+
+.columna h3 { font-weight: 500; font-size: clamp(1.6rem, 2.4vw, 3.2rem); letter-spacing: -.04em; line-height: 1.1; margin: 0 0 clamp(12px, 1.2vw, 24px) }
+.lista { list-style: none; margin: 0 0 clamp(24px, 2.4vw, 48px); padding: 0; display: grid; gap: .6em; color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.5 }
+.lista li { display: flex; gap: .6em }
+.lista li::before { content: ""; flex-shrink: 0; width: .45em; height: .45em; border-radius: 50%; margin-top: .55em; background: var(--punto) }
+.btn { display: inline-block; background: var(--tinta); color: var(--sobre-tinta); text-decoration: none; padding: clamp(13px, 1vw, 20px) clamp(26px, 2.1vw, 44px); border-radius: 999px; font-size: clamp(.95rem, .9vw, 1.15rem); font-weight: 500 }
+
+@media (max-width: 759px) {
+  .seccion { padding: 12vh 20px }
+  .titulo { font-size: clamp(2rem, 9vw, 2.6rem); margin-bottom: 40px }
+  .columnas { grid-template-columns: 1fr; gap: 72px }
+  .carta { width: 36vw }
+  .mazo { height: 52vw }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carta, .burbuja { transition: none }
+}

@@ -5,7 +5,7 @@ import { useRegistrarEmpleado } from '@/features/auth';
 import type { Company } from '@/features/empresas';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
+import { EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
 import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
 import { Building2 } from 'lucide-react';
 
@@ -68,9 +68,14 @@ export function JoinCompanyForm({ company, onBack, onSuccess }: {
   };
 
   return (
-    <Card className="p-8">
-      <button onClick={onBack} className="text-sm text-muted-foreground hover:text-foreground mb-4 -ml-2 px-2 min-h-11 inline-flex items-center gap-1">← Volver</button>
-      <div className="flex items-start gap-4 mb-6">
+    <div>
+      <EncabezadoAcceso
+        onVolver={onBack}
+        eyebrow="Crear cuenta · Unirme a mi empresa"
+        titulo="Súmate a tu equipo."
+        texto="Completa tus datos y adjunta un documento que acredite que trabajas ahí. El administrador de la empresa aprueba tu solicitud."
+      />
+      <div className="flex items-start gap-4 mb-6 p-4 rounded-2xl bg-card border border-border">
         {company?.logo_url
           ? <img src={company.logo_url} alt={company.nombre} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
           : <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center flex-shrink-0"><Building2 className="w-7 h-7 text-primary-foreground" /></div>
@@ -112,6 +117,6 @@ export function JoinCompanyForm({ company, onBack, onSuccess }: {
           {isSubmitting ? 'Mandando solicitud...' : 'Enviar Solicitud de Ingreso'}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

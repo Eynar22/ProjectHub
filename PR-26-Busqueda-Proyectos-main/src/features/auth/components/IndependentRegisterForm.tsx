@@ -5,9 +5,8 @@ import { toast } from 'sonner';
 import { useRegistrarIndependiente } from '@/features/auth';
 import { Input } from '@/shared/components/ui/Input';
 import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
+import { EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
 import { DocumentUpload } from '@/shared/components/ui/DocumentUpload';
-import { UserRound } from 'lucide-react';
 
 // El backend acepta hasta 20MB por request en base64; el CV se limita a 6MB.
 const MAX_CV_MB = 6;
@@ -65,19 +64,13 @@ export function IndependentRegisterForm({ onBack, onSuccess }: {
   };
 
   return (
-    <Card className="p-8">
-      <button onClick={onBack} className="text-sm text-muted-foreground hover:text-foreground mb-4 -ml-2 px-2 min-h-11 inline-flex items-center gap-1">← Volver</button>
-      <div className="flex items-start gap-4 mb-6">
-        <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
-          <UserRound className="w-7 h-7 text-primary-foreground" />
-        </div>
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold">Cuenta independiente</h1>
-          <p className="text-muted-foreground text-sm">
-            Sin empresa. Podrás explorar proyectos y postular a los que te interesen.
-          </p>
-        </div>
-      </div>
+    <div>
+      <EncabezadoAcceso
+        onVolver={onBack}
+        eyebrow="Crear cuenta · Independiente"
+        titulo="Tu perfil profesional."
+        texto="Sin empresa. Podrás explorar proyectos y postular a los que te interesen."
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
@@ -106,6 +99,6 @@ export function IndependentRegisterForm({ onBack, onSuccess }: {
           {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }

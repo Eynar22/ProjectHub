@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
+import { motion, useReducedMotion, useScroll, useSpring } from 'motion/react';
 import { Button } from '@/shared/components/ui/Button';
 import { Reveal } from '@/shared/components/Reveal';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
@@ -14,27 +14,16 @@ import { TodoEnUnLugar } from '@/shared/components/landing/TodoEnUnLugar';
 import { CtaFinal } from '@/shared/components/landing/CtaFinal';
 import { OdsImpacto } from '@/shared/components/landing/OdsImpacto';
 import { HechoEnBolivia } from '@/shared/components/landing/HechoEnBolivia';
-import { ProjectImage } from '@/shared/components/ui/ProjectImage';
+import { HeroPrincipal } from '@/shared/components/landing/HeroPrincipal';
+import { FraseImpacto } from '@/shared/components/landing/FraseImpacto';
+import { Contador } from '@/shared/components/Contador';
 import {
   Building2,
-  ArrowRight,
   Globe,
   Search,
   FolderUp,
-  ShieldCheck,
   ChevronDown,
 } from 'lucide-react';
-
-const textContainer = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.2 } }
-};
-
-const textItem = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
-};
-
 
 
 export default function Home() {
@@ -43,21 +32,14 @@ export default function Home() {
   const { data: empresas = [] } = useEmpresas();
   const reducirMovimiento = useReducedMotion();
 
-  // Hooks para el efecto de "Zoom Out" del hero
-  const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const heroScale = useTransform(scrollY, [0, 500], [1, 0.85]);
-  const heroY = useTransform(scrollY, [0, 500], [0, 60]);
+  // Barra de progreso de lectura (0 → 1 en toda la página).
+  const { scrollYProgress } = useScroll();
+  const progresoLectura = useSpring(scrollYProgress, { stiffness: 140, damping: 30 });
 
   // ODS con al menos un proyecto (para la barra de cifras del hero).
   const odsCubiertos = ODS_LIST.filter(o => projects.some(p => Array.isArray(p.ods) && p.ods.includes(o.id))).length;
   const proyectosEnCurso = projects.filter(p => p.estado === 'en_curso').length;
   const empresasVerificadas = empresas.filter(e => e.estado === 'aprobado').length;
-  // Proyectos reales para el panel del hero: los 3 más recientes en curso.
-  const proyectosRecientes = [...projects]
-    .filter(p => p.estado === 'en_curso' && !p.suspendido)
-    .sort((a, b) => (b.fecha_creacion ?? '').localeCompare(a.fecha_creacion ?? ''))
-    .slice(0, 3);
 
   return (
     <AppLayout
@@ -66,117 +48,17 @@ export default function Home() {
       sinFooter
       mainClassName="flex-1 w-full"
     >
+      {!reducirMovimiento && (
+        <motion.div
+          aria-hidden="true"
+          style={{ scaleX: progresoLectura }}
+          className="fixed top-0 left-0 right-0 h-[3px] z-[60] origin-left bg-gradient-to-r from-primary to-indigo-400"
+        />
+      )}
       <div className="relative w-full -mt-20 md:-mt-24">
 
-        {/* ======================================= */}
-        {/* HERO SECTION - FONDO FIJO, CONTENIDO 3D */}
-        {/* ======================================= */}
-        <section className="relative h-[130vh] w-full z-0">
-          <div className="sticky top-0 h-[100dvh] w-full bg-[#05050A] overflow-hidden">
-
-            {/* 1. FONDO: La Paz de noche (Unsplash, public/images/landing/) con un zoom muy
-                lento, velado a la izquierda para que el texto se lea y fundido abajo. */}
-            <motion.img
-              src="/images/landing/hero-la-paz-noche.jpg"
-              alt=""
-              aria-hidden="true"
-              fetchPriority="high"
-              className="absolute inset-0 w-full h-full object-cover object-[center_70%]"
-              initial={{ scale: 1.08, opacity: 0 }}
-              animate={reducirMovimiento ? { scale: 1.05, opacity: 1 } : { scale: [1.05, 1.15], opacity: 1 }}
-              transition={reducirMovimiento
-                ? { duration: 0.6 }
-                : { scale: { duration: 40, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }, opacity: { duration: 1.2 } }}
-            />
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#05050A] via-[#05050A]/80 to-[#05050A]/30" />
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-[#05050A]/70 via-transparent to-transparent" />
-            <div aria-hidden="true" className="absolute -top-40 -left-40 w-[40rem] h-[40rem] rounded-full bg-primary/20 blur-[140px]" />
-            <div aria-hidden="true" className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.6)_1px,transparent_0)] [background-size:28px_28px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-transparent to-transparent opacity-90" />
-            <p className="absolute bottom-4 right-4 z-10 text-[10px] text-white/40">La Paz, Bolivia · Foto: Unsplash</p>
-
-            {/* 2. CONTENIDO ANIMADO */}
-            <motion.div
-              style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-              className="absolute inset-0 w-full h-full flex flex-col justify-center overflow-hidden"
-            >
-              <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-24">
-
-                <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center relative z-20 pointer-events-none">
-
-                  <motion.div variants={textContainer} initial="hidden" animate="show" className="max-w-xl pointer-events-auto">
-
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight drop-shadow-lg text-white">
-                      Publica tu problema. <br/>
-                      <span className="text-primary italic font-serif">Encuentra quién</span><br/>
-                      lo resuelve.
-                    </h1>
-
-                    <motion.p variants={textItem} className="text-base md:text-lg text-slate-300 mb-8 leading-relaxed max-w-md font-medium">
-                      Las empresas publican proyectos con un problema real. Profesionales y equipos postulan con su propuesta de solución.
-                      Y cuando el proyecto arranca, las tareas, el chat y los archivos quedan en un solo lugar.
-                    </motion.p>
-
-                    <motion.div variants={textItem} className="flex flex-col sm:flex-row gap-3">
-                      <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white bg-primary hover:bg-indigo-600 shadow-[0_0_40px_rgba(37,99,235,0.4)] transition-all">
-                        Crear cuenta
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                      <Link to="/explore" className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-white border border-white/25 bg-white/5 hover:bg-white/10 backdrop-blur-sm transition-all">
-                        <Search className="w-5 h-5" />
-                        Ver proyectos abiertos
-                      </Link>
-                    </motion.div>
-
-                    <motion.p variants={textItem} className="mt-5 text-sm text-slate-400 flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-blue-400" />
-                      Cada empresa pasa una revisión antes de publicar.
-                    </motion.p>
-                  </motion.div>
-
-                  {/* Proyectos reales más recientes (solo si hay alguno publicado) */}
-                  {proyectosRecientes.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, delay: 0.3 }}
-                      className="hidden lg:block w-full max-w-md justify-self-end pointer-events-auto"
-                    >
-                      <div className="rounded-3xl border border-white/15 bg-[#0B0F1E]/80 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.5)] overflow-hidden">
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-                          <span className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Proyectos recientes</span>
-                          <Link to="/explore" className="text-[11px] font-semibold text-slate-300 hover:text-white inline-flex items-center gap-1">
-                            Ver todos <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        </div>
-                        <ul className="p-3 space-y-2">
-                          {proyectosRecientes.map(p => (
-                            <li key={p.id}>
-                              <Link
-                                to={`/project/${p.id}`}
-                                className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 hover:border-primary/50 hover:bg-white/[0.06] transition-colors"
-                              >
-                                <ProjectImage imagenes={p.imagenes} alt="" className="w-14 h-14 rounded-xl flex-shrink-0" />
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-bold text-white truncate group-hover:text-blue-300 transition-colors">{p.nombre}</p>
-                                  {(p.problema || p.descripcion_corta) && (
-                                    <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">{p.problema || p.descripcion_corta}</p>
-                                  )}
-                                </div>
-                                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-300 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </motion.div>
-                  )}
-
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        {/* HERO */}
+        <HeroPrincipal />
 
         {/* ======================================= */}
         {/* SECCIÓN 2: ¿QUÉ ES PROJECTHUB?          */}
@@ -211,7 +93,7 @@ export default function Home() {
                     <c.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xl md:text-2xl font-extrabold text-foreground leading-none">{c.valor}</span>
+                    <span className="text-xl md:text-2xl font-extrabold text-foreground leading-none"><Contador valor={c.valor} /></span>
                     <span className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-wider">{c.etiqueta}</span>
                   </div>
                 </div>
@@ -253,6 +135,9 @@ export default function Home() {
         <TodoEnUnLugar />
 
         {/* HECHO EN BOLIVIA: mosaico de fotos */}
+        {/* Respiro: frase a pantalla completa */}
+        <FraseImpacto />
+
         <HechoEnBolivia />
 
         {/* SECCIÓN 5: IMPACTO SOSTENIBLE (ODS) */}
