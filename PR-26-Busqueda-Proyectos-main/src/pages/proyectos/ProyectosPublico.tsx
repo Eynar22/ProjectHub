@@ -15,7 +15,8 @@ import { ArrowRight, Building2, Calendar, DollarSign, Lock, Search, Users } from
 import { LIMITES } from '@/shared/validacion';
 import { useApp } from '@/app/context/AppContext';
 import { useProyectos, type Project } from '@/features/proyectos';
-import { useEmpresas } from '@/features/empresas';
+import { useEmpresas, type Company } from '@/features/empresas';
+import { useUsuarios } from '@/features/usuarios';
 import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
 import { Navbar } from '@/shared/components/layout/Navbar';
@@ -31,6 +32,14 @@ export default function ProyectosPublico() {
   const sesion = !!currentUser;
   const { data: proyectos = [], isLoading, isError } = useProyectos();
   const { data: listaEmpresas = [] } = useEmpresas();
+  // Con sesión la lista de proyectos no trae la empresa: se resuelve por el
+  // creador (proyecto → creador → empresa), igual que la versión anterior.
+  const { data: usuarios = [] } = useUsuarios(sesion);
+  const empresaDe = (p: Project): Company | undefined => {
+    const id = p.creador?.empresa?.id ?? usuarios.find(u => u.id === p.creador_id)?.empresa_id;
+    return id != null ? listaEmpresas.find(c => c.id === id) : undefined;
+  };
+  const nombreEmpresa = (p: Project) => empresaDe(p)?.nombre ?? p.creador?.empresa?.nombre;
   const [busqueda, setBusqueda] = useState('');
   const [ahora] = useState(() => Date.now()); // para marcar los proyectos nuevos
   const [categoria, setCategoria] = useState('');
@@ -47,15 +56,14 @@ export default function ProyectosPublico() {
   const abiertos = proyectos.filter(p => (!p.estado || p.estado === 'en_curso') && !p.suspendido).sort((a, b) => b.id - a.id);
   const texto = busqueda.trim().toLowerCase();
   const filtrados = abiertos.filter(p =>
-    (!texto || p.nombre.toLowerCase().includes(texto) || p.creador?.empresa?.nombre?.toLowerCase().includes(texto) || p.problema?.toLowerCase().includes(texto)) &&
+    (!texto || p.nombre.toLowerCase().includes(texto) || nombreEmpresa(p)?.toLowerCase().includes(texto) || p.problema?.toLowerCase().includes(texto)) &&
     (!categoria || p.categoria === categoria) &&
     (!odsFiltro || (Array.isArray(p.ods) && p.ods.includes(odsFiltro))),
   );
   const categorias = PROJECT_CATEGORIES.filter(c => abiertos.some(p => p.categoria === c));
   const odsPresentes = ODS_LIST.filter(o => abiertos.some(p => p.ods?.includes(o.id)));
-  const empresas = new Set(abiertos.map(p => p.creador?.empresa?.nombre).filter(Boolean)).size;
+  const empresas = new Set(abiertos.map(nombreEmpresa).filter(Boolean)).size;
   const hayFiltro = !!texto || !!categoria || !!odsFiltro;
-  const logoDe = (p: Project) => listaEmpresas.find(c => c.id === p.creador?.empresa?.id)?.logo_url ?? null;
   const titulo = 'Problemas reales esperando a quien sepa resolverlos.';
 
   const contenido = (
@@ -127,7 +135,7 @@ export default function ProyectosPublico() {
           <p className={e.vacio} style={{ gridColumn: '1 / -1' }}>{abiertos.length === 0 ? 'Todavía no hay proyectos abiertos.' : 'Ningún proyecto coincide con la búsqueda.'}</p>
         ) : (
           filtrados.map((p, i) => (
-            <Tarjeta key={p.id} p={p} indice={i} ahora={ahora} sesion={sesion} logo={logoDe(p)}
+            <Tarjeta key={p.id} p={p} indice={i} ahora={ahora} sesion={sesion} logo={empresaDe(p)?.logo_url ?? null} empresaNombre={nombreEmpresa(p)}
               destacada={i === 0 && !hayFiltro && filtrados.length > 2} />
           ))
         )}
@@ -185,11 +193,10 @@ const fecha = (iso?: string) => (iso ? new Date(iso + 'T00:00:00').toLocaleDateS
 
 /** Tarjeta de proyecto con el diseño de siempre: foto de fondo completa (rota
  *  sola), capa oscura, logo y categoría arriba, datos y botón abajo. */
-function Tarjeta({ p, indice, ahora, sesion, logo }: {
-  p: Project; indice: number; destacada?: boolean; ahora: number; sesion: boolean; logo: string | null;
+function Tarjeta({ p, indice, ahora, sesion, logo, empresaNombre }: {
+  p: Project; indice: number; destacada?: boolean; ahora: number; sesion: boolean; logo: string | null; empresaNombre?: string;
 }) {
   const fotos = (p.imagenes ?? []).map(i => i.url).filter(Boolean);
-  const empresa = p.creador?.empresa;
   const nuevo = p.fecha_creacion && ahora - new Date(p.fecha_creacion).getTime() < DIAS_NUEVO * 864e5;
   const participantes = p.participantes?.length ?? 0;
 
@@ -223,7 +230,7 @@ function Tarjeta({ p, indice, ahora, sesion, logo }: {
           <h2 className={s.cardTitulo}>{p.nombre}</h2>
           {(p.descripcion_corta || p.problema) && <p className={s.cardDesc}>{p.descripcion_corta || p.problema}</p>}
           <div className={`${s.cardChips} ${sesion ? '' : s.borroso}`}>
-            <span><Building2 size={14} aria-hidden="true" /> {empresa?.nombre || 'Empresa'}</span>
+            <span><Building2 size={14} aria-hidden="true" /> {empresaNombre || 'Empresa'}</span>
             <span><Calendar size={14} aria-hidden="true" /> {fecha(p.fecha_inicio)} – {fecha(p.fecha_fin)}</span>
             <span><Users size={14} aria-hidden="true" /> {participantes} {participantes === 1 ? 'participante' : 'participantes'}</span>
             {p.financiamiento ? <span className={s.cardDinero}><DollarSign size={14} aria-hidden="true" /> {p.financiamiento.toLocaleString('es-BO')}</span> : null}
