@@ -10,9 +10,10 @@
  * Imágenes: public/images/landing (Unsplash) e íconos oficiales de los ODS.
  * ========================================================================= */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router';
 import { Navbar } from '@/shared/components/layout/Navbar';
+import { useProyectos, type Project } from '@/features/proyectos';
 import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './InicioNuevo.module.css';
 import { CaosOrden } from './inicio-nuevo/CaosOrden';
@@ -23,8 +24,12 @@ import { Impacto } from './inicio-nuevo/Impacto';
 import { Bolivia } from './inicio-nuevo/Bolivia';
 import { Cierre } from './inicio-nuevo/Cierre';
 
-// "Obras" del mazo: fotos alternadas con íconos de ODS (aportan el color).
-const CARTAS = [
+type Carta = { img: string; titulo: string } | { ods: number; color: string };
+
+// Mazo de respaldo (fotos ilustrativas + ODS) para completar cuando todavía
+// hay pocos proyectos con foto. El mazo siempre tiene 8 cartas: la animación
+// está calculada para 8 posiciones.
+const CARTAS_EJEMPLO: readonly Carta[] = [
   { img: '/images/landing/bolivia-murales.jpg', titulo: 'Arte urbano en El Alto' },
   { ods: 4, color: ODS_POR_ID[4].color },
   { img: '/images/landing/equipos.jpg', titulo: 'Software para cooperativas' },
@@ -33,7 +38,35 @@ const CARTAS = [
   { ods: 11, color: ODS_POR_ID[11].color },
   { img: '/images/landing/profesionales.jpg', titulo: 'Consultoría ambiental' },
   { ods: 6, color: ODS_POR_ID[6].color },
-] as const;
+];
+const TOTAL_CARTAS = 8;
+
+/** Mazo con proyectos reales: foto + nombre de los proyectos abiertos más
+ *  recientes, intercalados con los ODS a los que aportan. Se completa con el
+ *  mazo de ejemplo hasta tener 8 cartas. */
+function armarMazo(proyectos: Project[]): Carta[] {
+  const conFoto = proyectos
+    .filter(p => (!p.estado || p.estado === 'en_curso') && !p.suspendido && p.imagenes?.[0]?.url)
+    .sort((a, b) => b.id - a.id)
+    .slice(0, TOTAL_CARTAS / 2);
+  const fotos: Carta[] = conFoto.map(p => ({ img: p.imagenes[0].url, titulo: p.nombre }));
+  const odsUsados = [...new Set(conFoto.flatMap(p => p.ods ?? []))].filter(id => ODS_POR_ID[id]);
+  const ods: Carta[] = odsUsados.map(id => ({ ods: id, color: ODS_POR_ID[id].color }));
+
+  // Intercala foto / ODS, como el mazo original.
+  const mazo: Carta[] = [];
+  for (let i = 0; mazo.length < TOTAL_CARTAS && (i < fotos.length || i < ods.length); i++) {
+    if (fotos[i]) mazo.push(fotos[i]);
+    if (ods[i] && mazo.length < TOTAL_CARTAS) mazo.push(ods[i]);
+  }
+  // Completar con el mazo de ejemplo (sin repetir ODS ya usados).
+  for (const c of CARTAS_EJEMPLO) {
+    if (mazo.length >= TOTAL_CARTAS) break;
+    if ('ods' in c && odsUsados.includes(c.ods)) continue;
+    mazo.push(c);
+  }
+  return mazo.slice(0, TOTAL_CARTAS);
+}
 
 /** Texto partido en palabras animables; `grupo` las agrupa para el JS. */
 function Palabras({ texto, grupo }: { texto: string; grupo: string }) {
@@ -49,6 +82,8 @@ function Palabras({ texto, grupo }: { texto: string; grupo: string }) {
 type Pose = { x: number; y: number; rz: number; ry: number; e: number; o: number };
 
 export default function InicioNuevo() {
+  const { data: proyectos = [] } = useProyectos();
+  const mazo = useMemo(() => armarMazo(proyectos), [proyectos]);
   const raiz = useRef<HTMLDivElement>(null);
   const recorrido = useRef<HTMLElement>(null);
   const hero = useRef<HTMLDivElement>(null);
@@ -76,7 +111,7 @@ export default function InicioNuevo() {
       w.style.transform = `translateY(${(1 - v) * 6}px)`;
     };
 
-    const N = CARTAS.length;
+    const N = TOTAL_CARTAS;
     const M = (N - 1) / 2;
     // Poses en píxeles desde el centro de la escena. `k` escala según el ancho;
     // la cascada usa proporciones de la pantalla medidas sobre el video de referencia
@@ -235,7 +270,7 @@ export default function InicioNuevo() {
             </div>
 
             <div className={s.mesa} aria-hidden="true">
-              {CARTAS.map((c, i) => (
+              {mazo.map((c, i) => (
                 <div
                   key={i}
                   ref={el => { cartas.current[i] = el; }}
