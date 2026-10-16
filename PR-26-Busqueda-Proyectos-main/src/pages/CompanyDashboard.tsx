@@ -446,31 +446,31 @@ export default function CompanyDashboard() {
                 {myProjects.slice(0, 3).map((project) => {
                   const estadoCfg = PROYECTO_ESTADO[project.estado] ?? { variant: 'neutral' as const, label: project.estado };
                   return (
-                    <Card key={project.id} className="group relative overflow-hidden h-full min-h-[240px] flex flex-col rounded-2xl border border-white/10 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                    <Card key={project.id} className="group relative overflow-hidden h-full min-h-[240px] flex flex-col rounded-2xl border border-surface-inverse-foreground/10 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
                       <ProjectImage
                         imagenes={project.imagenes}
                         alt={project.nombre}
                         fallback="dark"
                         className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 z-10 bg-black/55 pointer-events-none" />
-                      <div className="relative z-20 flex flex-col h-full p-4 text-white">
+                      <div className="absolute inset-0 z-10 bg-surface-inverse/55 pointer-events-none" />
+                      <div className="relative z-20 flex flex-col h-full p-4 text-surface-inverse-foreground">
                         <div className="flex justify-end">
-                          <span className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
+                          <span className="bg-surface-inverse-foreground/20 backdrop-blur-md border border-surface-inverse-foreground/10 text-surface-inverse-foreground text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
                             {project.categoria || 'Tecnología'}
                           </span>
                         </div>
                         <div className="mt-auto flex flex-col gap-2.5">
                           <div>
                             <h3 className="text-lg font-black leading-tight line-clamp-1 drop-shadow-md mb-0.5">{project.nombre}</h3>
-                            <p className="text-xs text-white/80 line-clamp-2 drop-shadow-sm">{project.descripcion_corta}</p>
+                            <p className="text-xs text-surface-inverse-foreground/80 line-clamp-2 drop-shadow-sm">{project.descripcion_corta}</p>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 text-[10px] font-medium text-white/90 shadow-sm">
+                            <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 text-[10px] font-medium text-surface-inverse-foreground/90 shadow-sm">
                               <Calendar className="w-3 h-3" />
                               <span>{project.fecha_inicio}</span>
                             </span>
-                            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-full text-[10px] font-semibold text-white/90 shadow-sm">
+                            <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-2.5 py-1 rounded-full text-[10px] font-semibold text-surface-inverse-foreground/90 shadow-sm">
                               {estadoCfg.label}
                             </span>
                           </div>

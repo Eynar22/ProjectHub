@@ -131,7 +131,7 @@ export function Navbar() {
         aria-label="Principal"
         className={`pointer-events-auto w-full h-full flex items-center gap-2 px-4 md:px-6 border-b transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ${
           conScroll
-            ? 'bg-card/90 backdrop-blur-md border-border/60 shadow-[0_6px_24px_rgba(0,0,0,0.15)]'
+            ? 'bg-card/90 backdrop-blur-md border-border/60 shadow-lg'
             : enLanding
               // Arriba del todo en la portada: transparente sobre el hero.
               ? 'bg-transparent border-transparent'

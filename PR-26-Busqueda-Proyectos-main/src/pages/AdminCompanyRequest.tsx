@@ -211,7 +211,7 @@ export default function AdminCompanyRequest() {
                       <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 px-2">Responsable de Solicitud</h3>
                       
                       <div className="flex flex-col items-center text-center px-2">
-                        <div className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-4 border-2 border-white shadow-lg overflow-hidden">
+                        <div className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-4 border-2 border-card shadow-lg overflow-hidden">
                           <span className="text-3xl font-black text-success">{registrant.nombre_completo.charAt(0).toUpperCase()}</span>
                         </div>
                         <h4 className="text-xl font-bold text-foreground mb-1">{registrant.nombre_completo}</h4>

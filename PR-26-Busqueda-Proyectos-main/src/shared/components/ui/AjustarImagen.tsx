@@ -217,7 +217,7 @@ export function BotonAjustar({ onClick, className = '' }: { onClick: () => void;
       onClick={onClick}
       aria-label="Ajustar foto"
       title="Ajustar foto"
-      className={`inline-flex items-center gap-1 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur px-2 py-1 text-[11px] font-semibold text-white transition-colors ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full bg-surface-inverse/60 hover:bg-surface-inverse/80 backdrop-blur px-2 py-1 text-[11px] font-semibold text-surface-inverse-foreground transition-colors ${className}`}
     >
       <Crop className="w-3.5 h-3.5" /> Ajustar
     </button>

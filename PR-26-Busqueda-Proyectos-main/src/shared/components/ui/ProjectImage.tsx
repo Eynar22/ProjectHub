@@ -39,10 +39,10 @@ export function ProjectImage({
         />
       ) : fallback === 'dark' ? (
         <div className="w-full h-full bg-surface-inverse flex items-center justify-center">
-          <Building2 className="w-20 h-20 text-white/10" />
+          <Building2 className="w-20 h-20 text-surface-inverse-foreground/10" />
         </div>
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
+        <div className="w-full h-full bg-primary/10 flex items-center justify-center">
           <FolderKanban className="w-10 h-10 text-primary/40" />
         </div>
       )}

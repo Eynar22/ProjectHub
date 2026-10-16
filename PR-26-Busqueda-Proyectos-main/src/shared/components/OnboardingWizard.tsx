@@ -180,7 +180,7 @@ export function OnboardingWizard() {
   if (closed) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-surface-inverse/60 backdrop-blur-sm">
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg">
         <Card className="p-8 relative overflow-hidden max-h-[90vh] overflow-y-auto">
           {step !== 'listo' && (
@@ -322,11 +322,11 @@ export function OnboardingWizard() {
                                 aria-pressed={activo}
                                 title={o.nombre}
                                 className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-all ${
-                                  activo ? 'text-white border-transparent' : 'bg-input-background text-foreground border-input hover:border-primary/40'
+                                  activo ? 'text-surface-inverse-foreground border-transparent' : 'bg-input-background text-foreground border-input hover:border-primary/40'
                                 }`}
                                 style={activo ? { backgroundColor: o.color } : undefined}
                               >
-                                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${activo ? 'bg-white/25' : 'bg-muted'}`}>
+                                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${activo ? 'bg-surface-inverse-foreground/25' : 'bg-muted'}`}>
                                   {o.id}
                                 </span>
                                 <span className="max-w-[8rem] truncate">{o.nombre}</span>

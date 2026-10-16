@@ -157,7 +157,7 @@ const TOOLTIP_STYLE = {
   border: '1px solid var(--color-border)',
   borderRadius: '10px',
   fontSize: '12px',
-  boxShadow: '0 8px 24px rgb(0 0 0 / 0.10)',
+  boxShadow: 'var(--shadow-lg)',
 } as const;
 
 export function MonthlyColumns({

@@ -167,7 +167,7 @@ export function InfoTab({
                   <button
                     type="button"
                     onClick={() => removeEditImage(idx)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-surface-inverse/60 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -248,11 +248,11 @@ export function InfoTab({
                   aria-pressed={activo}
                   title={o.nombre}
                   className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                    activo ? 'text-white border-transparent shadow-sm' : 'bg-input-background text-foreground border-input hover:border-primary/40'
+                    activo ? 'text-surface-inverse-foreground border-transparent shadow-sm' : 'bg-input-background text-foreground border-input hover:border-primary/40'
                   }`}
                   style={activo ? { backgroundColor: o.color } : undefined}
                 >
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${activo ? 'bg-white/25' : 'bg-muted'}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${activo ? 'bg-surface-inverse-foreground/25' : 'bg-muted'}`}>
                     {o.id}
                   </span>
                   <span className="max-w-[10rem] truncate">{o.nombre}</span>
@@ -269,10 +269,10 @@ export function InfoTab({
                 <span
                   key={id}
                   title={o.nombre}
-                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-white shadow-sm"
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-surface-inverse-foreground shadow-sm"
                   style={{ backgroundColor: o.color }}
                 >
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px]">{o.id}</span>
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-surface-inverse-foreground/25 text-[10px]">{o.id}</span>
                   {o.nombre}
                 </span>
               );

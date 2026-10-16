@@ -139,7 +139,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
   const teamCount = project.participantes?.length || 0;
 
   return (
-    <Card className={`group relative overflow-hidden h-full min-h-[360px] flex flex-col rounded-2xl border border-white/10 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 ${tab === 'archivados' ? 'grayscale-[0.35]' : ''}`}>
+    <Card className={`group relative overflow-hidden h-full min-h-[360px] flex flex-col rounded-2xl border border-surface-inverse-foreground/10 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 ${tab === 'archivados' ? 'grayscale-[0.35]' : ''}`}>
       {/* Fondo: imagen del proyecto a sangre (o relleno oscuro) */}
       <ProjectImage
         imagenes={project.imagenes}
@@ -148,24 +148,24 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
         className="absolute inset-0 z-0 transition-transform duration-700 group-hover:scale-105"
       />
       {/* Velo oscuro para legibilidad del texto */}
-      <div className="absolute inset-0 z-10 bg-black/55 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-surface-inverse/55 pointer-events-none" />
 
       {/* Contenido */}
-      <div className="relative z-20 flex flex-col h-full p-5 text-white">
+      <div className="relative z-20 flex flex-col h-full p-5 text-surface-inverse-foreground">
         {/* Superior: rol + categoría / solicitudes */}
         <div className="flex items-start justify-between gap-2">
-          <span className="bg-white/15 backdrop-blur-md border border-white/15 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+          <span className="bg-surface-inverse-foreground/15 backdrop-blur-md border border-surface-inverse-foreground/15 text-surface-inverse-foreground text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
             {isOwner ? <Crown className="w-3.5 h-3.5" /> :
              isCollab ? <UserCheck className="w-3.5 h-3.5" /> :
              <Building2 className="w-3.5 h-3.5" />}
             {isOwner ? 'Propietario' : isCollab ? 'Colaborador' : 'Supervisión'}
           </span>
           <div className="flex flex-col items-end gap-2">
-            <span className="bg-white/20 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+            <span className="bg-surface-inverse-foreground/20 backdrop-blur-md border border-surface-inverse-foreground/10 text-surface-inverse-foreground text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
               {project.categoria || 'Tecnología'}
             </span>
             {isOwner && pendingReqs.length > 0 && tab === 'activos' && (
-              <span className="bg-warning/30 backdrop-blur-md border border-warning/40 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+              <span className="bg-warning/30 backdrop-blur-md border border-warning/40 text-surface-inverse-foreground text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg animate-pulse">
                 {pendingReqs.length} SOLICITUDES
               </span>
             )}
@@ -178,18 +178,18 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
             <h3 className="text-lg font-black leading-tight line-clamp-2 drop-shadow-md mb-1">
               {project.nombre}
             </h3>
-            <p className="text-white/80 text-xs line-clamp-2 leading-relaxed drop-shadow-sm">
+            <p className="text-surface-inverse-foreground/80 text-xs line-clamp-2 leading-relaxed drop-shadow-sm">
               {project.descripcion_corta || 'Sin descripción corta disponible.'}
             </p>
           </div>
 
           {/* Etiquetas glassmorphism: fecha, equipo, presupuesto, estado */}
           <div className="flex flex-wrap gap-2">
-            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+            <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-surface-inverse-foreground/90 shadow-sm">
               <Calendar className="w-3.5 h-3.5" />
               <span>{project.fecha_inicio}{project.fecha_fin ? ` al ${project.fecha_fin}` : ''}</span>
             </span>
-            <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+            <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-surface-inverse-foreground/90 shadow-sm">
               <Users className="w-3.5 h-3.5" />
               <span>{teamCount} integrante{teamCount === 1 ? '' : 's'}</span>
             </span>
@@ -201,14 +201,14 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
             )}
             {isOwner && tab !== 'archivados' ? (
               isLoading ? (
-                <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-white/90 shadow-sm">
+                <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium text-surface-inverse-foreground/90 shadow-sm">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Actualizando…
                 </span>
               ) : (
                 <EstadoBadge project={project} onSelect={onEstado} />
               )
             ) : (
-              <span className="bg-white/10 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-semibold text-white/90 shadow-sm">
+              <span className="bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/10 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-semibold text-surface-inverse-foreground/90 shadow-sm">
                 <EstadoIcon className="w-3.5 h-3.5" />
                 {estadoCfg.label}
               </span>
@@ -221,11 +221,11 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
               <Avatar
                 name={creator?.nombre_completo ?? '?'}
                 src={creator?.foto_url}
-                className="w-6 h-6 rounded-full text-[10px] border border-white/20"
-                fallbackClassName="bg-white/15 text-white font-bold"
+                className="w-6 h-6 rounded-full text-[10px] border border-surface-inverse-foreground/20"
+                fallbackClassName="bg-surface-inverse-foreground/15 text-surface-inverse-foreground font-bold"
               />
-              <p className="text-[11px] text-white/70 line-clamp-1">
-                Liderado por <span className="font-bold text-white">{creator?.nombre_completo}</span>
+              <p className="text-[11px] text-surface-inverse-foreground/70 line-clamp-1">
+                Liderado por <span className="font-bold text-surface-inverse-foreground">{creator?.nombre_completo}</span>
                 {creatorCompany && <span> · {creatorCompany.nombre}</span>}
               </p>
             </div>
@@ -238,7 +238,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
                 <button
                   onClick={() => onEstado(project.id, 'en_curso')}
                   disabled={isLoading}
-                  className="flex-1 rounded-full bg-success/90 text-white hover:bg-success font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl disabled:opacity-50"
+                  className="flex-1 rounded-full bg-success/90 text-surface-inverse-foreground hover:bg-success font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-xl disabled:opacity-50"
                 >
                   {isLoading
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Procesando…</>
@@ -246,7 +246,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
                 </button>
               )}
               <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-                <button className="w-full rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
+                <button className="w-full rounded-full bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/20 text-surface-inverse-foreground hover:bg-surface-inverse-foreground/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
                   <Eye className="w-4 h-4" /> Ver Detalles
                 </button>
               </Link>
@@ -264,7 +264,7 @@ function ProjectCard({ project, isOwner, tab, loadingId, onEstado, requests }: {
                 </button>
               </Link>
               <Link to={isLoading ? '#' : `/project/${project.id}`} state={{ from: 'my-projects' }} className={`flex-1 ${isLoading ? 'pointer-events-none' : ''}`}>
-                <button className="w-full rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
+                <button className="w-full rounded-full bg-surface-inverse-foreground/10 backdrop-blur-md border border-surface-inverse-foreground/20 text-surface-inverse-foreground hover:bg-surface-inverse-foreground/20 font-bold py-3 text-[13px] flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-lg">
                   <Eye className="w-4 h-4" /> Detalles
                 </button>
               </Link>

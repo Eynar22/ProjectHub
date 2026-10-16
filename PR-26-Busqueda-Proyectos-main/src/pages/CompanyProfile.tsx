@@ -681,7 +681,7 @@ export default function CompanyProfile() {
                                 <button
                                   type="button"
                                   onClick={() => removeGalleryImage(i)}
-                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-surface-inverse/60 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>

@@ -47,7 +47,7 @@ export function TodoEnUnLugar() {
   const actual = HERRAMIENTAS.find((h) => h.id === activa)!;
 
   return (
-    <section id="demo" className="scroll-mt-16 relative z-20 py-24 border-b border-border/50 bg-gradient-to-b from-background via-primary/[0.05] to-background">
+    <section id="demo" className="scroll-mt-16 relative z-20 py-24 border-b border-border/50 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center mb-14 max-w-3xl mx-auto">
           <p className="text-sm font-bold text-primary uppercase tracking-widest mb-3">Pruébalo aquí mismo</p>
@@ -100,12 +100,12 @@ export function TodoEnUnLugar() {
           <div
             onPointerDown={detener}
             onKeyDown={detener}
-            className="rounded-3xl border border-border/70 bg-card shadow-[0_30px_80px_rgba(0,0,0,0.25)] overflow-hidden"
+            className="rounded-3xl border border-border/70 bg-card shadow-xl overflow-hidden"
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border/60 bg-muted/40">
-              <span className="w-3 h-3 rounded-full bg-red-400/80" />
-              <span className="w-3 h-3 rounded-full bg-amber-400/80" />
-              <span className="w-3 h-3 rounded-full bg-emerald-400/80" />
+              <span className="w-3 h-3 rounded-full bg-danger/80" />
+              <span className="w-3 h-3 rounded-full bg-warning/80" />
+              <span className="w-3 h-3 rounded-full bg-success/80" />
               <span className="ml-3 text-xs font-semibold text-muted-foreground truncate">Monitoreo de agua · Grupo de trabajo</span>
               <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-bold text-primary">
                 <Hand className="w-3.5 h-3.5" /> {actual.pista}
@@ -137,7 +137,7 @@ export function TodoEnUnLugar() {
 /* ─────────────── Tablero: arrastrar tareas entre columnas ─────────────── */
 
 const COLUMNAS = ['Por hacer', 'En proceso', 'Hecho'];
-const PRIORIDAD_COLOR = { alta: 'bg-red-500', media: 'bg-amber-500', baja: 'bg-emerald-500' } as const;
+const PRIORIDAD_COLOR = { alta: 'bg-danger', media: 'bg-warning', baja: 'bg-success' } as const;
 
 interface TareaDemo { id: number; titulo: string; col: number; prioridad: keyof typeof PRIORIDAD_COLOR; quien: string }
 
@@ -188,7 +188,7 @@ export function DemoTablero() {
                   layout
                   drag
                   dragSnapToOrigin
-                  whileDrag={{ scale: 1.06, rotate: 2, zIndex: 50, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
+                  whileDrag={{ scale: 1.06, rotate: 2, zIndex: 50, boxShadow: 'var(--shadow-xl)' }}
                   onDrag={(e) => setSobre(columnaEn(...coords(e)))}
                   onDragEnd={(e) => {
                     const destino = columnaEn(...coords(e));
@@ -198,7 +198,7 @@ export function DemoTablero() {
                     }
                   }}
                   className={`relative rounded-xl border bg-card px-2.5 py-2 cursor-grab active:cursor-grabbing select-none touch-none ${
-                    t.col === 2 ? 'border-emerald-500/40' : 'border-border'
+                    t.col === 2 ? 'border-success/40' : 'border-border'
                   }`}
                 >
                   <div className="flex items-start gap-1.5">
@@ -362,8 +362,8 @@ export function DemoArchivos() {
                 whileTap={{ scale: 0.97 }}
                 className="group rounded-2xl border border-border/70 bg-muted/30 hover:bg-primary/5 hover:border-primary/40 p-4 text-left transition-colors"
               >
-                <Folder className="w-10 h-10 text-amber-500 mb-3 group-hover:hidden" />
-                <FolderOpen className="w-10 h-10 text-amber-500 mb-3 hidden group-hover:block" />
+                <Folder className="w-10 h-10 text-warning mb-3 group-hover:hidden" />
+                <FolderOpen className="w-10 h-10 text-warning mb-3 hidden group-hover:block" />
                 <p className="text-sm font-semibold text-foreground">{c.nombre}</p>
                 <p className="text-xs text-muted-foreground">{c.archivos.length} archivos</p>
               </motion.button>
@@ -381,8 +381,8 @@ export function DemoArchivos() {
                 className="flex items-center gap-3 rounded-xl border border-border/60 px-3 py-2.5 hover:bg-muted/50 transition-colors"
               >
                 {a.tipo === 'pdf'
-                  ? <FileText className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  : <FileImage className="w-5 h-5 text-sky-500 flex-shrink-0" />}
+                  ? <FileText className="w-5 h-5 text-danger flex-shrink-0" />
+                  : <FileImage className="w-5 h-5 text-info flex-shrink-0" />}
                 <span className="text-sm text-foreground flex-1 truncate">{a.nombre}</span>
                 <span className="text-xs text-muted-foreground tabular-nums">{a.peso}</span>
               </motion.div>

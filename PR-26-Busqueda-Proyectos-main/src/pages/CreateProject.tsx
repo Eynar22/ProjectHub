@@ -283,13 +283,13 @@ export default function CreateProject() {
                             title={o.nombre}
                             className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
                               activo
-                                ? 'text-white border-transparent shadow-sm'
+                                ? 'text-surface-inverse-foreground border-transparent shadow-sm'
                                 : 'bg-input-background text-foreground border-input hover:border-primary/40'
                             }`}
                             style={activo ? { backgroundColor: o.color } : undefined}
                           >
                             <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                              activo ? 'bg-white/25' : 'bg-muted'
+                              activo ? 'bg-surface-inverse-foreground/25' : 'bg-muted'
                             }`}>
                               {o.id}
                             </span>
@@ -379,10 +379,10 @@ export default function CreateProject() {
                       {imageFiles.map((file, i) => (
                         <div key={i} className="relative group rounded-xl overflow-hidden aspect-video bg-muted">
                           <img src={URL.createObjectURL(file)} alt={`img-${i}`} className="w-full h-full object-contain bg-muted" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <div className="absolute inset-0 bg-surface-inverse/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <BotonAjustar onClick={() => reajustarImagen(i)} className="min-h-11 px-3" />
                             <button type="button" onClick={() => removeImage(i)} aria-label="Quitar imagen"
-                              className="min-h-11 min-w-11 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
+                              className="min-h-11 min-w-11 bg-surface-inverse-foreground/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-destructive transition-colors">
                               <X className="w-4 h-4 text-primary-foreground" />
                             </button>
                           </div>

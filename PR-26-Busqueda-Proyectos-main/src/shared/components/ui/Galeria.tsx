@@ -47,13 +47,13 @@ export function Galeria({ fotos, nombre }: { fotos: string[]; nombre: string }) 
               className={`group relative overflow-hidden rounded-xl bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring ${celda(i)}`}
             >
               <img src={url} alt="" loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              <span className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors" />
+              <span className="absolute inset-0 bg-surface-inverse/0 group-hover:bg-surface-inverse/25 transition-colors" />
               {esUltima ? (
-                <span className="absolute inset-0 bg-black/55 flex items-center justify-center text-white text-xl font-bold">
+                <span className="absolute inset-0 bg-surface-inverse/55 flex items-center justify-center text-surface-inverse-foreground text-xl font-bold">
                   +{restantes}
                 </span>
               ) : (
-                <Expand className="absolute bottom-2 right-2 w-5 h-5 text-white drop-shadow opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                <Expand className="absolute bottom-2 right-2 w-5 h-5 text-surface-inverse-foreground drop-shadow opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
               )}
             </button>
           );
@@ -112,16 +112,16 @@ function Visor({ fotos, nombre, inicial, onCerrar }: {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black/95 flex flex-col text-white select-none"
+      className="fixed inset-0 z-[100] bg-surface-inverse/95 flex flex-col text-surface-inverse-foreground select-none"
       onClick={onCerrar}
     >
       {/* Barra superior */}
       <div className="flex items-center justify-between px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <p className="text-sm font-semibold truncate">
-          {nombre} <span className="text-white/60 font-normal ml-2">{actual + 1} / {total}</span>
+          {nombre} <span className="text-surface-inverse-foreground/60 font-normal ml-2">{actual + 1} / {total}</span>
         </p>
         <button type="button" onClick={onCerrar} aria-label="Cerrar"
-          className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center">
+          className="w-10 h-10 rounded-full hover:bg-surface-inverse-foreground/10 flex items-center justify-center">
           <X className="w-6 h-6" />
         </button>
       </div>
@@ -171,7 +171,7 @@ function Visor({ fotos, nombre, inicial, onCerrar }: {
               aria-label={`Ver foto ${i + 1}`}
               aria-current={i === actual}
               className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-14 rounded-md overflow-hidden transition-all ${
-                i === actual ? 'ring-2 ring-white opacity-100' : 'opacity-50 hover:opacity-80'
+                i === actual ? 'ring-2 ring-surface-inverse-foreground opacity-100' : 'opacity-50 hover:opacity-80'
               }`}
             >
               <img src={url} alt="" className="w-full h-full object-cover" />
@@ -191,7 +191,7 @@ function Flecha({ lado, onClick }: { lado: 'izq' | 'der'; onClick: () => void })
       type="button"
       onClick={(e) => { e.stopPropagation(); onClick(); }}
       aria-label={lado === 'izq' ? 'Foto anterior' : 'Foto siguiente'}
-      className={`absolute top-1/2 -translate-y-1/2 ${lado === 'izq' ? 'left-2 sm:left-4' : 'right-2 sm:right-4'} w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur flex items-center justify-center transition-colors`}
+      className={`absolute top-1/2 -translate-y-1/2 ${lado === 'izq' ? 'left-2 sm:left-4' : 'right-2 sm:right-4'} w-11 h-11 rounded-full bg-surface-inverse-foreground/10 hover:bg-surface-inverse-foreground/25 backdrop-blur flex items-center justify-center transition-colors`}
     >
       <Icono className="w-6 h-6" />
     </button>
