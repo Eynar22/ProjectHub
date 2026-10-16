@@ -67,7 +67,7 @@
 /* ODS como chips de color con su número */
 .odsFila { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; align-items: center }
 .odsChip { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 9px; display: grid; place-items: center; font-size: .78rem; font-weight: 700;
-  background: var(--c); color: var(--primary-foreground); font-variant-numeric: tabular-nums }
+  background: var(--c); color: var(--surface-inverse-foreground); font-variant-numeric: tabular-nums }
 .odsMas { height: 32px; padding: 0 10px; border-radius: 9px; display: grid; place-items: center; font-size: .78rem; font-weight: 700; background: var(--linea-suave); color: var(--tinta-2) }
 
 .pie { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: .98rem; color: var(--azul) }

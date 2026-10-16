@@ -62,7 +62,7 @@
   box-shadow: var(--shadow-xl); background: var(--muted); will-change: transform, opacity; transform-style: preserve-3d }
 .carta img { width: 100%; height: 100%; object-fit: cover; display: block }
 .cartaOds img { object-fit: contain; padding: 14px }
-.carta b { position: absolute; left: 8px; right: 8px; bottom: 8px; font-size: .68rem; font-weight: 600; color: var(--primary-foreground); text-shadow: 0 1px 6px var(--surface-inverse); line-height: 1.2 ; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.carta b { position: absolute; left: 8px; right: 8px; bottom: 8px; font-size: .68rem; font-weight: 600; color: var(--surface-inverse-foreground); text-shadow: 0 1px 6px var(--surface-inverse); line-height: 1.2 ; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
 
 /* ───── Burbujas ───── */
 .burbuja { position: absolute; z-index: 40; font-size: clamp(.85rem, 1.05vw, 1.35rem); font-weight: 500; color: var(--primary-foreground); padding: .45em 1em; border-radius: 999px; transform: translate(-50%, -50%) scale(0); transition: transform .45s cubic-bezier(.34,1.56,.64,1); white-space: nowrap }
