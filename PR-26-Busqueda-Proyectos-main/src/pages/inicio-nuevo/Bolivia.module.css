@@ -5,17 +5,17 @@
 
 .seccion { position: relative; background: var(--surface-inverse); color: var(--surface-inverse-foreground); padding: 20vh 0 18vh; overflow: hidden }
 .dentro { padding: 0 7.1vw }
-.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: color-mix(in oklch, var(--surface-inverse-foreground) 62%, var(--surface-inverse)); margin: 0 0 1.6vw }
-.frase { font-weight: 500; font-size: clamp(2.4rem, 5.4vw, 7.2rem); line-height: 1.05; letter-spacing: -.032em; margin: 0; max-width: 17ch }
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gray-200); margin: 0 0 1.6vw }
+.frase { font-weight: 700; font-size: clamp(2.4rem, 5.4vw, 7.2rem); line-height: 1.05; letter-spacing: -.032em; margin: 0; max-width: 17ch }
 .w { display: inline-block; white-space: pre; transition: opacity .2s linear }
-.acento { color: color-mix(in oklch, var(--primary) 55%, var(--surface-inverse-foreground)) }
+.acento { color: var(--primary) }
 
 /* Fila de fotos que se desliza con el scroll */
 .fila { display: flex; gap: clamp(14px, 1.4vw, 28px); margin-top: clamp(64px, 8vw, 150px); will-change: transform; padding-left: 7.1vw }
 .foto { position: relative; flex: 0 0 auto; width: clamp(220px, 22vw, 440px); aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-xl) }
 .foto:nth-child(even) { margin-top: clamp(30px, 4vw, 80px) }
 .foto img { width: 100%; height: 100%; object-fit: cover; display: block }
-.credito { position: absolute; right: 7.1vw; bottom: 3vh; font-size: .72rem; color: color-mix(in oklch, var(--surface-inverse-foreground) 50%, var(--surface-inverse)) }
+.credito { position: absolute; right: 7.1vw; bottom: 3vh; font-size: .72rem; color: var(--gray-200) }
 
 .burbuja { position: absolute; z-index: 2; left: 18px; top: 18px; font-size: clamp(.82rem, 1vw, 1.3rem); font-weight: 500; color: var(--primary-foreground); background: var(--rojo);
   padding: .45em 1em; border-radius: 999px; white-space: nowrap }

@@ -32,14 +32,16 @@
   --primary-foreground: oklch(1 0 0);
   --primary-hover: var(--guinda-700);
   --primary-active: var(--guinda-800);
+  /* Fondo suave de marca: el rosa oficial #F5E6EA. */
+  --primary-subtle: var(--guinda-100);
 
   /* --- secundario / acento: NEUTRALES, no colores de marca --- */
-  --secondary: var(--gray-100);
-  --secondary-foreground: var(--gray-800);
-  --accent: var(--gray-100);
+  --secondary: var(--guinda-100);   /* #F5E6EA */
+  --secondary-foreground: var(--guinda-600);
+  --accent: var(--guinda-100);      /* hover de menús/listas en rosa oficial */
   --accent-foreground: var(--gray-900);
-  --muted: var(--gray-100);
-  --muted-foreground: var(--gray-500);
+  --muted: var(--gray-200);         /* #E8E8EB */
+  --muted-foreground: var(--gray-600); /* #6B6B6B */
 
   /* --- bordes y campos --- */
   --border: var(--gray-200);
@@ -48,38 +50,36 @@
   --switch-background: var(--gray-300);
   --ring: var(--guinda-600);
 
-  /* --- semánticos (Anexo A9): base + fondo suave + texto --- */
-  --success: var(--green-base);
+  /* --- estados: SOLO paleta oficial (decisión del usuario) ---
+   * Positivo/neutro = gris #6B6B6B; atención/negativo = guinda #A31E3A.
+   * Fondos suaves: #E8E8EB (gris) y #F5E6EA (rosa). El icono/texto distingue
+   * el estado; el color ya no es verde/ámbar/rojo/azul. */
+  --success: var(--gray-600);
   --success-foreground: oklch(1 0 0);
-  --success-subtle: var(--green-subtle);
-  --success-strong: var(--green-strong);
+  --success-subtle: var(--gray-200);
+  --success-strong: var(--gray-900);
 
-  --warning: var(--amber-base);
+  --warning: var(--guinda-600);
   --warning-foreground: oklch(1 0 0);
-  --warning-subtle: var(--amber-subtle);
-  --warning-strong: var(--amber-strong);
+  --warning-subtle: var(--guinda-100);
+  --warning-strong: var(--guinda-700);
 
-  --destructive: var(--red-base);
+  --destructive: var(--guinda-600);
   --destructive-foreground: oklch(1 0 0);
-  --danger: var(--red-base);
-  --danger-subtle: var(--red-subtle);
-  --danger-strong: var(--red-strong);
+  --danger: var(--guinda-600);
+  --danger-subtle: var(--guinda-100);
+  --danger-strong: var(--guinda-700);
 
-  --info: var(--blue-base);
-  --info-subtle: var(--blue-subtle);
-  --info-strong: var(--blue-strong);
+  --info: var(--gray-600);
+  --info-subtle: var(--gray-200);
+  --info-strong: var(--gray-900);
 
-  /* --- paleta categórica para gráficas (datos, no decoración) ---
-   * 5 primeros slots de la paleta por defecto validada de la guía de dataviz:
-   * pasa banda de luminosidad, piso de croma, separación CVD (protan/deutan) y
-   * el piso de visión normal en modo claro y oscuro. El WARN de contraste en
-   * claro (aqua/amarillo/magenta < 3:1 sobre superficie casi blanca) se cubre
-   * con la regla de relieve: las barras llevan su valor como etiqueta directa. */
-  --chart-1: #2A78D6; /* azul */
-  --chart-2: #EB6834; /* naranja */
-  --chart-3: #1BAF7A; /* aqua */
-  --chart-4: #EDA100; /* amarillo */
-  --chart-5: #E87BA4; /* magenta */
+  /* --- gráficas: solo paleta oficial (guinda, grises, rosa) --- */
+  --chart-1: #A31E3A; /* guinda */
+  --chart-2: #6B6B6B; /* gris */
+  --chart-3: #E8E8EB; /* gris claro */
+  --chart-4: oklch(0.795 0.085 14); /* guinda claro */
+  --chart-5: #2E2E2E; /* carbón */
 
   /* --- forma --- */
   --radius: var(--radius-lg);
@@ -96,67 +96,68 @@
 }
 
 .dark {
-  /* Neutros traducidos: la elevación se comunica con fondos más claros. */
-  --background: var(--gray-950);
-  --foreground: var(--gray-100);
+  /* Neutros de la paleta oficial: fondo #2E2E2E, texto #FAFAFA, texto
+     secundario #E8E8EB. La elevación se comunica con grises un poco más claros. */
+  --background: var(--gray-900);
+  --foreground: var(--gray-50);
   --surface: var(--gray-900);
-  --surface-raised: var(--gray-800);
-  --card: var(--gray-900);
-  --card-foreground: var(--gray-100);
-  --popover: var(--gray-900);
-  --popover-foreground: var(--gray-100);
+  --surface-raised: var(--gray-700);
+  --card: var(--gray-800);
+  --card-foreground: var(--gray-50);
+  --popover: var(--gray-800);
+  --popover-foreground: var(--gray-50);
   --surface-inverse: var(--gray-800);
   --surface-inverse-foreground: var(--gray-50);
 
   --secondary: var(--gray-800);
-  --secondary-foreground: var(--gray-100);
-  --accent: var(--gray-800);
-  --accent-foreground: var(--gray-100);
+  --secondary-foreground: var(--gray-50);
+  --accent: var(--gray-700);
+  --accent-foreground: var(--gray-50);
   --muted: var(--gray-800);
-  --muted-foreground: var(--gray-400);
+  --muted-foreground: var(--gray-200);
 
-  --border: var(--gray-800);
-  --input: var(--gray-700);
-  --input-background: var(--gray-900);
+  --border: var(--gray-700);
+  --input: var(--gray-600);
+  --input-background: var(--gray-800);
   --switch-background: var(--gray-700);
 
-  /* Marca: guinda más luminoso con texto oscuro encima (como los semánticos
-     -on-dark). Así cumple contraste como fondo de botón (texto oscuro) y como
-     texto/enlace sobre el fondo oscuro. */
-  --primary: var(--guinda-400);
-  --primary-foreground: var(--gray-950);
-  --primary-hover: var(--guinda-300);
-  --primary-active: var(--guinda-200);
+  /* Marca: el MISMO guinda oficial #A31E3A en ambos temas (decisión del
+     usuario: el color primario no cambia en oscuro). Botones con texto blanco. */
+  --primary: var(--guinda-600);
+  --primary-foreground: oklch(1 0 0);
+  --primary-hover: var(--guinda-500);
+  --primary-active: var(--guinda-700);
+  --primary-subtle: var(--guinda-950);
   --ring: var(--guinda-300);
 
   /* Semánticos: variante -on-dark, menos saturada y más luminosa. */
-  --success: var(--green-on-dark);
-  --success-foreground: var(--gray-950);
-  --success-subtle: color-mix(in oklab, var(--green-on-dark) 16%, var(--gray-900));
-  --success-strong: var(--green-on-dark);
+  --success: var(--gray-600);
+  --success-foreground: oklch(1 0 0);
+  --success-subtle: var(--gray-700);
+  --success-strong: var(--gray-200);
 
-  --warning: var(--amber-on-dark);
-  --warning-foreground: var(--gray-950);
-  --warning-subtle: color-mix(in oklab, var(--amber-on-dark) 16%, var(--gray-900));
-  --warning-strong: var(--amber-on-dark);
+  --warning: var(--guinda-600);
+  --warning-foreground: oklch(1 0 0);
+  --warning-subtle: var(--guinda-100);
+  --warning-strong: var(--guinda-100);
 
-  --destructive: var(--red-on-dark);
-  --destructive-foreground: var(--gray-950);
-  --danger: var(--red-on-dark);
-  --danger-subtle: color-mix(in oklab, var(--red-on-dark) 16%, var(--gray-900));
-  --danger-strong: var(--red-on-dark);
+  --destructive: var(--guinda-600);
+  --destructive-foreground: oklch(1 0 0);
+  --danger: var(--guinda-600);
+  --danger-subtle: var(--guinda-100);
+  --danger-strong: var(--guinda-100);
 
-  --info: var(--blue-on-dark);
-  --info-subtle: color-mix(in oklab, var(--blue-on-dark) 16%, var(--gray-900));
-  --info-strong: var(--blue-on-dark);
+  --info: var(--gray-600);
+  --info-subtle: var(--gray-700);
+  --info-strong: var(--gray-200);
 
   /* Mismos 5 hues, re-escalados para superficie oscura (misma guía de dataviz).
    * Todos pasan (banda de luminosidad, croma, CVD y contraste >= 3:1). */
-  --chart-1: #3987E5; /* azul */
-  --chart-2: #D95926; /* naranja */
-  --chart-3: #199E70; /* aqua */
-  --chart-4: #C98500; /* amarillo */
-  --chart-5: #D55181; /* magenta */
+  --chart-1: #A31E3A; /* guinda */
+  --chart-2: #6B6B6B; /* gris */
+  --chart-3: #E8E8EB; /* gris claro */
+  --chart-4: oklch(0.795 0.085 14); /* guinda claro */
+  --chart-5: #FAFAFA; /* blanco */
 
   --sidebar: var(--gray-900);
   --sidebar-foreground: var(--gray-300);
@@ -185,6 +186,7 @@
   --color-surface-inverse-foreground: var(--surface-inverse-foreground);
 
   --color-primary: var(--primary);
+  --color-primary-subtle: var(--primary-subtle);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary-active: var(--primary-active);

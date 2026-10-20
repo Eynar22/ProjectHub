@@ -7,7 +7,7 @@
 .seccion { position: relative; height: 330vh }
 .escena { position: sticky; top: 0; height: 100vh; display: grid; grid-template-columns: minmax(0, 34vw) 1fr; gap: 5vw; align-items: center; padding: 0 7.1vw; overflow: hidden }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
-.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.4vw, 5.8rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 1.8vw, 36px) }
+.titulo { font-weight: 700; font-size: clamp(2.4rem, 4.4vw, 5.8rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 1.8vw, 36px) }
 .w { display: inline-block; white-space: pre }
 .texto { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.6; max-width: 34ch; margin: 0 0 clamp(24px, 2.6vw, 52px) }
 

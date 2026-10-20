@@ -5,7 +5,7 @@
 
 .seccion { padding: 16vh 7.1vw 18vh }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
-.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(48px, 6vw, 120px); max-width: 18ch }
+.titulo { font-weight: 700; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(48px, 6vw, 120px); max-width: 18ch }
 .w { display: inline-block; white-space: pre }
 
 .columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw }
@@ -36,7 +36,7 @@
 .burbuja::after { content: ""; position: absolute; bottom: -5px; left: calc(50% - 5px); width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
 .abierto .burbuja { transform: translate(-50%, -50%) scale(1) }
 
-.columna h3 { font-weight: 500; font-size: clamp(1.6rem, 2.4vw, 3.2rem); letter-spacing: -.026em; line-height: 1.1; margin: 0 0 clamp(12px, 1.2vw, 24px) }
+.columna h3 { font-weight: 600; font-size: clamp(1.6rem, 2.4vw, 3.2rem); letter-spacing: -.026em; line-height: 1.1; margin: 0 0 clamp(12px, 1.2vw, 24px) }
 .lista { list-style: none; margin: 0 0 clamp(24px, 2.4vw, 48px); padding: 0; display: grid; gap: .6em; color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.5 }
 .lista li { display: flex; gap: .6em }
 .lista li::before { content: ""; flex-shrink: 0; width: .45em; height: .45em; border-radius: 50%; margin-top: .55em; background: var(--punto) }

@@ -123,9 +123,9 @@ export default function InicioNuevo() {
         const d = i - M;
         return movil
           ? { x: d * 0.1 * W, y: 0.06 * H + d * d * 0.004 * H, rz: d * 3, ry: -d * 4, e: (0.3 * W) / BASE, o: 1 }
-          : { x: d * 0.088 * W, y: 0.125 * H + d * d * 0.006 * H, rz: d * 2.6, ry: -d * 4, e: (0.14 * W) / BASE, o: 1 };
+          : { x: d * 0.088 * W, y: 0.075 * H + d * d * 0.006 * H, rz: d * 2.6, ry: -d * 4, e: (0.14 * W) / BASE, o: 1 };
       },
-      mazo: (i: number): Pose => ({ x: (i - M) * 3 * k, y: (movil ? 0.06 : 0.125) * H - i * 2.2 * k, rz: -3 + i * 0.4, ry: 0, e: ((movil ? 0.3 : 0.1) * W) / BASE, o: 1 }),
+      mazo: (i: number): Pose => ({ x: (i - M) * 3 * k, y: (movil ? 0.06 : 0.075) * H - i * 2.2 * k, rz: -3 + i * 0.4, ry: 0, e: ((movil ? 0.3 : 0.1) * W) / BASE, o: 1 }),
       unica: (i: number): Pose => ({ x: 0, y: (movil ? 0.28 : 0.15) * H, rz: 0, ry: 0, e: ((movil ? 0.26 : 0.085) * W) / BASE, o: i === N - 1 ? 1 : 0 }),
       cascada: (i: number): Pose => {
         const j = N - 1 - i;
@@ -158,7 +158,7 @@ export default function InicioNuevo() {
       const rec = recorrido.current!.getBoundingClientRect();
       const p = clamp(-rec.top / (rec.height - innerHeight));
 
-      bajo.current!.style.top = movil ? `${0.56 * H + 0.17 * W + 20}px` : `${Math.max(0.8 * H, 0.625 * H + 0.08 * W + 24)}px`;
+      bajo.current!.style.top = movil ? `${0.56 * H + 0.17 * W + 20}px` : `${Math.min(H - 220, 0.575 * H + 0.07 * W + 52)}px`; // justo bajo el abanico, siempre visible
 
       // Intro por tiempo
       titulo.forEach((w, i) => pintar(w, ease(clamp((intro - i * 0.035) / 0.12))));
@@ -245,7 +245,7 @@ export default function InicioNuevo() {
         <section ref={recorrido} className={s.recorrido}>
           <div className={s.escena}>
             <div ref={hero} className={s.hero}>
-              <h1><Palabras texto="Publica tu problema." grupo="titulo" /><br /><Palabras texto="Encuentra quién lo resuelve." grupo="titulo" /></h1>
+              <h1><Palabras texto="Publica tu problema." grupo="titulo" /><br /><span className={s.color}><Palabras texto="Encuentra quién" grupo="titulo" /></span><Palabras texto="lo resuelve." grupo="titulo" /></h1>
               <div ref={bajo} className={s.bajo}>
                 <p><Palabras texto="Las empresas publican problemas reales y los profesionales postulan con su solución." grupo="subtitulo" /></p>
                 <div className={s.acciones}>
@@ -286,16 +286,15 @@ export default function InicioNuevo() {
 
             {[
               { t: 'Empresa', lado: s.izq, color: 'var(--azul)' },
-              { t: 'Profesional', lado: s.der, color: 'var(--verde)' },
-              { t: 'Propuesta aceptada', lado: s.izq, color: 'var(--rojo)' },
-              { t: 'Equipo', lado: s.der, color: 'var(--tinta)' },
+              { t: 'Profesional', lado: s.der, color: 'var(--gray-600)' },
+              { t: 'Propuesta aceptada', lado: s.izq, color: 'var(--azul)' },
+              { t: 'Equipo', lado: s.der, color: 'var(--guinda-100)' },
             ].map((b, i) => (
-              <span key={b.t} ref={el => { burbujas.current[i] = el; }} className={`${s.burbuja} ${b.lado}`} style={{ background: b.color, color: b.color === 'var(--tinta)' ? 'var(--sobre-tinta)' : undefined }} aria-hidden="true">
+              <span key={b.t} ref={el => { burbujas.current[i] = el; }} className={`${s.burbuja} ${b.lado}`} style={{ background: b.color, color: b.color === 'var(--guinda-100)' ? 'var(--guinda-600)' : '#FAFAFA' }} aria-hidden="true">
                 {b.t}
               </span>
             ))}
 
-            <span className={s.nota}>Imágenes ilustrativas</span>
           </div>
         </section>
 

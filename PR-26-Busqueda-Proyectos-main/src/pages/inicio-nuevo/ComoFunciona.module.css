@@ -11,7 +11,7 @@
 .pasos { position: relative; min-height: clamp(260px, 26vw, 420px) }
 .paso { position: absolute; inset: 0 }
 .numero { font-size: clamp(.9rem, 1vw, 1.25rem); font-weight: 500; color: var(--tinta-2); margin: 0 0 .8vw; font-variant-numeric: tabular-nums }
-.paso h2 { font-weight: 500; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 2vw, 40px) }
+.paso h2 { font-weight: 700; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 2vw, 40px) }
 .paso p { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.6; max-width: 30ch; margin: 0 }
 .w { display: inline-block; white-space: pre }
 
@@ -28,7 +28,7 @@
 .foto { aspect-ratio: 16 / 10; overflow: hidden }
 .foto img { width: 100%; height: 100%; object-fit: cover; display: block }
 .cuerpo { padding: clamp(16px, 1.4vw, 28px) }
-.cuerpo h3 { font-weight: 500; font-size: clamp(1.1rem, 1.35vw, 1.7rem); letter-spacing: -.03em; margin: 0 0 6px }
+.cuerpo h3 { font-weight: 600; font-size: clamp(1.1rem, 1.35vw, 1.7rem); letter-spacing: -.03em; margin: 0 0 6px }
 .cuerpo small { color: var(--tinta-2); font-size: clamp(.78rem, .8vw, 1rem) }
 .pie { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: clamp(14px, 1.2vw, 24px) }
 .ods { display: flex; gap: 6px }

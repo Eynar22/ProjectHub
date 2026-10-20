@@ -13,9 +13,9 @@
   --tinta: var(--foreground);
   --tinta-2: var(--muted-foreground);
   --azul: var(--primary);
-  --verde: var(--success);
-  --rojo: var(--danger);
-  --ambar: var(--warning);
+  --verde: var(--gray-600);   /* #6B6B6B: la portada solo usa la paleta oficial */
+  --rojo: var(--primary);
+  --ambar: var(--gray-600);
   --superficie: var(--card);
   --linea: var(--border);
   --linea-suave: var(--muted);
@@ -35,24 +35,25 @@
 
 /* ───── Escena con scroll ───── */
 .recorrido { position: relative; height: 260vh }
-.escena { position: sticky; top: 0; height: 100vh; overflow: hidden }
+.escena { position: sticky; top: 0; height: 100vh; overflow-x: clip; overflow-y: visible }
 
 /* Palabra que entra de borroso a nítido (el JS controla opacidad y desenfoque) */
 .w { display: inline-block; white-space: pre; opacity: 0; filter: blur(10px); transform: translateY(6px) }
 
-.hero { position: absolute; inset: 0; text-align: center; padding: 15vh 20px 0; will-change: transform, opacity }
-.hero h1 { font-weight: 500; font-size: clamp(2.4rem, 4.8vw, 7rem); line-height: 1.08; letter-spacing: -.032em; margin: 0 auto }
+.hero { position: absolute; inset: 0; text-align: center; padding: 11vh 20px 0; will-change: transform, opacity }
+.hero h1 { position: relative; z-index: 1; font-weight: 700; font-size: clamp(2.4rem, 4.6vw, 6.6rem); line-height: 1.08; letter-spacing: -.032em; margin: 0 auto }
 .bajo { position: absolute; left: 0; right: 0; text-align: center; padding-inline: 20px }
 .bajo p { margin: 0 auto clamp(20px, 3vh, 48px); font-size: clamp(1rem, 1.05vw, 1.4rem); color: var(--tinta); max-width: 60ch }
 .acciones { display: flex; justify-content: center; gap: clamp(22px, 2.2vw, 48px); align-items: center }
 .accionesIzq { justify-content: flex-start }
 .btn { background: var(--primary); color: var(--primary-foreground); text-decoration: none; padding: clamp(13px, 1vw, 20px) clamp(26px, 2.1vw, 44px); border-radius: 999px; font-size: clamp(.95rem, .9vw, 1.15rem); font-weight: 500 }
 .btn:hover { background: var(--primary-hover) }
-.mas { font-size: clamp(.95rem, .9vw, 1.15rem); color: var(--tinta-2); text-decoration: none }
+.mas { font-size: clamp(.95rem, .9vw, 1.15rem); color: var(--tinta-2); text-decoration: none; padding: clamp(12px, .95vw, 19px) clamp(24px, 2vw, 42px); border: 1px solid var(--linea); border-radius: 999px }
+.mas:hover { background: var(--secondary); color: var(--primary) }
 
 .seccion2 { position: absolute; left: 0; top: 0; padding: 104px 0 0 7.1vw; max-width: 48vw }
-.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; margin: 0 0 1.2vw; color: var(--tinta-2) }
-.seccion2 h2 { font-weight: 500; font-size: clamp(2.4rem, 5vw, 6.4rem); line-height: 1.07; letter-spacing: -.032em; margin: 0 0 clamp(28px, 3.6vw, 80px) }
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; margin: 0 0 1.2vw; color: var(--primary) }
+.seccion2 h2 { font-weight: 700; font-size: clamp(2.4rem, 5vw, 6.4rem); line-height: 1.07; letter-spacing: -.032em; margin: 0 0 clamp(28px, 3.6vw, 80px) }
 .color { color: var(--azul) }
 .seccion2 p { color: var(--tinta-2); font-size: clamp(1rem, 1vw, 1.35rem); max-width: 19vw; min-width: 260px; margin: 0 0 clamp(28px, 4.2vw, 90px); line-height: 1.6 }
 
@@ -71,7 +72,6 @@
 .der::after { left: 14px }
 .on { transform: translate(-50%, -50%) scale(1) }
 
-.nota { position: absolute; right: 18px; bottom: 14px; font-size: .7rem; color: var(--tinta-2) }
 
 
 @media (prefers-reduced-motion: reduce) {

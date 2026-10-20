@@ -2,7 +2,7 @@
  * src/pages/inicio-nuevo/ParaQuien.tsx
  * "Para quién" de la portada nueva: Empresas y Profesionales, cada una con su
  * mazo de 3 tarjetas que se abre en abanico al entrar en pantalla (el hero en
- * chico). Burbujas con los mismos colores del hero: azul empresa, verde
+ * chico). Burbujas con los mismos colores del hero: guinda empresa, gris
  * profesional. Tarjetas ilustrativas.
  * ========================================================================= */
 

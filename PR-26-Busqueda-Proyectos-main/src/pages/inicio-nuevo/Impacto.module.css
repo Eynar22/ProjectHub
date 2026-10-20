@@ -6,7 +6,7 @@
 .seccion { padding: 16vh 7.1vw 18vh }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
 .cabecera { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5vw; align-items: end; margin-bottom: clamp(48px, 6vw, 110px) }
-.titulo { font-weight: 500; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 }
+.titulo { font-weight: 700; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 }
 .w { display: inline-block; white-space: pre }
 
 /* Cifras grandes con una línea arriba */
@@ -40,7 +40,7 @@
 /* Ficha del ODS (columna derecha) */
 .panel { max-width: 560px }
 .panelNum { font-size: clamp(.85rem, .9vw, 1.1rem); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px }
-.panel h3 { font-weight: 500; font-size: clamp(1.8rem, 2.8vw, 3.6rem); letter-spacing: -.03em; line-height: 1.06; margin: 0 0 14px }
+.panel h3 { font-weight: 600; font-size: clamp(1.8rem, 2.8vw, 3.6rem); letter-spacing: -.03em; line-height: 1.06; margin: 0 0 14px }
 .panelMeta { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.55; margin: 0 0 clamp(20px, 2vw, 36px) }
 .panelCuenta { font-size: clamp(.95rem, 1vw, 1.25rem); font-weight: 500; margin: 0 0 12px }
 .lista { list-style: none; margin: 0 0 clamp(22px, 2vw, 36px); padding: 0; display: grid; gap: 10px }

@@ -22,11 +22,11 @@ interface Pieza {
 }
 
 const PIEZAS: Pieza[] = [
-  { caos: 'RE: RE: FW: propuesta final (v3)', iconoCaos: Mail, colorCaos: 'var(--danger)', orden: '3 propuestas recibidas', iconoOrden: FileText, x: 0.02, y: 0.08, r: -9 },
-  { caos: '¿Alguien tiene el Excel actualizado?', iconoCaos: MessageCircle, colorCaos: 'var(--success)', orden: 'Chat del proyecto', iconoOrden: MessageSquare, x: 0.38, y: 0.26, r: 7 },
-  { caos: 'tareas_proyecto_FINAL2.xlsx', iconoCaos: FileSpreadsheet, colorCaos: 'var(--success-strong)', orden: 'Tablero de tareas', iconoOrden: ListChecks, x: 0.0, y: 0.47, r: 5 },
-  { caos: 'informe_sin_nombre (1).pdf', iconoCaos: FileText, colorCaos: 'var(--warning)', orden: 'Archivos del proyecto', iconoOrden: FolderOpen, x: 0.42, y: 0.64, r: -6 },
-  { caos: '¿Quién estaba a cargo de esto?', iconoCaos: Mail, colorCaos: 'var(--danger)', orden: 'Responsables asignados', iconoOrden: UserCheck, x: 0.08, y: 0.84, r: 10 },
+  { caos: 'RE: RE: FW: propuesta final (v3)', iconoCaos: Mail, colorCaos: 'var(--primary)', orden: '3 propuestas recibidas', iconoOrden: FileText, x: 0.02, y: 0.08, r: -9 },
+  { caos: '¿Alguien tiene el Excel actualizado?', iconoCaos: MessageCircle, colorCaos: 'var(--gray-600)', orden: 'Chat del proyecto', iconoOrden: MessageSquare, x: 0.38, y: 0.26, r: 7 },
+  { caos: 'tareas_proyecto_FINAL2.xlsx', iconoCaos: FileSpreadsheet, colorCaos: 'var(--gray-600)', orden: 'Tablero de tareas', iconoOrden: ListChecks, x: 0.0, y: 0.47, r: 5 },
+  { caos: 'informe_sin_nombre (1).pdf', iconoCaos: FileText, colorCaos: 'var(--gray-600)', orden: 'Archivos del proyecto', iconoOrden: FolderOpen, x: 0.42, y: 0.64, r: -6 },
+  { caos: '¿Quién estaba a cargo de esto?', iconoCaos: Mail, colorCaos: 'var(--primary)', orden: 'Responsables asignados', iconoOrden: UserCheck, x: 0.08, y: 0.84, r: 10 },
 ];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
