@@ -1,0 +1,78 @@
+/* ============================================================================
+ * Cabecera del grupo de trabajo. Bloque carbón (#2E2E2E) con la foto del
+ * proyecto velada, acentos guinda y las rayas diagonales de la marca. Igual en
+ * modo claro y oscuro (es una superficie oscura propia).
+ * ========================================================================= */
+
+.cabecera { position: relative; overflow: hidden; isolation: isolate; margin-bottom: 28px; border-radius: clamp(20px, 2.4vw, 36px);
+  background: var(--gray-900); color: var(--gray-50); box-shadow: var(--shadow-xl); animation: entra .7s cubic-bezier(.16,1,.3,1) both }
+@keyframes entra { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+/* Foto del proyecto de fondo, velada para que el texto se lea */
+.fondo { position: absolute; inset: 0; z-index: -2 }
+.fondo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); filter: blur(3px) saturate(.9); opacity: .38 }
+.fondo::after { content: ""; position: absolute; inset: 0; background: color-mix(in oklab, var(--gray-900) 55%, transparent) }
+.rayas { position: absolute; z-index: -1; right: -3%; top: -12%; width: 38%; height: 80%; pointer-events: none; opacity: .18;
+  background: repeating-linear-gradient(-60deg, var(--guinda-400) 0 10px, transparent 10px 26px);
+  -webkit-mask-image: radial-gradient(closest-side, #000, transparent); mask-image: radial-gradient(closest-side, #000, transparent) }
+
+.contenido { padding: clamp(20px, 2.6vw, 44px) clamp(20px, 2.8vw, 48px) clamp(18px, 2vw, 32px) }
+
+.volver { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px 7px 10px; border-radius: 999px; font-size: .88rem; font-weight: 600;
+  color: var(--gray-50); text-decoration: none; background: color-mix(in oklab, var(--gray-50) 10%, transparent); border: 1px solid color-mix(in oklab, var(--gray-50) 18%, transparent);
+  transition: background .2s }
+.volver:hover { background: color-mix(in oklab, var(--gray-50) 20%, transparent) }
+
+/* Logo + nombre */
+.titular { display: flex; align-items: flex-end; gap: clamp(14px, 1.6vw, 24px); margin: clamp(22px, 2.6vw, 44px) 0 clamp(20px, 2.2vw, 36px) }
+.marcaEmpresa { flex-shrink: 0; width: clamp(60px, 5.4vw, 88px); aspect-ratio: 1; border-radius: 22%; overflow: hidden; background: var(--gray-50);
+  display: grid; place-items: center; box-shadow: 0 10px 30px -10px rgb(0 0 0 / .6) }
+.marcaEmpresa img { width: 100%; height: 100%; object-fit: contain; padding: 8px }
+.marcaEmpresa span { font-size: clamp(1.6rem, 2.4vw, 2.6rem); font-weight: 700; color: var(--guinda-600) }
+.textos { min-width: 0 }
+.etiquetas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px }
+.estado, .propietario { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: .78rem; font-weight: 700; letter-spacing: .02em }
+.estado { background: var(--guinda-600); color: var(--gray-50) }
+.estado[data-estado="terminado"] { background: var(--gray-50); color: var(--gray-900) }
+.estado[data-estado="archivado"] { background: var(--gray-600); color: var(--gray-50) }
+.propietario { color: var(--gray-50); border: 1px solid color-mix(in oklab, var(--gray-50) 30%, transparent) }
+.nombre { margin: 0; font-weight: 700; font-size: clamp(1.9rem, 3.6vw, 3.8rem); line-height: 1.04; letter-spacing: -.032em; overflow-wrap: anywhere }
+.empresa { margin: 8px 0 0; color: var(--guinda-100); font-size: clamp(.95rem, 1.05vw, 1.2rem); font-weight: 500 }
+
+/* Métricas en tarjetitas translúcidas */
+.metricas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1vw, 16px) }
+.metrica { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 14px 16px; border-radius: 18px; font-size: .9rem; color: var(--gray-200);
+  background: color-mix(in oklab, var(--gray-50) 8%, transparent); border: 1px solid color-mix(in oklab, var(--gray-50) 12%, transparent); backdrop-filter: blur(8px) }
+.metrica b { color: var(--gray-50); font-weight: 700 }
+.metrica small { display: block; margin-top: 2px; color: var(--gray-300); font-size: .78rem }
+.icono { flex-shrink: 0; color: var(--guinda-300) }
+.avatares { display: flex; flex-shrink: 0; padding-left: 6px }
+.avatar { width: 32px; height: 32px; margin-left: -6px; border-radius: 50%; box-shadow: 0 0 0 2px var(--gray-900); font-size: .7rem; font-weight: 700 }
+.avatarIniciales { background: var(--guinda-600); color: var(--gray-50) }
+.avatarMas { display: grid; place-items: center; background: var(--gray-50); color: var(--gray-900) }
+.avance { flex: 1; min-width: 0; display: grid; gap: 8px }
+.avance i { display: block; height: 6px; border-radius: 6px; background: color-mix(in oklab, var(--gray-50) 18%, transparent); overflow: hidden }
+.avance i b { display: block; height: 100%; border-radius: 6px; background: var(--guinda-400); transition: width .8s cubic-bezier(.16,1,.3,1) }
+
+/* Pestañas como píldoras, sobre una franja más oscura */
+.pestanas { display: flex; gap: 6px; overflow-x: auto; padding: 10px clamp(14px, 2.4vw, 40px); background: color-mix(in oklab, var(--gray-950, #1a1a1a) 55%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--gray-50) 10%, transparent); scrollbar-width: none }
+.pestanas::-webkit-scrollbar { display: none }
+.pestana, .pestanaOn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 0; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: .9rem; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s }
+.pestana { background: transparent; color: var(--gray-200) }
+.pestana:hover { background: color-mix(in oklab, var(--gray-50) 10%, transparent); color: var(--gray-50) }
+.pestanaOn { background: var(--gray-50); color: var(--guinda-600); box-shadow: 0 6px 18px -8px rgb(0 0 0 / .6) }
+.pestana:focus-visible, .pestanaOn:focus-visible { outline: 2px solid var(--guinda-300); outline-offset: 2px }
+.pestanaIcono { width: 16px; height: 16px }
+.contador { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; font-size: .72rem; font-weight: 700;
+  background: var(--guinda-600); color: var(--gray-50) }
+
+@media (max-width: 900px) {
+  .metricas { grid-template-columns: 1fr }
+  .titular { align-items: flex-start }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cabecera { animation: none }
+  .avance i b, .pestana, .pestanaOn { transition: none }
+}

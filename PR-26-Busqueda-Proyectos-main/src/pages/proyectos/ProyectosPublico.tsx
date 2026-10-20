@@ -21,6 +21,8 @@ import { PROJECT_CATEGORIES } from '@/shared/constants/proyecto';
 import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 import e from '@/pages/empresas/EmpresasPublico.module.css';
 import s from './ProyectosPublico.module.css';
 
@@ -60,6 +62,7 @@ export default function ProyectosPublico() {
     (!categoria || p.categoria === categoria) &&
     (!odsFiltro || (Array.isArray(p.ods) && p.ods.includes(odsFiltro))),
   );
+  const pag = usePaginacion(filtrados, 12, [texto, categoria, odsFiltro]);
   const categorias = PROJECT_CATEGORIES.filter(c => abiertos.some(p => p.categoria === c));
   const odsPresentes = ODS_LIST.filter(o => abiertos.some(p => p.ods?.includes(o.id)));
   const empresas = new Set(abiertos.map(nombreEmpresa).filter(Boolean)).size;
@@ -126,7 +129,7 @@ export default function ProyectosPublico() {
         )}
       </div>
 
-      <div className={s.grilla}>
+      <div ref={pag.refLista} className={s.grilla} style={{ scrollMarginTop: 140 }}>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <div key={i} className={`${e.cargando} ${i === 0 ? s.destacada : ''}`} style={{ height: 'auto' }} />)
         ) : isError ? (
@@ -134,12 +137,13 @@ export default function ProyectosPublico() {
         ) : filtrados.length === 0 ? (
           <p className={e.vacio} style={{ gridColumn: '1 / -1' }}>{abiertos.length === 0 ? 'Todavía no hay proyectos abiertos.' : 'Ningún proyecto coincide con la búsqueda.'}</p>
         ) : (
-          filtrados.map((p, i) => (
+          pag.visibles.map((p, i) => (
             <Tarjeta key={p.id} p={p} indice={i} ahora={ahora} sesion={sesion} logo={empresaDe(p)?.logo_url ?? null} empresaNombre={nombreEmpresa(p)}
-              destacada={i === 0 && !hayFiltro && filtrados.length > 2} />
+              destacada={pag.pagina === 1 && i === 0 && !hayFiltro && filtrados.length > 2} />
           ))
         )}
       </div>
+      <Paginacion {...pag.props} etiqueta="proyectos" className="mx-[7.1vw] mb-[8vh] -mt-[9vh] max-md:mx-5" />
 
       {!sesion && (
         <section className={e.cierre}>

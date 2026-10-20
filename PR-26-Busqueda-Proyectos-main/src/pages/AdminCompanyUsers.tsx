@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 export default function AdminCompanyUsers() {
   const { id } = useParams();
@@ -29,6 +31,7 @@ export default function AdminCompanyUsers() {
     user.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.correo.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const pag = usePaginacion(filteredUsers, 10, [searchTerm]);
 
   // Count active admins for this company to prevent blocking the last one
   const activeAdminsCount = () =>
@@ -108,8 +111,8 @@ export default function AdminCompanyUsers() {
               </div>
             </Card>
 
-            <div className="grid gap-4">
-              {filteredUsers.map((member, index) => {
+            <div ref={pag.refLista} className="grid gap-4">
+              {pag.visibles.map((member, index) => {
                 const isBlocked = member.estado === 'bloqueado';
                 const isOnlyAdmin = member.rol === 'admin' 
                   ? activeAdminsCount() <= 1 
@@ -262,6 +265,7 @@ export default function AdminCompanyUsers() {
                 />
               )}
             </div>
+            <Paginacion {...pag.props} etiqueta="usuarios" />
           </div>
     </AppLayout>
   );

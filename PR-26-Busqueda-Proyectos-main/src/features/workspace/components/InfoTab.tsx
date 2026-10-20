@@ -129,6 +129,8 @@ export function InfoTab({
         </Card>
       )}
 
+      <div className="grid items-start gap-6 lg:grid-cols-3">
+      <div className="min-w-0 space-y-6 lg:col-span-2">
       {/* Images */}
       <Card className="overflow-hidden">
         {editingProjectInfo ? (
@@ -179,25 +181,34 @@ export function InfoTab({
             </div>
           </div>
         ) : (
-          <div className="h-96">
+          project.imagenes.length === 0 ? (
+            <div className="grid h-72 place-items-center bg-primary-subtle text-primary">
+              <span className="flex flex-col items-center gap-2 text-sm font-semibold"><Image className="h-8 w-8" /> Este proyecto aún no tiene imágenes</span>
+            </div>
+          ) : (
+          <div className="h-[26rem]">
             <Slider {...sliderSettings}>
               {project.imagenes.map((img, idx) => (
                 <div key={idx}>
-                  <img
-                    src={img.url}
-                    alt={`${project.nombre} ${idx + 1}`}
-                    className="w-full h-96 object-contain bg-muted"
-                  />
+                  <div className="relative h-[26rem] overflow-hidden bg-surface-inverse">
+                    <img src={img.url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+                    <img
+                      src={img.url}
+                      alt={`${project.nombre} ${idx + 1}`}
+                      className="relative h-full w-full object-contain"
+                    />
+                  </div>
                 </div>
               ))}
             </Slider>
           </div>
+          )
         )}
       </Card>
 
       {/* Description */}
       <Card className="p-6">
-        <h3 className="text-xl font-bold tracking-tight mb-4">Descripción</h3>
+        <h3 className="mb-4 flex items-center gap-3 text-xl font-bold tracking-tight"><span className="h-6 w-1.5 rounded-full bg-primary" aria-hidden="true" />Descripción</h3>
         {editingProjectInfo ? (
           <TextArea
             value={editDescripcion}
@@ -214,9 +225,7 @@ export function InfoTab({
 
       {/* Problema que resuelve */}
       <Card className="p-6">
-        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
-          <AlertOctagon className="w-5 h-5 text-warning-strong" /> El problema que resuelve
-        </h3>
+        <h3 className="mb-4 flex items-center gap-3 text-xl font-bold tracking-tight"><span className="h-6 w-1.5 rounded-full bg-primary" aria-hidden="true" /><AlertOctagon className="h-5 w-5 text-primary" /> El problema que resuelve</h3>
         {editingProjectInfo ? (
           <TextArea
             value={editProblema} maxLength={LIMITES.proyecto.problema}
@@ -231,11 +240,12 @@ export function InfoTab({
         )}
       </Card>
 
+      </div>
+
+      <aside className="space-y-6">
       {/* ODS */}
       <Card className="p-6">
-        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary" /> Objetivos de Desarrollo Sostenible
-        </h3>
+        <h3 className="mb-4 flex items-center gap-3 text-xl font-bold tracking-tight"><span className="h-6 w-1.5 rounded-full bg-primary" aria-hidden="true" /><Target className="h-5 w-5 text-primary" /> ODS del proyecto</h3>
         {editingProjectInfo ? (
           <div className="flex flex-wrap gap-2">
             {ODS_LIST.map((o) => {
@@ -284,10 +294,10 @@ export function InfoTab({
       </Card>
 
       {/* Info Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-4">
         <Card className="p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Calendar className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-3 mb-3">
+            <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"><Calendar className="h-5 w-5" /></span>
             <h4 className="font-semibold">Fechas</h4>
           </div>
           <div className="text-sm text-muted-foreground space-y-1.5">
@@ -310,19 +320,19 @@ export function InfoTab({
 
         {project.financiamiento && (
           <Card className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-success" />
+            <div className="flex items-center gap-3 mb-3">
+              <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"><DollarSign className="h-5 w-5" /></span>
               <h4 className="font-semibold">Financiamiento</h4>
             </div>
-            <div className="text-2xl font-bold text-success">
+            <div className="text-2xl font-bold text-primary">
               ${project.financiamiento.toLocaleString()}
             </div>
           </Card>
         )}
 
         <Card className="p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-3 mb-3">
+            <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"><Users className="h-5 w-5" /></span>
             <h4 className="font-semibold">Colaboradores</h4>
           </div>
           <div className="text-2xl font-bold">
@@ -331,6 +341,8 @@ export function InfoTab({
         </Card>
       </div>
 
+      </aside>
+      </div>
       {/* End of Info Section */}
     </motion.div>
   );

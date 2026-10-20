@@ -10,6 +10,8 @@ import { Avatar } from '@/shared/components/ui/Avatar';
 import { Building2, Check, X, ArrowLeft, Mail, FileText, ExternalLink } from 'lucide-react';
 import { EstadoVacio } from '@/shared/components/feedback';
 import { motion } from 'motion/react';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 export default function ProjectRequests() {
   const { id } = useParams();
@@ -21,6 +23,10 @@ export default function ProjectRequests() {
   const responder = useResponderSolicitud();
 
   const project = projects.find(p => p.id === Number(id));
+  const pendingRequests = projectRequests.filter(r => r.estado === 'pendiente');
+  const processedRequests = projectRequests.filter(r => r.estado !== 'pendiente');
+  const pagPend = usePaginacion(pendingRequests, 10, []);
+  const pagProc = usePaginacion(processedRequests, 10, []);
 
   if (!project || project.creador_id !== currentUser?.id) {
     return (
@@ -35,9 +41,6 @@ export default function ProjectRequests() {
       </div>
     );
   }
-
-  const pendingRequests = projectRequests.filter(r => r.estado === 'pendiente');
-  const processedRequests = projectRequests.filter(r => r.estado !== 'pendiente');
 
   const handleAccept = (requestId: number) => {
     responder.mutate({ solicitudId: requestId, accion: 'aceptar' });
@@ -75,8 +78,8 @@ export default function ProjectRequests() {
           </h2>
           
           {pendingRequests.length > 0 ? (
-            <div className="space-y-4">
-              {pendingRequests.map(request => {
+            <div ref={pagPend.refLista} className="space-y-4">
+              {pagPend.visibles.map(request => {
                 const requester = users.find(u => u.id === request.usuario_id);
                 const requesterCompany = companies.find(c => c.id === requester?.empresa_id);
                 if (!requester) return null;
@@ -150,6 +153,7 @@ export default function ProjectRequests() {
                   </motion.div>
                 );
               })}
+              <Paginacion {...pagPend.props} etiqueta="solicitudes" />
             </div>
           ) : (
             <EstadoVacio
@@ -167,8 +171,8 @@ export default function ProjectRequests() {
               Procesadas ({processedRequests.length})
             </h2>
             
-            <div className="space-y-3">
-              {processedRequests.map(request => {
+            <div ref={pagProc.refLista} className="space-y-3">
+              {pagProc.visibles.map(request => {
                 const requester = users.find(u => u.id === request.usuario_id);
                 const requesterCompany = companies.find(c => c.id === requester?.empresa_id);
                 if (!requester) return null;
@@ -204,6 +208,7 @@ export default function ProjectRequests() {
                 );
               })}
             </div>
+            <Paginacion {...pagProc.props} etiqueta="solicitudes" />
           </div>
         )}
       </div>

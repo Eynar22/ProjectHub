@@ -10,6 +10,8 @@ import { Input } from '@/shared/components/ui/Input';
 import { Building2, Search, Users, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EstadoVacio, EstadoError } from '@/shared/components/feedback';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 export default function AdminCompanies() {
   const { data: companies = [], isError, refetch } = useEmpresas();
@@ -32,6 +34,7 @@ export default function AdminCompanies() {
     const dateB = new Date(b.fecha_registro || 0).getTime();
     return dateB - dateA;
   });
+  const pag = usePaginacion(filteredCompanies, 10, [searchTerm, filter]);
 
   return (
     <AppLayout isAdmin contained mainClassName="flex-1 p-8">
@@ -78,8 +81,8 @@ export default function AdminCompanies() {
             </Card>
 
             {/* Companies List */}
-            <div className="space-y-4">
-              {filteredCompanies.map(comp => (
+            <div ref={pag.refLista} className="space-y-4">
+              {pag.visibles.map(comp => (
                 <motion.div
                   key={comp.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -153,6 +156,7 @@ export default function AdminCompanies() {
                 />
               )}
             </div>
+            <Paginacion {...pag.props} etiqueta="empresas" />
           </div>
     </AppLayout>
   );

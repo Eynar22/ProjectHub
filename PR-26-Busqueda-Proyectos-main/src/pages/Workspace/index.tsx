@@ -33,12 +33,9 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '@/shared/components/layout/AppLayout';
 import { Button } from '@/shared/components/ui/Button';
-import { Badge } from '@/shared/components/ui/Badge';
-import { Tabs } from '@/shared/components/ui/Tabs';
 import { StatusBanner } from '@/shared/components/StatusBanner';
 import { useDocumentTitle } from '@/shared/utils/useDocumentTitle';
 import {
-  ArrowLeft,
   Info,
   Users,
   MessageSquare,
@@ -51,6 +48,7 @@ import {
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import type { TabType, WorkspaceMember, WorkspaceTask } from '@/features/workspace/components/types';
+import { CabeceraGrupo } from '@/features/workspace/components/CabeceraGrupo';
 import { InfoTab } from '@/features/workspace/components/InfoTab';
 import { TeamTab } from '@/features/workspace/components/TeamTab';
 import { ChatTab } from '@/features/workspace/components/ChatTab';
@@ -603,23 +601,18 @@ export default function Workspace() {
   return (
     <DndProvider backend={HTML5Backend}>
       <AppLayout sinSidebar contained mainClassName="flex-1 px-4 sm:px-6 lg:px-8 py-10">
-          {/* Header */}
-          <div className="mb-8">
-            <Link to="/dashboard">
-              <Button variant="ghost" className="mb-4 flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Volver al Dashboard
-              </Button>
-            </Link>
-
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-black tracking-tight">{project.nombre}</h1>
-                {ownerCompany?.nombre && <p className="text-sm text-muted-foreground">{ownerCompany.nombre}</p>}
-              </div>
-              {isOwner && <Badge variant="info">Propietario</Badge>}
-            </div>
-          </div>
+          {/* Cabecera: foto, nombre, equipo, avance y pestañas */}
+          <CabeceraGrupo
+            project={project}
+            empresa={ownerCompany}
+            isOwner={isOwner}
+            equipo={participatingUsers}
+            columnas={kanbanColumns}
+            tareas={projectTasks}
+            pestanas={tabs}
+            activa={activeTab}
+            onCambiar={(id) => setActiveTab(id as TabType)}
+          />
 
           {project.suspendido && (
             <StatusBanner tone="danger" icon={AlertOctagon} title="Espacio de Trabajo Suspendido">
@@ -641,13 +634,6 @@ export default function Workspace() {
               Puedes seguir consultando su historial y recursos en modo &ldquo;solo lectura&rdquo;.
             </StatusBanner>
           )}
-
-          <Tabs
-            tabs={tabs}
-            active={activeTab}
-            onChange={(id) => setActiveTab(id as TabType)}
-            className="mb-6"
-          />
 
           {/* Tab Content */}
           <div>

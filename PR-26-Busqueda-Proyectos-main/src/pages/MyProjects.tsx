@@ -26,6 +26,8 @@ import {
   CheckCircle2, RefreshCw, ArchiveRestore, Crown, UserCheck, Building2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 type TabKey = 'activos' | 'terminados' | 'archivados';
 
@@ -303,6 +305,8 @@ export default function MyProjects() {
     tab === 'activos'    ? activos :
     tab === 'terminados' ? terminados :
     archivados;
+  const pagMios = usePaginacion(displayProjects.filter(isMine), 9, [tab]);
+  const pagColab = usePaginacion(displayProjects.filter(isCollab), 9, [tab]);
 
   const handleEstado = async (projectId: number, nuevoEstado: 'en_curso' | 'terminado' | 'archivado') => {
     setLoadingId(projectId);
@@ -397,9 +401,9 @@ export default function MyProjects() {
                         {displayProjects.filter(isMine).length}
                       </span>
                     </h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div ref={pagMios.refLista} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <AnimatePresence mode="popLayout">
-                        {displayProjects.filter(isMine).map(project => (
+                        {pagMios.visibles.map(project => (
                           <motion.div key={project.id} layout
                             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
                             <ProjectCard
@@ -414,6 +418,7 @@ export default function MyProjects() {
                         ))}
                       </AnimatePresence>
                     </div>
+                    <Paginacion {...pagMios.props} etiqueta="proyectos" />
                   </div>
                 )}
 
@@ -427,9 +432,9 @@ export default function MyProjects() {
                         {displayProjects.filter(isCollab).length}
                       </span>
                     </h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div ref={pagColab.refLista} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <AnimatePresence mode="popLayout">
-                        {displayProjects.filter(isCollab).map(project => (
+                        {pagColab.visibles.map(project => (
                           <motion.div key={project.id} layout
                             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
                             <ProjectCard
@@ -444,6 +449,7 @@ export default function MyProjects() {
                         ))}
                       </AnimatePresence>
                     </div>
+                    <Paginacion {...pagColab.props} etiqueta="proyectos" />
                   </div>
                 )}
               </>

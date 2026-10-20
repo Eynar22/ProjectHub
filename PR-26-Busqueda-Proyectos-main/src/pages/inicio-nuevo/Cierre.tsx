@@ -118,7 +118,7 @@ export function Cierre() {
         </div>
       </section>
 
-      <footer className={s.pie}>
+      <footer className={`${s.pie} banda-guinda`}>
         <Link to="/" className={s.logo}><i />ProjectHub</Link>
         <ul className={s.enlaces}>
           <li><Link to="/explore">Proyectos</Link></li>

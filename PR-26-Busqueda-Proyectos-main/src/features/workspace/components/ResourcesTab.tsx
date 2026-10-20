@@ -7,6 +7,8 @@ import { Card } from '@/shared/components/ui/Card';
 import { Button } from '@/shared/components/ui/Button';
 import { Modal } from '@/shared/components/ui/Modal';
 import type { Resource } from '@/features/proyectos';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 export function ResourcesTab({
   fileInputRef,
@@ -40,6 +42,7 @@ export function ResourcesTab({
   deleteResource: (id: number) => void;
 }) {
   const [resourceToDelete, setResourceToDelete] = useState<Resource | null>(null);
+  const pag = usePaginacion(currentResources, 24, [currentFolderId]);
 
   return (
     <motion.div
@@ -121,8 +124,8 @@ export function ResourcesTab({
         <p className="text-xs text-muted-foreground mb-4">Acepta PDFs e imágenes (JPG, PNG, GIF, WebP…)</p>
 
         {/* File/folder grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {currentResources.map(res => {
+        <div ref={pag.refLista} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {pag.visibles.map(res => {
             const isPdf = res.url?.startsWith('data:application/pdf');
             const isImage = res.url?.startsWith('data:image/');
             return (
@@ -185,6 +188,7 @@ export function ResourcesTab({
             </div>
           )}
         </div>
+        <Paginacion {...pag.props} etiqueta="archivos" />
 
         {currentResources.length === 0 && !uploadingFile && (
           <div

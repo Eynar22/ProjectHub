@@ -32,6 +32,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 type EstadoFilter = 'todos' | 'en_curso' | 'terminado' | 'archivado';
 
@@ -175,6 +177,7 @@ export default function AdminProjects() {
     const dateB = new Date(b.fecha_creacion || b.id).getTime();
     return dateB - dateA;
   });
+  const pag = usePaginacion(filtered, 10, [searchTerm, estadoFilter]);
 
   const counts = {
     todos: allProjects.length,
@@ -282,7 +285,7 @@ export default function AdminProjects() {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {filtered.map((project, index) => {
+                    {pag.visibles.map((project, index) => {
                       const creator = users.find((u) => u.id === project.creador_id);
                       const company = companies.find((c) => c.id === creator?.empresa_id);
                       const estado = project.estado || 'en_curso';
@@ -397,6 +400,7 @@ export default function AdminProjects() {
               )}
             </div>
           </Card>
+          <Paginacion {...pag.props} etiqueta="proyectos" />
     </AppLayout>
   );
 }

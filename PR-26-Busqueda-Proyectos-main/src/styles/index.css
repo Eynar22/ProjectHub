@@ -39,3 +39,14 @@
 .slick-next {
   right: 25px;
 }
+/* ───── Barra de scroll con la paleta ─────
+ * Riel del color del fondo y pulgar guinda (#A31E3A) que se oscurece al
+ * pasar el mouse. scrollbar-color cubre Firefox y Chrome/Edge modernos;
+ * ::-webkit-scrollbar cubre Safari y Chromium antiguos. */
+html {
+  scrollbar-color: var(--guinda-600) var(--background);
+}
+::-webkit-scrollbar { width: 12px; height: 12px }
+::-webkit-scrollbar-track { background: var(--background) }
+::-webkit-scrollbar-thumb { background: var(--guinda-600); border-radius: 999px; border: 3px solid var(--background) }
+::-webkit-scrollbar-thumb:hover { background: var(--guinda-700) }

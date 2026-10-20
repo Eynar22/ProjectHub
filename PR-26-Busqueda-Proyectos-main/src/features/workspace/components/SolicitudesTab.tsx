@@ -8,6 +8,8 @@ import { Badge } from '@/shared/components/ui/Badge';
 import { Avatar } from '@/shared/components/ui/Avatar';
 import type { Company } from '@/features/empresas';
 import type { ProyectoSolicitud } from './types';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 export function SolicitudesTab({
   projectName,
@@ -31,6 +33,8 @@ export function SolicitudesTab({
   onVerCv: (base64: string) => void;
 }) {
   const processedRequests = allRequests.filter(r => r.estado !== 'pendiente');
+  const pagPend = usePaginacion(pendingJoinRequests, 10, []);
+  const pagProc = usePaginacion(processedRequests, 10, []);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -55,11 +59,11 @@ export function SolicitudesTab({
           <p className="text-muted-foreground text-sm">Cargando solicitudes...</p>
         </Card>
       ) : pendingJoinRequests.length > 0 ? (
-        <div className="space-y-4 mb-8">
+        <div ref={pagPend.refLista} className="space-y-4 mb-8">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
             <Clock className="w-3.5 h-3.5" /> Pendientes de revisión
           </h3>
-          {pendingJoinRequests.map((req, i) => {
+          {pagPend.visibles.map((req, i) => {
             const reqCompany = req.usuario?.empresa_id
               ? companies.find(c => c.id === req.usuario!.empresa_id)
               : null;
@@ -156,6 +160,7 @@ export function SolicitudesTab({
               </motion.div>
             );
           })}
+          <Paginacion {...pagPend.props} etiqueta="solicitudes" />
         </div>
       ) : (
         <Card className="p-16 text-center border-none shadow-sm mb-8">
@@ -171,8 +176,8 @@ export function SolicitudesTab({
       {processedRequests.length > 0 && (
         <div>
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Procesadas</h3>
-          <div className="space-y-2">
-            {processedRequests.map(req => (
+          <div ref={pagProc.refLista} className="space-y-2">
+            {pagProc.visibles.map(req => (
               <Card key={req.id} className={`p-4 border-none shadow-sm ${req.estado === 'rechazado' ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
@@ -194,6 +199,7 @@ export function SolicitudesTab({
               </Card>
             ))}
           </div>
+          <Paginacion {...pagProc.props} etiqueta="solicitudes" />
         </div>
       )}
     </motion.div>

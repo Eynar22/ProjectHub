@@ -34,6 +34,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 
 export default function CompanyMembers() {
@@ -66,6 +68,9 @@ export default function CompanyMembers() {
   const pendingRequests = memberRequests.filter(mr => mr.empresa_id === currentUser?.empresa_id && mr.estado === 'pendiente');
   const approvedRequests = memberRequests.filter(mr => mr.empresa_id === currentUser?.empresa_id && mr.estado === 'aprobado');
   const rejectedRequests = memberRequests.filter(mr => mr.empresa_id === currentUser?.empresa_id && mr.estado === 'rechazado');
+  const pagPend = usePaginacion(pendingRequests, 10, []);
+  const pagMiembros = usePaginacion(companyMembers, 10, []);
+  const pagRech = usePaginacion(rejectedRequests, 10, []);
 
   const tabs = [
     { id: 'pendiente' as const, label: 'Solicitudes Pendientes', count: pendingRequests.length, icon: Clock, color: 'text-warning', bg: 'bg-warning/10 border-warning/20' },
@@ -149,8 +154,8 @@ export default function CompanyMembers() {
               {activeTab === 'pendiente' && (
                 <motion.div key="pending" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                   {pendingRequests.length > 0 ? (
-                    <div className="space-y-4">
-                      {pendingRequests.map((mr, i) => (
+                    <div ref={pagPend.refLista} className="space-y-4">
+                      {pagPend.visibles.map((mr, i) => (
                         <motion.div key={mr.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
                           <Card className="p-0 border-none shadow-sm overflow-hidden relative hover:shadow-md transition-all">
                             <div className="absolute top-0 left-0 w-1 h-full bg-warning" />
@@ -240,6 +245,7 @@ export default function CompanyMembers() {
                           </Card>
                         </motion.div>
                       ))}
+                      <Paginacion {...pagPend.props} etiqueta="solicitudes" />
                     </div>
                   ) : (
                     <Card className="p-16 text-center border-none shadow-sm">
@@ -257,8 +263,8 @@ export default function CompanyMembers() {
               {activeTab === 'miembros' && (
                 <motion.div key="members" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                   {companyMembers.length > 0 ? (
-                    <div className="space-y-4">
-                      {companyMembers.map((member, i) => {
+                    <div ref={pagMiembros.refLista} className="space-y-4">
+                      {pagMiembros.visibles.map((member, i) => {
                         const isAdmin = member.rol === 'admin';
                         return (
                           <motion.div key={member.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
@@ -328,6 +334,7 @@ export default function CompanyMembers() {
                           </motion.div>
                         );
                       })}
+                      <Paginacion {...pagMiembros.props} etiqueta="miembros" />
                     </div>
                   ) : (
                     <Card className="p-16 text-center border-none shadow-sm">
@@ -345,8 +352,8 @@ export default function CompanyMembers() {
               {activeTab === 'rechazado' && (
                 <motion.div key="rejected" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                   {rejectedRequests.length > 0 ? (
-                    <div className="space-y-3">
-                      {rejectedRequests.map((mr, i) => (
+                    <div ref={pagRech.refLista} className="space-y-3">
+                      {pagRech.visibles.map((mr, i) => (
                         <motion.div key={mr.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
                           <Card className="p-0 border-none shadow-sm overflow-hidden relative opacity-60 hover:opacity-80 transition-opacity">
                             <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
@@ -376,6 +383,7 @@ export default function CompanyMembers() {
                           </Card>
                         </motion.div>
                       ))}
+                      <Paginacion {...pagRech.props} etiqueta="solicitudes" />
                     </div>
                   ) : (
                     <Card className="p-16 text-center border-none shadow-sm">

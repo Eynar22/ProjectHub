@@ -15,6 +15,8 @@ import { ODS_LIST, ODS_POR_ID, etiquetaOds } from '@/shared/constants/ods';
 import { useApp } from '@/app/context/AppContext';
 import { Navbar } from '@/shared/components/layout/Navbar';
 import { Sidebar } from '@/shared/components/layout/Sidebar';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 import s from './EmpresasPublico.module.css';
 
 function Palabras({ texto, retraso = 0 }: { texto: string; retraso?: number }) {
@@ -40,6 +42,7 @@ export default function EmpresasPublico() {
     (!texto || e.nombre.toLowerCase().includes(texto) || e.descripcion?.toLowerCase().includes(texto)) &&
     (!odsFiltro || e.ods.includes(odsFiltro)),
   );
+  const pag = usePaginacion(filtradas, 12, [texto, odsFiltro]);
   const odsPresentes = ODS_LIST.filter(o => empresas.some(e => e.ods.includes(o.id)));
   const totalProyectos = empresas.reduce((n, e) => n + e.total_proyectos, 0);
   const totalOds = new Set(empresas.flatMap(e => e.ods)).size;
@@ -93,7 +96,7 @@ export default function EmpresasPublico() {
         )}
       </div>
 
-      <div className={s.lista}>
+      <div ref={pag.refLista} className={s.lista} style={{ scrollMarginTop: 140 }}>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <div key={i} className={s.cargando} />)
         ) : isError ? (
@@ -101,9 +104,10 @@ export default function EmpresasPublico() {
         ) : filtradas.length === 0 ? (
           <p className={s.vacio}>{empresas.length === 0 ? 'Todavía no hay empresas registradas.' : 'Ninguna empresa coincide con la búsqueda.'}</p>
         ) : (
-          filtradas.map((e, i) => <Tarjeta key={e.id} empresa={e} indice={i} />)
+          pag.visibles.map((e, i) => <Tarjeta key={e.id} empresa={e} indice={i} />)
         )}
       </div>
+      <Paginacion {...pag.props} etiqueta="empresas" className="mx-[7.1vw] mb-[8vh] -mt-[11vh] max-md:mx-5" />
 
       {!sesion && (
       <section className={s.cierre}>

@@ -16,6 +16,8 @@ import {
   Users, Search, Shield, UserCheck, Lock, Unlock, UserMinus,
   Building2, ChevronDown, Crown, User as UserIcon, AlertTriangle,
 } from 'lucide-react';
+import { Paginacion } from '@/shared/components/ui/Paginacion';
+import { usePaginacion } from '@/shared/components/ui/usePaginacion';
 
 const ROL_CFG: Record<string, { label: string; bg: string; text: string; icon: ComponentType<{ className?: string }> }> = {
   superadmin: { label: 'Super Admin', bg: 'bg-muted', text: 'text-foreground', icon: Shield },
@@ -54,6 +56,7 @@ export default function AdminUsers() {
       u.correo.toLowerCase().includes(term)
     );
   }).sort((a, b) => b.id - a.id);
+  const pag = usePaginacion(filteredUsers, 10, [searchTerm, selectedCompanyId]);
 
   // Count active admins for a company (to prevent blocking the last one)
   const activeAdminsCount = (empresaId: number) =>
@@ -134,9 +137,9 @@ export default function AdminUsers() {
           </AnimatePresence>
 
           {/* Users list */}
-          <div className="grid gap-3">
+          <div ref={pag.refLista} className="grid gap-3">
             <AnimatePresence mode="popLayout">
-              {filteredUsers.map(user => {
+              {pag.visibles.map(user => {
                 const rolCfg = ROL_CFG[user.rol] || ROL_CFG.empleado;
                 const RolIcon = rolCfg.icon;
                 const estadoCfg = ESTADO_CFG[user.estado || 'activo'] || ESTADO_CFG.activo;
@@ -271,6 +274,7 @@ export default function AdminUsers() {
               />
             )}
           </div>
+          <Paginacion {...pag.props} etiqueta="usuarios" />
 
           {/* Confirmación de bloqueo */}
           <Modal
