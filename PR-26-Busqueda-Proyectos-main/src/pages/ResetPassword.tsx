@@ -1,14 +1,19 @@
+/* ============================================================================
+ * src/pages/ResetPassword.tsx
+ * Restablecer contraseña con el diseño de las páginas de acceso. A la derecha,
+ * las cajas del código se llenan mientras se escribe y el candado se abre
+ * cuando el código y la nueva contraseña están completos.
+ * ========================================================================= */
+
 import { useState } from 'react';
-import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import { useNavigate, useSearchParams, Link } from 'react-router';
 import { toast } from 'sonner';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { LIMITES, CAMPOS, validarCampos, validarConfirmacion, primerError } from '@/shared/validacion';
 import { useRestablecerPassword } from '@/features/auth';
-import { Input } from '@/shared/components/ui/Input';
-import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
-import { motion } from 'motion/react';
+import { AccesoLayout, EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
+import { Desbloqueo } from '@/pages/acceso/VistasAcceso';
+import s from '@/pages/acceso/Acceso.module.css';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -16,6 +21,7 @@ export default function ResetPassword() {
   const [codigo, setCodigo] = useState('');
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [confirmarPassword, setConfirmarPassword] = useState('');
+  const [verClave, setVerClave] = useState(false);
   const navigate = useNavigate();
   const restablecer = useRestablecerPassword();
 
@@ -46,81 +52,83 @@ export default function ResetPassword() {
     }
   };
 
-  return (
-    <div className="min-h-screen">
-      <Navbar />
+  // El candado se abre cuando el formulario ya pasaría la validación.
+  const listo = codigo.length === 6
+    && !primerError(validarCampos({ correo, nuevaPassword }, { correo: CAMPOS.correo, nuevaPassword: CAMPOS.password }))
+    && nuevaPassword === confirmarPassword;
 
-      <div className="flex items-center justify-center py-16 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <Card className="p-8">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
-                <ShieldCheck className="w-8 h-8 text-primary-foreground" />
-              </div>
-            </div>
-
-            <h1 className="text-3xl font-bold text-center mb-2">Restablecer Contraseña</h1>
-            <p className="text-center text-muted-foreground mb-8">
-              Ingresa el código de 6 dígitos que enviamos a tu correo y tu nueva contraseña
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Email"
-                type="email"
-                autoComplete="email"
-                placeholder="tu@empresa.com"
-                value={correo} maxLength={LIMITES.usuario.correo}
-                onChange={(e) => setCorreo(e.target.value)}
-              />
-
-              <Input
-                label="Código de verificación"
-                type="text"
-                autoComplete="one-time-code"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="123456"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
-                className="text-center text-lg tracking-[0.5em] font-semibold"
-              />
-
-              <Input
-                label="Nueva contraseña"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={nuevaPassword} maxLength={LIMITES.usuario.password_max}
-                onChange={(e) => setNuevaPassword(e.target.value)}
-              />
-
-              <Input
-                label="Confirmar nueva contraseña"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={confirmarPassword} maxLength={LIMITES.usuario.password_max}
-                onChange={(e) => setConfirmarPassword(e.target.value)}
-              />
-
-              <Button type="submit" variant="primary" className="w-full" disabled={restablecer.isPending}>
-                {restablecer.isPending ? 'Actualizando...' : 'Restablecer Contraseña'}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5">
-                <ArrowLeft className="w-3.5 h-3.5" /> ¿No recibiste el código? Solicitar de nuevo
-              </Link>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+  const panel = (
+    <div className={s.panel} aria-hidden="true">
+      <Desbloqueo codigo={codigo} listo={listo} />
     </div>
+  );
+
+  const ojo = (
+    <button type="button" className={s.ojo} onClick={() => setVerClave(v => !v)} aria-label={verClave ? 'Ocultar contraseña' : 'Ver contraseña'}>
+      {verClave ? <EyeOff size={17} /> : <Eye size={17} />}
+    </button>
+  );
+
+  return (
+    <AccesoLayout panel={panel}>
+      <EncabezadoAcceso
+        eyebrow="Restablecer contraseña"
+        titulo="Crea tu nueva contraseña."
+        texto="Ingresa el código de 6 dígitos que enviamos a tu correo y elige una contraseña nueva."
+        onVolver={() => navigate('/forgot-password')}
+      />
+
+      <form onSubmit={handleSubmit} className={`${s.campos} ${s.aparece}`} style={{ animationDelay: '.5s' }} noValidate>
+        <div className={s.campo}>
+          <label htmlFor="reset-correo" className={s.etiqueta}>Correo</label>
+          <input
+            id="reset-correo" type="email" autoComplete="email" placeholder="tu@empresa.com"
+            className={s.input} value={correo} maxLength={LIMITES.usuario.correo}
+            onChange={e => setCorreo(e.target.value)}
+          />
+        </div>
+
+        <div className={s.campo}>
+          <label htmlFor="reset-codigo" className={s.etiqueta}>Código de verificación</label>
+          <input
+            id="reset-codigo" type="text" autoComplete="one-time-code" inputMode="numeric" maxLength={6} placeholder="123456"
+            className={s.input} value={codigo}
+            style={{ textAlign: 'center', letterSpacing: '.5em', fontWeight: 700, fontSize: '1.25rem' }}
+            onChange={e => setCodigo(e.target.value.replace(/\D/g, ''))}
+          />
+        </div>
+
+        <div className={s.campo}>
+          <label htmlFor="reset-nueva" className={s.etiqueta}>Nueva contraseña</label>
+          <div className={s.conIcono}>
+            <input
+              id="reset-nueva" type={verClave ? 'text' : 'password'} autoComplete="new-password" placeholder="••••••••"
+              className={s.input} value={nuevaPassword} maxLength={LIMITES.usuario.password_max}
+              onChange={e => setNuevaPassword(e.target.value)}
+            />
+            {ojo}
+          </div>
+        </div>
+
+        <div className={s.campo}>
+          <label htmlFor="reset-confirmar" className={s.etiqueta}>Confirmar nueva contraseña</label>
+          <input
+            id="reset-confirmar" type={verClave ? 'text' : 'password'} autoComplete="new-password" placeholder="••••••••"
+            className={s.input} value={confirmarPassword} maxLength={LIMITES.usuario.password_max}
+            onChange={e => setConfirmarPassword(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className={s.btn} disabled={restablecer.isPending}>
+          {restablecer.isPending
+            ? <><span className={s.girando} aria-hidden="true" /> Actualizando…</>
+            : <>Guardar contraseña <ArrowRight size={18} /></>}
+        </button>
+      </form>
+
+      <p className={`${s.pie} ${s.aparece}`} style={{ animationDelay: '.7s' }}>
+        ¿No recibiste el código? <Link to="/forgot-password" className={s.enlace}>Solicitar de nuevo</Link>
+      </p>
+    </AccesoLayout>
   );
 }

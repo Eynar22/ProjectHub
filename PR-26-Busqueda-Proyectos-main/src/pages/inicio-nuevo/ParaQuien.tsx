@@ -1,14 +1,16 @@
 /* ============================================================================
  * src/pages/inicio-nuevo/ParaQuien.tsx
- * "Para quién" de la portada nueva: Empresas y Profesionales, cada una con su
- * mazo de 3 tarjetas que se abre en abanico al entrar en pantalla (el hero en
- * chico). Burbujas con los mismos colores del hero: guinda empresa, gris
- * profesional. Tarjetas ilustrativas.
+ * "Para quién" de la portada nueva: dos paneles grandes, uno por público.
+ *  - Empresas: panel guinda (#A31E3A), botón blanco.
+ *  - Profesionales: panel carbón (#2E2E2E), botón guinda.
+ * Cada panel entra desde su lado, abre su mazo de 3 tarjetas en abanico y
+ * sus beneficios aparecen uno a uno. Lleva las rayas diagonales de la marca
+ * como adorno. Tarjetas ilustrativas.
  * ========================================================================= */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { FileText } from 'lucide-react';
+import { ArrowRight, Building2, FileText, UserRound, type LucideIcon } from 'lucide-react';
 import { ODS_POR_ID } from '@/shared/constants/ods';
 import s from './ParaQuien.module.css';
 
@@ -35,39 +37,50 @@ function Palabras({ texto, visible, retraso = 0 }: { texto: string; visible: boo
 }
 
 /** Marca `visible` la primera vez que el elemento entra en pantalla. */
-function useAlVer<T extends Element>() {
+function useAlVer<T extends Element>(umbral = 0.3) {
   const ref = useRef<T>(null);
   const [visible, setVisible] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   useEffect(() => {
     if (visible || !ref.current) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.3 });
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: umbral });
     io.observe(ref.current);
     return () => io.disconnect();
-  }, [visible]);
+  }, [visible, umbral]);
   return [ref, visible] as const;
 }
 
-function Columna({ titulo, puntos, color, burbuja, boton, destino, cartas }: {
+function Panel({ variante, etiqueta, icono: Icono, titulo, puntos, boton, destino, cartas }: {
+  variante: 'empresa' | 'pro';
+  etiqueta: string;
+  icono: LucideIcon;
   titulo: string;
   puntos: string[];
-  color: string;
-  burbuja: string;
   boton: string;
   destino: string;
   cartas: ReactNode;
 }) {
-  const [ref, visible] = useAlVer<HTMLDivElement>();
+  const [ref, visible] = useAlVer<HTMLDivElement>(0.2);
   return (
-    <div ref={ref} className={s.columna} style={{ ['--punto' as string]: color }}>
+    <div
+      ref={ref}
+      className={`${s.panel} ${variante === 'empresa' ? s.empresa : s.pro} ${visible ? s.visible : ''}`}
+    >
+      <span className={s.rayas} aria-hidden="true" />
+
       <div className={`${s.mazo} ${visible ? s.abierto : ''}`} aria-hidden="true">
         {cartas}
-        <span className={s.burbuja} style={{ background: color }}>{burbuja}</span>
       </div>
-      <h3><Palabras texto={titulo} visible={visible} retraso={0.2} /></h3>
-      <ul className={s.lista}>
-        {puntos.map(p => <li key={p}>{p}</li>)}
-      </ul>
-      <Link to={destino} className={s.btn}>{boton}</Link>
+
+      <p className={s.etiqueta}><Icono size={16} /> {etiqueta}</p>
+      <h3><Palabras texto={titulo} visible={visible} retraso={0.25} /></h3>
+      <ol className={s.lista}>
+        {puntos.map((p, i) => (
+          <li key={p} style={{ transitionDelay: visible ? `${0.45 + i * 0.08}s` : '0s' }}>
+            <span className={s.num}>{i + 1}</span>{p}
+          </li>
+        ))}
+      </ol>
+      <Link to={destino} className={s.btn}>{boton} <ArrowRight size={18} /></Link>
     </div>
   );
 }
@@ -79,14 +92,16 @@ export function ParaQuien() {
     <section id="para-quien" className={s.seccion}>
       <p className={s.eyebrow}>Para quién</p>
       <h2 ref={refTitulo} className={s.titulo}>
-        <Palabras texto="Un lugar para quien tiene el problema y para quien sabe resolverlo." visible={verTitulo} />
+        <Palabras texto="Un lugar para quien tiene el problema" visible={verTitulo} />
+        <span className={s.acento}><Palabras texto="y para quien sabe resolverlo." visible={verTitulo} retraso={0.3} /></span>
       </h2>
 
-      <div className={s.columnas}>
-        <Columna
-          titulo="Empresas"
-          color="var(--azul)"
-          burbuja="Empresa"
+      <div className={s.paneles}>
+        <Panel
+          variante="empresa"
+          etiqueta="Si eres empresa"
+          icono={Building2}
+          titulo="Publica tu problema."
           puntos={[
             'Publica proyectos con un problema real, fechas y ODS.',
             'Recibe propuestas con CV y compáralas en un solo lugar.',
@@ -101,10 +116,11 @@ export function ParaQuien() {
             <div className={s.carta}><img src="/images/landing/empresas.jpg" alt="" /><b>Capacitación docente rural</b></div>
           </>}
         />
-        <Columna
-          titulo="Profesionales y equipos"
-          color="var(--verde)"
-          burbuja="Profesional"
+        <Panel
+          variante="pro"
+          etiqueta="Si eres profesional o equipo"
+          icono={UserRound}
+          titulo="Resuelve problemas reales."
           puntos={[
             'No necesitas pertenecer a una empresa: postula como independiente.',
             'Encuentra proyectos con impacto real en Bolivia.',

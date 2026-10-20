@@ -12,7 +12,7 @@
 /* ───── Preguntas ───── */
 .preguntas { padding: 18vh 7.1vw 14vh; display: grid; grid-template-columns: minmax(0, 32vw) 1fr; gap: 5vw; align-items: start }
 .pregIzq { position: sticky; top: 16vh }
-.pregTitulo { font-weight: 500; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 1.6vw, 32px) }
+.pregTitulo { font-weight: 700; font-size: clamp(2.2rem, 4.2vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 1.6vw, 32px) }
 .pregSub { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.55; margin: 0; max-width: 30ch }
 .pregSub a { color: var(--tinta); font-weight: 500 }
 .lista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea) }
@@ -42,7 +42,7 @@
 .abierto .carta:nth-child(3) { transform: translate(-50%, -54%) rotate(0deg) }
 .abierto .carta:nth-child(4) { transform: translate(calc(-50% + 52%), -48%) rotate(5deg) }
 .abierto .carta:nth-child(5) { transform: translate(calc(-50% + 105%), -40%) rotate(12deg) }
-.cierreTitulo { font-weight: 500; font-size: clamp(2.6rem, 6vw, 8rem); line-height: 1.02; letter-spacing: -.035em; margin: 0 auto clamp(24px, 2.4vw, 48px); max-width: 16ch }
+.cierreTitulo { font-weight: 700; font-size: clamp(2.6rem, 6vw, 8rem); line-height: 1.02; letter-spacing: -.035em; margin: 0 auto clamp(24px, 2.4vw, 48px); max-width: 16ch }
 .rojo { color: var(--azul) }
 .cierreSub { color: var(--tinta-2); font-size: clamp(1rem, 1.15vw, 1.45rem); margin: 0 auto clamp(28px, 3vw, 56px); max-width: 44ch }
 .acciones { display: flex; justify-content: center; align-items: center; gap: clamp(22px, 2.2vw, 48px); flex-wrap: wrap }

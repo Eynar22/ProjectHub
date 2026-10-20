@@ -1,14 +1,19 @@
+/* ============================================================================
+ * src/pages/ForgotPassword.tsx
+ * "Olvidé mi contraseña" con el diseño de las páginas de acceso: formulario a
+ * la izquierda y, a la derecha, un correo con el código en camino que muestra
+ * en vivo la dirección que se escribe.
+ * ========================================================================= */
+
 import { useState } from 'react';
-import { LIMITES, CAMPOS, validarCampo } from '@/shared/validacion';
 import { useNavigate, Link } from 'react-router';
 import { toast } from 'sonner';
+import { ArrowRight } from 'lucide-react';
+import { LIMITES, CAMPOS, validarCampo } from '@/shared/validacion';
 import { useSolicitarCodigoRecuperacion } from '@/features/auth';
-import { Input } from '@/shared/components/ui/Input';
-import { Button } from '@/shared/components/ui/Button';
-import { Card } from '@/shared/components/ui/Card';
-import { Navbar } from '@/shared/components/layout/Navbar';
-import { KeyRound, ArrowLeft } from 'lucide-react';
-import { motion } from 'motion/react';
+import { AccesoLayout, EncabezadoAcceso } from '@/pages/acceso/AccesoLayout';
+import { CorreoCodigo } from '@/pages/acceso/VistasAcceso';
+import s from '@/pages/acceso/Acceso.module.css';
 
 export default function ForgotPassword() {
   const [correo, setCorreo] = useState('');
@@ -32,51 +37,41 @@ export default function ForgotPassword() {
     }
   };
 
-  return (
-    <div className="min-h-screen">
-      <Navbar />
-
-      <div className="flex items-center justify-center py-16 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <Card className="p-8">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
-                <KeyRound className="w-8 h-8 text-primary-foreground" />
-              </div>
-            </div>
-
-            <h1 className="text-3xl font-bold text-center mb-2">Recuperar Contraseña</h1>
-            <p className="text-center text-muted-foreground mb-8">
-              Ingresa tu correo y te enviaremos un código de verificación
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Email"
-                type="email"
-                autoComplete="email"
-                placeholder="tu@empresa.com"
-                value={correo} maxLength={LIMITES.usuario.correo}
-                onChange={(e) => setCorreo(e.target.value)}
-              />
-
-              <Button type="submit" variant="primary" className="w-full" disabled={solicitarCodigo.isPending}>
-                {solicitarCodigo.isPending ? 'Enviando...' : 'Enviar Código'}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5">
-                <ArrowLeft className="w-3.5 h-3.5" /> Volver a iniciar sesión
-              </Link>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+  const panel = (
+    <div className={s.panel} aria-hidden="true">
+      <CorreoCodigo correo={correo} />
     </div>
+  );
+
+  return (
+    <AccesoLayout panel={panel}>
+      <EncabezadoAcceso
+        eyebrow="Recuperar contraseña"
+        titulo="¿Olvidaste tu contraseña?"
+        texto="Escribe tu correo y te enviaremos un código de verificación para crear una nueva."
+        onVolver={() => navigate('/login')}
+      />
+
+      <form onSubmit={handleSubmit} className={`${s.campos} ${s.aparece}`} style={{ animationDelay: '.5s' }} noValidate>
+        <div className={s.campo}>
+          <label htmlFor="olvido-correo" className={s.etiqueta}>Correo</label>
+          <input
+            id="olvido-correo" type="email" autoComplete="email" placeholder="tu@empresa.com"
+            className={s.input} value={correo} maxLength={LIMITES.usuario.correo}
+            onChange={e => setCorreo(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className={s.btn} disabled={solicitarCodigo.isPending}>
+          {solicitarCodigo.isPending
+            ? <><span className={s.girando} aria-hidden="true" /> Enviando…</>
+            : <>Enviar código <ArrowRight size={18} /></>}
+        </button>
+      </form>
+
+      <p className={`${s.pie} ${s.aparece}`} style={{ animationDelay: '.7s' }}>
+        ¿La recordaste? <Link to="/login" className={s.enlace}>Inicia sesión</Link>
+      </p>
+    </AccesoLayout>
   );
 }

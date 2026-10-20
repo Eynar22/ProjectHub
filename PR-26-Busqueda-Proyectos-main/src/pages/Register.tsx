@@ -59,7 +59,7 @@ export default function Register() {
     return (
       <AccesoLayout>
         <div className={s.estado}>
-          <div className={`${s.estadoIcono} ${s.aparece}`} style={{ background: 'var(--verde)' }}><CheckCircle2 size={38} /></div>
+          <div className={`${s.estadoIcono} ${s.aparece}`} style={{ background: 'var(--primary)' }}><CheckCircle2 size={38} /></div>
           <TituloAnimado texto={independiente ? '¡Cuenta creada!' : '¡Solicitud enviada!'} retraso={0.1} />
           <p className={s.sub}>
             {independiente

@@ -13,9 +13,12 @@
   --tinta: var(--foreground);
   --tinta-2: var(--muted-foreground);
   --azul: var(--primary);
-  --verde: var(--success);
-  --rojo: var(--danger);
-  --ambar: var(--warning);
+  /* Solo paleta oficial: guinda y grises. */
+  --verde: var(--gray-600);
+  --rojo: var(--primary);
+  --ambar: var(--primary);
+  /* Fondo del panel ilustrado: rosa oficial; en oscuro, carbón teñido de guinda. */
+  --panel-fondo: var(--guinda-100);
   --superficie: var(--card);
   --linea: var(--border);
   --linea-suave: var(--muted);
@@ -26,6 +29,7 @@
   display: flex;
   flex-direction: column;
 }
+:global(.dark) .raiz { --panel-fondo: color-mix(in oklab, var(--guinda-600) 20%, var(--gray-900)) }
 .raiz *, .raiz *::before, .raiz *::after { box-sizing: border-box }
 .raiz a:focus-visible, .raiz button:focus-visible { outline: 2px solid var(--azul); outline-offset: 3px }
 
@@ -34,8 +38,8 @@
 /* ───── Cuerpo en dos columnas ───── */
 .cuerpo { flex: 1; display: grid; grid-template-columns: minmax(320px, 32vw) minmax(0, 1fr); gap: 5vw; align-items: center; padding: 2vh 7.1vw 6vh }
 .form { width: 100%; max-width: 100% }
-.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.2vw }
-.titulo { font-weight: 500; font-size: clamp(2.4rem, 4.4vw, 5.4rem); line-height: 1.04; letter-spacing: -.032em; margin: 0 0 14px }
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--primary); margin: 0 0 1.2vw }
+.titulo { font-weight: 700; font-size: clamp(2.4rem, 4.4vw, 5.4rem); line-height: 1.04; letter-spacing: -.032em; margin: 0 0 14px }
 .w { display: inline-block; white-space: pre; opacity: 0; filter: blur(10px); transform: translateY(8px); animation: entra .7s cubic-bezier(.16,1,.3,1) forwards }
 @keyframes entra { to { opacity: 1; filter: none; transform: none } }
 .sub { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.3rem); line-height: 1.55; margin: 0 0 clamp(26px, 2.6vw, 44px); opacity: 0; animation: entra .7s .35s cubic-bezier(.16,1,.3,1) forwards }
@@ -49,7 +53,7 @@
   transition: border-color .2s, box-shadow .2s }
 .input::placeholder { color: var(--muted-foreground) }
 .input:hover { border-color: var(--input) }
-.input:focus { outline: none; border-color: var(--tinta); box-shadow: 0 0 0 4px var(--muted) }
+.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 18%, transparent) }
 .conIcono { position: relative }
 .conIcono .input { padding-right: 56px }
 .ojo { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--linea-suave);
@@ -59,8 +63,8 @@
 
 .fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .92rem; color: var(--tinta-2); margin-top: 4px }
 .fila label { display: flex; align-items: center; gap: 8px; cursor: pointer }
-.fila input { width: 16px; height: 16px; accent-color: var(--tinta) }
-.enlace { color: var(--tinta); font-weight: 500; text-decoration: underline; text-underline-offset: 3px }
+.fila input { width: 16px; height: 16px; accent-color: var(--primary) }
+.enlace { color: var(--primary); font-weight: 500; text-decoration: underline; text-underline-offset: 3px }
 
 .btn { width: 100%; margin-top: 12px; border: 0; cursor: pointer; font: inherit; font-size: 1.05rem; font-weight: 500; color: var(--primary-foreground); background: var(--primary); padding: 17px 28px; border-radius: 999px;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: transform .2s, box-shadow .2s, opacity .2s }
@@ -77,6 +81,11 @@
 /* ───── Panel ilustrado (columna derecha) ───── */
 .panel { position: relative; height: min(82vh, 52vw); /* Sin caja: la ilustración flota directamente sobre el fondo de la página */
   display: grid; place-items: center; overflow: visible; opacity: 0; animation: entra .9s .2s cubic-bezier(.16,1,.3,1) forwards }
+/* Fondo de color detrás de la ilustración + rayas diagonales de la marca */
+.panel::before { content: ""; position: absolute; inset: 2% -3%; z-index: 0; border-radius: clamp(24px, 2.4vw, 44px); background: var(--panel-fondo) }
+.panel::after { content: ""; position: absolute; right: -1%; top: 3%; width: 36%; height: 36%; z-index: 0; pointer-events: none; border-radius: clamp(24px, 2.4vw, 44px);
+  background: repeating-linear-gradient(-60deg, var(--primary) 0 10px, transparent 10px 26px); opacity: .16;
+  -webkit-mask-image: radial-gradient(closest-side, #000, transparent); mask-image: radial-gradient(closest-side, #000, transparent) }
 .burbuja { position: absolute; z-index: 2; font-size: clamp(.85rem, 1vw, 1.25rem); font-weight: 500; color: var(--primary-foreground); padding: .5em 1.05em; border-radius: 999px; white-space: nowrap;
   box-shadow: var(--shadow-xl); transform: scale(0); animation: pop .5s cubic-bezier(.34,1.56,.64,1) forwards }
 .burbuja::after { content: ""; position: absolute; bottom: -5px; left: 18px; width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
@@ -107,7 +116,7 @@
 /* Encabezado común: volver + eyebrow + título + texto */
 .volver { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 18px; padding: 8px 14px 8px 10px; border: 1px solid var(--linea); border-radius: 999px;
   background: none; cursor: pointer; font: inherit; font-size: .92rem; color: var(--tinta-2); transition: background .2s, color .2s }
-.volver:hover { background: var(--tinta); color: var(--sobre-tinta); border-color: var(--tinta) }
+.volver:hover { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary) }
 
 @media (max-width: 900px) {
   .ancho { grid-template-columns: 1fr }
@@ -129,7 +138,7 @@
 .ventCab i { width: 9px; height: 9px; border-radius: 50%; background: var(--linea) }
 .ventCab span { margin-left: 8px }
 .ventCuerpo { padding: clamp(22px, 2.2vw, 44px); display: grid; gap: clamp(10px, .9vw, 16px); transition: filter .5s, opacity .5s }
-.saludo { margin: 0; font-size: clamp(1.8rem, 3vw, 3.6rem); font-weight: 500; letter-spacing: -.03em; line-height: 1.05 }
+.saludo { margin: 0; font-size: clamp(1.8rem, 3vw, 3.6rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.05 }
 .saludoSub { margin: 0 0 6px; color: var(--tinta-2); font-size: clamp(.9rem, 1vw, 1.2rem) }
 .avisos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px }
 .avisos span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--linea-suave); font-size: clamp(.8rem, .9vw, 1.05rem); font-weight: 500 }
@@ -145,7 +154,7 @@
 .rolFoto { flex: 1; min-height: 0; overflow: hidden }
 .rolFoto img { width: 100%; height: 100%; object-fit: cover; display: block }
 .rolTxt { display: grid; gap: 4px; padding: clamp(14px, 1.3vw, 24px) }
-.rolTxt b { font-weight: 500; font-size: clamp(1.15rem, 1.6vw, 2rem); letter-spacing: -.035em }
+.rolTxt b { font-weight: 700; font-size: clamp(1.15rem, 1.6vw, 2rem); letter-spacing: -.035em }
 .rolTxt small { color: var(--tinta-2); font-size: clamp(.82rem, .9vw, 1.1rem); line-height: 1.4 }
 .rolIcono { width: clamp(30px, 2.4vw, 42px); aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; background: var(--c); color: var(--primary-foreground); margin-bottom: 6px }
 .rolOn { border-color: var(--c) }
@@ -158,7 +167,7 @@
 .fichaLogo { position: absolute; left: 26px; top: calc(clamp(140px, 13vw, 240px) - 40px); width: clamp(68px, 5.6vw, 96px); aspect-ratio: 1; border-radius: 20px; background: var(--azul); color: var(--primary-foreground); display: grid; place-items: center;
   font-size: 1.8rem; font-weight: 600; border: 4px solid var(--superficie) }
 .fichaCuerpo { padding: clamp(48px, 4vw, 70px) 26px 26px; display: grid; gap: 10px }
-.fichaCuerpo > b, .perfil > b, .credCuerpo > b { font-weight: 500; font-size: clamp(1.5rem, 2.3vw, 2.8rem); letter-spacing: -.026em; line-height: 1.08; overflow-wrap: anywhere }
+.fichaCuerpo > b, .perfil > b, .credCuerpo > b { font-weight: 700; font-size: clamp(1.5rem, 2.3vw, 2.8rem); letter-spacing: -.026em; line-height: 1.08; overflow-wrap: anywhere }
 .fichaCuerpo p { margin: 0; color: var(--tinta-2); font-size: clamp(.92rem, 1vw, 1.2rem); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden }
 .fichaDatos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px }
 .fichaDatos span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--linea-suave); font-size: clamp(.8rem, .9vw, 1.05rem) }
@@ -166,17 +175,17 @@
 /* Registro: perfil y credencial */
 .perfil, .credencial { width: min(100%, 620px); border-radius: 24px; background: var(--superficie); box-shadow: var(--shadow-xl); overflow: hidden }
 .perfil { padding: clamp(28px, 2.6vw, 48px) clamp(24px, 2vw, 40px) clamp(22px, 2vw, 36px); display: grid; justify-items: center; gap: 8px; text-align: center }
-.avatar { width: clamp(84px, 7vw, 128px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-size: clamp(2rem, 3vw, 3.4rem); font-weight: 600; color: var(--primary-foreground); background: var(--verde); margin-bottom: 6px }
+.avatar { width: clamp(84px, 7vw, 128px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-size: clamp(2rem, 3vw, 3.4rem); font-weight: 600; color: var(--primary-foreground); background: var(--primary); margin-bottom: 6px }
 .cargo { color: var(--tinta-2); font-size: clamp(.95rem, 1.1vw, 1.3rem) }
 .chips { display: flex; gap: 6px; margin: 6px 0 10px }
 .chips span { padding: 5px 10px; border-radius: 999px; background: var(--linea-suave); font-size: .78rem; font-weight: 500 }
 .postulaciones { width: 100%; display: grid; gap: 8px; text-align: left; border-top: 1px solid var(--linea-suave); padding-top: 14px }
 .postulaciones small { color: var(--tinta-2) }
-.credCab { display: flex; align-items: center; gap: 12px; padding: clamp(16px, 1.4vw, 26px) clamp(20px, 1.8vw, 32px); background: var(--tinta); color: var(--sobre-tinta); font-size: clamp(1rem, 1.1vw, 1.3rem) }
-.credCab img, .credCab span { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; background: var(--azul); display: grid; place-items: center; font-weight: 600 }
+.credCab { display: flex; align-items: center; gap: 12px; padding: clamp(16px, 1.4vw, 26px) clamp(20px, 1.8vw, 32px); background: var(--primary); color: var(--primary-foreground); font-size: clamp(1rem, 1.1vw, 1.3rem) }
+.credCab img, .credCab span { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; background: var(--primary-foreground); color: var(--primary); display: grid; place-items: center; font-weight: 600 }
 .credCuerpo { padding: clamp(26px, 2.4vw, 44px) 24px clamp(20px, 2vw, 34px); display: grid; justify-items: center; gap: 8px; text-align: center }
 .credCuerpo .avatar { background: var(--azul) }
-.sello { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; border: 1.5px dashed var(--ambar); color: var(--warning-strong); font-size: clamp(.82rem, .9vw, 1.05rem); font-weight: 500; transform: rotate(-3deg) }
+.sello { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; border: 1.5px dashed var(--primary); color: var(--primary); font-size: clamp(.82rem, .9vw, 1.05rem); font-weight: 500; transform: rotate(-3deg) }
 .credPie { padding: 12px; text-align: center; font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-2); border-top: 1px dashed var(--linea) }
 
 @media (prefers-reduced-motion: reduce) {
@@ -199,3 +208,23 @@
 .rolOn .rolPuntos { max-height: 12em; opacity: 1; margin-top: 12px; transition-delay: .25s }
 .rolOn .rolTxt b { font-size: clamp(1.6rem, 2.6vw, 3.2rem) }
 .rolTxt, .rolTxt small { white-space: normal }
+
+/* ───── Recuperar y restablecer contraseña ───── */
+.correoDe { display: flex; align-items: center; gap: 12px; padding-bottom: clamp(10px, 1vw, 16px); border-bottom: 1px solid var(--linea-suave); margin-bottom: 4px }
+.correoDe > span:last-child { display: grid; min-width: 0 }
+.correoDe b { font-weight: 700; font-size: clamp(.95rem, 1vw, 1.2rem) }
+.correoDe small { color: var(--tinta-2); font-size: clamp(.8rem, .85vw, 1rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.correoDe em { font-style: normal; color: var(--primary); font-weight: 600 }
+.correoLogo { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--primary); color: var(--primary-foreground) }
+.codigoCajas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(6px, .7vw, 12px); margin-top: 6px }
+.codigoCajas span { aspect-ratio: 4 / 5; border-radius: 14px; border: 2px solid var(--linea); display: grid; place-items: center;
+  font-size: clamp(1.4rem, 2.2vw, 2.6rem); font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; transition: border-color .25s, background .25s, transform .25s }
+.codigoCajas .cajaLlena { border-color: var(--primary); background: color-mix(in oklab, var(--primary) 8%, transparent); transform: translateY(-3px); animation: pop .3s cubic-bezier(.34,1.56,.64,1) }
+.cajaEspera { background: var(--linea-suave); animation: brillaCaja 1.6s ease-in-out infinite }
+@keyframes brillaCaja { 50% { background: color-mix(in oklab, var(--primary) 18%, var(--linea-suave)); border-color: var(--primary) } }
+.desbloqueo .ventCuerpo { justify-items: center }
+.desbloqueo .codigoCajas { width: 100% }
+.candadoGrande { width: clamp(76px, 6vw, 108px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; margin-bottom: 8px;
+  background: var(--linea-suave); color: var(--tinta-2); transition: background .4s, color .4s, transform .4s cubic-bezier(.34,1.56,.64,1) }
+.candadoGrande.abierto { background: var(--primary); color: var(--primary-foreground); transform: scale(1.08) rotate(-6deg) }
+@media (prefers-reduced-motion: reduce) { .cajaEspera, .codigoCajas .cajaLlena { animation: none } }

@@ -68,7 +68,7 @@ export function Cierre() {
 
   return (
     <>
-      <section id="preguntas" className={s.preguntas}>
+      <section id="preguntas" className={`${s.preguntas} banda-rosa`}>
         <div ref={refPreg} className={s.pregIzq}>
           <p className={s.eyebrow}>Preguntas</p>
           <h2 className={s.pregTitulo}><Palabras texto="Lo que más nos preguntan." visible={verPreg} /></h2>
@@ -99,7 +99,7 @@ export function Cierre() {
         </ul>
       </section>
 
-      <section ref={refCierre} className={s.cierre}>
+      <section ref={refCierre} className={`${s.cierre} banda-guinda`}>
         <div className={`${s.mazo} ${verCierre ? s.abierto : ''}`} aria-hidden="true">
           {CARTAS.map((c, i) => (
             <div key={i} className={`${s.carta} ${'ods' in c ? s.ods : ''}`} style={{ background: 'ods' in c ? c.color : undefined, zIndex: i === 2 ? 5 : 3 - Math.abs(i - 2) }}>

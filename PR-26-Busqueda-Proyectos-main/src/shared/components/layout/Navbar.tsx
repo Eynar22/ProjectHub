@@ -82,7 +82,11 @@ export function Navbar() {
   useEffect(() => {
     if (!enLanding || !location.hash) return;
     const id = location.hash.slice(1);
-    const t = setTimeout(() => irASeccion(id), 150);
+    const t = setTimeout(() => {
+      irASeccion(id);
+      // Ya se usó: se quita de la URL para que recargar no vuelva a saltar.
+      history.replaceState(history.state, '', window.location.pathname + window.location.search);
+    }, 150);
     return () => clearTimeout(t);
   }, [enLanding, location.hash]);
 
@@ -114,10 +118,9 @@ export function Navbar() {
 
   const clickSeccion = (e: ReactMouseEvent, id: string) => {
     setMobileMenuOpen(false);
-    if (enLanding && irASeccion(id)) {
-      e.preventDefault();
-      history.replaceState(null, '', `#${id}`);
-    }
+    // Solo desplaza: no escribe #seccion en la URL, así al recargar la portada
+    // empieza arriba y no vuelve a la última sección pulsada.
+    if (enLanding && irASeccion(id)) e.preventDefault();
     // Si no estamos en el landing, el <Link to="/#id"> navega y el efecto de arriba hace el salto.
   };
 
@@ -145,6 +148,7 @@ export function Navbar() {
             // Ya en la portada: subir al inicio y repetir la animación del hero.
             if (!enLanding) return;
             e.preventDefault();
+            if (window.location.hash) history.replaceState(history.state, '', '/');
             window.scrollTo({ top: 0, behavior: 'auto' });
             window.dispatchEvent(new Event('portada:reiniciar'));
           }}

@@ -1,58 +1,119 @@
 /* ============================================================================
  * Sección "Cómo funciona" de la portada nueva. Usa las variables de color de
- * .raiz (InicioNuevo.module.css), que solo existen dentro de esa página.
+ * .raiz (InicioNuevo.module.css) y solo colores de la paleta oficial.
  * ========================================================================= */
 
-.seccion { position: relative; height: 320vh }
+.seccion { position: relative; height: 400vh }
 .escena { position: sticky; top: 0; height: 100vh; display: grid; grid-template-columns: minmax(0, 40vw) 1fr; align-items: center; gap: 4vw; padding: 0 7.1vw; overflow: hidden }
+.columnaTexto { position: relative; z-index: 2 }
 
-/* Columna de texto */
-.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--tinta-2); margin: 0 0 1.4vw }
-.pasos { position: relative; min-height: clamp(260px, 26vw, 420px) }
-.paso { position: absolute; inset: 0 }
+/* Columna de texto. Los pasos se apilan en la misma celda de la grilla, así
+   el bloque toma la altura del paso más alto y nada se encima. */
+.eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--primary); margin: 0 0 1.4vw }
+.pasos { display: grid }
+.paso { grid-area: 1 / 1 }
 .numero { font-size: clamp(.9rem, 1vw, 1.25rem); font-weight: 500; color: var(--tinta-2); margin: 0 0 .8vw; font-variant-numeric: tabular-nums }
-.paso h2 { font-weight: 700; font-size: clamp(2.4rem, 4.6vw, 6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 2vw, 40px) }
-.paso p { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.6; max-width: 30ch; margin: 0 }
+.numero b { color: var(--primary); font-weight: 700 }
+.paso h2 { font-weight: 700; font-size: clamp(2.4rem, 4.4vw, 5.6rem); line-height: 1.06; letter-spacing: -.032em; margin: 0 0 clamp(18px, 2vw, 40px) }
+.texto { color: var(--tinta-2); font-size: clamp(1rem, 1.05vw, 1.35rem); line-height: 1.6; max-width: 34ch; margin: 0 }
 .w { display: inline-block; white-space: pre }
 
-/* Indicador: los cuatro nombres de los pasos, el actual en negro */
-.indice { display: flex; flex-wrap: wrap; gap: 10px 22px; list-style: none; margin: clamp(28px, 3vw, 56px) 0 0; padding: 0; font-size: clamp(.85rem, .9vw, 1.1rem) }
-.indice li { color: var(--muted-foreground); transition: color .4s }
-.indice li.activo { color: var(--tinta) }
-.indice li.hecho { color: var(--tinta-2) }
+/* Indicador: barra segmentada que se llena en guinda */
+.indice { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; list-style: none; margin: clamp(28px, 3vw, 56px) 0 0; padding: 0; max-width: 34rem;
+  font-size: clamp(.8rem, .85vw, 1.05rem); font-weight: 600 }
+.indice li { display: grid; gap: 8px; color: var(--tinta-2); transition: color .4s }
+.indice li.activo { color: var(--primary) }
+.indice li.hecho { color: var(--tinta) }
+.barra { display: block; height: 4px; border-radius: 4px; background: var(--muted); overflow: hidden }
+.barra b { display: block; height: 100%; background: var(--primary); transform-origin: left; transition: transform .25s linear }
 
 /* Columna de la tarjeta */
-.mesa { position: relative; height: 100%; display: grid; place-items: center start; padding-left: 4vw; perspective: 1400px }
-.tarjeta { position: relative; width: clamp(260px, 30vw, 620px); background: var(--superficie); border-radius: 18px; overflow: hidden;
-  box-shadow: var(--shadow-xl); transition: transform .9s cubic-bezier(.16,1,.3,1); will-change: transform }
-.foto { aspect-ratio: 16 / 10; overflow: hidden }
+.mesa { position: relative; height: 100%; display: grid; place-items: center; perspective: 1400px }
+.ancla { position: relative; transform: translateX(-8%) }
+
+/* Número enorme del paso, de fondo */
+.numeroFondo { position: absolute; right: -2vw; bottom: 4vh; font-weight: 700; font-size: clamp(9rem, 22vw, 26rem); line-height: .8; letter-spacing: -.06em;
+  color: var(--secondary); pointer-events: none; user-select: none; animation: numeroEntra .8s cubic-bezier(.16,1,.3,1) both }
+@keyframes numeroEntra { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: none } }
+
+/* Mancha guinda suave que se desplaza en cada paso */
+.mancha { position: absolute; width: 46vw; aspect-ratio: 1; border-radius: 50%; left: 50%; top: 50%;
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--primary) 16%, transparent), transparent);
+  transform: translate(-60%, -55%) scale(.8); transition: transform 1.2s cubic-bezier(.16,1,.3,1); pointer-events: none }
+.mancha[data-paso="1"] { transform: translate(-30%, -60%) scale(1) }
+.mancha[data-paso="2"] { transform: translate(-45%, -40%) scale(1.1) }
+.mancha[data-paso="3"] { transform: translate(-50%, -50%) scale(1.25) }
+
+/* Tarjeta del proyecto */
+.tarjeta { position: relative; z-index: 2; width: clamp(260px, 28vw, 580px); background: var(--superficie); border-radius: 18px; overflow: hidden;
+  box-shadow: var(--shadow-xl); transition: transform .9s cubic-bezier(.16,1,.3,1); will-change: transform; animation: flotar 6s ease-in-out infinite }
+@keyframes flotar { 50% { translate: 0 -8px } }
+.foto { position: relative; aspect-ratio: 16 / 9; overflow: hidden }
 .foto img { width: 100%; height: 100%; object-fit: cover; display: block }
+.sello { position: absolute; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: .4em .85em; border-radius: 999px;
+  background: var(--primary); color: var(--primary-foreground); font-size: clamp(.72rem, .75vw, .95rem); font-weight: 600;
+  transform: scale(0) rotate(-8deg); transition: transform .5s cubic-bezier(.34,1.56,.64,1) }
+.sello[data-on="true"] { transform: scale(1) rotate(-3deg) }
 .cuerpo { padding: clamp(16px, 1.4vw, 28px) }
 .cuerpo h3 { font-weight: 600; font-size: clamp(1.1rem, 1.35vw, 1.7rem); letter-spacing: -.03em; margin: 0 0 6px }
 .cuerpo small { color: var(--tinta-2); font-size: clamp(.78rem, .8vw, 1rem) }
 .pie { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: clamp(14px, 1.2vw, 24px) }
 .ods { display: flex; gap: 6px }
-.ods img { width: clamp(28px, 2.2vw, 44px); height: clamp(28px, 2.2vw, 44px); border-radius: 6px }
-.estado { font-size: clamp(.75rem, .8vw, 1rem); font-weight: 600; padding: .4em .9em; border-radius: 999px; background: var(--muted); color: var(--tinta); transition: background .4s, color .4s; white-space: nowrap }
+.ods img { width: clamp(28px, 2.2vw, 44px); height: clamp(28px, 2.2vw, 44px); border-radius: 6px;
+  transform: scale(0); transition: transform .45s cubic-bezier(.34,1.56,.64,1) }
+.ods img[data-on="true"] { transform: scale(1) }
+.estado { font-size: clamp(.75rem, .8vw, 1rem); font-weight: 600; padding: .4em .9em; border-radius: 999px; white-space: nowrap;
+  animation: estadoPulso .5s cubic-bezier(.34,1.56,.64,1) }
+@keyframes estadoPulso { from { transform: scale(.7); opacity: 0 } to { transform: none; opacity: 1 } }
 
-/* Burbujas que se van sumando alrededor de la tarjeta */
-.burbuja { position: absolute; z-index: 5; font-size: clamp(.82rem, 1vw, 1.3rem); font-weight: 500; color: var(--primary-foreground); padding: .45em 1em; border-radius: 999px;
-  transform: scale(0); transition: transform .5s cubic-bezier(.34,1.56,.64,1); white-space: nowrap }
-.burbuja::after { content: ""; position: absolute; bottom: -5px; width: 10px; height: 10px; background: inherit; transform: rotate(45deg) }
-.izq::after { right: 16px }
-.der::after { left: 16px }
-.visible { transform: scale(1) }
+/* Equipo y tareas (paso 4): se despliega dentro de la tarjeta */
+.equipo { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .6s cubic-bezier(.16,1,.3,1), opacity .4s, margin .6s }
+.equipo > * { overflow: hidden; min-height: 0 }
+.equipo[data-on="true"] { grid-template-rows: auto auto; opacity: 1; margin-top: clamp(14px, 1.2vw, 22px) }
+.avatares { display: flex; padding-left: 6px }
+.avatares .avatar { margin-left: -6px; box-shadow: 0 0 0 3px var(--superficie); transform: scale(0); transition: transform .4s cubic-bezier(.34,1.56,.64,1) }
+.equipo[data-on="true"] .avatares .avatar { transform: scale(1) }
+.tareas { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: clamp(.75rem, .8vw, 1rem); font-weight: 600; color: var(--tinta-2); font-variant-numeric: tabular-nums }
+.tareas i { flex: 1; height: 6px; border-radius: 6px; background: var(--muted); overflow: hidden }
+.tareas b { display: block; height: 100%; background: var(--primary); transform-origin: left; transition: transform .5s cubic-bezier(.16,1,.3,1) }
+
+.avatar { flex-shrink: 0; display: grid; place-items: center; width: clamp(30px, 2.3vw, 42px); aspect-ratio: 1; border-radius: 50%;
+  font-size: clamp(.68rem, .72vw, .9rem); font-weight: 700 }
+
+/* Propuestas: vuelan desde la derecha y se abren en abanico */
+.propuesta { position: absolute; right: -34%; z-index: 3; display: flex; align-items: center; gap: 10px; min-width: clamp(190px, 15vw, 280px);
+  padding: 10px 14px; border-radius: 14px; background: var(--superficie); box-shadow: var(--shadow-xl); border: 2px solid transparent;
+  opacity: 0; transform: translateX(60%) rotate(6deg); transition: transform .7s cubic-bezier(.16,1,.3,1), opacity .5s, border-color .4s, top .7s cubic-bezier(.16,1,.3,1) }
+.propuesta[data-i="0"] { top: 4% }
+.propuesta[data-i="1"] { top: 34% }
+.propuesta[data-i="2"] { top: 64% }
+.propTexto { display: grid; line-height: 1.25 }
+.propTexto b { font-weight: 600; font-size: clamp(.8rem, .85vw, 1.05rem) }
+.propTexto small { color: var(--tinta-2); font-size: clamp(.7rem, .72vw, .9rem) }
+.propCheck { margin-left: auto; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--primary); color: var(--primary-foreground); transform: scale(0); transition: transform .4s .2s cubic-bezier(.34,1.56,.64,1) }
+
+.propuesta[data-estado="llega"][data-i="0"] { opacity: 1; transform: rotate(-4deg) }
+.propuesta[data-estado="llega"][data-i="1"] { opacity: 1; transform: translateX(-8%) rotate(2deg) }
+.propuesta[data-estado="llega"][data-i="2"] { opacity: 1; transform: rotate(5deg) }
+.propuesta[data-estado="elegida"] { opacity: 1; top: 40%; z-index: 4; border-color: var(--primary); transform: translateX(-30%) scale(1.12) }
+.propuesta[data-estado="elegida"] .propCheck { transform: scale(1) }
+.propuesta[data-estado="descartada"] { opacity: 0; transform: translateY(70px) rotate(12deg) scale(.9) }
 
 @media (max-width: 759px) {
-  .seccion { height: 300vh }
-  .escena { grid-template-columns: 1fr; align-content: center; gap: 24px; padding: 0 20px }
-  .pasos { min-height: 210px }
+  .seccion { height: 360vh }
+  .escena { grid-template-columns: 1fr; align-content: center; gap: 20px; padding: 0 20px }
   .paso h2 { font-size: clamp(2rem, 9vw, 2.6rem) }
-  .indice { display: none }
-  .mesa { height: auto; padding-block: 30px; padding-left: 0; place-items: center }
-  .tarjeta { width: min(74vw, 320px) }
+  .indice { gap: 8px; font-size: .72rem }
+  .mesa { height: auto; padding-block: 20px }
+  .ancla { transform: translateX(-14%) }
+  .tarjeta { width: min(64vw, 280px) }
+  .propuesta { right: -42%; min-width: 150px; padding: 8px 10px }
+  .numeroFondo { font-size: 10rem }
+  .mancha { width: 90vw }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tarjeta, .burbuja { transition: none }
+  .tarjeta, .propuesta, .sello, .ods img, .equipo, .avatares .avatar, .mancha { transition: none }
+  .tarjeta, .numeroFondo, .estado { animation: none }
 }

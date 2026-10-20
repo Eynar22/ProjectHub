@@ -91,6 +91,29 @@ export default function InicioNuevo() {
   const cartas = useRef<(HTMLDivElement | null)[]>([]);
   const burbujas = useRef<(HTMLSpanElement | null)[]>([]);
 
+  // Fondo que cambia con el scroll: la franja que cruza el centro de la
+  // pantalla decide el color de fondo de toda la página (ver .raiz[data-banda]).
+  useEffect(() => {
+    const r = raiz.current!;
+    const franjas = Array.from(r.querySelectorAll<HTMLElement>('[class*="banda-"]'));
+    let raf = 0;
+    const medir = () => {
+      raf = 0;
+      const centro = innerHeight / 2;
+      const actual = franjas.find(el => {
+        const b = el.getBoundingClientRect();
+        return b.top <= centro && b.bottom >= centro;
+      });
+      const banda = actual?.className.match(/banda-(\w+)/)?.[1] ?? 'tema';
+      if (r.dataset.banda !== banda) r.dataset.banda = banda;
+    };
+    const alScroll = () => { if (!raf) raf = requestAnimationFrame(medir); };
+    medir();
+    addEventListener('scroll', alScroll, { passive: true });
+    addEventListener('resize', alScroll);
+    return () => { removeEventListener('scroll', alScroll); removeEventListener('resize', alScroll); cancelAnimationFrame(raf); };
+  }, []);
+
   useEffect(() => {
     const r = raiz.current!;
     const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -298,17 +321,17 @@ export default function InicioNuevo() {
           </div>
         </section>
 
-        <CaosOrden />
+        <div className="banda-inversa"><CaosOrden /></div>
 
-        <ComoFunciona />
+        <div className="banda-rosa"><ComoFunciona /></div>
 
-        <ParaQuien />
+        <div className="banda-tema"><ParaQuien /></div>
 
-        <Demo />
+        <div className="banda-inversa"><Demo /></div>
 
-        <Impacto />
+        <div className="banda-gris"><Impacto /></div>
 
-        <Bolivia />
+        <div className="banda-oscura"><Bolivia /></div>
 
         <Cierre />
 

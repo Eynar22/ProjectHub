@@ -130,10 +130,12 @@ export default function EmpresasPublico() {
   );
 }
 
+const COLORES_TARJETA = ['var(--guinda-600)', 'var(--gray-600)', 'var(--guinda-400)'];
+
 function Tarjeta({ empresa: e, indice }: { empresa: EmpresaPublica; indice: number }) {
   const MAX_ODS = 6;
-  // Color de la empresa: el de su primer ODS (o el de la marca).
-  const color = e.ods.length ? ODS_POR_ID[e.ods[0]]?.color : undefined;
+  // Color de acento de la tarjeta: rota entre los colores de la paleta oficial.
+  const color = COLORES_TARJETA[indice % COLORES_TARJETA.length];
   const inicial = e.nombre.trim().charAt(0).toUpperCase();
   return (
     <Link to={`/empresa/${e.id}`} className={s.tarjeta} style={{ '--c': color, animationDelay: `${0.2 + Math.min(indice, 8) * 0.08}s` } as CSSProperties}>

@@ -29,7 +29,7 @@
 .raiz *, .raiz *::before, .raiz *::after { box-sizing: border-box }
 .raiz a:focus-visible { outline: 2px solid var(--azul); outline-offset: 3px }
 
-.marco { background: var(--pagina); position: relative }
+.marco { position: relative }
 
 /* ───── Menú ───── */
 
@@ -88,3 +88,97 @@
   .seccion2 p { max-width: none; min-width: 0; margin-bottom: 18px }
   .eyebrow { margin-bottom: 10px }
 }
+
+/* ───── Franjas de color ─────
+ * La portada alterna fondos de la paleta para dar ritmo. Para que el cambio no
+ * sea brusco:
+ *  1. Escalones de tono: los vecinos son cercanos y el contraste fuerte se
+ *     guarda para momentos clave (el problema, el cierre).
+ *  2. Costuras: antes de cada franja, una zona corta donde el color anterior
+ *     (--previo) se funde con el nuevo. Es un bloque propio, sin texto encima.
+ *  3. Solo los 6 colores oficiales.
+ * Cada franja redefine los tokens y los alias de .raiz, así su contenido se
+ * adapta solo. Las de "tema" e "inversa" se invierten en modo oscuro.
+ *
+ *  tema     #FAFAFA (oscuro: #2E2E2E)   inversa  #2E2E2E (oscuro: #FAFAFA)
+ *  gris     #E8E8EB (oscuro: #6B6B6B)   rosa     #F5E6EA
+ *  oscura   #2E2E2E siempre              guinda   #A31E3A */
+
+/* Color de fondo de cada franja, para usarlo como --previo en la siguiente. */
+.raiz {
+  --b-tema: var(--gray-50); --b-inversa: var(--gray-900); --b-gris: var(--gray-200);
+  --b-rosa: var(--guinda-100); --b-oscura: var(--gray-900); --b-guinda: var(--guinda-600);
+}
+:global(.dark) .raiz { --b-tema: var(--gray-900); --b-inversa: var(--gray-50); --b-gris: var(--gray-600) }
+
+/* Juegos de tokens: claro y oscuro (se reusan en varias franjas). */
+.raiz :global(.banda-inversa), .raiz :global(.banda-oscura), :global(.dark) .raiz :global(.banda-tema) {
+  --background: var(--gray-900); --foreground: var(--gray-50);
+  --card: var(--gray-800); --card-foreground: var(--gray-50);
+  --muted: var(--gray-800); --muted-foreground: var(--gray-200);
+  --border: var(--gray-700); --secondary: var(--gray-800); --secondary-foreground: var(--gray-50);
+  --pagina: var(--gray-900); --tinta: var(--gray-50); --tinta-2: var(--gray-200);
+  --superficie: var(--gray-800); --linea: var(--gray-700); --linea-suave: var(--gray-700); --sobre-tinta: var(--gray-900);
+  --fondo: var(--gray-900);
+}
+.raiz :global(.banda-tema), :global(.dark) .raiz :global(.banda-inversa) {
+  --background: var(--gray-50); --foreground: var(--gray-900);
+  --card: oklch(1 0 0); --card-foreground: var(--gray-900);
+  --muted: var(--gray-200); --muted-foreground: var(--gray-600);
+  --border: var(--gray-200); --secondary: var(--guinda-100); --secondary-foreground: var(--guinda-600);
+  --pagina: var(--gray-50); --tinta: var(--gray-900); --tinta-2: var(--gray-600);
+  --superficie: oklch(1 0 0); --linea: var(--gray-200); --linea-suave: var(--gray-200); --sobre-tinta: var(--gray-50);
+  --fondo: var(--gray-50);
+}
+.raiz :global(.banda-gris) {
+  --background: var(--gray-200); --foreground: var(--gray-900);
+  --card: var(--gray-50); --card-foreground: var(--gray-900);
+  --muted: var(--gray-300); --muted-foreground: var(--gray-700);
+  --border: var(--gray-300); --secondary: var(--gray-50); --secondary-foreground: var(--guinda-600);
+  --pagina: var(--gray-200); --tinta: var(--gray-900); --tinta-2: var(--gray-700);
+  --superficie: var(--gray-50); --linea: var(--gray-300); --linea-suave: var(--gray-300); --sobre-tinta: var(--gray-50);
+  --fondo: var(--gray-200);
+}
+:global(.dark) .raiz :global(.banda-gris) {
+  --background: var(--gray-600); --foreground: var(--gray-50);
+  --card: var(--gray-800); --card-foreground: var(--gray-50);
+  --muted: var(--gray-700); --muted-foreground: var(--gray-100);
+  --border: var(--gray-500); --secondary: var(--gray-700); --secondary-foreground: var(--gray-50);
+  --pagina: var(--gray-600); --tinta: var(--gray-50); --tinta-2: var(--gray-100);
+  --superficie: var(--gray-800); --linea: var(--gray-500); --linea-suave: var(--gray-700); --sobre-tinta: var(--gray-900);
+  --fondo: var(--gray-600);
+}
+.raiz :global(.banda-rosa) {
+  --background: var(--guinda-100); --foreground: var(--gray-900);
+  --card: var(--gray-50); --card-foreground: var(--gray-900);
+  --muted: var(--gray-200); --muted-foreground: var(--gray-600);
+  --border: var(--guinda-200); --secondary: var(--gray-50); --secondary-foreground: var(--guinda-600);
+  --pagina: var(--guinda-100); --tinta: var(--gray-900); --tinta-2: var(--gray-600);
+  --superficie: var(--gray-50); --linea: var(--guinda-200); --linea-suave: var(--gray-200); --sobre-tinta: var(--gray-50);
+  --fondo: var(--guinda-100);
+}
+.raiz :global(.banda-guinda) {
+  --background: var(--guinda-600); --foreground: var(--gray-50);
+  --card: var(--gray-50); --card-foreground: var(--gray-900);
+  --muted: var(--guinda-700); --muted-foreground: var(--guinda-100);
+  --border: var(--guinda-500); --secondary: var(--guinda-700); --secondary-foreground: var(--gray-50);
+  --primary: var(--gray-50); --primary-foreground: var(--guinda-600); --primary-hover: var(--guinda-100);
+  --pagina: var(--guinda-600); --tinta: var(--gray-50); --tinta-2: var(--guinda-100);
+  --superficie: var(--gray-50); --linea: var(--guinda-500); --linea-suave: var(--guinda-700); --sobre-tinta: var(--guinda-600);
+  --azul: var(--guinda-100);
+  --fondo: var(--guinda-600);
+}
+
+.raiz :global(:is(.banda-tema, .banda-inversa, .banda-gris, .banda-rosa, .banda-oscura, .banda-guinda)) {
+  color: var(--tinta);
+}
+/* Fondo que cambia con el scroll: las franjas son transparentes y es .raiz la
+   que se tiñe con el color de la franja que ocupa el centro de la pantalla
+   (InicioNuevo.tsx pone data-banda). Sin bordes ni costuras visibles. */
+.raiz { background: var(--b-tema); transition: background-color .7s cubic-bezier(.4,0,.2,1) }
+.raiz[data-banda="inversa"] { background: var(--b-inversa) }
+.raiz[data-banda="gris"] { background: var(--b-gris) }
+.raiz[data-banda="rosa"] { background: var(--b-rosa) }
+.raiz[data-banda="oscura"] { background: var(--b-oscura) }
+.raiz[data-banda="guinda"] { background: var(--b-guinda) }
+@media (prefers-reduced-motion: reduce) { .raiz { transition: none } }

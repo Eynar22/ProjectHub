@@ -3,7 +3,7 @@
  * Usa las variables de .raiz (InicioNuevo.module.css).
  * ========================================================================= */
 
-.seccion { position: relative; background: var(--surface-inverse); color: var(--surface-inverse-foreground); padding: 20vh 0 18vh; overflow: hidden }
+.seccion { position: relative; color: var(--tinta); padding: 20vh 0 18vh; overflow: hidden }
 .dentro { padding: 0 7.1vw }
 .eyebrow { font-size: clamp(.75rem, .85vw, 1rem); font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gray-200); margin: 0 0 1.6vw }
 .frase { font-weight: 700; font-size: clamp(2.4rem, 5.4vw, 7.2rem); line-height: 1.05; letter-spacing: -.032em; margin: 0; max-width: 17ch }

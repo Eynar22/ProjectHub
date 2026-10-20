@@ -6,11 +6,13 @@
  *    el contenido se desenfoca y aparece un candado.
  *  - RolesPrevio: registro, elegir camino. Resalta el rol que se mira.
  *  - FichaEmpresa / PerfilPrevio / Credencial: se arman en vivo con los datos.
+ *  - CorreoCodigo: olvidé mi contraseña. Un correo con el código en camino.
+ *  - Desbloqueo: restablecer. Las cajas se llenan con el código y el candado
+ *    se abre cuando todo está listo.
  * Datos de ejemplo donde la persona aún no escribió nada.
  * ========================================================================= */
 
-import { Building2, CheckCircle2, Clock, Lock, MessageSquare, UserRound, Users } from 'lucide-react';
-import { ODS_POR_ID } from '@/shared/constants/ods';
+import { Building2, CheckCircle2, Clock, Lock, LockOpen, Mail, MessageSquare, UserRound, Users } from 'lucide-react';
 import s from './Acceso.module.css';
 
 /** Burbuja de chat apoyada en un punto (posición en %). */
@@ -28,9 +30,9 @@ export function EspacioPrevio({ correo, privado }: { correo: string; privado: bo
   const usuario = correo.split('@')[0].replace(/[._-]+/g, ' ').trim();
   const nombre = usuario ? usuario.charAt(0).toUpperCase() + usuario.slice(1) : '';
   const proyectos = [
-    { t: 'Monitoreo de agua potable', avance: 72, color: ODS_POR_ID[6].color },
-    { t: 'Software para cooperativas', avance: 45, color: ODS_POR_ID[8].color },
-    { t: 'Energía solar en escuelas', avance: 90, color: ODS_POR_ID[7].color },
+    { t: 'Monitoreo de agua potable', avance: 72, color: 'var(--guinda-600)' },
+    { t: 'Software para cooperativas', avance: 45, color: 'var(--gray-600)' },
+    { t: 'Energía solar en escuelas', avance: 90, color: 'var(--guinda-400)' },
   ];
   return (
     <div className={s.vista}>
@@ -68,15 +70,15 @@ export type Rol = 'unirse' | 'empresa' | 'independiente' | null;
 export function RolesPrevio({ resaltado }: { resaltado: Rol }) {
   const roles = [
     {
-      id: 'unirse' as const, icono: Users, t: 'Miembro', d: 'Te sumas al equipo de tu empresa', color: 'var(--azul)', img: '/images/landing/equipos.jpg',
+      id: 'unirse' as const, icono: Users, t: 'Miembro', d: 'Te sumas al equipo de tu empresa', color: 'var(--gray-600)', img: '/images/landing/equipos.jpg',
       puntos: ['Buscas tu empresa y adjuntas un documento', 'El administrador aprueba tu solicitud', 'Trabajas en los proyectos de tu equipo'],
     },
     {
-      id: 'empresa' as const, icono: Building2, t: 'Empresa', d: 'Publicas proyectos y eliges propuestas', color: 'var(--rojo)', img: '/images/landing/empresas.jpg',
+      id: 'empresa' as const, icono: Building2, t: 'Empresa', d: 'Publicas proyectos y eliges propuestas', color: 'var(--primary)', img: '/images/landing/empresas.jpg',
       puntos: ['Registras tu empresa con su documentación', 'Publicas proyectos con un problema real', 'Eliges la mejor propuesta y formas tu equipo'],
     },
     {
-      id: 'independiente' as const, icono: UserRound, t: 'Independiente', d: 'Postulas a los proyectos que te gusten', color: 'var(--verde)', img: '/images/landing/profesionales.jpg',
+      id: 'independiente' as const, icono: UserRound, t: 'Independiente', d: 'Postulas a los proyectos que te gusten', color: 'var(--gray-900)', img: '/images/landing/profesionales.jpg',
       puntos: ['Tu cuenta queda activa al instante', 'Postulas con tu propuesta y tu CV', 'Si te aceptan, te sumas al grupo de trabajo'],
     },
   ];
@@ -149,7 +151,7 @@ export function PerfilPrevio({ v }: { v: Valores }) {
         <div className={s.postulaciones}>
           <small>Proyectos para postular</small>
           {['Monitoreo de agua potable', 'Energía solar en escuelas'].map((p, i) => (
-            <div key={p} className={s.filaProy} style={{ animationDelay: `${0.4 + i * 0.12}s` }}><i style={{ background: i ? ODS_POR_ID[7].color : ODS_POR_ID[6].color }} /><span>{p}</span></div>
+            <div key={p} className={s.filaProy} style={{ animationDelay: `${0.4 + i * 0.12}s` }}><i style={{ background: i ? 'var(--gray-600)' : 'var(--guinda-600)' }} /><span>{p}</span></div>
           ))}
         </div>
       </div>
@@ -178,6 +180,59 @@ export function Credencial({ empresa, logo, v }: { empresa?: string; logo?: stri
         <div className={s.credPie}>Miembro · ProjectHub</div>
       </div>
       <Burbuja texto="El admin te aprueba" color="var(--azul)" x="62%" y="12%" retraso={0.6} />
+    </div>
+  );
+}
+
+/* ─────────────────── Olvidé mi contraseña ─────────────────── */
+
+export function CorreoCodigo({ correo }: { correo: string }) {
+  const para = correo.trim() || 'tu@correo.com';
+  return (
+    <div className={s.vista}>
+      <div className={s.ventanita}>
+        <div className={s.ventCab}><i /><i /><i /><span>Bandeja de entrada</span></div>
+        <div className={s.ventCuerpo}>
+          <div className={s.correoDe}>
+            <span className={s.correoLogo}><Mail size={20} /></span>
+            <span><b>ProjectHub</b><small>Para: <em key={para} className={s.nombreVivo}>{para}</em></small></span>
+          </div>
+          <p className={s.saludo}>Tu código de verificación</p>
+          <p className={s.saludoSub}>Úsalo para crear una contraseña nueva. Vence en 15 minutos.</p>
+          <div className={s.codigoCajas}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <span key={i} className={s.cajaEspera} style={{ animationDelay: `${i * 0.12}s` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <Burbuja texto="Llega en segundos" color="var(--primary)" x="6%" y="8%" retraso={0.6} />
+    </div>
+  );
+}
+
+/* ─────────────────── Restablecer contraseña ─────────────────── */
+
+export function Desbloqueo({ codigo, listo }: { codigo: string; listo: boolean }) {
+  return (
+    <div className={s.vista}>
+      <div className={`${s.ventanita} ${s.desbloqueo}`}>
+        <div className={s.ventCab}><i /><i /><i /><span>Tu cuenta · ProjectHub</span></div>
+        <div className={s.ventCuerpo}>
+          <span className={`${s.candadoGrande} ${listo ? s.abierto : ''}`}>
+            {listo ? <LockOpen size={40} /> : <Lock size={40} />}
+          </span>
+          <div className={s.codigoCajas}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <span key={i} className={codigo[i] ? s.cajaLlena : ''}>{codigo[i] ?? ''}</span>
+            ))}
+          </div>
+          <p className={s.saludoSub} style={{ textAlign: 'center' }}>
+            {listo ? 'Todo listo: guarda tu nueva contraseña.' : codigo.length < 6 ? 'Escribe el código que te enviamos.' : 'Ahora elige tu nueva contraseña.'}
+          </p>
+        </div>
+      </div>
+      {listo && <Burbuja texto="¡Lista para entrar!" color="var(--primary)" x="8%" y="10%" />}
     </div>
   );
 }
